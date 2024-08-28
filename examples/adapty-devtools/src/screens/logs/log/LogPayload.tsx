@@ -1,4 +1,5 @@
 import React from 'react';
+import { Clipboard } from '@capacitor/clipboard';
 import { JsLog, formatDate } from '../../../helpers';
 import styles from './LogPayload.module.css';
 import { useParams } from 'react-router-dom';
@@ -83,6 +84,15 @@ function LogPayload({ onBack }: LogPayloadProps) {
     }
   };
 
+  const handleCopyParams = async () => {
+    if (log?.params) {
+      const serializedParams = JSON.stringify(log.params, null, 2);
+      await Clipboard.write({
+        string: serializedParams
+      });
+    }
+  };
+
   return (
     <div className={styles.LogPayloadContainer}>
       <div className={styles.LogPayloadHeader}>
@@ -117,7 +127,12 @@ function LogPayload({ onBack }: LogPayloadProps) {
 
         {log.params && Object.keys(log.params).length > 0 && (
           <div className={styles.Section}>
-            <h3>Parameters</h3>
+            <div className={styles.SectionHeader}>
+              <h3>Parameters</h3>
+              <button className={styles.ConsoleButton} onClick={handleCopyParams} title="Copy parameters to clipboard">
+                Copy to clipboard
+              </button>
+            </div>
             <div className={styles.ParamsList}>{renderValue(log.params)}</div>
           </div>
         )}
