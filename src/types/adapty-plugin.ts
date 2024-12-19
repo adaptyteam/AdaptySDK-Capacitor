@@ -156,7 +156,7 @@ export interface AdaptyPlugin {
   /**
    * Updates the user profile.
    */
-  updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void>;
+  updateProfile(options: Partial<AdaptyProfileParameters>): Promise<void>;
 
   /**
    * Checks if the SDK is activated.
