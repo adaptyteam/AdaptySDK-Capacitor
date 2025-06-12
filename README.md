@@ -1,0 +1,1 @@
+# AdaptySDK-Capacitor
