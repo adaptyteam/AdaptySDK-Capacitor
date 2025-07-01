@@ -15,7 +15,7 @@ and comes with a very minimal shell for building an app.
 To sync your web assets with native platforms:
 
 ```bash
-npx cap sync
+yarn cap sync
 ```
 
 ### Running on Android
@@ -23,13 +23,13 @@ npx cap sync
 To run on Android device or emulator:
 
 ```bash
-npx cap run android
+yarn cap run android
 ```
 
 Or open Android Studio:
 
 ```bash
-npx cap open android
+yarn cap open android
 ```
 
 ### Running on iOS
@@ -37,11 +37,11 @@ npx cap open android
 To run on iOS device or simulator:
 
 ```bash
-npx cap run ios
+yarn cap run ios
 ```
 
 Or open Xcode:
 
 ```bash
-npx cap open ios
+yarn cap open ios
 ```
