@@ -43,6 +43,7 @@
     "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
+    "tsc": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
