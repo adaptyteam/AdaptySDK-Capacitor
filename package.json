@@ -44,7 +44,8 @@
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
     "tsc": "tsc --noEmit",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "yarn build",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@capacitor/android": "^7.0.0",
@@ -55,6 +56,8 @@
     "@ionic/prettier-config": "^4.0.0",
     "@ionic/swiftlint-config": "^2.0.0",
     "eslint": "^8.57.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
     "prettier": "^3.4.2",
     "prettier-plugin-java": "^2.6.6",
     "rimraf": "^6.0.1",
@@ -69,6 +72,18 @@
   "swiftlint": "@ionic/swiftlint-config",
   "eslintConfig": {
     "extends": "@ionic/eslint-config/recommended"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,html,java}": [
+      "prettier --write"
+    ],
+    "*.swift": [
+      "node-swiftlint --fix --format"
+    ]
   },
   "capacitor": {
     "ios": {
