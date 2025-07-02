@@ -1,5 +1,5 @@
-import { AdaptyError } from '../adapty-error';
-import { AdaptyPaywallProduct, AdaptyProfile, AdaptyPurchaseResult } from '../types';
+// import { AdaptyError } from '../adapty-error';
+// import { AdaptyPaywallProduct, AdaptyProfile, AdaptyPurchaseResult } from '../types';
 // import { FileLocation } from '../types/inputs'; // TODO: check if this type exists
 
 /**
