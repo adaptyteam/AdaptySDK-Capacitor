@@ -1,6 +1,6 @@
 import { AdaptyUiOnboardingStateUpdatedActionCoder } from './adapty-ui-onboarding-state-updated-action';
-import type { OnboardingStateUpdatedAction } from '@/ui/types';
-import type { Event } from '@/types/schema';
+import type { OnboardingStateUpdatedAction } from '../ui/types';
+import type { Event } from '../types/schema';
 
 type Serializable = Event['OnboardingViewEvent.OnStateUpdatedAction']['action'];
 

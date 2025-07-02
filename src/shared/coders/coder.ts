@@ -1,6 +1,10 @@
-import { AdaptyError } from '@/adapty-error';
+import { AdaptyError } from '../adapty-error';
 import { Converter, Properties, StrType } from './types';
-import { Platform } from 'react-native';
+// import { Platform } from 'react-native'; // Not available in Capacitor
+// Mock Platform for Capacitor
+const Platform = {
+  OS: 'web' as 'web' | 'ios' | 'android'
+};
 
 export abstract class Coder<
   Model extends Record<string, any>,

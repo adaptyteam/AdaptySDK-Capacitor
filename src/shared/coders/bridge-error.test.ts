@@ -1,6 +1,6 @@
-import { AdaptyBridgeError } from '@/types/bridge';
+import { AdaptyBridgeError } from '../types/bridge';
 import { BridgeErrorCoder } from './bridge-error';
-import { AdaptyError } from '@/adapty-error';
+import { AdaptyError } from '../adapty-error';
 
 describe('BridgeErrorCoder', () => {
   let coder: BridgeErrorCoder;

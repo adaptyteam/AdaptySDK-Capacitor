@@ -1,6 +1,6 @@
 import { AdaptyUiOnboardingMetaCoder } from './adapty-ui-onboarding-meta';
-import type { AdaptyUiOnboardingMeta } from '@/ui/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyUiOnboardingMeta } from '../ui/types';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyUiOnboardingMeta;
 const mocks: Def['AdaptyUI.OnboardingMeta'][] = [

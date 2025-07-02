@@ -1,9 +1,9 @@
-import type { AdaptyDiscountPhase, AdaptySubscriptionOffer } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyDiscountPhase, AdaptySubscriptionOffer } from '../types';
+import type { Def } from '../types/schema';
 import { AdaptyDiscountPhaseCoder } from './adapty-discount-phase';
 import { ArrayCoder } from './array';
-import { AdaptySubscriptionOfferCoder } from '@/coders/adapty-subscription-offer';
-import { AdaptySubscriptionOfferIdCoder } from '@/coders/adapty-subscription-offer-identifier';
+import { AdaptySubscriptionOfferCoder } from './adapty-subscription-offer';
+import { AdaptySubscriptionOfferIdCoder } from './adapty-subscription-offer-identifier';
 
 type Model = AdaptySubscriptionOffer;
 const mocks: Def['AdaptySubscriptionOffer'][] = [

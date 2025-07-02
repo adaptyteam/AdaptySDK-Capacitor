@@ -1,6 +1,6 @@
-import type { AdaptySubscriptionOfferId } from '@/types';
-import type { Def } from '@/types/schema';
-import { AdaptySubscriptionOfferIdCoder } from '@/coders/adapty-subscription-offer-identifier';
+import type { AdaptySubscriptionOfferId } from '../types';
+import type { Def } from '../types/schema';
+import { AdaptySubscriptionOfferIdCoder } from './adapty-subscription-offer-identifier';
 
 type Model = AdaptySubscriptionOfferId;
 const mocks: Def['AdaptySubscriptionOffer.Identifier'][] = [

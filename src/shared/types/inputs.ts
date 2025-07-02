@@ -1,4 +1,4 @@
-import { AdaptyUiMediaCache } from '@/ui/types';
+import { AdaptyUiMediaCache } from '../ui/types';
 /**
  * Log levels for the SDK
  *

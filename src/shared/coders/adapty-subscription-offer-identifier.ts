@@ -1,5 +1,5 @@
-import { AdaptySubscriptionOfferId } from '@/types';
-import type { Def } from '@/types/schema';
+import { AdaptySubscriptionOfferId } from '../types';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
 

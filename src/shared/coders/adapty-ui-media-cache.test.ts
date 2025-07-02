@@ -1,5 +1,5 @@
-import { Def } from '@/types/schema';
-import { AdaptyUiMediaCacheCoder } from '@/coders/adapty-ui-media-cache';
+import { Def } from '../types/schema';
+import { AdaptyUiMediaCacheCoder } from './adapty-ui-media-cache';
 
 const mocks: Required<Def['AdaptyConfiguration']>['media_cache'][] = [
   {

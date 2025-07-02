@@ -1,5 +1,5 @@
 // import SDK type to link to methods in docs.
-import type { Adapty } from '@/adapty-handler';
+// import type { Adapty } from '../adapty-handler'; // TODO: uncomment when adapty-handler is copied
 
 export const VendorStore = Object.freeze({
   AppStore: 'app_store',

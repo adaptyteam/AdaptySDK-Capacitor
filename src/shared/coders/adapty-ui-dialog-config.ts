@@ -1,7 +1,7 @@
-import type { Def } from '@/types/schema';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
-import { AdaptyUiDialogConfig } from '@/ui/types';
+import { AdaptyUiDialogConfig } from '../ui/types';
 
 type Model = AdaptyUiDialogConfig;
 type Serializable = Def['AdaptyUI.DialogConfiguration'];

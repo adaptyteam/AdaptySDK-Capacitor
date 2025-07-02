@@ -1,8 +1,8 @@
-import { AdaptyBridgeError } from '@/types/bridge';
+import { AdaptyBridgeError } from '../types/bridge';
 import { SimpleCoder } from './coder';
 import { Properties } from './types';
 import { ErrorConverter } from './error-coder';
-import { AdaptyError } from '@/adapty-error';
+import { AdaptyError } from '../adapty-error';
 
 type Model = AdaptyBridgeError;
 type Serializable = Record<string, any>;

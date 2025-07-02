@@ -1,7 +1,7 @@
-import type { Def } from '@/types/schema';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
-import { AdaptyUiOnboardingStateParams } from '@/ui/types';
+import { AdaptyUiOnboardingStateParams } from '../ui/types';
 
 type Model = AdaptyUiOnboardingStateParams;
 type Serializable = Def['AdaptyUI.OnboardingsStateParams'];

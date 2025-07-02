@@ -1,6 +1,6 @@
 import { AdaptyOnboardingBuilderCoder } from './adapty-onboarding-builder';
-import type { AdaptyOnboardingBuilder } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyOnboardingBuilder } from '../types';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyOnboardingBuilder;
 type Serializable = Required<Def['AdaptyOnboarding']>['onboarding_builder'];

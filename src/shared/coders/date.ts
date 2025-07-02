@@ -1,4 +1,4 @@
-import { AdaptyError } from '@/adapty-error';
+import { AdaptyError } from '../adapty-error';
 import type { Converter } from './types';
 
 /**

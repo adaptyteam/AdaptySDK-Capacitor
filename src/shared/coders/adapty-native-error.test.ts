@@ -1,7 +1,7 @@
 import { AdaptyNativeErrorCoder } from './adapty-native-error';
-import { AdaptyError } from '@/adapty-error';
-import type { AdaptyNativeError } from '@/types/bridge';
-import type { Def } from '@/types/schema';
+import { AdaptyError } from '../adapty-error';
+import type { AdaptyNativeError } from '../types/bridge';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyNativeError;
 const mocks: Def['AdaptyError'][] = [

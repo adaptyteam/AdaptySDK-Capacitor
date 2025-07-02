@@ -1,7 +1,7 @@
-import type { AdaptyPurchaseResult } from '@/types';
-import type { Def } from '@/types/schema';
-import { AdaptyPurchaseResultCoder } from '@/coders/adapty-purchase-result';
-import { AdaptyProfileCoder } from '@/coders/adapty-profile';
+import type { AdaptyPurchaseResult } from '../types';
+import type { Def } from '../types/schema';
+import { AdaptyPurchaseResultCoder } from './adapty-purchase-result';
+import { AdaptyProfileCoder } from './adapty-profile';
 
 type Model = AdaptyPurchaseResult;
 type TestAdaptyPurchaseResultDef =

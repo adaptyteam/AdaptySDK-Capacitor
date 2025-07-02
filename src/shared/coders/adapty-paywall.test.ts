@@ -1,5 +1,5 @@
-import type { AdaptyPaywall, ProductReference } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyPaywall, ProductReference } from '../types';
+import type { Def } from '../types/schema';
 import { AdaptyPaywallCoder } from './adapty-paywall';
 import { ProductReferenceCoder } from './product-reference';
 import { ArrayCoder } from './array';

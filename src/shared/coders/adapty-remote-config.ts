@@ -1,5 +1,5 @@
-import type { AdaptyRemoteConfig } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyRemoteConfig } from '../types';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { Coder } from './coder';
 import { JSONCoder } from './json';

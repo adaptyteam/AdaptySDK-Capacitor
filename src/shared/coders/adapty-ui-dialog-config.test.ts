@@ -1,5 +1,5 @@
-import { Def } from '@/types/schema';
-import { AdaptyUiDialogConfigCoder } from '@/coders/adapty-ui-dialog-config';
+import { Def } from '../types/schema';
+import { AdaptyUiDialogConfigCoder } from './adapty-ui-dialog-config';
 
 const mocks: Def['AdaptyUI.DialogConfiguration'][] = [
   {

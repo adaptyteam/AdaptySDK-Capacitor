@@ -1,12 +1,12 @@
-import type { AdaptyPaywall } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyPaywall } from '../types';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { ProductReferenceCoder } from './product-reference';
 import { ArrayCoder } from './array';
 import { Coder } from './coder';
 import { AdaptyRemoteConfigCoder } from './adapty-remote-config';
 import { AdaptyPaywallBuilderCoder } from './adapty-paywall-builder';
-import { AdaptyPlacementCoder } from '@/coders/adapty-placement';
+import { AdaptyPlacementCoder } from './adapty-placement';
 
 type Model = AdaptyPaywall;
 type CodableModel = Omit<Model, 'hasViewConfiguration'>;

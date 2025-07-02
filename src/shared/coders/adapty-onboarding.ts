@@ -1,10 +1,10 @@
-import type { AdaptyOnboarding } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyOnboarding } from '../types';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { Coder } from './coder';
 import { AdaptyRemoteConfigCoder } from './adapty-remote-config';
 import { AdaptyOnboardingBuilderCoder } from './adapty-onboarding-builder';
-import { AdaptyPlacementCoder } from '@/coders/adapty-placement';
+import { AdaptyPlacementCoder } from './adapty-placement';
 
 type Model = AdaptyOnboarding;
 type CodableModel = Omit<Model, 'hasViewConfiguration'>;

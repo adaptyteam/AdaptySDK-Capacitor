@@ -1,4 +1,4 @@
-import { AdaptyError } from '@/adapty-error';
+import { AdaptyError } from '../adapty-error';
 import { LogContext } from '../logger';
 import { AdaptyNativeErrorCoder } from './adapty-native-error';
 import { AdaptyPaywallCoder } from './adapty-paywall';
@@ -10,11 +10,11 @@ import { ErrorConverter } from './error-coder';
 import type { Converter } from './types';
 import { AdaptyRemoteConfigCoder } from './adapty-remote-config';
 import { AdaptyPaywallBuilderCoder } from './adapty-paywall-builder';
-import { AdaptyPurchaseResultCoder } from '@/coders/adapty-purchase-result';
-import { AdaptyOnboardingCoder } from '@/coders/adapty-onboarding';
-import { AdaptyUiOnboardingMetaCoder } from '@/coders/adapty-ui-onboarding-meta';
-import { AdaptyUiOnboardingStateParamsCoder } from '@/coders/adapty-ui-onboarding-state-params';
-import { AdaptyUiOnboardingStateUpdatedActionCoder } from '@/coders/adapty-ui-onboarding-state-updated-action';
+import { AdaptyPurchaseResultCoder } from './adapty-purchase-result';
+import { AdaptyOnboardingCoder } from './adapty-onboarding';
+import { AdaptyUiOnboardingMetaCoder } from './adapty-ui-onboarding-meta';
+import { AdaptyUiOnboardingStateParamsCoder } from './adapty-ui-onboarding-state-params';
+import { AdaptyUiOnboardingStateUpdatedActionCoder } from './adapty-ui-onboarding-state-updated-action';
 
 const AdaptyTypes = [
   'AdaptyError',

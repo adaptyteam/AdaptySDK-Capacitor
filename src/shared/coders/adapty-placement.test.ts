@@ -1,6 +1,6 @@
 import { AdaptyPlacementCoder } from './adapty-placement';
-import type { AdaptyPlacement } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyPlacement } from '../types';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyPlacement;
 const mocks: Def['AdaptyPlacement'][] = [

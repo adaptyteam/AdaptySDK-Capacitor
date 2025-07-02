@@ -2,8 +2,8 @@ import type {
   AdaptySubscription,
   CancellationReason,
   VendorStore,
-} from '@/types';
-import type { Def } from '@/types/schema';
+} from '../types';
+import type { Def } from '../types/schema';
 import { AdaptySubscriptionCoder } from './adapty-subscription';
 
 type Model = AdaptySubscription;

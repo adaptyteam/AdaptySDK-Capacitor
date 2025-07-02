@@ -1,7 +1,7 @@
-import type { Def } from '@/types/schema';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
-import { AdaptyUiMediaCache } from '@/ui/types';
+import { AdaptyUiMediaCache } from '../ui/types';
 
 type Model = AdaptyUiMediaCache;
 type Serializable = Required<Def['AdaptyConfiguration']>['media_cache'];

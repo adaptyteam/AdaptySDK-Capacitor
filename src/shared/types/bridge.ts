@@ -1,5 +1,9 @@
-import type { EmitterSubscription } from 'react-native';
-import type { AdaptyProfile } from '@/types';
+// import type { EmitterSubscription } from 'react-native'; // Not available in Capacitor
+// Mock EmitterSubscription for Capacitor
+interface EmitterSubscription {
+  remove(): void;
+}
+import type { AdaptyProfile } from './index';
 
 /**
  * Valid list of expected parameters to the handlers

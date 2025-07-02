@@ -1,5 +1,5 @@
-import type { Def, Event } from '@/types/schema';
-import type { OnboardingStateUpdatedAction } from '@/ui/types';
+import type { Def, Event } from '../types/schema';
+import type { OnboardingStateUpdatedAction } from '../ui/types';
 import { SimpleCoder } from './coder';
 import type { Properties } from './types';
 import { AdaptyUiOnboardingStateParamsCoder } from './adapty-ui-onboarding-state-params';

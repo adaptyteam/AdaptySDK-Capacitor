@@ -1,6 +1,6 @@
 import { AdaptyUiOnboardingStateParamsCoder } from './adapty-ui-onboarding-state-params';
-import type { AdaptyUiOnboardingStateParams } from '@/ui/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyUiOnboardingStateParams } from '../ui/types';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyUiOnboardingStateParams;
 const mocks: Def['AdaptyUI.OnboardingsStateParams'][] = [

@@ -1,6 +1,6 @@
-// import type { AdaptyNativeError } from '@/types/bridge';
-// import type { AdaptyPaywall, AdaptyPaywallProduct, AdaptyProfile } from '@/types';
-// import { AdaptyError } from '@/adapty-error';
+// import type { AdaptyNativeError } from '../types/bridge';
+// import type { AdaptyPaywall, AdaptyPaywallProduct, AdaptyProfile } from '../types';
+// import { AdaptyError } from '../adapty-error';
 
 // import { AdaptyPaywallCoder } from './adapty-paywall';
 // import { AdaptyPaywallProductCoder } from './adapty-paywall-product';

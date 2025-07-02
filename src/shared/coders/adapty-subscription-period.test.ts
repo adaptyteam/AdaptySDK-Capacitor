@@ -1,5 +1,5 @@
-import type { AdaptySubscriptionPeriod, ProductPeriod } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptySubscriptionPeriod, ProductPeriod } from '../types';
+import type { Def } from '../types/schema';
 import { AdaptySubscriptionPeriodCoder } from './adapty-subscription-period';
 
 type Model = AdaptySubscriptionPeriod;

@@ -1,5 +1,5 @@
-import type { ProductReference } from '@/types';
-import type { Def } from '@/types/schema';
+import type { ProductReference } from '../types';
+import type { Def } from '../types/schema';
 import { ProductReferenceCoder } from './product-reference';
 
 type Model = ProductReference;

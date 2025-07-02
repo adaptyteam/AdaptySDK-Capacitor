@@ -1,6 +1,6 @@
 import { AdaptyPriceCoder } from './adapty-price';
-import type { AdaptyPrice } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyPrice } from '../types';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyPrice;
 const mocks: Def['AdaptyPrice'][] = [

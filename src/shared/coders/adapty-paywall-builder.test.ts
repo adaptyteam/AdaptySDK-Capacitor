@@ -1,6 +1,6 @@
 import { AdaptyPaywallBuilderCoder } from './adapty-paywall-builder';
-import type { AdaptyPaywallBuilder } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyPaywallBuilder } from '../types';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyPaywallBuilder;
 const mocks: Required<Def['AdaptyPaywall']>['paywall_builder'][] = [

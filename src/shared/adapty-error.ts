@@ -1,4 +1,4 @@
-import { ErrorCode } from '@/types/error';
+import { ErrorCode } from './types/error';
 
 export interface AdaptyErrorInput {
   adaptyCode: ErrorCode;

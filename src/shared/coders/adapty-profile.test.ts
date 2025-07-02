@@ -1,5 +1,5 @@
-import type { Def } from '@/types/schema';
-import type { AdaptyNonSubscription, AdaptyProfile } from '@/types';
+import type { Def } from '../types/schema';
+import type { AdaptyNonSubscription, AdaptyProfile } from '../types';
 import { AdaptyProfileCoder } from './adapty-profile';
 import { AdaptyAccessLevelCoder } from './adapty-access-level';
 import { HashmapCoder } from './hashmap';

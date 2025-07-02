@@ -3,8 +3,8 @@ import type {
   CancellationReason,
   OfferType,
   VendorStore,
-} from '@/types';
-import type { Def } from '@/types/schema';
+} from '../types';
+import type { Def } from '../types/schema';
 import { AdaptyAccessLevelCoder } from './adapty-access-level';
 
 type Model = AdaptyAccessLevel;

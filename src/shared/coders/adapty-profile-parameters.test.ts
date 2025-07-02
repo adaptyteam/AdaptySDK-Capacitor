@@ -1,4 +1,4 @@
-import { Def } from '@/types/schema';
+import { Def } from '../types/schema';
 import { AdaptyProfileParametersCoder } from './adapty-profile-parameters';
 
 const mocks: Def['AdaptyProfileParameters'][] = [

@@ -1,6 +1,6 @@
 import { AdaptyRemoteConfigCoder } from './adapty-remote-config';
-import type { AdaptyRemoteConfig } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyRemoteConfig } from '../types';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyRemoteConfig;
 const mocks: Required<Def['AdaptyPaywall']>['remote_config'][] = [

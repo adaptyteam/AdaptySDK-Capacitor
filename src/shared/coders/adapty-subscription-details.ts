@@ -1,9 +1,9 @@
-import type { AdaptySubscriptionDetails } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptySubscriptionDetails } from '../types';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
 import { AdaptySubscriptionPeriodCoder } from './adapty-subscription-period';
-import { AdaptySubscriptionOfferCoder } from '@/coders/adapty-subscription-offer';
+import { AdaptySubscriptionOfferCoder } from './adapty-subscription-offer';
 
 type Model = AdaptySubscriptionDetails;
 type Serializable = Def['AdaptyPaywallProduct.Subscription'];

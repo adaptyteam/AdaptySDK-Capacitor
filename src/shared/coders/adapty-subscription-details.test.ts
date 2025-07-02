@@ -1,8 +1,8 @@
-import type { AdaptySubscriptionDetails } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptySubscriptionDetails } from '../types';
+import type { Def } from '../types/schema';
 import { AdaptySubscriptionDetailsCoder } from './adapty-subscription-details';
 import { AdaptySubscriptionPeriodCoder } from './adapty-subscription-period';
-import { AdaptySubscriptionOfferCoder } from '@/coders/adapty-subscription-offer';
+import { AdaptySubscriptionOfferCoder } from './adapty-subscription-offer';
 
 type Model = AdaptySubscriptionDetails;
 const mocks: Def['AdaptyPaywallProduct.Subscription'][] = [

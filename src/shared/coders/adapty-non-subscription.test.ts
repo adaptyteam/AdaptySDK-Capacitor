@@ -1,5 +1,5 @@
-import type { Def } from '@/types/schema';
-import type { AdaptyNonSubscription, VendorStore } from '@/types';
+import type { Def } from '../types/schema';
+import type { AdaptyNonSubscription, VendorStore } from '../types';
 import { AdaptyNonSubscriptionCoder } from './adapty-non-subscription';
 
 type Model = AdaptyNonSubscription;

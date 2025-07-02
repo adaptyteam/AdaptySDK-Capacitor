@@ -1,5 +1,5 @@
-import type { AdaptyPaywallProduct } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyPaywallProduct } from '../types';
+import type { Def } from '../types/schema';
 import { AdaptyPriceCoder } from './adapty-price';
 import { AdaptyPaywallProductCoder } from './adapty-paywall-product';
 import { AdaptySubscriptionDetailsCoder } from './adapty-subscription-details';

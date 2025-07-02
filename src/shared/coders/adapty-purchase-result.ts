@@ -1,8 +1,8 @@
-import type { AdaptyPurchaseResult } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyPurchaseResult } from '../types';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
-import { AdaptyProfileCoder } from '@/coders/adapty-profile';
+import { AdaptyProfileCoder } from './adapty-profile';
 
 type Model = AdaptyPurchaseResult;
 type Serializable = Def['AdaptyPurchaseResult'];

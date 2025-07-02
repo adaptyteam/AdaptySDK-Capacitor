@@ -1,6 +1,6 @@
 import { AdaptyOnboardingCoder } from './adapty-onboarding';
-import type { AdaptyOnboarding } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptyOnboarding } from '../types';
+import type { Def } from '../types/schema';
 
 type Model = AdaptyOnboarding;
 const mocks: Def['AdaptyOnboarding'][] = [

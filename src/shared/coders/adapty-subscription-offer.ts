@@ -1,10 +1,10 @@
-import type { AdaptySubscriptionOffer } from '@/types';
-import type { Def } from '@/types/schema';
+import type { AdaptySubscriptionOffer } from '../types';
+import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
-import { AdaptySubscriptionOfferIdCoder } from '@/coders/adapty-subscription-offer-identifier';
-import { ArrayCoder } from '@/coders/array';
-import { AdaptyDiscountPhaseCoder } from '@/coders/adapty-discount-phase';
+import { AdaptySubscriptionOfferIdCoder } from './adapty-subscription-offer-identifier';
+import { ArrayCoder } from './array';
+import { AdaptyDiscountPhaseCoder } from './adapty-discount-phase';
 
 type Model = AdaptySubscriptionOffer;
 type Serializable = Def['AdaptySubscriptionOffer'];

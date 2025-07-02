@@ -1,4 +1,4 @@
-import type { Def } from '@/types/schema';
+import type { Def } from '../types/schema';
 import type { AdaptyAccessLevel } from '../types';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
