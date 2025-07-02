@@ -70,9 +70,6 @@
   },
   "prettier": "@ionic/prettier-config",
   "swiftlint": "@ionic/swiftlint-config",
-  "eslintConfig": {
-    "extends": "@ionic/eslint-config/recommended"
-  },
   "lint-staged": {
     "*.{ts,js}": [
       "eslint --fix",
