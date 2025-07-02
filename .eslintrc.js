@@ -1,6 +1,22 @@
 module.exports = {
   extends: '@ionic/eslint-config/recommended',
+  env: {
+    node: true,
+  },
   overrides: [
+    {
+      files: ['**/*.config.js', '.eslintrc.js'],
+      env: {
+        node: true,
+      },
+    },
+    {
+      files: ['jest/**/*', '**/*.test.js', '**/*.test.ts', '**/*.spec.js', '**/*.spec.ts'],
+      env: {
+        jest: true,
+        node: true,
+      },
+    },
     {
       files: ['src/shared/**/*'],
       rules: {
