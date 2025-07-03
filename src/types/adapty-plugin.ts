@@ -18,7 +18,7 @@ import type {
   LogLevel,
 } from '../shared/types/inputs';
 
-export interface AdaptyCapacitorPlugin {
+export interface AdaptyPlugin {
   /**
    * Initializes the Adapty SDK.
    * This method must be called in order for the SDK to work.
