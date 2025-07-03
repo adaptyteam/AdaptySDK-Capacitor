@@ -8,7 +8,7 @@ import type {
   AdaptyPurchaseResult,
   AdaptyProfileParameters,
   RefundPreference,
-} from './shared/types';
+} from '../shared/types';
 import type {
   ActivateParamsInput,
   GetPlacementParamsInput,
@@ -16,9 +16,9 @@ import type {
   MakePurchaseParamsInput,
   FileLocation,
   LogLevel,
-} from './shared/types/inputs';
+} from '../shared/types/inputs';
 
-export interface AdaptyCapacitorPluginPlugin {
+export interface AdaptyCapacitorPlugin {
   /**
    * Initializes the Adapty SDK.
    * This method must be called in order for the SDK to work.
