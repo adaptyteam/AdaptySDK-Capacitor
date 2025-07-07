@@ -11,7 +11,6 @@ import type {
   AdaptyProfileParameters,
   RefundPreference,
 } from './shared/types';
-import type { AdaptyConfiguration } from './shared/types/bridge';
 import type {
   GetPlacementParamsInput,
   GetPlacementForDefaultAudienceParamsInput,
@@ -21,7 +20,12 @@ import type {
 } from './shared/types/inputs';
 
 export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacitorPluginPlugin {
-  async activate(options: { apiKey: string; configuration: AdaptyConfiguration }): Promise<void> {
+  async echo(options: { value: string }): Promise<{ value: string }> {
+    console.log('Web: echo called with:', options);
+    return Promise.resolve({ value: options.value });
+  }
+
+  async activate(options: { apiKey: string; configuration?: any }): Promise<void> {
     console.log('Web: activate called with:', options);
     // Mock implementation for web - just log the call
     return Promise.resolve();

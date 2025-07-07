@@ -20,11 +20,11 @@ import type {
 import type { AdaptyPlugin } from './types/adapty-plugin';
 
 export class Adapty implements AdaptyPlugin {
-  activate(options: { apiKey: string; params?: ActivateParamsInput }): Promise<void> {
+  activate(_options: { apiKey: string; params?: ActivateParamsInput }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  getPaywall(options: {
+  getPaywall(_options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
@@ -32,7 +32,7 @@ export class Adapty implements AdaptyPlugin {
     throw new Error('Method not implemented.');
   }
 
-  getPaywallForDefaultAudience(options: {
+  getPaywallForDefaultAudience(_options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
@@ -40,11 +40,11 @@ export class Adapty implements AdaptyPlugin {
     throw new Error('Method not implemented.');
   }
 
-  getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
+  getPaywallProducts(_options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
     throw new Error('Method not implemented.');
   }
 
-  getOnboarding(options: {
+  getOnboarding(_options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
@@ -52,7 +52,7 @@ export class Adapty implements AdaptyPlugin {
     throw new Error('Method not implemented.');
   }
 
-  getOnboardingForDefaultAudience(options: {
+  getOnboardingForDefaultAudience(_options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
@@ -64,23 +64,23 @@ export class Adapty implements AdaptyPlugin {
     throw new Error('Method not implemented.');
   }
 
-  identify(options: { customerUserId: string }): Promise<void> {
+  identify(_options: { customerUserId: string }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  logShowPaywall(options: { paywall: AdaptyPaywall }): Promise<void> {
+  logShowPaywall(_options: { paywall: AdaptyPaywall }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  openWebPaywall(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void> {
+  openWebPaywall(_options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<{ url: string }> {
+  createWebPaywallUrl(_options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<{ url: string }> {
     throw new Error('Method not implemented.');
   }
 
-  logShowOnboarding(options: { screenOrder: number; onboardingName?: string; screenName?: string }): Promise<void> {
+  logShowOnboarding(_options: { screenOrder: number; onboardingName?: string; screenName?: string }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
@@ -88,7 +88,7 @@ export class Adapty implements AdaptyPlugin {
     throw new Error('Method not implemented.');
   }
 
-  makePurchase(options: {
+  makePurchase(_options: {
     product: AdaptyPaywallProduct;
     params?: MakePurchaseParamsInput;
   }): Promise<{ result: AdaptyPurchaseResult }> {
@@ -99,7 +99,7 @@ export class Adapty implements AdaptyPlugin {
     throw new Error('Method not implemented.');
   }
 
-  reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void> {
+  reportTransaction(_options: { transactionId: string; variationId?: string }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
@@ -107,35 +107,35 @@ export class Adapty implements AdaptyPlugin {
     throw new Error('Method not implemented.');
   }
 
-  setFallback(options: { fileLocation: FileLocation }): Promise<void> {
+  setFallback(_options: { fileLocation: FileLocation }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  setFallbackPaywalls(options: { paywallsLocation: FileLocation }): Promise<void> {
+  setFallbackPaywalls(_options: { paywallsLocation: FileLocation }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  setIntegrationIdentifier(options: { key: string; value: string }): Promise<void> {
+  setIntegrationIdentifier(_options: { key: string; value: string }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  setLogLevel(options: { logLevel: LogLevel }): Promise<void> {
+  setLogLevel(_options: { logLevel: LogLevel }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void> {
+  updateAttribution(_options: { attribution: Record<string, any>; source: string }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  updateCollectingRefundDataConsent(options: { consent: boolean }): Promise<void> {
+  updateCollectingRefundDataConsent(_options: { consent: boolean }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  updateRefundPreference(options: { refundPreference: RefundPreference }): Promise<void> {
+  updateRefundPreference(_options: { refundPreference: RefundPreference }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
-  updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {
+  updateProfile(_options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
@@ -144,8 +144,8 @@ export class Adapty implements AdaptyPlugin {
   }
 
   addListener(
-    eventName: 'onLatestProfileLoad',
-    listenerFunc: (data: { profile: AdaptyProfile }) => void,
+    _eventName: 'onLatestProfileLoad',
+    _listenerFunc: (data: { profile: AdaptyProfile }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle {
     throw new Error('Method not implemented.');
   }
