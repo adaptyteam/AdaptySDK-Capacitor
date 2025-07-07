@@ -7,4 +7,6 @@ const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPluginPlugin>('Adapt
 });
 
 export * from './definitions';
+export * from './adapty';
+export * from './shared/types/inputs';
 export { AdaptyCapacitorPlugin };
