@@ -5,3 +5,6 @@ node_modules/
 .DS_Store
 .sourcemaps
 dist/
+
+# Adapty credentials
+.adapty-credentials.json
