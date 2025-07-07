@@ -25,7 +25,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     return Promise.resolve({ value: options.value });
   }
 
-  async activate(options: { apiKey: string; configuration?: any }): Promise<void> {
+  async activate(options: { apiKey: string; params?: any }): Promise<void> {
     console.log('Web: activate called with:', options);
     // Mock implementation for web - just log the call
     return Promise.resolve();
