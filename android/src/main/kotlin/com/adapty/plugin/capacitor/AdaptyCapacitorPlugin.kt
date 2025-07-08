@@ -48,9 +48,4 @@ class AdaptyCapacitorPluginKt {
     fun isActivated(): Boolean {
         return isActivated
     }
-
-    fun echo(value: String): String {
-        Log.i("Echo", value)
-        return value
-    }
 }

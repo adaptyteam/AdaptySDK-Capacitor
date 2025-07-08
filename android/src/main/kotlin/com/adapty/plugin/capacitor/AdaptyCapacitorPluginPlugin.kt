@@ -52,13 +52,4 @@ class AdaptyCapacitorPluginPlugin : Plugin() {
         ret.put("isActivated", implementation.isActivated())
         call.resolve(ret)
     }
-
-    @PluginMethod
-    fun echo(call: PluginCall) {
-        val value = call.getString("value")
-
-        val ret = JSObject()
-        ret.put("value", implementation.echo(value ?: ""))
-        call.resolve(ret)
-    }
 } 

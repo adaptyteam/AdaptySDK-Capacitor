@@ -39,9 +39,4 @@ import Adapty
     @objc public func isActivated() -> Bool {
         return _isActivated
     }
-
-    @objc public func echo(_ value: String) -> String {
-        print(value)
-        return value
-    }
 }

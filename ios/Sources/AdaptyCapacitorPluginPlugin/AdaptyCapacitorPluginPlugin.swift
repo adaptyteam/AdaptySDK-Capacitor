@@ -10,7 +10,6 @@ public class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "AdaptyCapacitorPluginPlugin"
     public let jsName = "AdaptyCapacitorPlugin"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "echo", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "activate", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "isActivated", returnType: CAPPluginReturnPromise)
     ]
@@ -44,13 +43,6 @@ public class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func isActivated(_ call: CAPPluginCall) {
         call.resolve([
             "isActivated": implementation.isActivated()
-        ])
-    }
-
-    @objc func echo(_ call: CAPPluginCall) {
-        let value = call.getString("value") ?? ""
-        call.resolve([
-            "value": implementation.echo(value)
         ])
     }
 }

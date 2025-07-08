@@ -20,11 +20,6 @@ import type {
 } from './shared/types/inputs';
 
 export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacitorPluginPlugin {
-  async echo(options: { value: string }): Promise<{ value: string }> {
-    console.log('Web: echo called with:', options);
-    return Promise.resolve({ value: options.value });
-  }
-
   async activate(options: { apiKey: string; params?: any }): Promise<void> {
     console.log('Web: activate called with:', options);
     // Mock implementation for web - just log the call
@@ -37,7 +32,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     params?: GetPlacementParamsInput;
   }): Promise<{ paywall: AdaptyPaywall }> {
     console.log('Web: getPaywall called with:', options);
-    throw new Error('Web platform is not supported');
+    throw new Error('Method not implemented on web platform');
   }
 
   async getPaywallForDefaultAudience(options: {
