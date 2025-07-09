@@ -24,7 +24,7 @@ public class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
 
         implementation.handleMethodCall(method: methodName, withJson: args) { response in
             // Return response as string directly
-            call.resolve(["data": response])
+            call.resolve(["crossPlatformJson": response])
         }
     }
 }

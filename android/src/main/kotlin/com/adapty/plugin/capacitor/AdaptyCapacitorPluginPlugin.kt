@@ -31,7 +31,7 @@ class AdaptyCapacitorPluginPlugin : Plugin() {
         implementation.handleMethodCall(methodName, args) { response ->
             // Return response as string directly
             val result = JSObject()
-            result.put("data", response)
+            result.put("crossPlatformJson", response)
             call.resolve(result)
         }
     }

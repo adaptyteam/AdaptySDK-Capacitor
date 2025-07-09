@@ -14,7 +14,6 @@ npx cap sync
 <docgen-index>
 
 * [`handleMethodCall(...)`](#handlemethodcall)
-* [`activate(...)`](#activate)
 * [`getPaywall(...)`](#getpaywall)
 * [`getPaywallForDefaultAudience(...)`](#getpaywallfordefaultaudience)
 * [`getPaywallProducts(...)`](#getpaywallproducts)
@@ -805,9 +804,7 @@ Interface representing details about a user's subscription.
 
 Construct a type with a set of properties K of type T
 
-<code>{
- [P in K]: T;
- }</code>
+<code>{ [P in K]: T; }</code>
 
 
 #### GetPlacementParamsInput
@@ -895,9 +892,7 @@ Log levels for the SDK
 
 Make all properties in T optional
 
-<code>{
- [P in keyof T]?: T[P];
- }</code>
+<code>{ [P in keyof T]?: T[P]; }</code>
 
 
 #### AppTrackingTransparencyStatus

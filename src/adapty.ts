@@ -47,9 +47,9 @@ export class Adapty implements AdaptyPlugin {
       args: argsString,
     });
 
-    // Handle response format - data comes as JSON string in 'data' field
+    // Handle response format - JSON comes as string in 'crossPlatformJson' field
     try {
-      const parsedData = JSON.parse(result.data);
+      const parsedData = JSON.parse(result.crossPlatformJson);
 
       // Check for errors (like React Native does)
       if (parsedData.error) {
@@ -63,7 +63,7 @@ export class Adapty implements AdaptyPlugin {
         throw error;
       }
       // If parsing fails, return the data as is
-      return { result: result.data };
+      return { result: result.crossPlatformJson };
     }
   }
 
