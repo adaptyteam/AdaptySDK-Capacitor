@@ -13,6 +13,7 @@ npx cap sync
 
 <docgen-index>
 
+* [`handleMethodCall(...)`](#handlemethodcall)
 * [`activate(...)`](#activate)
 * [`getPaywall(...)`](#getpaywall)
 * [`getPaywallForDefaultAudience(...)`](#getpaywallfordefaultaudience)

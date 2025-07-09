@@ -46,7 +46,25 @@ export class Adapty implements AdaptyPlugin {
       methodName,
       args: argsString,
     });
-    return result;
+
+    // Handle response format - data comes as JSON string in 'data' field
+    try {
+      const parsedData = JSON.parse(result.data);
+
+      // Check for errors (like React Native does)
+      if (parsedData.error) {
+        throw new Error(parsedData.error);
+      }
+
+      return parsedData;
+    } catch (error) {
+      // If it's our thrown error, re-throw it
+      if (error instanceof Error && error.message.startsWith('{') === false) {
+        throw error;
+      }
+      // If parsing fails, return the data as is
+      return { result: result.data };
+    }
   }
 
   /**

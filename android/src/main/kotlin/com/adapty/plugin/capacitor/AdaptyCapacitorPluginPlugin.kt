@@ -25,32 +25,14 @@ class AdaptyCapacitorPluginPlugin : Plugin() {
             call.reject("methodName is required")
             return
         }
-        
+
         val args = call.getString("args") ?: ""
-        
+
         implementation.handleMethodCall(methodName, args) { response ->
-            if (response != null) {
-                try {
-                    val responseJson = JSONObject(response)
-                    if (responseJson.has("error")) {
-                        call.reject(responseJson.getString("error"))
-                    } else {
-                        // Convert JSONObject to JSObject
-                        val result = JSObject()
-                        for (key in responseJson.keys()) {
-                            result.put(key, responseJson.get(key))
-                        }
-                        call.resolve(result)
-                    }
-                } catch (e: Exception) {
-                    // If response is not JSON, return as string
-                    val result = JSObject()
-                    result.put("result", response)
-                    call.resolve(result)
-                }
-            } else {
-                call.resolve()
-            }
+            // Return response as string directly
+            val result = JSObject()
+            result.put("data", response)
+            call.resolve(result)
         }
     }
-} 
+}
