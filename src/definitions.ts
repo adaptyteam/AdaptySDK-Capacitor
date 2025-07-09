@@ -19,9 +19,10 @@ import type {
 
 export interface AdaptyCapacitorPluginPlugin {
   /**
-   * Initializes the Adapty SDK
+   * Handles crossplatform method calls
+   * @internal
    */
-  activate(options: { apiKey: string; params?: any }): Promise<void>;
+  handleMethodCall(options: { methodName: string; args: string }): Promise<any>;
 
   /**
    * Fetches the paywall by the specified placement
@@ -161,11 +162,6 @@ export interface AdaptyCapacitorPluginPlugin {
    * Updates user profile
    */
   updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void>;
-
-  /**
-   * Checks if SDK is activated
-   */
-  isActivated(): Promise<{ isActivated: boolean }>;
 
   /**
    * Adds event listener

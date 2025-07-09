@@ -20,10 +20,9 @@ import type {
 } from './shared/types/inputs';
 
 export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacitorPluginPlugin {
-  async activate(options: { apiKey: string; params?: any }): Promise<void> {
-    console.log('Web: activate called with:', options);
-    // Mock implementation for web - just log the call
-    return Promise.resolve();
+  async handleMethodCall(options: { methodName: string; args: string }): Promise<any> {
+    console.log('Web: handleMethodCall called with:', options);
+    throw new Error('Web platform is not supported');
   }
 
   async getPaywall(options: {
@@ -168,11 +167,6 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
 
   async updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {
     console.log('Web: updateProfile called with:', options);
-    throw new Error('Web platform is not supported');
-  }
-
-  async isActivated(): Promise<{ isActivated: boolean }> {
-    console.log('Web: isActivated called');
     throw new Error('Web platform is not supported');
   }
 

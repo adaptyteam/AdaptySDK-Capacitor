@@ -38,7 +38,6 @@ npx cap sync
 * [`updateCollectingRefundDataConsent(...)`](#updatecollectingrefunddataconsent)
 * [`updateRefundPreference(...)`](#updaterefundpreference)
 * [`updateProfile(...)`](#updateprofile)
-* [`isActivated()`](#isactivated)
 * [`addListener('onLatestProfileLoad', ...)`](#addlisteneronlatestprofileload-)
 * [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
@@ -49,17 +48,19 @@ npx cap sync
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-### activate(...)
+### handleMethodCall(...)
 
 ```typescript
-activate(options: { apiKey: string; params?: any; }) => Promise<void>
+handleMethodCall(options: { methodName: string; args: string; }) => Promise<any>
 ```
 
-Initializes the Adapty SDK
+Handles crossplatform method calls
 
-| Param         | Type                                           |
-| ------------- | ---------------------------------------------- |
-| **`options`** | <code>{ apiKey: string; params?: any; }</code> |
+| Param         | Type                                               |
+| ------------- | -------------------------------------------------- |
+| **`options`** | <code>{ methodName: string; args: string; }</code> |
+
+**Returns:** <code>Promise&lt;any&gt;</code>
 
 --------------------
 
@@ -422,19 +423,6 @@ Updates user profile
 | Param         | Type                                                                                                                           |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **`options`** | <code>{ params: <a href="#partial">Partial</a>&lt;<a href="#adaptyprofileparameters">AdaptyProfileParameters</a>&gt;; }</code> |
-
---------------------
-
-
-### isActivated()
-
-```typescript
-isActivated() => Promise<{ isActivated: boolean; }>
-```
-
-Checks if SDK is activated
-
-**Returns:** <code>Promise&lt;{ isActivated: boolean; }&gt;</code>
 
 --------------------
 
@@ -816,7 +804,9 @@ Interface representing details about a user's subscription.
 
 Construct a type with a set of properties K of type T
 
-<code>{ [P in K]: T; }</code>
+<code>{
+ [P in K]: T;
+ }</code>
 
 
 #### GetPlacementParamsInput
@@ -904,7 +894,9 @@ Log levels for the SDK
 
 Make all properties in T optional
 
-<code>{ [P in keyof T]?: T[P]; }</code>
+<code>{
+ [P in keyof T]?: T[P];
+ }</code>
 
 
 #### AppTrackingTransparencyStatus

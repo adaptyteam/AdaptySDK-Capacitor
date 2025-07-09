@@ -1,6 +1,8 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 import { registerPlugin } from '@capacitor/core';
 
+import type { AdaptyCapacitorPluginPlugin } from './definitions';
+import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -18,10 +20,8 @@ import type {
   FileLocation,
   LogLevel,
 } from './shared/types/inputs';
+import type { AdaptyUiMediaCache } from './shared/ui/types';
 import type { AdaptyPlugin } from './types/adapty-plugin';
-import type { AdaptyCapacitorPluginPlugin } from './definitions';
-import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
-import { AdaptyUiMediaCache } from './shared/ui/types';
 import version from './version';
 
 const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPluginPlugin>('AdaptyCapacitorPlugin', {
@@ -30,11 +30,24 @@ const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPluginPlugin>('Adapt
 
 export class Adapty implements AdaptyPlugin {
   private activating: Promise<void> | null = null;
+  private isActivatedFlag = false;
   private defaultMediaCache: AdaptyUiMediaCache = {
     memoryStorageTotalCostLimit: 100 * 1024 * 1024,
     memoryStorageCountLimit: 2147483647,
     diskStorageSizeLimit: 100 * 1024 * 1024,
   };
+
+  /**
+   * Handle method calls through crossplatform bridge
+   */
+  private async handleMethodCall(methodName: string, args: any): Promise<any> {
+    const argsString = typeof args === 'string' ? args : JSON.stringify(args);
+    const result = await AdaptyCapacitorPlugin.handleMethodCall({
+      methodName,
+      args: argsString,
+    });
+    return result;
+  }
 
   /**
    * Initializes the Adapty SDK.
@@ -140,140 +153,231 @@ export class Adapty implements AdaptyPlugin {
       configuration.apple_idfa_collection_disabled = params.ios.idfaCollectionDisabled;
     }
 
-    // Call native activation
-    await AdaptyCapacitorPlugin.activate({
-      apiKey,
-      params: configuration,
-    });
+    // Call native activation through handleMethodCall
+    await this.handleMethodCall('activate', configuration);
+    this.isActivatedFlag = true;
   }
 
-  getPaywall(_options: {
+  async getPaywall(options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
   }): Promise<{ paywall: AdaptyPaywall }> {
-    throw new Error('Method not implemented.');
+    const args = {
+      placement_id: options.placementId,
+      locale: options.locale,
+      ...(options.params || {}),
+    };
+    return await this.handleMethodCall('get_paywall', args);
   }
 
-  getPaywallForDefaultAudience(_options: {
+  async getPaywallForDefaultAudience(options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
   }): Promise<{ paywall: AdaptyPaywall }> {
-    throw new Error('Method not implemented.');
+    const args = {
+      placement_id: options.placementId,
+      locale: options.locale,
+      ...(options.params || {}),
+    };
+    return await this.handleMethodCall('get_paywall_for_default_audience', args);
   }
 
-  getPaywallProducts(_options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
-    throw new Error('Method not implemented.');
+  async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
+    const args = {
+      paywall: options.paywall,
+    };
+    return await this.handleMethodCall('get_paywall_products', args);
   }
 
-  getOnboarding(_options: {
+  async getOnboarding(options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
   }): Promise<{ onboarding: AdaptyOnboarding }> {
-    throw new Error('Method not implemented.');
+    const args = {
+      placement_id: options.placementId,
+      locale: options.locale,
+      ...(options.params || {}),
+    };
+    return await this.handleMethodCall('get_onboarding', args);
   }
 
-  getOnboardingForDefaultAudience(_options: {
+  async getOnboardingForDefaultAudience(options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
   }): Promise<{ onboarding: AdaptyOnboarding }> {
-    throw new Error('Method not implemented.');
+    const args = {
+      placement_id: options.placementId,
+      locale: options.locale,
+      ...(options.params || {}),
+    };
+    return await this.handleMethodCall('get_onboarding_for_default_audience', args);
   }
 
-  getProfile(): Promise<{ profile: AdaptyProfile }> {
-    throw new Error('Method not implemented.');
+  async getProfile(): Promise<{ profile: AdaptyProfile }> {
+    return await this.handleMethodCall('get_profile', {});
   }
 
-  identify(_options: { customerUserId: string }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async identify(options: { customerUserId: string }): Promise<void> {
+    const args = {
+      customer_user_id: options.customerUserId,
+    };
+    await this.handleMethodCall('identify', args);
   }
 
-  logShowPaywall(_options: { paywall: AdaptyPaywall }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async logShowPaywall(options: { paywall: AdaptyPaywall }): Promise<void> {
+    const args = {
+      paywall: options.paywall,
+    };
+    await this.handleMethodCall('log_show_paywall', args);
   }
 
-  openWebPaywall(_options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async openWebPaywall(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void> {
+    const args = {
+      paywall_or_product: options.paywallOrProduct,
+    };
+    await this.handleMethodCall('open_web_paywall', args);
   }
 
-  createWebPaywallUrl(_options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<{ url: string }> {
-    throw new Error('Method not implemented.');
+  async createWebPaywallUrl(options: {
+    paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
+  }): Promise<{ url: string }> {
+    const args = {
+      paywall_or_product: options.paywallOrProduct,
+    };
+    return await this.handleMethodCall('create_web_paywall_url', args);
   }
 
-  logShowOnboarding(_options: { screenOrder: number; onboardingName?: string; screenName?: string }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async logShowOnboarding(options: {
+    screenOrder: number;
+    onboardingName?: string;
+    screenName?: string;
+  }): Promise<void> {
+    const args = {
+      screen_order: options.screenOrder,
+      onboarding_name: options.onboardingName,
+      screen_name: options.screenName,
+    };
+    await this.handleMethodCall('log_show_onboarding', args);
   }
 
-  logout(): Promise<void> {
-    throw new Error('Method not implemented.');
+  async logout(): Promise<void> {
+    await this.handleMethodCall('logout', {});
+    this.isActivatedFlag = false;
   }
 
-  makePurchase(_options: {
+  async makePurchase(options: {
     product: AdaptyPaywallProduct;
     params?: MakePurchaseParamsInput;
   }): Promise<{ result: AdaptyPurchaseResult }> {
-    throw new Error('Method not implemented.');
+    const args = {
+      product: options.product,
+      ...(options.params || {}),
+    };
+    return await this.handleMethodCall('make_purchase', args);
   }
 
-  presentCodeRedemptionSheet(): Promise<void> {
-    throw new Error('Method not implemented.');
+  async presentCodeRedemptionSheet(): Promise<void> {
+    await this.handleMethodCall('present_code_redemption_sheet', {});
   }
 
-  reportTransaction(_options: { transactionId: string; variationId?: string }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void> {
+    const args = {
+      transaction_id: options.transactionId,
+      variation_id: options.variationId,
+    };
+    await this.handleMethodCall('report_transaction', args);
   }
 
-  restorePurchases(): Promise<{ profile: AdaptyProfile }> {
-    throw new Error('Method not implemented.');
+  async restorePurchases(): Promise<{ profile: AdaptyProfile }> {
+    return await this.handleMethodCall('restore_purchases', {});
   }
 
-  setFallback(_options: { fileLocation: FileLocation }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async setFallback(options: { fileLocation: FileLocation }): Promise<void> {
+    const args = {
+      file_location: options.fileLocation,
+    };
+    await this.handleMethodCall('set_fallback', args);
   }
 
-  setFallbackPaywalls(_options: { paywallsLocation: FileLocation }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async setFallbackPaywalls(options: { paywallsLocation: FileLocation }): Promise<void> {
+    const args = {
+      paywalls_location: options.paywallsLocation,
+    };
+    await this.handleMethodCall('set_fallback', args);
   }
 
-  setIntegrationIdentifier(_options: { key: string; value: string }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async setIntegrationIdentifier(options: { key: string; value: string }): Promise<void> {
+    const args = {
+      key: options.key,
+      value: options.value,
+    };
+    await this.handleMethodCall('set_integration_identifiers', args);
   }
 
-  setLogLevel(_options: { logLevel: LogLevel }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async setLogLevel(options: { logLevel: LogLevel }): Promise<void> {
+    const args = {
+      log_level: options.logLevel,
+    };
+    await this.handleMethodCall('set_log_level', args);
   }
 
-  updateAttribution(_options: { attribution: Record<string, any>; source: string }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void> {
+    const args = {
+      attribution: options.attribution,
+      source: options.source,
+    };
+    await this.handleMethodCall('update_attribution_data', args);
   }
 
-  updateCollectingRefundDataConsent(_options: { consent: boolean }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async updateCollectingRefundDataConsent(options: { consent: boolean }): Promise<void> {
+    const args = {
+      consent: options.consent,
+    };
+    await this.handleMethodCall('update_collecting_refund_data_consent', args);
   }
 
-  updateRefundPreference(_options: { refundPreference: RefundPreference }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async updateRefundPreference(options: { refundPreference: RefundPreference }): Promise<void> {
+    const args = {
+      refund_preference: options.refundPreference,
+    };
+    await this.handleMethodCall('update_refund_preference', args);
   }
 
-  updateProfile(_options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {
-    throw new Error('Method not implemented.');
+  async updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {
+    const args = {
+      params: options.params,
+    };
+    await this.handleMethodCall('update_profile', args);
   }
 
   async isActivated(): Promise<{ isActivated: boolean }> {
-    return await AdaptyCapacitorPlugin.isActivated();
+    try {
+      const result = await this.handleMethodCall('is_activated', {});
+      return { isActivated: result?.is_activated ?? this.isActivatedFlag };
+    } catch (error) {
+      return { isActivated: this.isActivatedFlag };
+    }
   }
 
   addListener(
     _eventName: 'onLatestProfileLoad',
     _listenerFunc: (data: { profile: AdaptyProfile }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle {
-    throw new Error('Method not implemented.');
+    // TODO: Implement proper event listener handling through crossplatform bridge
+    const handle = {
+      remove: async () => {
+        // TODO: Implement removal
+      },
+    };
+    const promise = Promise.resolve(handle);
+    return Object.assign(promise, handle);
   }
 
-  removeAllListeners(): Promise<void> {
-    throw new Error('Method not implemented.');
+  async removeAllListeners(): Promise<void> {
+    // TODO: Implement proper event listener removal through crossplatform bridge
   }
 }

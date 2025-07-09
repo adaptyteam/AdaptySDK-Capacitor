@@ -13,43 +13,44 @@ class AdaptyCapacitorPluginPlugin : Plugin() {
 
     private val implementation = AdaptyCapacitorPluginKt()
 
-    @PluginMethod
-    fun activate(call: PluginCall) {
-        val apiKey = call.getString("apiKey")
-        val params = call.getObject("params")
-
-        if (apiKey == null || apiKey.isEmpty()) {
-            call.reject("API key is required")
-            return
-        }
-
-        try {
-            // Convert JSObject to JSONObject
-            val configuration = JSONObject()
-            if (params != null) {
-                for (key in params.keys()) {
-                    val value = params.get(key)
-                    configuration.put(key, value)
-                }
-            }
-            
-            implementation.activate(context, apiKey, configuration) { error ->
-                if (error != null) {
-                    call.reject("Failed to activate Adapty: $error")
-                } else {
-                    call.resolve()
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("AdaptyCapacitor", "Exception during activation", e)
-            call.reject("Failed to activate Adapty: ${e.message}")
-        }
+    override fun load() {
+        super.load()
+        // Initialize crossplatform helper on plugin load
+        implementation.initialize(context)
     }
 
     @PluginMethod
-    fun isActivated(call: PluginCall) {
-        val ret = JSObject()
-        ret.put("isActivated", implementation.isActivated())
-        call.resolve(ret)
+    fun handleMethodCall(call: PluginCall) {
+        val methodName = call.getString("methodName") ?: run {
+            call.reject("methodName is required")
+            return
+        }
+        
+        val args = call.getString("args") ?: ""
+        
+        implementation.handleMethodCall(methodName, args) { response ->
+            if (response != null) {
+                try {
+                    val responseJson = JSONObject(response)
+                    if (responseJson.has("error")) {
+                        call.reject(responseJson.getString("error"))
+                    } else {
+                        // Convert JSONObject to JSObject
+                        val result = JSObject()
+                        for (key in responseJson.keys()) {
+                            result.put(key, responseJson.get(key))
+                        }
+                        call.resolve(result)
+                    }
+                } catch (e: Exception) {
+                    // If response is not JSON, return as string
+                    val result = JSObject()
+                    result.put("result", response)
+                    call.resolve(result)
+                }
+            } else {
+                call.resolve()
+            }
+        }
     }
 } 

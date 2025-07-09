@@ -10,39 +10,31 @@ public class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "AdaptyCapacitorPluginPlugin"
     public let jsName = "AdaptyCapacitorPlugin"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "activate", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "isActivated", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "handleMethodCall", returnType: CAPPluginReturnPromise)
     ]
     private let implementation = AdaptyCapacitorPlugin()
 
-    @objc func activate(_ call: CAPPluginCall) {
-        guard let apiKey = call.getString("apiKey") else {
-            call.reject("API key is required")
+    @objc func handleMethodCall(_ call: CAPPluginCall) {
+        guard let methodName = call.getString("methodName") else {
+            call.reject("methodName is required")
             return
         }
 
-        let params = call.getObject("params")
-        var paramsDict: [String: Any]?
+        let args = call.getString("args") ?? ""
 
-        if let params = params {
-            paramsDict = [:]
-            for key in params.keys {
-                paramsDict?[key] = params[key]
-            }
-        }
-
-        implementation.activate(apiKey: apiKey, params: paramsDict) { error in
-            if let error = error {
-                call.reject("Failed to activate Adapty: \(error.localizedDescription)")
+        implementation.handleMethodCall(method: methodName, withJson: args) { response in
+            if let response = response {
+                // Try to parse as JSON
+                if let responseData = response.data(using: .utf8),
+                   let responseJson = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any] {
+                    call.resolve(responseJson)
+                } else {
+                    // Return as string if not JSON
+                    call.resolve(["result": response])
+                }
             } else {
                 call.resolve()
             }
         }
-    }
-
-    @objc func isActivated(_ call: CAPPluginCall) {
-        call.resolve([
-            "isActivated": implementation.isActivated()
-        ])
     }
 }
