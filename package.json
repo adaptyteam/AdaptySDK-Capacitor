@@ -48,6 +48,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "prepublishOnly": "yarn build",
+    "build-example": "yarn build && cd ./example-app && yarn --force &&  yarn build && yarn cap sync",
     "prepare": "husky"
   },
   "devDependencies": {
