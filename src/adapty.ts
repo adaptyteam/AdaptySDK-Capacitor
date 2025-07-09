@@ -198,7 +198,19 @@ export class Adapty implements AdaptyPlugin {
     }
 
     // Call native activation through handleMethodCall
-    await this.handleMethodCall('activate', configuration);
+    const method = 'activate';
+    const activateRequest = {
+      configuration: configuration,
+      method,
+    };
+    await this.handleMethodCall(method, activateRequest);
+  }
+
+  async isActivated(): Promise<boolean> {
+    const method = 'is_activated';
+    const args = { method };
+    const result = await this.handleMethodCall(method, args);
+    return result;
   }
 
   async getPaywall(options: {
@@ -206,12 +218,14 @@ export class Adapty implements AdaptyPlugin {
     locale?: string;
     params?: GetPlacementParamsInput;
   }): Promise<{ paywall: AdaptyPaywall }> {
+    const method = 'get_paywall';
     const args = {
+      method,
       placement_id: options.placementId,
       locale: options.locale,
       ...(options.params || {}),
     };
-    const paywall = await this.handleMethodCall('get_paywall', args);
+    const paywall = await this.handleMethodCall(method, args);
     return { paywall: paywall as unknown as AdaptyPaywall };
   }
 
@@ -220,18 +234,24 @@ export class Adapty implements AdaptyPlugin {
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
   }): Promise<{ paywall: AdaptyPaywall }> {
+    const method = 'get_paywall_for_default_audience';
     const args = {
       placement_id: options.placementId,
       locale: options.locale,
+      method,
       ...(options.params || {}),
     };
-    const paywall = await this.handleMethodCall('get_paywall_for_default_audience', args);
+    const paywall = await this.handleMethodCall(method, args);
     return { paywall: paywall as unknown as AdaptyPaywall };
   }
 
   async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
-    const args = { paywall: options.paywall };
-    const products = await this.handleMethodCall('get_paywall_products', args);
+    const method = 'get_paywall_products';
+    const args = {
+      paywall: options.paywall,
+      method,
+    };
+    const products = await this.handleMethodCall(method, args);
     return { products: products as unknown as AdaptyPaywallProduct[] };
   }
 
@@ -240,12 +260,14 @@ export class Adapty implements AdaptyPlugin {
     locale?: string;
     params?: GetPlacementParamsInput;
   }): Promise<{ onboarding: AdaptyOnboarding }> {
+    const method = 'get_onboarding';
     const args = {
       placement_id: options.placementId,
       locale: options.locale,
+      method,
       ...(options.params || {}),
     };
-    const onboarding = await this.handleMethodCall('get_onboarding', args);
+    const onboarding = await this.handleMethodCall(method, args);
     return { onboarding: onboarding as unknown as AdaptyOnboarding };
   }
 
@@ -254,49 +276,60 @@ export class Adapty implements AdaptyPlugin {
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
   }): Promise<{ onboarding: AdaptyOnboarding }> {
+    const method = 'get_onboarding_for_default_audience';
     const args = {
       placement_id: options.placementId,
       locale: options.locale,
+      method,
       ...(options.params || {}),
     };
-    const onboarding = await this.handleMethodCall('get_onboarding_for_default_audience', args);
+    const onboarding = await this.handleMethodCall(method, args);
     return { onboarding: onboarding as unknown as AdaptyOnboarding };
   }
 
   async getProfile(): Promise<{ profile: AdaptyProfile }> {
-    const profile = await this.handleMethodCall('get_profile', {});
+    const method = 'get_profile';
+    const args = { method };
+    const profile = await this.handleMethodCall(method, args);
     return { profile: profile as unknown as AdaptyProfile };
   }
 
   async identify(options: { customerUserId: string }): Promise<void> {
+    const method = 'identify';
     const args = {
       customer_user_id: options.customerUserId,
+      method,
     };
-    await this.handleMethodCall('identify', args);
+    await this.handleMethodCall(method, args);
   }
 
   async logShowPaywall(options: { paywall: AdaptyPaywall }): Promise<void> {
+    const method = 'log_show_paywall';
     const args = {
       paywall: options.paywall,
+      method,
     };
-    await this.handleMethodCall('log_show_paywall', args);
+    await this.handleMethodCall(method, args);
   }
 
   async openWebPaywall(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void> {
+    const method = 'open_web_paywall';
     const args = {
       paywall_or_product: options.paywallOrProduct,
+      method,
     };
-    await this.handleMethodCall('open_web_paywall', args);
+    await this.handleMethodCall(method, args);
   }
 
   async createWebPaywallUrl(options: {
     paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
   }): Promise<{ url: string }> {
+    const method = 'create_web_paywall_url';
     const args = this.isPaywall(options.paywallOrProduct)
-      ? { paywall: options.paywallOrProduct }
-      : { product: options.paywallOrProduct };
+      ? { method, paywall: options.paywallOrProduct }
+      : { method, product: options.paywallOrProduct };
 
-    const url = await this.handleMethodCall('create_web_paywall_url', args);
+    const url = await this.handleMethodCall(method, args);
     return { url: url as string };
   }
 
@@ -305,108 +338,131 @@ export class Adapty implements AdaptyPlugin {
     onboardingName?: string;
     screenName?: string;
   }): Promise<void> {
+    const method = 'log_show_onboarding';
     const args = {
       screen_order: options.screenOrder,
       onboarding_name: options.onboardingName,
       screen_name: options.screenName,
+      method,
     };
-    await this.handleMethodCall('log_show_onboarding', args);
+    await this.handleMethodCall(method, args);
   }
 
   async logout(): Promise<void> {
-    await this.handleMethodCall('logout', {});
+    const method = 'logout';
+    const args = { method };
+    await this.handleMethodCall(method, args);
   }
 
   async makePurchase(options: {
     product: AdaptyPaywallProduct;
     params?: MakePurchaseParamsInput;
   }): Promise<{ result: AdaptyPurchaseResult }> {
+    const method = 'make_purchase';
     const args = {
       product: options.product,
+      method,
       ...(options.params || {}),
     };
-    const result = await this.handleMethodCall('make_purchase', args);
+    const result = await this.handleMethodCall(method, args);
     return { result: result as unknown as AdaptyPurchaseResult };
   }
 
   async presentCodeRedemptionSheet(): Promise<void> {
-    await this.handleMethodCall('present_code_redemption_sheet', {});
+    const method = 'present_code_redemption_sheet';
+    const args = { method };
+    await this.handleMethodCall(method, args);
   }
 
   async reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void> {
+    const method = 'report_transaction';
     const args = {
       transaction_id: options.transactionId,
       variation_id: options.variationId,
+      method,
     };
-    await this.handleMethodCall('report_transaction', args);
+    await this.handleMethodCall(method, args);
   }
 
   async restorePurchases(): Promise<{ profile: AdaptyProfile }> {
-    const profile = await this.handleMethodCall('restore_purchases', {});
+    const method = 'restore_purchases';
+    const args = { method };
+    const profile = await this.handleMethodCall(method, args);
     return { profile: profile as unknown as AdaptyProfile };
   }
 
   async setFallback(options: { fileLocation: FileLocation }): Promise<void> {
+    const method = 'set_fallback';
     const args = {
       file_location: options.fileLocation,
+      method,
     };
-    await this.handleMethodCall('set_fallback', args);
+    await this.handleMethodCall(method, args);
   }
 
   async setFallbackPaywalls(options: { paywallsLocation: FileLocation }): Promise<void> {
+    const method = 'set_fallback';
     const args = {
       paywalls_location: options.paywallsLocation,
+      method,
     };
-    await this.handleMethodCall('set_fallback', args);
+    await this.handleMethodCall(method, args);
   }
 
   async setIntegrationIdentifier(options: { key: string; value: string }): Promise<void> {
+    const method = 'set_integration_identifiers';
     const args = {
+      method,
       key: options.key,
       value: options.value,
     };
-    await this.handleMethodCall('set_integration_identifiers', args);
+    await this.handleMethodCall(method, args);
   }
 
   async setLogLevel(options: { logLevel: LogLevel }): Promise<void> {
+    const method = 'set_log_level';
     const args = {
+      method,
       log_level: options.logLevel,
     };
-    await this.handleMethodCall('set_log_level', args);
+    await this.handleMethodCall(method, args);
   }
 
   async updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void> {
+    const method = 'update_attribution_data';
     const args = {
       attribution: options.attribution,
       source: options.source,
+      method,
     };
-    await this.handleMethodCall('update_attribution_data', args);
+    await this.handleMethodCall(method, args);
   }
 
   async updateCollectingRefundDataConsent(options: { consent: boolean }): Promise<void> {
+    const method = 'update_collecting_refund_data_consent';
     const args = {
       consent: options.consent,
+      method,
     };
-    await this.handleMethodCall('update_collecting_refund_data_consent', args);
+    await this.handleMethodCall(method, args);
   }
 
   async updateRefundPreference(options: { refundPreference: RefundPreference }): Promise<void> {
+    const method = 'update_refund_preference';
     const args = {
       refund_preference: options.refundPreference,
+      method,
     };
-    await this.handleMethodCall('update_refund_preference', args);
+    await this.handleMethodCall(method, args);
   }
 
   async updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {
+    const method = 'update_profile';
     const args = {
       params: options.params,
+      method,
     };
-    await this.handleMethodCall('update_profile', args);
-  }
-
-  async isActivated(): Promise<boolean> {
-    const result = await this.handleMethodCall('is_activated', {});
-    return result;
+    await this.handleMethodCall(method, args);
   }
 
   addListener(

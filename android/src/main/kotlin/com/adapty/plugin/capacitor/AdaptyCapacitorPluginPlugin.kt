@@ -26,7 +26,7 @@ class AdaptyCapacitorPluginPlugin : Plugin() {
             return
         }
 
-        val args = call.getString("args") ?: ""
+        val args = call.getString("args").orEmpty()
 
         implementation.handleMethodCall(methodName, args) { response ->
             // Return response as string directly

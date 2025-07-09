@@ -27,11 +27,11 @@ class AdaptyCapacitorPluginKt {
     }
 
     fun handleMethodCall(methodName: String, args: String, callback: (String?) -> Unit) {
-        try {
+        runCatching {
             crossplatformHelper.onMethodCall(args, methodName) { response ->
                 callback(response)
             }
-        } catch (e: Exception) {
+        }.onFailure { e ->
             Log.e("AdaptyCapacitor", "Exception during method call: ${e.message}")
             callback(null)
         }
