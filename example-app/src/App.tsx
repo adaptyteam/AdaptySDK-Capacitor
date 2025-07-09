@@ -3,7 +3,6 @@ import { Adapty } from '@adapty/capacitor';
 import credentials from '../.adapty-credentials.json';
 
 const App: React.FC = () => {
-  const [echoText, setEchoText] = useState('Hello World!');
   const [result, setResult] = useState<string>('');
   const [apiKey, setApiKey] = useState('');
   const [isActivated, setIsActivated] = useState(false);
@@ -41,8 +40,8 @@ const App: React.FC = () => {
   const testIsActivated = async () => {
     try {
       const response = await adapty.isActivated();
-      setResult(`Is Activated: ${response.isActivated}`);
-      setIsActivated(response.isActivated);
+      setResult(`Is Activated: ${response}`);
+      setIsActivated(response);
     } catch (error) {
       setResult(`Error checking activation: ${error}`);
     }
@@ -53,27 +52,27 @@ const App: React.FC = () => {
       <main>
         <h1>Adapty Capacitor Plugin Test</h1>
         <p>
-          This project can be used to test out the functionality of Adapty plugin. 
+          This project can be used to test out the functionality of Adapty plugin.
           Nothing in the <em>example-app/</em> folder will be published to npm.
         </p>
-        
+
         <div style={{ marginBottom: '20px' }}>
           <label htmlFor="apiKeyInput">API Key:</label>
           <br />
-          <input 
-            type="text" 
-            id="apiKeyInput" 
+          <input
+            type="text"
+            id="apiKeyInput"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="API key will be loaded from credentials file"
-            style={{ 
-              padding: '8px', 
+            style={{
+              padding: '8px',
               marginTop: '5px',
               marginRight: '10px',
               width: '400px'
             }}
           />
-          <button 
+          <button
             onClick={testActivate}
             disabled={!apiKey || apiKey.trim().length === 0}
             style={{
@@ -91,7 +90,7 @@ const App: React.FC = () => {
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <button 
+          <button
             onClick={testIsActivated}
             style={{
               padding: '8px 16px',
@@ -126,7 +125,7 @@ const App: React.FC = () => {
             <li>Use "Check Activation Status" to verify the SDK is properly activated</li>
             <li>The Android implementation should work on Android devices/emulators</li>
           </ol>
-          
+
           <h3>Current Configuration:</h3>
           <ul>
             <li>API Key: {apiKey ? `${apiKey.substring(0, 20)}...` : 'Not loaded'}</li>
@@ -139,4 +138,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App; 
+export default App;
