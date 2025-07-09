@@ -12,6 +12,13 @@ import type {
   AdaptyProfileParameters,
   RefundPreference,
 } from './shared/types';
+import {
+  isErrorResponse,
+  isSuccessResponse,
+  type CrossPlatformResponse,
+  type MethodName,
+  type ResponseByMethod,
+} from './shared/types/cross-platform-json';
 import type {
   ActivateParamsInput,
   GetPlacementParamsInput,
@@ -20,10 +27,12 @@ import type {
   FileLocation,
   LogLevel,
 } from './shared/types/inputs';
-import type { Req } from './shared/types/schema';
 import type { AdaptyUiMediaCache } from './shared/ui/types';
 import type { AdaptyPlugin } from './types/adapty-plugin';
 import version from './version';
+
+// Helper type to extract success content from response
+type ExtractSuccessContent<T> = T extends { success: infer S } ? S : never;
 
 const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPluginPlugin>('AdaptyCapacitorPlugin', {
   web: () => import('./web').then((m) => new m.AdaptyCapacitorPluginWeb()),
@@ -31,7 +40,6 @@ const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPluginPlugin>('Adapt
 
 export class Adapty implements AdaptyPlugin {
   private activating: Promise<void> | null = null;
-  private isActivatedFlag = false;
   private defaultMediaCache: AdaptyUiMediaCache = {
     memoryStorageTotalCostLimit: 100 * 1024 * 1024,
     memoryStorageCountLimit: 2147483647,
@@ -39,33 +47,50 @@ export class Adapty implements AdaptyPlugin {
   };
 
   /**
-   * Handle method calls through crossplatform bridge
+   * Handle method calls through crossplatform bridge with type safety
    */
-  private async handleMethodCall(methodName: string, args: any): Promise<any> {
+  private async handleMethodCall<M extends MethodName>(
+    methodName: M,
+    args: any,
+  ): Promise<ExtractSuccessContent<ResponseByMethod<M>>> {
     const argsString = typeof args === 'string' ? args : JSON.stringify(args);
     const result = await AdaptyCapacitorPlugin.handleMethodCall({
       methodName,
       args: argsString,
     });
 
-    // Handle response format - JSON comes as string in 'crossPlatformJson' field
+    // Parse JSON response with type safety
     try {
-      const parsedData = JSON.parse(result.crossPlatformJson);
+      const parsedResponse: CrossPlatformResponse = JSON.parse(result.crossPlatformJson);
 
-      // Check for errors (like React Native does)
-      if (parsedData.error) {
-        throw new Error(parsedData.error);
+      // Check for native errors
+      if (isErrorResponse(parsedResponse)) {
+        const error = parsedResponse.error;
+        throw new Error(`Native error: ${error.message} (code: ${error.adapty_code})`);
       }
 
-      return parsedData;
+      // Extract success data with type safety
+      if (isSuccessResponse(parsedResponse)) {
+        return parsedResponse.success as ExtractSuccessContent<ResponseByMethod<M>>;
+      }
+
+      throw new Error('Invalid response format: missing success or error field');
     } catch (error) {
-      // If it's our thrown error, re-throw it
-      if (error instanceof Error && error.message.startsWith('{') === false) {
+      // If it's our custom error, re-throw it
+      if (error instanceof Error && !error.message.startsWith('{')) {
         throw error;
       }
-      // If parsing fails, return the data as is
-      return { result: result.crossPlatformJson };
+
+      // If JSON parsing fails, wrap the error
+      throw new Error(`Failed to parse native response: ${error}`);
     }
+  }
+
+  /**
+   * Helper method to check if object is a paywall
+   */
+  private isPaywall(obj: AdaptyPaywall | AdaptyPaywallProduct): obj is AdaptyPaywall {
+    return 'placement' in obj && 'paywallId' in obj;
   }
 
   /**
@@ -174,7 +199,6 @@ export class Adapty implements AdaptyPlugin {
 
     // Call native activation through handleMethodCall
     await this.handleMethodCall('activate', configuration);
-    this.isActivatedFlag = true;
   }
 
   async getPaywall(options: {
@@ -187,7 +211,8 @@ export class Adapty implements AdaptyPlugin {
       locale: options.locale,
       ...(options.params || {}),
     };
-    return await this.handleMethodCall('get_paywall', args);
+    const paywall = await this.handleMethodCall('get_paywall', args);
+    return { paywall: paywall as unknown as AdaptyPaywall };
   }
 
   async getPaywallForDefaultAudience(options: {
@@ -200,14 +225,14 @@ export class Adapty implements AdaptyPlugin {
       locale: options.locale,
       ...(options.params || {}),
     };
-    return await this.handleMethodCall('get_paywall_for_default_audience', args);
+    const paywall = await this.handleMethodCall('get_paywall_for_default_audience', args);
+    return { paywall: paywall as unknown as AdaptyPaywall };
   }
 
   async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
-    const args = {
-      paywall: options.paywall,
-    };
-    return await this.handleMethodCall('get_paywall_products', args);
+    const args = { paywall: options.paywall };
+    const products = await this.handleMethodCall('get_paywall_products', args);
+    return { products: products as unknown as AdaptyPaywallProduct[] };
   }
 
   async getOnboarding(options: {
@@ -220,7 +245,8 @@ export class Adapty implements AdaptyPlugin {
       locale: options.locale,
       ...(options.params || {}),
     };
-    return await this.handleMethodCall('get_onboarding', args);
+    const onboarding = await this.handleMethodCall('get_onboarding', args);
+    return { onboarding: onboarding as unknown as AdaptyOnboarding };
   }
 
   async getOnboardingForDefaultAudience(options: {
@@ -233,11 +259,13 @@ export class Adapty implements AdaptyPlugin {
       locale: options.locale,
       ...(options.params || {}),
     };
-    return await this.handleMethodCall('get_onboarding_for_default_audience', args);
+    const onboarding = await this.handleMethodCall('get_onboarding_for_default_audience', args);
+    return { onboarding: onboarding as unknown as AdaptyOnboarding };
   }
 
   async getProfile(): Promise<{ profile: AdaptyProfile }> {
-    return await this.handleMethodCall('get_profile', {});
+    const profile = await this.handleMethodCall('get_profile', {});
+    return { profile: profile as unknown as AdaptyProfile };
   }
 
   async identify(options: { customerUserId: string }): Promise<void> {
@@ -264,10 +292,12 @@ export class Adapty implements AdaptyPlugin {
   async createWebPaywallUrl(options: {
     paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
   }): Promise<{ url: string }> {
-    const args = {
-      paywall_or_product: options.paywallOrProduct,
-    };
-    return await this.handleMethodCall('create_web_paywall_url', args);
+    const args = this.isPaywall(options.paywallOrProduct)
+      ? { paywall: options.paywallOrProduct }
+      : { product: options.paywallOrProduct };
+
+    const url = await this.handleMethodCall('create_web_paywall_url', args);
+    return { url: url as string };
   }
 
   async logShowOnboarding(options: {
@@ -285,7 +315,6 @@ export class Adapty implements AdaptyPlugin {
 
   async logout(): Promise<void> {
     await this.handleMethodCall('logout', {});
-    this.isActivatedFlag = false;
   }
 
   async makePurchase(options: {
@@ -296,7 +325,8 @@ export class Adapty implements AdaptyPlugin {
       product: options.product,
       ...(options.params || {}),
     };
-    return await this.handleMethodCall('make_purchase', args);
+    const result = await this.handleMethodCall('make_purchase', args);
+    return { result: result as unknown as AdaptyPurchaseResult };
   }
 
   async presentCodeRedemptionSheet(): Promise<void> {
@@ -312,7 +342,8 @@ export class Adapty implements AdaptyPlugin {
   }
 
   async restorePurchases(): Promise<{ profile: AdaptyProfile }> {
-    return await this.handleMethodCall('restore_purchases', {});
+    const profile = await this.handleMethodCall('restore_purchases', {});
+    return { profile: profile as unknown as AdaptyProfile };
   }
 
   async setFallback(options: { fileLocation: FileLocation }): Promise<void> {
@@ -374,9 +405,7 @@ export class Adapty implements AdaptyPlugin {
   }
 
   async isActivated(): Promise<boolean> {
-    const result = (await this.handleMethodCall('is_activated', {
-      method: 'is_activated',
-    } satisfies Req['IsActivated.Request'])) as boolean;
+    const result = await this.handleMethodCall('is_activated', {});
     return result;
   }
 

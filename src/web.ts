@@ -170,6 +170,11 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     throw new Error('Web platform is not supported');
   }
 
+  async isActivated(): Promise<{ isActivated: boolean }> {
+    console.log('Web: isActivated called');
+    throw new Error('Web platform is not supported');
+  }
+
   addListener(
     eventName: 'onLatestProfileLoad',
     _listenerFunc: (data: { profile: AdaptyProfile }) => void,
