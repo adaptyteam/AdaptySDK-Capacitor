@@ -20,6 +20,7 @@ import type {
   FileLocation,
   LogLevel,
 } from './shared/types/inputs';
+import type { Req } from './shared/types/schema';
 import type { AdaptyUiMediaCache } from './shared/ui/types';
 import type { AdaptyPlugin } from './types/adapty-plugin';
 import version from './version';
@@ -93,7 +94,7 @@ export class Adapty implements AdaptyPlugin {
     // Check if already activated (if __ignoreActivationOnFastRefresh is enabled)
     if (params.__ignoreActivationOnFastRefresh) {
       try {
-        const { isActivated } = await this.isActivated();
+        const isActivated = await this.isActivated();
         if (isActivated) {
           return;
         }
@@ -372,13 +373,11 @@ export class Adapty implements AdaptyPlugin {
     await this.handleMethodCall('update_profile', args);
   }
 
-  async isActivated(): Promise<{ isActivated: boolean }> {
-    try {
-      const result = await this.handleMethodCall('is_activated', {});
-      return { isActivated: result?.is_activated ?? this.isActivatedFlag };
-    } catch (error) {
-      return { isActivated: this.isActivatedFlag };
-    }
+  async isActivated(): Promise<boolean> {
+    const result = (await this.handleMethodCall('is_activated', {
+      method: 'is_activated',
+    } satisfies Req['IsActivated.Request'])) as boolean;
+    return result;
   }
 
   addListener(

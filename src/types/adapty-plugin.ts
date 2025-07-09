@@ -167,7 +167,7 @@ export interface AdaptyPlugin {
   /**
    * Checks if the SDK is activated.
    */
-  isActivated(): Promise<{ isActivated: boolean }>;
+  isActivated(): Promise<boolean>;
 
   /**
    * Adds a listener for profile updates.
