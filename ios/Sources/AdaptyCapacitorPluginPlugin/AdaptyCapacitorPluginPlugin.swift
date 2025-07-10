@@ -6,25 +6,33 @@ import Capacitor
  * here: https://capacitorjs.com/docs/plugins/ios
  */
 @objc(AdaptyCapacitorPluginPlugin)
-public class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
+public final class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "AdaptyCapacitorPluginPlugin"
     public let jsName = "AdaptyCapacitorPlugin"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "handleMethodCall", returnType: CAPPluginReturnPromise)
     ]
-    private let implementation = AdaptyCapacitorPlugin()
 
     @objc func handleMethodCall(_ call: CAPPluginCall) {
-        guard let methodName = call.getString("methodName") else {
-            call.reject("methodName is required")
-            return
-        }
+        let methodName = call.methodName
+        let args = call.json
 
-        let args = call.getString("args") ?? ""
-
-        implementation.handleMethodCall(method: methodName, withJson: args) { response in
+        AdaptyCapacitorPlugin.handleMethodCall(method: methodName, withJson: args) { response in
             // Return response as string directly
             call.resolve(["crossPlatformJson": response])
         }
+    }
+
+    @objc override public func load() {
+        AdaptyCapacitorPlugin.initialize()
+    }
+}
+private extension CAPPluginCall {
+    var methodName: String {
+        getString("methodName") ?? "Unknown"
+    }
+
+    var json: String {
+        getString("args") ?? "{}"
     }
 }
