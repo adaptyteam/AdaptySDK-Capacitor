@@ -1,0 +1,216 @@
+.app-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.description {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.text-input {
+  padding: 8px;
+  margin-top: 5px;
+  margin-right: 10px;
+  width: 400px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.button {
+  padding: 8px 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-primary {
+  background-color: #007bff;
+}
+
+.button-success {
+  background-color: #28a745;
+}
+
+.button-info {
+  background-color: #17a2b8;
+}
+
+.button-warning {
+  background-color: #ffc107;
+  color: black;
+}
+
+.button-secondary {
+  background-color: #6c757d;
+}
+
+.button-purple {
+  background-color: #6f42c1;
+}
+
+.button-orange {
+  background-color: #fd7e14;
+}
+
+.button-teal {
+  background-color: #20c997;
+}
+
+.button-danger {
+  background-color: #dc3545;
+}
+
+.result-box {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.result-box.success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.result-box.default {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.info-box {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.info-box-item {
+  margin-bottom: 10px;
+}
+
+.info-box-item:last-child {
+  margin-bottom: 0;
+}
+
+.products-list {
+  margin-top: 10px;
+}
+
+.product-item {
+  margin-left: 20px;
+  margin-top: 5px;
+  padding: 5px;
+  background-color: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.product-title {
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+.product-price {
+  color: #666;
+  margin-bottom: 3px;
+}
+
+.product-id {
+  color: #999;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.button-small {
+  padding: 4px 8px;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.config-section {
+  margin-top: 30px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.config-title {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.config-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.config-list li {
+  margin-bottom: 5px;
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 10px;
+  }
+
+  .text-input {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .button-group {
+    justify-content: flex-start;
+  }
+
+  .button {
+    min-width: 120px;
+  }
+}
