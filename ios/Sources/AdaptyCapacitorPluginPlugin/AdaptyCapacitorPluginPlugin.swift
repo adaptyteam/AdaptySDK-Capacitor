@@ -24,7 +24,7 @@ public final class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc override public func load() {
-        AdaptyCapacitorPlugin.initialize()
+        AdaptyCapacitorPlugin.setup()
     }
 }
 private extension CAPPluginCall {

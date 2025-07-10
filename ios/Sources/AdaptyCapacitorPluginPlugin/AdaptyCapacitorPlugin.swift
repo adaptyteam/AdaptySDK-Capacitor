@@ -8,16 +8,16 @@ enum Log {
     static let wrapper = Category(subsystem: "io.adapty.capacitor", name: "wrapper")
 }
 
-public final class AdaptyCapacitorPlugin: NSObject {
+@objc public final class AdaptyCapacitorPlugin: NSObject {
     static let shared = AdaptyCapacitorPlugin()
 
-    static func initialize() {
+    @objc static func setup() {
         Task { @MainActor in
             AdaptyPlugin.register(eventHandler: shared)
         }
     }
 
-    static func handleMethodCall(method: String, withJson json: String, completion: @escaping (String?) -> Void) {
+    @objc static func handleMethodCall(method: String, withJson json: String, completion: @escaping (String) -> Void) {
         Task {
             let response = await AdaptyPlugin.execute(
                 method: method,
@@ -32,7 +32,8 @@ public final class AdaptyCapacitorPlugin: NSObject {
 extension AdaptyCapacitorPlugin: EventHandler {
     public func handle(event: AdaptyPluginEvent) {
         do {
-            Log.wrapper.info("event: \(event.asAdaptyJsonData.asAdaptyJsonString)")
+            let json = try event.asAdaptyJsonData.asAdaptyJsonString
+            Log.wrapper.info("event: \(json)")
             // try invokeMethod(
             //     event.id,
             //     arguments: event.asAdaptyJsonData.asAdaptyJsonString
