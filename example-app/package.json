@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "credentials": "node scripts/credentials.js",
+    "credentials-force": "node scripts/credentials.js --force-bundle",
     "prestart": "yarn credentials",
     "start": "vite",
     "build": "vite build",

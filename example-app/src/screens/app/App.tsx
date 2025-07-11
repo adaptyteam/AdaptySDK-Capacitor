@@ -7,13 +7,11 @@ import {
   AdaptyOnboarding,
   AdaptyError
 } from '@adapty/capacitor';
-import credentials from '../../../.adapty-credentials.json';
-import { PlacementId } from '../../constants';
+import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
 import './App.css';
 
 const App: React.FC = () => {
   const [result, setResult] = useState<string>('');
-  const [apiKey, setApiKey] = useState('');
   const [isActivated, setIsActivated] = useState(false);
   const [profile, setProfile] = useState<AdaptyProfile | null>(null);
   const [paywall, setPaywall] = useState<AdaptyPaywall | null>(null);
@@ -25,21 +23,11 @@ const App: React.FC = () => {
 
   const adapty = new Adapty();
 
-  useEffect(() => {
-    // Load API key from credentials file
-    if (credentials.token) {
-      setApiKey(credentials.token);
-      setResult('API key loaded from credentials file');
-    } else {
-      setResult('No API key found in credentials file. Please run "npm run credentials" first.');
-    }
-  }, []);
-
   const testActivate = async () => {
     try {
       setResult('Activating Adapty...');
       await adapty.activate({
-        apiKey: apiKey,
+        apiKey: getApiKey(),
         params: {
           logLevel: 'verbose',
           observerMode: false,
@@ -98,7 +86,7 @@ const App: React.FC = () => {
     try {
       console.log('[ADAPTY] Fetching paywall...');
       const paywall = await adapty.getPaywallForDefaultAudience({
-        placementId: PlacementId.Standard,
+        placementId: getPlacementId(),
         params: {
           fetchPolicy: 'reload_revalidating_cache_data',
         },
@@ -282,7 +270,7 @@ const App: React.FC = () => {
   const renderPaywallSection = () => {
     return (
       <div className="section">
-        <h3 className="section-title">Paywall ({PlacementId.Standard})</h3>
+        <h3 className="section-title">Paywall ({getPlacementId()})</h3>
         <div className="info-box">
           {paywall ? (
             <div>
@@ -296,7 +284,7 @@ const App: React.FC = () => {
               {products.length > 0 && (
                 <div className="products-list">
                   <strong>Products:</strong>
-                  {products.map((product, index) => (
+                  {products.map((product) => (
                     <div key={product.vendorProductId} className="product-item">
                       <div className="product-title">{product.localizedTitle}</div>
                       <div className="product-price">Price: {product.price?.localizedString || 'N/A'}</div>
@@ -339,7 +327,7 @@ const App: React.FC = () => {
   const renderOnboardingSection = () => {
     return (
       <div className="section">
-        <h3 className="section-title">Onboarding ({PlacementId.Standard})</h3>
+        <h3 className="section-title">Onboarding ({getPlacementId()})</h3>
         <div className="info-box">
           {onboarding ? (
             <div>
@@ -400,7 +388,7 @@ const App: React.FC = () => {
     try {
       console.log('[ADAPTY] Fetching onboarding...');
       const onboardingResult = await adapty.getOnboardingForDefaultAudience({
-        placementId: PlacementId.Standard,
+        placementId: getPlacementId(),
         params: {
           fetchPolicy: 'reload_revalidating_cache_data',
         },
@@ -531,19 +519,8 @@ const App: React.FC = () => {
         {/* Activation Section */}
         <div className="section">
           <h3 className="section-title">SDK Activation</h3>
-          <label htmlFor="apiKeyInput" className="input-label">API Key:</label>
-          <br />
-          <input
-            type="text"
-            id="apiKeyInput"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="API key will be loaded from credentials file"
-            className="text-input"
-          />
           <button
             onClick={testActivate}
-            disabled={!apiKey || apiKey.trim().length === 0}
             className={`button ${isActivated ? 'button-success' : 'button-primary'}`}
           >
             {isActivated ? 'Activated' : 'Activate Adapty'}
@@ -580,10 +557,10 @@ const App: React.FC = () => {
         <div className="config-section">
           <h3 className="config-title">Configuration:</h3>
           <ul className="config-list">
-            <li>API Key: {apiKey ? `${apiKey.substring(0, 20)}...` : 'Not loaded'}</li>
-            <li>Bundle ID: {credentials.ios_bundle || 'Not set'}</li>
+            <li>API Key: {getApiKey() ? `${getApiKey().substring(0, 20)}...` : 'Not loaded'}</li>
+            <li>Bundle ID: {getIosBundle() || 'Not set'}</li>
             <li>Status: {isActivated ? 'Activated' : 'Not activated'}</li>
-            <li>Placement ID: {PlacementId.Standard}</li>
+            <li>Placement ID: {getPlacementId()}</li>
           </ul>
         </div>
       </main>

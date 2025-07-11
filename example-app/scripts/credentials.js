@@ -7,6 +7,11 @@ const prompt = promptSync();
 var filename = '.adapty-credentials.json';
 var token_key = 'token';
 var ios_bundle_key = 'ios_bundle';
+var placement_id_key = 'placement_id';
+
+// Parse command line arguments
+var args = process.argv.slice(2);
+var forceBundleUpdate = args.includes('--force-bundle');
 
 var exists = fs.existsSync(filename);
 
@@ -46,14 +51,28 @@ function read_credentials_sync(obj = {}) {
     result[ios_bundle_key] = cache_bundle;
   }
 
-  if (result[ios_bundle_key] === cache_bundle) {
-    console.log(`[CREDENTIALS] Bundle ID unchanged (${result[ios_bundle_key]}), because no update needed`);
-  } else {
-    console.log(
-      `[CREDENTIALS] Bundle ID changed from "${cache_bundle}" to "${result[ios_bundle_key]}", updating Xcode project...`,
-    );
+  // Placement ID
+  var cache_placement = obj[placement_id_key];
+  var input_placement_id = prompt(`Enter your placement ID${cache_placement ? ` (${cache_placement})` : ''}: `);
+
+  if (input_placement_id) {
+    result[placement_id_key] = input_placement_id;
+  } else if (cache_placement) {
+    result[placement_id_key] = cache_placement;
+  }
+
+  if (result[ios_bundle_key] !== cache_bundle || forceBundleUpdate) {
+    if (forceBundleUpdate) {
+      console.log(`[CREDENTIALS] Force bundle update flag detected, updating Xcode project...`);
+    } else {
+      console.log(
+        `[CREDENTIALS] Bundle ID changed from "${cache_bundle}" to "${result[ios_bundle_key]}", updating Xcode project...`,
+      );
+    }
     write_ios_bundle(result[ios_bundle_key]);
     console.info("Don't forget to set your team in Xcode!");
+  } else {
+    console.log(`[CREDENTIALS] Bundle ID unchanged (${result[ios_bundle_key]}), because no update needed`);
   }
 
   return result;
@@ -73,10 +92,7 @@ function write_credentials_sync(obj) {
 // write_ios_bundle rewrites project.pbxproj file with new bundle identifier
 // Adapted for Capacitor: ios/App/App.xcodeproj/project.pbxproj
 function write_ios_bundle(new_bundle) {
-  console.log(`[CREDENTIALS] Starting iOS bundle update to: ${new_bundle}`);
-
   var pbxprojPath = 'ios/App/App.xcodeproj/project.pbxproj';
-  console.log(`[CREDENTIALS] Reading Capacitor project file: ${pbxprojPath}`);
 
   try {
     if (!fs.existsSync(pbxprojPath)) {
@@ -86,21 +102,15 @@ function write_ios_bundle(new_bundle) {
     }
 
     var ios_content = fs.readFileSync(pbxprojPath, 'utf8');
-    console.log(`[CREDENTIALS] Successfully read project file (${ios_content.length} characters)`);
 
     // Count current bundle identifiers
     var currentBundles = ios_content.match(/PRODUCT_BUNDLE_IDENTIFIER = [^;]+;/g);
-    console.log(`[CREDENTIALS] Found ${currentBundles ? currentBundles.length : 0} bundle identifier entries`);
-    if (currentBundles && currentBundles.length > 0) {
-      console.log(`[CREDENTIALS] Current bundle identifiers: ${currentBundles.join(', ')}`);
-    }
 
     var ios_content_new = ios_content.replace(
       /PRODUCT_BUNDLE_IDENTIFIER = [^;]+;/g,
       `PRODUCT_BUNDLE_IDENTIFIER = ${new_bundle};`,
     );
 
-    console.log(`[CREDENTIALS] Writing updated content to: ${pbxprojPath}`);
     fs.writeFileSync(pbxprojPath, ios_content_new);
     console.log('[CREDENTIALS] ✅ Successfully updated iOS bundle identifier in project.pbxproj');
   } catch (error) {
