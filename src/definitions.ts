@@ -31,7 +31,7 @@ export interface AdaptyCapacitorPluginPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
-  }): Promise<{ paywall: AdaptyPaywall }>;
+  }): Promise<AdaptyPaywall>;
 
   /**
    * Fetches the paywall for the default audience
@@ -40,7 +40,7 @@ export interface AdaptyCapacitorPluginPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<{ paywall: AdaptyPaywall }>;
+  }): Promise<AdaptyPaywall>;
 
   /**
    * Fetches products for a paywall

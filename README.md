@@ -68,7 +68,7 @@ Handles crossplatform method calls
 ### getPaywall(...)
 
 ```typescript
-getPaywall(options: { placementId: string; locale?: string; params?: GetPlacementParamsInput; }) => Promise<{ paywall: AdaptyPaywall; }>
+getPaywall(options: { placementId: string; locale?: string; params?: GetPlacementParamsInput; }) => Promise<AdaptyPaywall>
 ```
 
 Fetches the paywall by the specified placement
@@ -77,7 +77,7 @@ Fetches the paywall by the specified placement
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **`options`** | <code>{ placementId: string; locale?: string; params?: <a href="#getplacementparamsinput">GetPlacementParamsInput</a>; }</code> |
 
-**Returns:** <code>Promise&lt;{ paywall: <a href="#adaptypaywall">AdaptyPaywall</a>; }&gt;</code>
+**Returns:** <code>Promise&lt;<a href="#adaptypaywall">AdaptyPaywall</a>&gt;</code>
 
 --------------------
 
@@ -85,7 +85,7 @@ Fetches the paywall by the specified placement
 ### getPaywallForDefaultAudience(...)
 
 ```typescript
-getPaywallForDefaultAudience(options: { placementId: string; locale?: string; params?: GetPlacementForDefaultAudienceParamsInput; }) => Promise<{ paywall: AdaptyPaywall; }>
+getPaywallForDefaultAudience(options: { placementId: string; locale?: string; params?: GetPlacementForDefaultAudienceParamsInput; }) => Promise<AdaptyPaywall>
 ```
 
 Fetches the paywall for the default audience
@@ -94,7 +94,7 @@ Fetches the paywall for the default audience
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`options`** | <code>{ placementId: string; locale?: string; params?: <a href="#getplacementfordefaultaudienceparamsinput">GetPlacementForDefaultAudienceParamsInput</a>; }</code> |
 
-**Returns:** <code>Promise&lt;{ paywall: <a href="#adaptypaywall">AdaptyPaywall</a>; }&gt;</code>
+**Returns:** <code>Promise&lt;<a href="#adaptypaywall">AdaptyPaywall</a>&gt;</code>
 
 --------------------
 

@@ -32,7 +32,7 @@ export interface AdaptyPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
-  }): Promise<{ paywall: AdaptyPaywall }>;
+  }): Promise<AdaptyPaywall>;
 
   /**
    * Gets a paywall for default audience by placement ID.
@@ -41,7 +41,7 @@ export interface AdaptyPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<{ paywall: AdaptyPaywall }>;
+  }): Promise<AdaptyPaywall>;
 
   /**
    * Gets products for a specific paywall.

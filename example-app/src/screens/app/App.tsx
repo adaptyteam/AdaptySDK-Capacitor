@@ -97,22 +97,24 @@ const App: React.FC = () => {
     setIsLoadingPaywall(true);
     try {
       console.log('[ADAPTY] Fetching paywall...');
-      const paywallResult = await adapty.getPaywallForDefaultAudience({
+      const paywall = await adapty.getPaywallForDefaultAudience({
         placementId: PlacementId.Standard,
         params: {
           fetchPolicy: 'reload_revalidating_cache_data',
         },
       });
-      setPaywall(paywallResult.paywall);
+      // Логируем полученный paywall
+      console.log('[ADAPTY] Paywall fetched:', paywall);
+      setPaywall(paywall);
 
       // Log show paywall
-      await adapty.logShowPaywall({ paywall: paywallResult.paywall });
+      await adapty.logShowPaywall({ paywall });
 
       // Fetch products
-      const productsResult = await adapty.getPaywallProducts({ paywall: paywallResult.paywall });
+      const productsResult = await adapty.getPaywallProducts({ paywall });
       setProducts(productsResult.products);
 
-      setResult(`Paywall loaded: ${paywallResult.paywall.name}`);
+      setResult(`Paywall loaded: ${paywall.name}`);
     } catch (error) {
       console.error('[ADAPTY] Error fetching paywall', error);
       setResult(`Error fetching paywall: ${error}`);

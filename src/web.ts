@@ -29,7 +29,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
-  }): Promise<{ paywall: AdaptyPaywall }> {
+  }): Promise<AdaptyPaywall> {
     console.log('Web: getPaywall called with:', options);
     throw new Error('Method not implemented on web platform');
   }
@@ -38,7 +38,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<{ paywall: AdaptyPaywall }> {
+  }): Promise<AdaptyPaywall> {
     console.log('Web: getPaywallForDefaultAudience called with:', options);
     throw new Error('Web platform is not supported');
   }

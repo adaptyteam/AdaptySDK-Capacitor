@@ -2,6 +2,7 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import { registerPlugin } from '@capacitor/core';
 
 import type { AdaptyCapacitorPluginPlugin } from './definitions';
+import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyProfileCoder } from './shared/coders/adapty-profile';
 import { AdaptyPurchaseResultCoder } from './shared/coders/adapty-purchase-result';
 import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
@@ -219,7 +220,7 @@ export class Adapty implements AdaptyPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
-  }): Promise<{ paywall: AdaptyPaywall }> {
+  }): Promise<AdaptyPaywall> {
     const method = 'get_paywall';
     const args = {
       method,
@@ -227,15 +228,18 @@ export class Adapty implements AdaptyPlugin {
       locale: options.locale,
       ...(options.params || {}),
     };
-    const paywall = await this.handleMethodCall(method, args);
-    return { paywall: paywall as unknown as AdaptyPaywall };
+    const rawPaywall = await this.handleMethodCall(method, args);
+
+    // Decode the paywall using the coder to convert snake_case to camelCase
+    const paywallCoder = new AdaptyPaywallCoder();
+    return paywallCoder.decode(rawPaywall);
   }
 
   async getPaywallForDefaultAudience(options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<{ paywall: AdaptyPaywall }> {
+  }): Promise<AdaptyPaywall> {
     const method = 'get_paywall_for_default_audience';
     const args = {
       placement_id: options.placementId,
@@ -243,8 +247,11 @@ export class Adapty implements AdaptyPlugin {
       method,
       ...(options.params || {}),
     };
-    const paywall = await this.handleMethodCall(method, args);
-    return { paywall: paywall as unknown as AdaptyPaywall };
+    const rawPaywall = await this.handleMethodCall(method, args);
+
+    // Decode the paywall using the coder to convert snake_case to camelCase
+    const paywallCoder = new AdaptyPaywallCoder();
+    return paywallCoder.decode(rawPaywall);
   }
 
   async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
