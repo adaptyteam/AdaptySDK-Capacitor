@@ -78,8 +78,10 @@ const App: React.FC = () => {
     setIsLoadingProfile(true);
     try {
       console.log('[ADAPTY] Fetching user profile...');
-      const result = await adapty.getProfile();
-      setProfile(result.profile);
+      const profile = await adapty.getProfile();
+
+      console.log('[ADAPTY] Profile fetched:', profile);
+      setProfile(profile);
       setResult('Profile fetched successfully');
     } catch (error) {
       console.error('[ADAPTY] Error fetching user profile', error);
@@ -124,8 +126,8 @@ const App: React.FC = () => {
 
     try {
       console.log('[ADAPTY] Restoring purchases...');
-      const result = await adapty.restorePurchases();
-      setProfile(result.profile);
+      const profile = await adapty.restorePurchases();
+      setProfile(profile);
       setResult('Purchases restored successfully');
     } catch (error) {
       console.error('[ADAPTY] Error restoring purchases', error);

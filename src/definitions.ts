@@ -68,7 +68,7 @@ export interface AdaptyCapacitorPluginPlugin {
   /**
    * Fetches user profile
    */
-  getProfile(): Promise<{ profile: AdaptyProfile }>;
+  getProfile(): Promise<AdaptyProfile>;
 
   /**
    * Identifies user with customer ID
@@ -121,7 +121,7 @@ export interface AdaptyCapacitorPluginPlugin {
   /**
    * Restores purchases
    */
-  restorePurchases(): Promise<{ profile: AdaptyProfile }>;
+  restorePurchases(): Promise<AdaptyProfile>;
 
   /**
    * Sets fallback placements

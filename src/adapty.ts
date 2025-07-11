@@ -2,6 +2,8 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import { registerPlugin } from '@capacitor/core';
 
 import type { AdaptyCapacitorPluginPlugin } from './definitions';
+import { AdaptyProfileCoder } from './shared/coders/adapty-profile';
+import { AdaptyPurchaseResultCoder } from './shared/coders/adapty-purchase-result';
 import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
 import type {
   AdaptyPaywall,
@@ -287,11 +289,14 @@ export class Adapty implements AdaptyPlugin {
     return { onboarding: onboarding as unknown as AdaptyOnboarding };
   }
 
-  async getProfile(): Promise<{ profile: AdaptyProfile }> {
+  async getProfile(): Promise<AdaptyProfile> {
     const method = 'get_profile';
     const args = { method };
-    const profile = await this.handleMethodCall(method, args);
-    return { profile: profile as unknown as AdaptyProfile };
+    const rawProfile = await this.handleMethodCall(method, args);
+
+    // Decode the profile using the coder to convert snake_case to camelCase
+    const profileCoder = new AdaptyProfileCoder();
+    return profileCoder.decode(rawProfile);
   }
 
   async identify(options: { customerUserId: string }): Promise<void> {
@@ -364,8 +369,11 @@ export class Adapty implements AdaptyPlugin {
       method,
       ...(options.params || {}),
     };
-    const result = await this.handleMethodCall(method, args);
-    return { result: result as unknown as AdaptyPurchaseResult };
+    const rawResult = await this.handleMethodCall(method, args);
+
+    // Decode the purchase result using the coder to convert snake_case to camelCase
+    const purchaseResultCoder = new AdaptyPurchaseResultCoder();
+    return { result: purchaseResultCoder.decode(rawResult) };
   }
 
   async presentCodeRedemptionSheet(): Promise<void> {
@@ -384,11 +392,14 @@ export class Adapty implements AdaptyPlugin {
     await this.handleMethodCall(method, args);
   }
 
-  async restorePurchases(): Promise<{ profile: AdaptyProfile }> {
+  async restorePurchases(): Promise<AdaptyProfile> {
     const method = 'restore_purchases';
     const args = { method };
-    const profile = await this.handleMethodCall(method, args);
-    return { profile: profile as unknown as AdaptyProfile };
+    const rawProfile = await this.handleMethodCall(method, args);
+
+    // Decode the profile using the coder to convert snake_case to camelCase
+    const profileCoder = new AdaptyProfileCoder();
+    return profileCoder.decode(rawProfile);
   }
 
   async setFallback(options: { fileLocation: FileLocation }): Promise<void> {

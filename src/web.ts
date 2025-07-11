@@ -66,7 +66,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     throw new Error('Web platform is not supported');
   }
 
-  async getProfile(): Promise<{ profile: AdaptyProfile }> {
+  async getProfile(): Promise<AdaptyProfile> {
     console.log('Web: getProfile called');
     throw new Error('Web platform is not supported');
   }
@@ -125,7 +125,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     throw new Error('Web platform is not supported');
   }
 
-  async restorePurchases(): Promise<{ profile: AdaptyProfile }> {
+  async restorePurchases(): Promise<AdaptyProfile> {
     console.log('Web: restorePurchases called');
     throw new Error('Web platform is not supported');
   }

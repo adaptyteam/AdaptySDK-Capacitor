@@ -69,7 +69,7 @@ export interface AdaptyPlugin {
   /**
    * Gets the current user profile.
    */
-  getProfile(): Promise<{ profile: AdaptyProfile }>;
+  getProfile(): Promise<AdaptyProfile>;
 
   /**
    * Identifies the user with a customer user ID.
@@ -122,7 +122,7 @@ export interface AdaptyPlugin {
   /**
    * Restores user purchases.
    */
-  restorePurchases(): Promise<{ profile: AdaptyProfile }>;
+  restorePurchases(): Promise<AdaptyProfile>;
 
   /**
    * Sets fallback paywalls from a file.

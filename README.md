@@ -153,12 +153,12 @@ Fetches an onboarding for the default audience
 ### getProfile()
 
 ```typescript
-getProfile() => Promise<{ profile: AdaptyProfile; }>
+getProfile() => Promise<AdaptyProfile>
 ```
 
 Fetches user profile
 
-**Returns:** <code>Promise&lt;{ profile: <a href="#adaptyprofile">AdaptyProfile</a>; }&gt;</code>
+**Returns:** <code>Promise&lt;<a href="#adaptyprofile">AdaptyProfile</a>&gt;</code>
 
 --------------------
 
@@ -297,12 +297,12 @@ Reports transaction
 ### restorePurchases()
 
 ```typescript
-restorePurchases() => Promise<{ profile: AdaptyProfile; }>
+restorePurchases() => Promise<AdaptyProfile>
 ```
 
 Restores purchases
 
-**Returns:** <code>Promise&lt;{ profile: <a href="#adaptyprofile">AdaptyProfile</a>; }&gt;</code>
+**Returns:** <code>Promise&lt;<a href="#adaptyprofile">AdaptyProfile</a>&gt;</code>
 
 --------------------
 
