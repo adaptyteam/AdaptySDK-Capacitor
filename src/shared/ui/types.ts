@@ -90,3 +90,36 @@ export const AdaptyUiDialogActionType = Object.freeze({
 });
 
 export type AdaptyUiDialogActionType = (typeof AdaptyUiDialogActionType)[keyof typeof AdaptyUiDialogActionType];
+
+/**
+ * Additional options for creating a paywall view
+ *
+ * @see {@link https://docs.adapty.io/docs/paywall-builder-fetching | [DOC] Creating Paywall View}
+ */
+export interface CreatePaywallViewParamsInput {
+  /**
+   * `true` if you want to prefetch products before presenting a paywall view.
+   */
+  prefetchProducts?: boolean;
+  /**
+   * This value limits the timeout (in milliseconds) for this method.
+   */
+  loadTimeoutMs?: number;
+  /**
+   * If you are going to use custom tags functionality, pass an object with tags and corresponding replacement values
+   *
+   * ```
+   * {
+   *   'USERNAME': 'Bruce',
+   *   'CITY': 'Philadelphia'
+   * }
+   * ```
+   */
+  customTags?: Record<string, string>;
+  /**
+   * If you are going to use custom timer functionality, pass an object with timer ids and corresponding dates the timers should end at
+   */
+  customTimers?: Record<string, Date>;
+
+  // customAssets?: Record<string, AdaptyCustomAsset>; // TODO: implement custom assets
+}

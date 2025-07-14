@@ -54,7 +54,7 @@ export class Adapty implements AdaptyPlugin {
   /**
    * Handle method calls through crossplatform bridge with type safety
    */
-  private async handleMethodCall<M extends MethodName>(
+  public async handleMethodCall<M extends MethodName>(
     methodName: M,
     args: any,
   ): Promise<ExtractSuccessContent<ResponseByMethod<M>>> {

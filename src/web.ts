@@ -43,7 +43,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     throw new Error('Web platform is not supported');
   }
 
-  async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
+  async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<AdaptyPaywallProduct[]> {
     console.log('Web: getPaywallProducts called with:', options);
     throw new Error('Web platform is not supported');
   }
@@ -52,7 +52,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
-  }): Promise<{ onboarding: AdaptyOnboarding }> {
+  }): Promise<AdaptyOnboarding> {
     console.log('Web: getOnboarding called with:', options);
     throw new Error('Web platform is not supported');
   }
@@ -61,7 +61,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<{ onboarding: AdaptyOnboarding }> {
+  }): Promise<AdaptyOnboarding> {
     console.log('Web: getOnboardingForDefaultAudience called with:', options);
     throw new Error('Web platform is not supported');
   }
@@ -86,9 +86,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
     throw new Error('Web platform is not supported');
   }
 
-  async createWebPaywallUrl(options: {
-    paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
-  }): Promise<{ url: string }> {
+  async createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string> {
     console.log('Web: createWebPaywallUrl called with:', options);
     throw new Error('Web platform is not supported');
   }
@@ -110,7 +108,7 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
   async makePurchase(options: {
     product: AdaptyPaywallProduct;
     params?: MakePurchaseParamsInput;
-  }): Promise<{ result: AdaptyPurchaseResult }> {
+  }): Promise<AdaptyPurchaseResult> {
     console.log('Web: makePurchase called with:', options);
     throw new Error('Web platform is not supported');
   }

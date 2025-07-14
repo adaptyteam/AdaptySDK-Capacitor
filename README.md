@@ -102,7 +102,7 @@ Fetches the paywall for the default audience
 ### getPaywallProducts(...)
 
 ```typescript
-getPaywallProducts(options: { paywall: AdaptyPaywall; }) => Promise<{ products: AdaptyPaywallProduct[]; }>
+getPaywallProducts(options: { paywall: AdaptyPaywall; }) => Promise<AdaptyPaywallProduct[]>
 ```
 
 Fetches products for a paywall
@@ -111,7 +111,7 @@ Fetches products for a paywall
 | ------------- | --------------------------------------------------------------------- |
 | **`options`** | <code>{ paywall: <a href="#adaptypaywall">AdaptyPaywall</a>; }</code> |
 
-**Returns:** <code>Promise&lt;{ products: AdaptyPaywallProduct[]; }&gt;</code>
+**Returns:** <code>Promise&lt;AdaptyPaywallProduct[]&gt;</code>
 
 --------------------
 
@@ -119,7 +119,7 @@ Fetches products for a paywall
 ### getOnboarding(...)
 
 ```typescript
-getOnboarding(options: { placementId: string; locale?: string; params?: GetPlacementParamsInput; }) => Promise<{ onboarding: AdaptyOnboarding; }>
+getOnboarding(options: { placementId: string; locale?: string; params?: GetPlacementParamsInput; }) => Promise<AdaptyOnboarding>
 ```
 
 Fetches an onboarding by the specified placement
@@ -128,7 +128,7 @@ Fetches an onboarding by the specified placement
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **`options`** | <code>{ placementId: string; locale?: string; params?: <a href="#getplacementparamsinput">GetPlacementParamsInput</a>; }</code> |
 
-**Returns:** <code>Promise&lt;{ onboarding: <a href="#adaptyonboarding">AdaptyOnboarding</a>; }&gt;</code>
+**Returns:** <code>Promise&lt;<a href="#adaptyonboarding">AdaptyOnboarding</a>&gt;</code>
 
 --------------------
 
@@ -136,7 +136,7 @@ Fetches an onboarding by the specified placement
 ### getOnboardingForDefaultAudience(...)
 
 ```typescript
-getOnboardingForDefaultAudience(options: { placementId: string; locale?: string; params?: GetPlacementForDefaultAudienceParamsInput; }) => Promise<{ onboarding: AdaptyOnboarding; }>
+getOnboardingForDefaultAudience(options: { placementId: string; locale?: string; params?: GetPlacementForDefaultAudienceParamsInput; }) => Promise<AdaptyOnboarding>
 ```
 
 Fetches an onboarding for the default audience
@@ -145,7 +145,7 @@ Fetches an onboarding for the default audience
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`options`** | <code>{ placementId: string; locale?: string; params?: <a href="#getplacementfordefaultaudienceparamsinput">GetPlacementForDefaultAudienceParamsInput</a>; }</code> |
 
-**Returns:** <code>Promise&lt;{ onboarding: <a href="#adaptyonboarding">AdaptyOnboarding</a>; }&gt;</code>
+**Returns:** <code>Promise&lt;<a href="#adaptyonboarding">AdaptyOnboarding</a>&gt;</code>
 
 --------------------
 
@@ -211,7 +211,7 @@ Opens web paywall
 ### createWebPaywallUrl(...)
 
 ```typescript
-createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct; }) => Promise<{ url: string; }>
+createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct; }) => Promise<string>
 ```
 
 Creates web paywall URL
@@ -220,7 +220,7 @@ Creates web paywall URL
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`options`** | <code>{ paywallOrProduct: <a href="#adaptypaywall">AdaptyPaywall</a> \| <a href="#adaptypaywallproduct">AdaptyPaywallProduct</a>; }</code> |
 
-**Returns:** <code>Promise&lt;{ url: string; }&gt;</code>
+**Returns:** <code>Promise&lt;string&gt;</code>
 
 --------------------
 
@@ -254,7 +254,7 @@ Logs out current user
 ### makePurchase(...)
 
 ```typescript
-makePurchase(options: { product: AdaptyPaywallProduct; params?: MakePurchaseParamsInput; }) => Promise<{ result: AdaptyPurchaseResult; }>
+makePurchase(options: { product: AdaptyPaywallProduct; params?: MakePurchaseParamsInput; }) => Promise<AdaptyPurchaseResult>
 ```
 
 Makes a purchase
@@ -263,7 +263,7 @@ Makes a purchase
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`options`** | <code>{ product: <a href="#adaptypaywallproduct">AdaptyPaywallProduct</a>; params?: <a href="#makepurchaseparamsinput">MakePurchaseParamsInput</a>; }</code> |
 
-**Returns:** <code>Promise&lt;{ result: <a href="#adaptypurchaseresult">AdaptyPurchaseResult</a>; }&gt;</code>
+**Returns:** <code>Promise&lt;<a href="#adaptypurchaseresult">AdaptyPurchaseResult</a>&gt;</code>
 
 --------------------
 
