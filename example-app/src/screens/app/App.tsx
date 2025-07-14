@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { 
+import {
   Adapty,
   AdaptyProfile,
   AdaptyPaywall,
@@ -100,7 +100,7 @@ const App: React.FC = () => {
 
       // Fetch products
       const productsResult = await adapty.getPaywallProducts({ paywall });
-      setProducts(productsResult.products);
+      setProducts(productsResult);
 
       setResult(`Paywall loaded: ${paywall.name}`);
     } catch (error) {
@@ -191,7 +191,7 @@ const App: React.FC = () => {
       console.log('[ADAPTY] Making purchase...', product.vendorProductId);
       const result = await adapty.makePurchase({ product });
 
-      const purchaseResult = result.result;
+      const purchaseResult = result;
 
       if (purchaseResult.type === 'success') {
         setResult(`Purchase successful: ${product.vendorProductId}`);
@@ -247,7 +247,7 @@ const App: React.FC = () => {
 
     try {
       setResult('Creating paywall view...');
-      
+
       const view = await createPaywallView(paywall, {
         customTags: {
           'USERNAME': 'TestUser',
@@ -256,9 +256,9 @@ const App: React.FC = () => {
       });
 
       setResult('✅ Paywall view created. Presenting...');
-      
+
       await view.present();
-      
+
       setResult('✅ Paywall presented successfully!');
     } catch (error: any) {
       console.error('[ADAPTY] Failed to present paywall:', error);
@@ -432,16 +432,16 @@ const App: React.FC = () => {
           fetchPolicy: 'reload_revalidating_cache_data',
         },
       });
-      setOnboarding(onboardingResult.onboarding);
+      setOnboarding(onboardingResult);
 
       // Log show onboarding
       await adapty.logShowOnboarding({
         screenOrder: 1,
-        onboardingName: onboardingResult.onboarding.name,
+        onboardingName: onboardingResult.name,
         screenName: 'screen_1'
       });
 
-      setResult(`Onboarding loaded: ${onboardingResult.onboarding.name}`);
+      setResult(`Onboarding loaded: ${onboardingResult.name}`);
     } catch (error) {
       console.error('[ADAPTY] Error fetching onboarding', error);
       setResult(`Error fetching onboarding: ${error}`);
