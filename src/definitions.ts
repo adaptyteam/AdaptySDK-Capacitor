@@ -45,7 +45,7 @@ export interface AdaptyCapacitorPluginPlugin {
   /**
    * Fetches products for a paywall
    */
-  getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }>;
+  getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<AdaptyPaywallProduct[]>;
 
   /**
    * Fetches an onboarding by the specified placement
@@ -54,7 +54,7 @@ export interface AdaptyCapacitorPluginPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
-  }): Promise<{ onboarding: AdaptyOnboarding }>;
+  }): Promise<AdaptyOnboarding>;
 
   /**
    * Fetches an onboarding for the default audience
@@ -63,7 +63,7 @@ export interface AdaptyCapacitorPluginPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<{ onboarding: AdaptyOnboarding }>;
+  }): Promise<AdaptyOnboarding>;
 
   /**
    * Fetches user profile
@@ -88,7 +88,7 @@ export interface AdaptyCapacitorPluginPlugin {
   /**
    * Creates web paywall URL
    */
-  createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<{ url: string }>;
+  createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string>;
 
   /**
    * Logs onboarding view event
@@ -106,7 +106,7 @@ export interface AdaptyCapacitorPluginPlugin {
   makePurchase(options: {
     product: AdaptyPaywallProduct;
     params?: MakePurchaseParamsInput;
-  }): Promise<{ result: AdaptyPurchaseResult }>;
+  }): Promise<AdaptyPurchaseResult>;
 
   /**
    * Presents code redemption sheet (iOS only)

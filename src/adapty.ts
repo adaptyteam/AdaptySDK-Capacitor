@@ -2,7 +2,9 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import { registerPlugin } from '@capacitor/core';
 
 import type { AdaptyCapacitorPluginPlugin } from './definitions';
+import { AdaptyOnboardingCoder } from './shared/coders/adapty-onboarding';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
+import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
 import { AdaptyProfileCoder } from './shared/coders/adapty-profile';
 import { AdaptyPurchaseResultCoder } from './shared/coders/adapty-purchase-result';
 import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
@@ -254,21 +256,24 @@ export class Adapty implements AdaptyPlugin {
     return paywallCoder.decode(rawPaywall);
   }
 
-  async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }> {
+  async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<AdaptyPaywallProduct[]> {
     const method = 'get_paywall_products';
     const args = {
       paywall: options.paywall,
       method,
     };
     const products = await this.handleMethodCall(method, args);
-    return { products: products as unknown as AdaptyPaywallProduct[] };
+
+    // Decode the products array using the coder to convert snake_case to camelCase
+    const productCoder = new AdaptyPaywallProductCoder();
+    return products.map((product: any) => productCoder.decode(product));
   }
 
   async getOnboarding(options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
-  }): Promise<{ onboarding: AdaptyOnboarding }> {
+  }): Promise<AdaptyOnboarding> {
     const method = 'get_onboarding';
     const args = {
       placement_id: options.placementId,
@@ -277,14 +282,17 @@ export class Adapty implements AdaptyPlugin {
       ...(options.params || {}),
     };
     const onboarding = await this.handleMethodCall(method, args);
-    return { onboarding: onboarding as unknown as AdaptyOnboarding };
+
+    // Decode the onboarding using the coder to convert snake_case to camelCase
+    const onboardingCoder = new AdaptyOnboardingCoder();
+    return onboardingCoder.decode(onboarding);
   }
 
   async getOnboardingForDefaultAudience(options: {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<{ onboarding: AdaptyOnboarding }> {
+  }): Promise<AdaptyOnboarding> {
     const method = 'get_onboarding_for_default_audience';
     const args = {
       placement_id: options.placementId,
@@ -293,7 +301,10 @@ export class Adapty implements AdaptyPlugin {
       ...(options.params || {}),
     };
     const onboarding = await this.handleMethodCall(method, args);
-    return { onboarding: onboarding as unknown as AdaptyOnboarding };
+
+    // Decode the onboarding using the coder to convert snake_case to camelCase
+    const onboardingCoder = new AdaptyOnboardingCoder();
+    return onboardingCoder.decode(onboarding);
   }
 
   async getProfile(): Promise<AdaptyProfile> {
@@ -333,16 +344,14 @@ export class Adapty implements AdaptyPlugin {
     await this.handleMethodCall(method, args);
   }
 
-  async createWebPaywallUrl(options: {
-    paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
-  }): Promise<{ url: string }> {
+  async createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string> {
     const method = 'create_web_paywall_url';
     const args = this.isPaywall(options.paywallOrProduct)
       ? { method, paywall: options.paywallOrProduct }
       : { method, product: options.paywallOrProduct };
 
     const url = await this.handleMethodCall(method, args);
-    return { url: url as string };
+    return url as string;
   }
 
   async logShowOnboarding(options: {
@@ -369,7 +378,7 @@ export class Adapty implements AdaptyPlugin {
   async makePurchase(options: {
     product: AdaptyPaywallProduct;
     params?: MakePurchaseParamsInput;
-  }): Promise<{ result: AdaptyPurchaseResult }> {
+  }): Promise<AdaptyPurchaseResult> {
     const method = 'make_purchase';
     const args = {
       product: options.product,
@@ -380,7 +389,7 @@ export class Adapty implements AdaptyPlugin {
 
     // Decode the purchase result using the coder to convert snake_case to camelCase
     const purchaseResultCoder = new AdaptyPurchaseResultCoder();
-    return { result: purchaseResultCoder.decode(rawResult) };
+    return purchaseResultCoder.decode(rawResult);
   }
 
   async presentCodeRedemptionSheet(): Promise<void> {

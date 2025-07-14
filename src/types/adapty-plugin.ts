@@ -46,7 +46,7 @@ export interface AdaptyPlugin {
   /**
    * Gets products for a specific paywall.
    */
-  getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<{ products: AdaptyPaywallProduct[] }>;
+  getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<AdaptyPaywallProduct[]>;
 
   /**
    * Gets an onboarding by placement ID.
@@ -55,7 +55,7 @@ export interface AdaptyPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementParamsInput;
-  }): Promise<{ onboarding: AdaptyOnboarding }>;
+  }): Promise<AdaptyOnboarding>;
 
   /**
    * Gets an onboarding for default audience by placement ID.
@@ -64,7 +64,7 @@ export interface AdaptyPlugin {
     placementId: string;
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<{ onboarding: AdaptyOnboarding }>;
+  }): Promise<AdaptyOnboarding>;
 
   /**
    * Gets the current user profile.
@@ -89,7 +89,7 @@ export interface AdaptyPlugin {
   /**
    * Creates a URL for web paywall.
    */
-  createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<{ url: string }>;
+  createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string>;
 
   /**
    * Logs that an onboarding screen was shown to the user.
@@ -107,7 +107,7 @@ export interface AdaptyPlugin {
   makePurchase(options: {
     product: AdaptyPaywallProduct;
     params?: MakePurchaseParamsInput;
-  }): Promise<{ result: AdaptyPurchaseResult }>;
+  }): Promise<AdaptyPurchaseResult>;
 
   /**
    * Presents the code redemption sheet (iOS only).
