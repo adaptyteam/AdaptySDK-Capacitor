@@ -510,11 +510,26 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <main>
-        <h1 className="title">Adapty Capacitor Plugin Test</h1>
+        <h1 className="title">Adapty Capacitor Plugin</h1>
         <p className="description">
           This project demonstrates the functionality of the Adapty Capacitor plugin.
-          Nothing in the <em>example-app/</em> folder will be published to npm.
         </p>
+
+        {/* Credentials Info */}
+        <div className="section">
+          <h3 className="section-title">Configuration from .adapty-credentials.json file</h3>
+          <div className="info-box">
+            <div className="info-box-item">
+              <strong>API Key:</strong> {getApiKey() ? `${getApiKey().substring(0, 20)}...` : 'Not loaded'}
+            </div>
+            <div className="info-box-item">
+              <strong>Placement ID:</strong> {getPlacementId()}
+            </div>
+            <div className="info-box-item">
+              <strong>iOS Bundle ID:</strong> {getIosBundle()}
+            </div>
+          </div>
+        </div>
 
         {/* Activation Section */}
         <div className="section">
@@ -555,12 +570,12 @@ const App: React.FC = () => {
 
         {/* Configuration Info */}
         <div className="config-section">
-          <h3 className="config-title">Configuration:</h3>
+          <h3 className="config-title">SDK Status:</h3>
           <ul className="config-list">
-            <li>API Key: {getApiKey() ? `${getApiKey().substring(0, 20)}...` : 'Not loaded'}</li>
-            <li>Bundle ID: {getIosBundle() || 'Not set'}</li>
-            <li>Status: {isActivated ? 'Activated' : 'Not activated'}</li>
-            <li>Placement ID: {getPlacementId()}</li>
+            <li>Status: {isActivated ? '✅ Activated' : '❌ Not activated'}</li>
+            <li>Profile Loaded: {profile ? '✅ Yes' : '❌ No'}</li>
+            <li>Paywall Loaded: {paywall ? '✅ Yes' : '❌ No'}</li>
+            <li>Onboarding Loaded: {onboarding ? '✅ Yes' : '❌ No'}</li>
           </ul>
         </div>
       </main>

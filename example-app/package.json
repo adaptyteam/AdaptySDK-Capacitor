@@ -14,8 +14,8 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "android": "yarn cap run android --target Pixel_9_Pro",
-    "ios": "yarn cap run ios --target 0D3D6293-9DDD-4420-B1EA-ACF32640F09E"
+    "android": "yarn build && yarn cap run android --target Pixel_9_Pro",
+    "ios": "yarn build && yarn cap run ios --target 0D3D6293-9DDD-4420-B1EA-ACF32640F09E"
   },
   "dependencies": {
     "@capacitor/core": "latest",

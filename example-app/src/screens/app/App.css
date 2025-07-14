@@ -6,8 +6,9 @@
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 1.8rem;
   margin-bottom: 1rem;
+  margin-top: 2.5rem;
 }
 
 .description {
@@ -20,7 +21,7 @@
 }
 
 .section-title {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin-bottom: 1rem;
 }
 
