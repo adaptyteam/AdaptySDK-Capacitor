@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Adapty } from '@adapty/capacitor';
-import {
+import React, { useState } from 'react';
+import { 
+  Adapty,
   AdaptyProfile,
   AdaptyPaywall,
   AdaptyPaywallProduct,
   AdaptyOnboarding,
-  AdaptyError
+  createPaywallView,
 } from '@adapty/capacitor';
 import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
 import './App.css';
@@ -234,6 +234,38 @@ const App: React.FC = () => {
     return profile?.accessLevels?.['premium'];
   };
 
+  const presentPaywall = async () => {
+    if (!paywall) {
+      setResult('❌ No paywall loaded. Please load paywall first.');
+      return;
+    }
+
+    if (!paywall.hasViewConfiguration) {
+      setResult('❌ Paywall does not have view configuration (no Paywall Builder).');
+      return;
+    }
+
+    try {
+      setResult('Creating paywall view...');
+      
+      const view = await createPaywallView(paywall, {
+        customTags: {
+          'USERNAME': 'TestUser',
+          'CITY': 'Capacitor',
+        },
+      });
+
+      setResult('✅ Paywall view created. Presenting...');
+      
+      await view.present();
+      
+      setResult('✅ Paywall presented successfully!');
+    } catch (error: any) {
+      console.error('[ADAPTY] Failed to present paywall:', error);
+      setResult(`❌ Failed to present paywall: ${error.message}`);
+    }
+  };
+
   const renderProfileSection = () => {
     const accessLevel = getAccessLevel();
 
@@ -311,6 +343,13 @@ const App: React.FC = () => {
             className={`button button-primary ${(isLoadingPaywall || !isActivated) ? 'loading' : ''}`}
           >
             {isLoadingPaywall ? 'Loading...' : 'Load Paywall'}
+          </button>
+          <button
+            onClick={presentPaywall}
+            disabled={!paywall || !paywall.hasViewConfiguration}
+            className="button button-success"
+          >
+            Present Paywall
           </button>
           <button
             onClick={openWebPaywall}
