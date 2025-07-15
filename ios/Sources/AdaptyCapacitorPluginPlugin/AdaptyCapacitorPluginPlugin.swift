@@ -14,7 +14,10 @@ public final class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
     ]
 
     @objc func handleMethodCall(_ call: CAPPluginCall) {
-        let methodName = call.methodName
+        guard let methodName = call.getString("methodName") else {
+            call.reject("methodName is required")
+            return
+        }
         let args = call.json
 
         AdaptyCapacitorPlugin.handleMethodCall(method: methodName, withJson: args) { response in
@@ -28,10 +31,6 @@ public final class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 }
 private extension CAPPluginCall {
-    var methodName: String {
-        getString("methodName") ?? "Unknown"
-    }
-
     var json: String {
         getString("args") ?? "{}"
     }
