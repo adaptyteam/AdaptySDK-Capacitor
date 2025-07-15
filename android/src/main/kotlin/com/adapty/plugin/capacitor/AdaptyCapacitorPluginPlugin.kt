@@ -15,11 +15,11 @@ class AdaptyCapacitorPluginPlugin : Plugin() {
 
     override fun load() {
         super.load()
-        // Initialize crossplatform helper on plugin load
-        implementation.initialize(context)
-
         // Set activity from Capacitor plugin to adapty provider
         implementation.setActivityProvider { activity }
+
+        // Initialize crossplatform helper on plugin load
+        implementation.initialize(context)
     }
 
     @PluginMethod

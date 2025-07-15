@@ -27,9 +27,7 @@ class AdaptyCapacitorPluginKt {
             }
         )
         
-        crossplatformHelper.setActivity { 
-            activityProvider?.invoke()
-        }
+        crossplatformHelper.setActivity(activityProvider)
     }
 
     fun setActivityProvider(provider: () -> android.app.Activity?) {
