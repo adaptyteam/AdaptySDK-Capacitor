@@ -10,6 +10,8 @@ class AdaptyCapacitorPluginKt {
         CrossplatformHelper.shared
     }
 
+    private var activityProvider: (() -> android.app.Activity?)? = null
+
     fun initialize(context: Context) {
         CrossplatformHelper.init(
             context,
@@ -24,6 +26,14 @@ class AdaptyCapacitorPluginKt {
                 FileLocation.fromAsset("")
             }
         )
+        
+        crossplatformHelper.setActivity { 
+            activityProvider?.invoke()
+        }
+    }
+
+    fun setActivityProvider(provider: () -> android.app.Activity?) {
+        activityProvider = provider
     }
 
     fun handleMethodCall(methodName: String, args: String, callback: (String?) -> Unit) {
