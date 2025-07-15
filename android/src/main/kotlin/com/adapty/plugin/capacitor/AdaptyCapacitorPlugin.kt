@@ -20,14 +20,16 @@ class AdaptyCapacitorPluginKt {
                 // This callback is for native events, currently not used in our implementation
                 Log.d("AdaptyCapacitor", "Event received: $eventName")
             },
-            { value -> 
+            { value ->
                 // Return FileLocation based on the value - for now use empty asset as stub
                 // This will be handled properly when we implement file location functionality
                 FileLocation.fromAsset("")
             }
         )
-        
-        crossplatformHelper.setActivity(activityProvider)
+
+        crossplatformHelper.setActivity {
+            activityProvider?.invoke()
+        }
     }
 
     fun setActivityProvider(provider: () -> android.app.Activity?) {
