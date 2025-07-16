@@ -18,8 +18,34 @@ class AdaptyCapacitorPluginPlugin : Plugin() {
         // Set activity from Capacitor plugin to adapty provider
         implementation.setActivityProvider { activity }
 
-        // Initialize crossplatform helper on plugin load
-        implementation.initialize(context)
+        // Initialize crossplatform helper with event callback
+        implementation.initialize(context) { eventName, eventData ->
+            handleNativeEvent(eventName, eventData)
+        }
+    }
+
+    private fun handleNativeEvent(eventName: String, eventData: String) {
+        Log.d("AdaptyCapacitor", "Received native event: $eventName")
+        
+        try {
+            val eventObj = JSObject()
+            
+            if (eventData.isNotEmpty()) {
+                try {
+                    val jsonData = JSONObject(eventData)
+                    eventObj.put("data", jsonData)
+                } catch (e: Exception) {
+                    Log.w("AdaptyCapacitor", "Failed to parse event data as JSON: ${e.message}")
+                    eventObj.put("data", eventData)
+                }
+            }
+            
+            // Send event through Capacitor bridge
+            notifyListeners(eventName, eventObj)
+            Log.d("AdaptyCapacitor", "Event forwarded to bridge: $eventName")
+        } catch (e: Exception) {
+            Log.e("AdaptyCapacitor", "Failed to handle native event $eventName: ${e.message}", e)
+        }
     }
 
     @PluginMethod

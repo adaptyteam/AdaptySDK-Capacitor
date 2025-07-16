@@ -11,14 +11,17 @@ class AdaptyCapacitorPluginKt {
     }
 
     private var activityProvider: (() -> android.app.Activity?)? = null
+    private var eventCallback: ((String, String) -> Unit)? = null
 
-    fun initialize(context: Context) {
+    fun initialize(context: Context, eventCallback: ((String, String) -> Unit)? = null) {
+        this.eventCallback = eventCallback
+        
         CrossplatformHelper.init(
             context,
             { eventName, eventData ->
-                // For Capacitor, we'll handle events differently than React Native
-                // This callback is for native events, currently not used in our implementation
-                Log.d("AdaptyCapacitor", "Event received: $eventName")
+                Log.d("AdaptyCapacitor", "CrossplatformHelper event: $eventName")
+                // Forward events to Capacitor bridge
+                this.eventCallback?.invoke(eventName, eventData ?: "")
             },
             { value ->
                 // Return FileLocation based on the value - for now use empty asset as stub

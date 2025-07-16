@@ -493,20 +493,28 @@ export class Adapty implements AdaptyPlugin {
   }
 
   addListener(
-    _eventName: 'onLatestProfileLoad',
-    _listenerFunc: (data: { profile: AdaptyProfile }) => void,
+    eventName: 'onLatestProfileLoad',
+    listenerFunc: (data: { profile: AdaptyProfile }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle {
-    // TODO: Implement proper event listener handling through crossplatform bridge
-    const handle = {
-      remove: async () => {
-        // TODO: Implement removal
-      },
-    };
-    const promise = Promise.resolve(handle);
-    return Object.assign(promise, handle);
+    // Register listener through Capacitor plugin
+    return AdaptyCapacitorPlugin.addListener(eventName, (eventData: any) => {
+      try {
+        // Extract profile data from event
+        const profileData = eventData.data;
+        if (profileData?.profile) {
+          listenerFunc({ profile: profileData.profile });
+        } else if (profileData) {
+          // If data structure is different, try to parse directly
+          listenerFunc({ profile: profileData });
+        }
+      } catch (error) {
+        console.error('Error processing onLatestProfileLoad event:', error);
+      }
+    });
   }
 
   async removeAllListeners(): Promise<void> {
-    // TODO: Implement proper event listener removal through crossplatform bridge
+    // Remove all listeners through Capacitor plugin
+    return AdaptyCapacitorPlugin.removeAllListeners();
   }
 }
