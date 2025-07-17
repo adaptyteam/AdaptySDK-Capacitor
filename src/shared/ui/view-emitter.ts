@@ -13,6 +13,28 @@ interface CapacitorEventSubscription {
   remove: () => Promise<void>;
 }
 
+interface CapacitorEventArg {
+  data: string; // JSON string from native
+}
+
+interface ParsedEventData {
+  view?: {
+    id: string;
+    placement_id?: string;
+    variation_id?: string;
+  };
+  action?: {
+    type: string;
+    value?: any;
+  };
+  product?: any;
+  product_id?: string;
+  purchased_result?: any;
+  error?: any;
+  profile?: any;
+  id: string;
+}
+
 export class ViewEmitter {
   private viewId: string;
   private eventListeners: Map<string, CapacitorEventSubscription> = new Map();
@@ -53,27 +75,34 @@ export class ViewEmitter {
       const handlers = this.handlers;
       const subscription = (AdaptyCapacitorPlugin as any).addListener(
         config.nativeEvent,
-        function (arg: any) {
+        function (arg: CapacitorEventArg) {
           console.log('[ViewEmitter] Received event:', config.nativeEvent, 'data:', arg);
 
-          // Extract actual event data from wrapper and parse JSON string
-          let eventData = arg;
-          if (arg && typeof arg === 'object' && arg.data) {
-            const rawEventData = arg.data;
-            console.log('[ViewEmitter] Extracted raw event data from wrapper:', rawEventData);
-            
-            // Parse JSON string if it's a string
-            if (typeof rawEventData === 'string') {
-              try {
-                eventData = JSON.parse(rawEventData);
-                console.log('[ViewEmitter] Parsed JSON event data:', eventData);
-              } catch (error) {
-                console.error('[ViewEmitter] Failed to parse event data JSON:', error);
-                eventData = rawEventData;
-              }
-            } else {
-              eventData = rawEventData;
+          // Strict validation: events must come in {data: "json_string"} format
+          if (!arg || typeof arg !== 'object' || !arg.data) {
+            const error = `[ViewEmitter] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`;
+            console.error(error);
+            throw new Error(error);
+          }
+
+          const rawEventData: string = arg.data;
+          console.log('[ViewEmitter] Extracted raw event data from wrapper:', rawEventData);
+          
+          // Parse JSON string
+          let eventData: ParsedEventData;
+          if (typeof rawEventData === 'string') {
+            try {
+              eventData = JSON.parse(rawEventData) as ParsedEventData;
+              console.log('[ViewEmitter] Parsed JSON event data:', eventData);
+            } catch (error) {
+              const errorMsg = `[ViewEmitter] Failed to parse event data JSON: ${error}. Raw data: ${rawEventData}`;
+              console.error(errorMsg);
+              throw new Error(errorMsg);
             }
+          } else {
+            const errorMsg = `[ViewEmitter] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`;
+            console.error(errorMsg);
+            throw new Error(errorMsg);
           }
 
           const eventViewId = eventData?.view?.id ?? null;
@@ -94,7 +123,7 @@ export class ViewEmitter {
 
             const callbackArgs = extractCallbackArgs(
               config.handlerName,
-              eventData as Record<string, any>,
+              eventData,
             );
             console.log('[ViewEmitter] Calling handler:', config.handlerName, 'with args:', callbackArgs);
 
@@ -241,28 +270,28 @@ const HANDLER_TO_EVENT_CONFIG: Record<
 
 function extractCallbackArgs(
   handlerName: EventName,
-  eventArg: Record<string, any>,
+  eventArg: ParsedEventData,
 ) {
   switch (handlerName) {
     case 'onProductSelected':
-      return [eventArg['product_id']];
+      return [eventArg.product_id];
     case 'onPurchaseStarted':
-      return [eventArg['product']];
+      return [eventArg.product];
     case 'onPurchaseCompleted':
-      return [eventArg['purchased_result'], eventArg['product']];
+      return [eventArg.purchased_result, eventArg.product];
     case 'onPurchaseFailed':
-      return [eventArg['error'], eventArg['product']];
+      return [eventArg.error, eventArg.product];
     case 'onRestoreCompleted':
-      return [eventArg['profile']];
+      return [eventArg.profile];
     case 'onRestoreFailed':
     case 'onRenderingFailed':
     case 'onLoadingProductsFailed':
-      return [eventArg['error']];
+      return [eventArg.error];
     case 'onCustomAction':
     case 'onUrlPress':
-      return [eventArg['action']?.value];
+      return [eventArg.action?.value];
     case 'onWebPaymentNavigationFinished':
-      return [eventArg['product'], eventArg['error']];
+      return [eventArg.product, eventArg.error];
     case 'onCloseButtonPress':
     case 'onAndroidSystemBack':
     case 'onPaywallShown':
