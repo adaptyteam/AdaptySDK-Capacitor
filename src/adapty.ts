@@ -36,6 +36,15 @@ import type { AdaptyUiMediaCache } from './shared/ui/types';
 import type { AdaptyPlugin } from './types/adapty-plugin';
 import version from './version';
 
+// Type definitions for native events
+interface CapacitorEventArg {
+  data: string; // JSON string from native
+}
+
+interface ProfileEventData {
+  profile: AdaptyProfile;
+}
+
 // Helper type to extract success content from response
 type ExtractSuccessContent<T> = T extends { success: infer S } ? S : never;
 
@@ -497,18 +506,43 @@ export class Adapty implements AdaptyPlugin {
     listenerFunc: (data: { profile: AdaptyProfile }) => void,
   ): Promise<PluginListenerHandle> & PluginListenerHandle {
     // Register listener through Capacitor plugin
-    return AdaptyCapacitorPlugin.addListener(eventName, (eventData: any) => {
+    return AdaptyCapacitorPlugin.addListener(eventName, (arg: any) => {
       try {
-        // Extract profile data from event
-        const profileData = eventData.data;
-        if (profileData?.profile) {
-          listenerFunc({ profile: profileData.profile });
-        } else if (profileData) {
-          // If data structure is different, try to parse directly
-          listenerFunc({ profile: profileData });
+        // Strict validation: events must come in {data: "json_string"} format
+        if (!arg || typeof arg !== 'object' || !arg.data) {
+          const error = `[Adapty] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`;
+          console.error(error);
+          throw new Error(error);
+        }
+
+        const rawEventData: string = arg.data;
+
+        // Parse JSON string
+        let eventData: ProfileEventData;
+        if (typeof rawEventData === 'string') {
+          try {
+            eventData = JSON.parse(rawEventData) as ProfileEventData;
+          } catch (error) {
+            const errorMsg = `[Adapty] Failed to parse event data JSON: ${error}. Raw data: ${rawEventData}`;
+            console.error(errorMsg);
+            throw new Error(errorMsg);
+          }
+        } else {
+          const errorMsg = `[Adapty] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`;
+          console.error(errorMsg);
+          throw new Error(errorMsg);
+        }
+
+        // Call user's listener with parsed profile data
+        if (eventData?.profile) {
+          listenerFunc({ profile: eventData.profile });
+        } else {
+          console.error('[Adapty] Event data does not contain profile:', eventData);
+          throw new Error('[Adapty] Event data does not contain profile');
         }
       } catch (error) {
         console.error('Error processing onLatestProfileLoad event:', error);
+        throw error;
       }
     });
   }
