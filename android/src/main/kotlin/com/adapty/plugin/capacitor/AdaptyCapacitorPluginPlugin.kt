@@ -5,7 +5,6 @@ import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
-import org.json.JSONObject
 import android.util.Log
 
 @CapacitorPlugin(name = "AdaptyCapacitorPlugin")
@@ -30,15 +29,7 @@ class AdaptyCapacitorPluginPlugin : Plugin() {
         try {
             val eventObj = JSObject()
             
-            if (eventData.isNotEmpty()) {
-                try {
-                    val jsonData = JSONObject(eventData)
-                    eventObj.put("data", jsonData)
-                } catch (e: Exception) {
-                    Log.w("AdaptyCapacitor", "Failed to parse event data as JSON: ${e.message}")
-                    eventObj.put("data", eventData)
-                }
-            }
+            eventObj.put("data", eventData)
             
             // Send event through Capacitor bridge
             notifyListeners(eventName, eventObj)

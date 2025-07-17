@@ -56,11 +56,24 @@ export class ViewEmitter {
         function (arg: any) {
           console.log('[ViewEmitter] Received event:', config.nativeEvent, 'data:', arg);
 
-          // Extract actual event data from Android wrapper
+          // Extract actual event data from wrapper and parse JSON string
           let eventData = arg;
           if (arg && typeof arg === 'object' && arg.data) {
-            eventData = arg.data;
-            console.log('[ViewEmitter] Extracted event data from Android wrapper:', eventData);
+            const rawEventData = arg.data;
+            console.log('[ViewEmitter] Extracted raw event data from wrapper:', rawEventData);
+            
+            // Parse JSON string if it's a string
+            if (typeof rawEventData === 'string') {
+              try {
+                eventData = JSON.parse(rawEventData);
+                console.log('[ViewEmitter] Parsed JSON event data:', eventData);
+              } catch (error) {
+                console.error('[ViewEmitter] Failed to parse event data JSON:', error);
+                eventData = rawEventData;
+              }
+            } else {
+              eventData = rawEventData;
+            }
           }
 
           const eventViewId = eventData?.view?.id ?? null;

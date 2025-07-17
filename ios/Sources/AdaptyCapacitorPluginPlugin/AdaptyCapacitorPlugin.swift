@@ -1,6 +1,7 @@
 import Foundation
 import Adapty
 import AdaptyPlugin
+import Capacitor
 
 enum Log {
     typealias Category = AdaptyPlugin.LogCategory
@@ -47,14 +48,10 @@ extension AdaptyCapacitorPlugin: EventHandler {
                 return
             }
 
-            // Parse JSON to JSObject for Capacitor
-            guard let jsonData = json.data(using: .utf8),
-                  let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] else {
-                Log.wrapper.error("Failed to parse event JSON: \(json)")
-                return
-            }
+            // Create dictionary with JSON string in data field
+            let eventData: [String: String] = ["data": json]
 
-            plugin.notifyListeners(event.id, data: jsonObject, retainUntilConsumed: true)
+            plugin.notifyListeners(event.id, data: eventData, retainUntilConsumed: true)
             Log.wrapper.info("Event sent to JS: \(event.id)")
 
         } catch {
