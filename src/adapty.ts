@@ -36,11 +36,6 @@ import type { AdaptyUiMediaCache } from './shared/ui/types';
 import type { AdaptyPlugin } from './types/adapty-plugin';
 import version from './version';
 
-// Type definitions for native events
-interface CapacitorEventArg {
-  data: string; // JSON string from native
-}
-
 interface ProfileEventData {
   profile: AdaptyProfile;
 }
