@@ -17,7 +17,7 @@ import type {
   LogLevel,
 } from './shared/types/inputs';
 
-export interface AdaptyCapacitorPluginPlugin {
+export interface AdaptyCapacitorPlugin {
   /**
    * Handles crossplatform method calls
    * @internal

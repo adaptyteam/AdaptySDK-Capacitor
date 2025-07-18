@@ -1,7 +1,7 @@
 import { WebPlugin } from '@capacitor/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
-import type { AdaptyCapacitorPluginPlugin } from './definitions';
+import type { AdaptyCapacitorPlugin } from './definitions';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -19,7 +19,7 @@ import type {
   LogLevel,
 } from './shared/types/inputs';
 
-export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacitorPluginPlugin {
+export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacitorPlugin {
   async handleMethodCall(options: { methodName: string; args: string }): Promise<any> {
     console.log('Web: handleMethodCall called with:', options);
     throw new Error('Web platform is not supported');

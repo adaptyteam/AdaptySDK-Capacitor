@@ -1,52 +1,58 @@
 package com.adapty.plugin.capacitor
 
-import android.content.Context
+import com.getcapacitor.JSObject
+import com.getcapacitor.Plugin
+import com.getcapacitor.PluginCall
+import com.getcapacitor.PluginMethod
+import com.getcapacitor.annotation.CapacitorPlugin
 import android.util.Log
-import com.adapty.internal.crossplatform.CrossplatformHelper
-import com.adapty.utils.FileLocation
 
-class AdaptyCapacitorPluginKt {
-    private val crossplatformHelper by lazy {
-        CrossplatformHelper.shared
-    }
+@CapacitorPlugin(name = "AdaptyCapacitorPlugin")
+class AdaptyCapacitorPlugin : Plugin() {
 
-    private var activityProvider: (() -> android.app.Activity?)? = null
-    private var eventCallback: ((String, String) -> Unit)? = null
+    private val implementation = AdaptyCapacitorImplementation()
 
-    fun initialize(context: Context, eventCallback: ((String, String) -> Unit)? = null) {
-        this.eventCallback = eventCallback
-        
-        CrossplatformHelper.init(
-            context,
-            { eventName, eventData ->
-                Log.d("AdaptyCapacitor", "CrossplatformHelper event: $eventName")
-                // Forward events to Capacitor bridge
-                this.eventCallback?.invoke(eventName, eventData ?: "")
-            },
-            { value ->
-                // Return FileLocation based on the value - for now use empty asset as stub
-                // This will be handled properly when we implement file location functionality
-                FileLocation.fromAsset("")
-            }
-        )
+    override fun load() {
+        super.load()
+        // Set activity from Capacitor plugin to adapty provider
+        implementation.setActivityProvider { activity }
 
-        crossplatformHelper.setActivity {
-            activityProvider?.invoke()
+        // Initialize crossplatform helper with event callback
+        implementation.initialize(context) { eventName, eventData ->
+            handleNativeEvent(eventName, eventData)
         }
     }
 
-    fun setActivityProvider(provider: () -> android.app.Activity?) {
-        activityProvider = provider
+    private fun handleNativeEvent(eventName: String, eventData: String) {
+        Log.d("AdaptyCapacitor", "Received native event: $eventName")
+        
+        try {
+            val eventObj = JSObject()
+            
+            eventObj.put("data", eventData)
+            
+            // Send event through Capacitor bridge
+            notifyListeners(eventName, eventObj)
+            Log.d("AdaptyCapacitor", "Event forwarded to bridge: $eventName")
+        } catch (e: Exception) {
+            Log.e("AdaptyCapacitor", "Failed to handle native event $eventName: ${e.message}", e)
+        }
     }
 
-    fun handleMethodCall(methodName: String, args: String, callback: (String?) -> Unit) {
-        runCatching {
-            crossplatformHelper.onMethodCall(args, methodName) { response ->
-                callback(response)
-            }
-        }.onFailure { e ->
-            Log.e("AdaptyCapacitor", "Exception during method call: ${e.message}")
-            callback(null)
+    @PluginMethod
+    fun handleMethodCall(call: PluginCall) {
+        val methodName = call.getString("methodName") ?: run {
+            call.reject("methodName is required")
+            return
+        }
+
+        val args = call.getString("args").orEmpty()
+
+        implementation.handleMethodCall(methodName, args) { response ->
+            // Return response as string directly
+            val result = JSObject()
+            result.put("crossPlatformJson", response)
+            call.resolve(result)
         }
     }
 }

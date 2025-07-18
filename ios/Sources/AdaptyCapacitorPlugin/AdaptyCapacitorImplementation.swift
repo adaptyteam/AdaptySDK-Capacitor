@@ -9,11 +9,11 @@ enum Log {
     static let wrapper = Category(subsystem: "io.adapty.capacitor", name: "wrapper")
 }
 
-@objc public final class AdaptyCapacitorPlugin: NSObject {
-    static let shared = AdaptyCapacitorPlugin()
+@objc public final class AdaptyCapacitorImplementation: NSObject {
+    static let shared = AdaptyCapacitorImplementation()
 
     // Weak reference to Capacitor plugin for event sending
-    private weak var capacitorPlugin: AdaptyCapacitorPluginPlugin?
+    private weak var capacitorPlugin: AdaptyCapacitorPlugin?
 
     @objc static func setup() {
         Task { @MainActor in
@@ -21,7 +21,7 @@ enum Log {
         }
     }
 
-    @objc static func setCapacitorPlugin(_ plugin: AdaptyCapacitorPluginPlugin) {
+    @objc static func setCapacitorPlugin(_ plugin: AdaptyCapacitorPlugin) {
         shared.capacitorPlugin = plugin
     }
 
@@ -37,7 +37,7 @@ enum Log {
     }
 }
 
-extension AdaptyCapacitorPlugin: EventHandler {
+extension AdaptyCapacitorImplementation: EventHandler {
     public func handle(event: AdaptyPluginEvent) {
         do {
             let json = try event.asAdaptyJsonData.asAdaptyJsonString

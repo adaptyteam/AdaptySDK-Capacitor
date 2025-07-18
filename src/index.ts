@@ -1,8 +1,8 @@
 import { registerPlugin } from '@capacitor/core';
 
-import type { AdaptyCapacitorPluginPlugin } from './definitions';
+import { AdaptyCapacitorPlugin } from './definitions';
 
-const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPluginPlugin>('AdaptyCapacitorPlugin', {
+const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPlugin>('AdaptyCapacitorPlugin', {
   web: () => import('./web').then((m) => new m.AdaptyCapacitorPluginWeb()),
 });
 

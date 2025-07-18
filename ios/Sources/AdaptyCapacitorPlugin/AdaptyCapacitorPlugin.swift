@@ -5,9 +5,9 @@ import Capacitor
  * Please read the Capacitor iOS Plugin Development Guide
  * here: https://capacitorjs.com/docs/plugins/ios
  */
-@objc(AdaptyCapacitorPluginPlugin)
-public final class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
-    public let identifier = "AdaptyCapacitorPluginPlugin"
+@objc(AdaptyCapacitorPlugin)
+public final class AdaptyCapacitorPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "AdaptyCapacitorPlugin"
     public let jsName = "AdaptyCapacitorPlugin"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "handleMethodCall", returnType: CAPPluginReturnPromise)
@@ -20,15 +20,15 @@ public final class AdaptyCapacitorPluginPlugin: CAPPlugin, CAPBridgedPlugin {
         }
         let args = call.json
 
-        AdaptyCapacitorPlugin.handleMethodCall(method: methodName, withJson: args) { response in
+        AdaptyCapacitorImplementation.handleMethodCall(method: methodName, withJson: args) { response in
             // Return response as string directly
             call.resolve(["crossPlatformJson": response])
         }
     }
 
     @objc override public func load() {
-        AdaptyCapacitorPlugin.setup()
-        AdaptyCapacitorPlugin.setCapacitorPlugin(self)
+        AdaptyCapacitorImplementation.setup()
+        AdaptyCapacitorImplementation.setCapacitorPlugin(self)
     }
 }
 private extension CAPPluginCall {

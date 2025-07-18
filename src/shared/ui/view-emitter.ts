@@ -1,9 +1,9 @@
 import type { EventHandlers } from './types';
 import { registerPlugin } from '@capacitor/core';
-import type { AdaptyCapacitorPluginPlugin } from '../../definitions';
+import type { AdaptyCapacitorPlugin } from '../../definitions';
 
 // Get AdaptyCapacitorPlugin instance
-const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPluginPlugin>('AdaptyCapacitorPlugin', {
+const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPlugin>('AdaptyCapacitorPlugin', {
     web: () => import('../../web').then((m) => new m.AdaptyCapacitorPluginWeb()),
 });
 
