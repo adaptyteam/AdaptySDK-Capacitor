@@ -1,9 +1,11 @@
 import { Adapty } from '../../adapty';
 import type { AdaptyPaywall } from '../types';
-import type { AdaptyUiView, CreatePaywallViewParamsInput, AdaptyUiDialogConfig, AdaptyUiDialogActionType } from './types';
+import type { AdaptyUiView, CreatePaywallViewParamsInput, AdaptyUiDialogConfig, AdaptyUiDialogActionType, EventHandlers } from './types';
+import { DEFAULT_EVENT_HANDLERS } from './types';
 import { AdaptyPaywallCoder } from '../coders/adapty-paywall';
 import { AdaptyError } from '../adapty-error';
 import type { components } from '../types/api';
+import { ViewEmitter } from './view-emitter';
 
 type Req = components['requests'];
 
@@ -14,6 +16,7 @@ type Req = components['requests'];
 export class ViewController {
   private id: string | null = null;
   private adaptyPlugin: Adapty;
+  private viewEmitter: ViewEmitter | null = null;
 
   /**
    * Intended way to create a ViewController instance.
@@ -173,5 +176,88 @@ export class ViewController {
     };
 
     return await this.adaptyPlugin.handleMethodCall('adapty_ui_show_dialog', data);
+  }
+
+  /**
+   * Register event handlers for UI events
+   *
+   * @see {@link https://docs.adapty.io/docs/react-native-handling-events-1 | [DOC] Handling View Events}
+   *
+   * @remarks
+   * It registers only requested set of event handlers.
+   * Your config is assigned into four event listeners {@link DEFAULT_EVENT_HANDLERS},
+   * that handle default closing behavior.
+   * - `onCloseButtonPress`
+   * - `onAndroidSystemBack`
+   * - `onRestoreCompleted`
+   * - `onPurchaseCompleted`
+   *
+   * If you want to override these listeners, we strongly recommend to return `true` (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
+   * from your custom listener to retain default closing behavior.
+   *
+   * @param {Partial<EventHandlers> | undefined} [eventHandlers] - set of event handling callbacks
+   * @returns {() => void} unsubscribe - function to unsubscribe all listeners
+   */
+  public registerEventHandlers(
+    eventHandlers: Partial<EventHandlers> = DEFAULT_EVENT_HANDLERS,
+  ): () => void {
+    if (this.id === null) {
+      throw new AdaptyError({
+        adaptyCode: 2002,
+        message: 'No view reference',
+      });
+    }
+
+    console.log('[AdaptyCapacitor] Registering event handlers for view:', this.id);
+
+    // Create ViewEmitter if not exists
+    if (!this.viewEmitter) {
+      this.viewEmitter = new ViewEmitter(this.id);
+    }
+
+    const finalEventHandlers: EventHandlers = {
+      ...DEFAULT_EVENT_HANDLERS,
+      ...eventHandlers,
+    };
+
+    // Register each event handler with ViewEmitter
+    const subscriptions: { remove: () => Promise<void> }[] = [];
+
+    // onRequestClose function to dismiss the paywall
+    const onRequestClose = async () => {
+      try {
+        await this.dismiss();
+      } catch (error) {
+        console.warn('[AdaptyCapacitor] Failed to dismiss paywall:', error);
+      }
+    };
+
+    // Register all event handlers
+    Object.entries(finalEventHandlers).forEach(([eventName, handler]) => {
+      if (handler && typeof handler === 'function') {
+        try {
+          const subscription = this.viewEmitter!.addListener(
+            eventName as keyof EventHandlers,
+            handler,
+            onRequestClose
+          );
+          subscriptions.push(subscription);
+          console.log('[AdaptyCapacitor] Registered handler for:', eventName);
+        } catch (error) {
+          console.error(`[AdaptyCapacitor] Failed to register handler for ${eventName}:`, error);
+        }
+      }
+    });
+
+    // Return unsubscribe function
+    const unsubscribe = () => {
+      console.log('[AdaptyCapacitor] Unsubscribing event handlers for view:', this.id);
+      if (this.viewEmitter) {
+        this.viewEmitter.removeAllListeners();
+        this.viewEmitter = null;
+      }
+    };
+
+    return unsubscribe;
   }
 } 

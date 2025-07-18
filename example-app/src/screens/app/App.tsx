@@ -6,6 +6,7 @@ import {
   AdaptyPaywallProduct,
   AdaptyOnboarding,
   createPaywallView,
+  EventHandlers,
 } from '@adapty/capacitor';
 import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
 import './App.css';
@@ -91,18 +92,18 @@ const App: React.FC = () => {
           fetchPolicy: 'reload_revalidating_cache_data',
         },
       });
-      // Логируем полученный paywall
+
       console.log('[ADAPTY] Paywall fetched:', paywall);
       setPaywall(paywall);
 
-      // Log show paywall
-      await adapty.logShowPaywall({ paywall });
-
-      // Fetch products
-      const productsResult = await adapty.getPaywallProducts({ paywall });
-      setProducts(productsResult);
-
-      setResult(`Paywall loaded: ${paywall.name}`);
+      // // Log show paywall
+      // await adapty.logShowPaywall({ paywall });
+      //
+      // // Fetch products
+      // const productsResult = await adapty.getPaywallProducts({ paywall });
+      // setProducts(productsResult);
+      //
+      // setResult(`Paywall loaded: ${paywall.name}`);
     } catch (error) {
       console.error('[ADAPTY] Error fetching paywall', error);
       setResult(`Error fetching paywall: ${error}`);
@@ -255,10 +256,95 @@ const App: React.FC = () => {
         },
       });
 
+      // Register event handlers for paywall view
+      view.registerEventHandlers({
+        onCloseButtonPress: () => {
+          console.log('[ADAPTY] User pressed close button');
+          setResult('❌ User closed paywall');
+          return true; // Allow the paywall to close
+        },
+        onAndroidSystemBack: () => {
+          console.log('[ADAPTY] User pressed system back button');
+          setResult('⬅️ User pressed back button');
+          return true; // Allow the paywall to close
+        },
+        onUrlPress: (url: string) => {
+          console.log('[ADAPTY] User pressed URL:', url);
+          setResult(`🔗 User opened URL: ${url}`);
+          return false; // Don't close the paywall
+        },
+        onCustomAction: (action: any) => {
+          console.log('[ADAPTY] User performed custom action:', action);
+          setResult(`⚡ Custom action: ${JSON.stringify(action)}`);
+          return false; // Don't close the paywall
+        },
+        onProductSelected: (productId: string) => {
+          console.log('[ADAPTY] User selected product:', productId);
+          setResult(`📦 Product selected: ${productId}`);
+          return false; // Don't close the paywall
+        },
+        onPurchaseStarted: (product: any) => {
+          console.log('[ADAPTY] Purchase started for product:', product);
+          setResult(`🛒 Purchase started: ${product?.vendorProductId || 'unknown'}`);
+          return false; // Don't close the paywall
+        },
+        onPurchaseCompleted: (purchaseResult: any, product: any) => {
+          console.log('[ADAPTY] Purchase completed:', purchaseResult, product);
+          setResult(`✅ Purchase completed: ${purchaseResult?.type || 'unknown'}`);
+          return purchaseResult?.type !== 'user_cancelled'; // Close if not cancelled
+        },
+        onPurchaseFailed: (error: any, product: any) => {
+          console.log('[ADAPTY] Purchase failed:', error, product);
+          setResult(`❌ Purchase failed: ${error?.message || 'unknown error'}`);
+          return false; // Don't close the paywall
+        },
+        onRestoreStarted: () => {
+          console.log('[ADAPTY] Restore started');
+          setResult('🔄 Restore started...');
+          return false; // Don't close the paywall
+        },
+        onRestoreCompleted: (profile: any) => {
+          console.log('[ADAPTY] Restore completed:', profile);
+          setResult('✅ Restore completed successfully');
+          return true; // Close the paywall after successful restore
+        },
+        onRestoreFailed: (error: any) => {
+          console.log('[ADAPTY] Restore failed:', error);
+          setResult(`❌ Restore failed: ${error?.message || 'unknown error'}`);
+          return false; // Don't close the paywall
+        },
+        onPaywallShown: () => {
+          console.log('[ADAPTY] Paywall shown');
+          setResult('👁️ Paywall appeared');
+          return false; // Don't close the paywall
+        },
+        onPaywallClosed: () => {
+          console.log('[ADAPTY] Paywall closed');
+          setResult('👋 Paywall disappeared');
+          return false; // Already closed
+        },
+        onRenderingFailed: (error: any) => {
+          console.log('[ADAPTY] Rendering failed:', error);
+          setResult(`💥 Rendering failed: ${error?.message || 'unknown error'}`);
+          return false; // Don't close the paywall
+        },
+        onLoadingProductsFailed: (error: any) => {
+          console.log('[ADAPTY] Loading products failed:', error);
+          setResult(`📦❌ Products loading failed: ${error?.message || 'unknown error'}`);
+          return false; // Don't close the paywall
+        },
+        onWebPaymentNavigationFinished: (product: any, error: any) => {
+          console.log('[ADAPTY] Web payment navigation finished:', product, error);
+          setResult(`🌐 Web payment finished: ${error ? 'with error' : 'success'}`);
+          return false; // Don't close the paywall
+        },
+      });
+
       setResult('✅ Paywall view created. Presenting...');
 
       await view.present();
 
+     // setTimeout(() => view.dismiss(),5000)
       setResult('✅ Paywall presented successfully!');
     } catch (error: any) {
       console.error('[ADAPTY] Failed to present paywall:', error);

@@ -16,4 +16,5 @@ export type {
   AdaptyUiView,
   AdaptyUiDialogConfig,
   AdaptyUiDialogActionType,
+  EventHandlers,
 } from './ui-builder/index';
