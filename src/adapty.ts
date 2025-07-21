@@ -1,7 +1,7 @@
 import type { PluginListenerHandle } from '@capacitor/core';
-import { registerPlugin } from '@capacitor/core';
 
-import { AdaptyCapacitorPlugin } from './definitions';
+// Импортируем зарегистрированный экземпляр вместо создания нового
+import { AdaptyCapacitorPlugin } from './plugin';
 import { AdaptyOnboardingCoder } from './shared/coders/adapty-onboarding';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
@@ -42,10 +42,6 @@ interface ProfileEventData {
 
 // Helper type to extract success content from response
 type ExtractSuccessContent<T> = T extends { success: infer S } ? S : never;
-
-const AdaptyCapacitorPlugin = registerPlugin<AdaptyCapacitorPlugin>('AdaptyCapacitorPlugin', {
-  web: () => import('./web').then((m) => new m.AdaptyCapacitorPluginWeb()),
-});
 
 export class Adapty implements AdaptyPlugin {
   private activating: Promise<void> | null = null;
