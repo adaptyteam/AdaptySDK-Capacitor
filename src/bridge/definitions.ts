@@ -1,6 +1,6 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
-import type { AdaptyProfile } from './shared/types';
+import type { AdaptyProfile } from '../shared/types';
 
 export interface AdaptyCapacitorPlugin {
   /**

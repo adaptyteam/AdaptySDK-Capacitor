@@ -1,8 +1,9 @@
 import { WebPlugin } from '@capacitor/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
+import type { AdaptyProfile } from '../shared/types';
+
 import type { AdaptyCapacitorPlugin } from './definitions';
-import type { AdaptyProfile } from './shared/types';
 
 export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacitorPlugin {
   override addListener(

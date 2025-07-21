@@ -1,5 +1,5 @@
 import type { EventHandlers } from './types';
-import { AdaptyCapacitorPlugin } from '../../plugin';
+import { AdaptyCapacitorPlugin } from '../../bridge/plugin';
 
 type EventName = keyof EventHandlers;
 
