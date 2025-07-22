@@ -1,6 +1,5 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
-// Импортируем зарегистрированный экземпляр вместо создания нового
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
 import { AdaptyOnboardingCoder } from './shared/coders/adapty-onboarding';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
