@@ -61,9 +61,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
     // Adapty SDK dependencies
-    implementation 'io.adapty:android-sdk:3.8.0'
-    implementation 'io.adapty:android-ui:3.8.2'
-    implementation 'io.adapty.internal:crossplatform:3.8.4'
+    implementation 'io.adapty:android-sdk:3.8.2'
+    implementation 'io.adapty:android-ui:3.8.3'
+    implementation 'io.adapty.internal:crossplatform:3.8.5'
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

@@ -8,3 +8,5 @@ dist/
 
 # Adapty credentials
 .adapty-credentials.json
+
+!Podfile.lock

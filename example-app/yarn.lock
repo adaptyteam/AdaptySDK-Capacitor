@@ -3,7 +3,7 @@
 
 
 "@adapty/capacitor@file:..":
-  version "3.8.0"
+  version "3.8.2"
 
 "@ampproject/remapping@^2.2.0":
   version "2.3.0"
