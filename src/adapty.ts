@@ -17,13 +17,6 @@ import type {
   AdaptyProfileParameters,
   RefundPreference,
 } from './shared/types';
-import {
-  isErrorResponse,
-  isSuccessResponse,
-  type CrossPlatformResponse,
-  type MethodName,
-  type ResponseByMethod,
-} from './shared/types/cross-platform-json';
 import type {
   ActivateParamsInput,
   GetPlacementParamsInput,
@@ -32,6 +25,13 @@ import type {
   FileLocation,
   LogLevel,
 } from './shared/types/inputs';
+import {
+  isErrorResponse,
+  isSuccessResponse,
+  type CrossPlatformResponse,
+  type MethodName,
+  type MethodResponseMap,
+} from './shared/types/method-types';
 import type { AdaptyUiMediaCache } from './shared/ui/types';
 import type { AdaptyPlugin } from './types/adapty-plugin';
 import version from './version';
@@ -39,9 +39,6 @@ import version from './version';
 interface ProfileEventData {
   profile: AdaptyProfile;
 }
-
-// Helper type to extract success content from response
-type ExtractSuccessContent<T> = T extends { success: infer S } ? S : never;
 
 // Coder registry for different method responses
 const coderRegistry = {
@@ -74,10 +71,7 @@ export class Adapty implements AdaptyPlugin {
   /**
    * Handle method calls through crossplatform bridge with type safety
    */
-  public async handleMethodCall<M extends MethodName>(
-    methodName: M,
-    args: string,
-  ): Promise<ExtractSuccessContent<ResponseByMethod<M>>> {
+  public async handleMethodCall<M extends MethodName>(methodName: M, args: string): Promise<MethodResponseMap[M]> {
     const result = await AdaptyCapacitorPlugin.handleMethodCall({
       methodName,
       args,
@@ -90,7 +84,7 @@ export class Adapty implements AdaptyPlugin {
       // Check for native errors
       if (isErrorResponse(parsedResponse)) {
         const error = parsedResponse.error;
-        throw new Error(`Native error: ${error.message} (code: ${error.adapty_code})`);
+        throw new Error(`Native error: ${error.message} (code: ${error.adaptyCode})`);
       }
 
       // Extract success data with type safety
@@ -100,11 +94,11 @@ export class Adapty implements AdaptyPlugin {
         // Apply decoder if available for this method
         const coder = getCoder(methodName);
         if (coder) {
-          return coder.decode(successData) as ExtractSuccessContent<ResponseByMethod<M>>;
+          return coder.decode(successData) as MethodResponseMap[M];
         }
 
         // Return raw data for methods without specific coders
-        return successData as ExtractSuccessContent<ResponseByMethod<M>>;
+        return successData as MethodResponseMap[M];
       }
 
       throw new Error('Invalid response format: missing success or error field');
@@ -270,11 +264,7 @@ export class Adapty implements AdaptyPlugin {
       method,
       ...(options.params || {}),
     };
-    const rawPaywall = await this.handleMethodCall(method, JSON.stringify(args));
-
-    // Decode the paywall using the coder to convert snake_case to camelCase
-    const paywallCoder = new AdaptyPaywallCoder();
-    return paywallCoder.decode(rawPaywall);
+    return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<AdaptyPaywallProduct[]> {
@@ -283,11 +273,7 @@ export class Adapty implements AdaptyPlugin {
       paywall: options.paywall,
       method,
     };
-    const products = await this.handleMethodCall(method, JSON.stringify(args));
-
-    // Decode the products array using the coder to convert snake_case to camelCase
-    const productCoder = new AdaptyPaywallProductCoder();
-    return products.map((product: any) => productCoder.decode(product));
+    return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async getOnboarding(options: {
@@ -306,7 +292,7 @@ export class Adapty implements AdaptyPlugin {
 
     // Decode the onboarding using the coder to convert snake_case to camelCase
     const onboardingCoder = new AdaptyOnboardingCoder();
-    return onboardingCoder.decode(onboarding);
+    return onboardingCoder.decode(onboarding as any);
   }
 
   async getOnboardingForDefaultAudience(options: {
@@ -325,17 +311,13 @@ export class Adapty implements AdaptyPlugin {
 
     // Decode the onboarding using the coder to convert snake_case to camelCase
     const onboardingCoder = new AdaptyOnboardingCoder();
-    return onboardingCoder.decode(onboarding);
+    return onboardingCoder.decode(onboarding as any);
   }
 
   async getProfile(): Promise<AdaptyProfile> {
     const method = 'get_profile';
     const args = { method };
-    const rawProfile = await this.handleMethodCall(method, JSON.stringify(args));
-
-    // Decode the profile using the coder to convert snake_case to camelCase
-    const profileCoder = new AdaptyProfileCoder();
-    return profileCoder.decode(rawProfile);
+    return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async identify(options: { customerUserId: string }): Promise<void> {
@@ -410,7 +392,7 @@ export class Adapty implements AdaptyPlugin {
 
     // Decode the purchase result using the coder to convert snake_case to camelCase
     const purchaseResultCoder = new AdaptyPurchaseResultCoder();
-    return purchaseResultCoder.decode(rawResult);
+    return purchaseResultCoder.decode(rawResult as any);
   }
 
   async presentCodeRedemptionSheet(): Promise<void> {
@@ -436,7 +418,7 @@ export class Adapty implements AdaptyPlugin {
 
     // Decode the profile using the coder to convert snake_case to camelCase
     const profileCoder = new AdaptyProfileCoder();
-    return profileCoder.decode(rawProfile);
+    return profileCoder.decode(rawProfile as any);
   }
 
   async setFallback(options: { fileLocation: FileLocation }): Promise<void> {

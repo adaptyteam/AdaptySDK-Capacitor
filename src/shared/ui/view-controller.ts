@@ -77,7 +77,7 @@ export class ViewController {
       data.custom_timers = convertTimerInfo(params.customTimers);
     }
 
-    const result = await controller.adaptyPlugin.handleMethodCall('adapty_ui_create_paywall_view', data) as AdaptyUiView;
+    const result = await controller.adaptyPlugin.handleMethodCall('adapty_ui_create_paywall_view', JSON.stringify(data)) as AdaptyUiView;
     controller.id = result.id;
     
     return controller;
@@ -116,7 +116,7 @@ export class ViewController {
       id: this.id,
     };
 
-    await this.adaptyPlugin.handleMethodCall('adapty_ui_present_paywall_view', data);
+    await this.adaptyPlugin.handleMethodCall('adapty_ui_present_paywall_view', JSON.stringify(data));
   }
 
   /**
@@ -138,7 +138,7 @@ export class ViewController {
       destroy: false,
     };
 
-    await this.adaptyPlugin.handleMethodCall('adapty_ui_dismiss_paywall_view', data);
+    await this.adaptyPlugin.handleMethodCall('adapty_ui_dismiss_paywall_view', JSON.stringify(data));
   }
 
   /**
@@ -175,7 +175,7 @@ export class ViewController {
       configuration: dialogConfig,
     };
 
-    return await this.adaptyPlugin.handleMethodCall('adapty_ui_show_dialog', data);
+    return await this.adaptyPlugin.handleMethodCall('adapty_ui_show_dialog', JSON.stringify(data));
   }
 
   /**
