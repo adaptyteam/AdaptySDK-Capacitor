@@ -32,3 +32,21 @@ export class ArrayCoder<
     return result;
   }
 }
+
+
+export function createArrayCoder<
+  Model extends Record<string, any>,
+  ModelCoder extends SimpleCoder<Model, any>,
+>(CoderClass: new () => ModelCoder) {
+  return class ArrayCoderWrapper implements Converter<Model[], any[]> {
+    arrayCoderInstance = new ArrayCoder<Model, ModelCoder>(CoderClass);
+    
+    decode(data: any[]): Model[] {
+      return this.arrayCoderInstance.decode(data);
+    }
+    
+    encode(data: Model[]): any[] {
+      return this.arrayCoderInstance.encode(data);
+    }
+  };
+}

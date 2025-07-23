@@ -7,6 +7,7 @@ import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-produc
 import { AdaptyProfileCoder } from './shared/coders/adapty-profile';
 import { AdaptyPurchaseResultCoder } from './shared/coders/adapty-purchase-result';
 import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
+import { createArrayCoder } from './shared/coders/array';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -48,7 +49,7 @@ const coderRegistry = {
   restore_purchases: AdaptyProfileCoder,
   get_paywall: AdaptyPaywallCoder,
   get_paywall_for_default_audience: AdaptyPaywallCoder,
-  get_paywall_products: AdaptyPaywallProductCoder,
+  get_paywall_products: createArrayCoder<AdaptyPaywallProduct, AdaptyPaywallProductCoder>(AdaptyPaywallProductCoder),
   get_onboarding: AdaptyOnboardingCoder,
   get_onboarding_for_default_audience: AdaptyOnboardingCoder,
   make_purchase: AdaptyPurchaseResultCoder,
@@ -56,7 +57,10 @@ const coderRegistry = {
 
 // Get appropriate coder for method
 function getCoder(method: MethodName) {
-  return coderRegistry[method as keyof typeof coderRegistry];
+  const CoderClass = coderRegistry[method as keyof typeof coderRegistry];
+  if (!CoderClass) return null;
+
+  return new CoderClass();
 }
 
 export class Adapty implements AdaptyPlugin {
@@ -72,11 +76,11 @@ export class Adapty implements AdaptyPlugin {
    */
   public async handleMethodCall<M extends MethodName>(
     methodName: M,
-    body: string,
+    args: string,
   ): Promise<ExtractSuccessContent<ResponseByMethod<M>>> {
     const result = await AdaptyCapacitorPlugin.handleMethodCall({
       methodName,
-      args: body,
+      args,
     });
 
     // Parse JSON response with type safety
@@ -94,16 +98,9 @@ export class Adapty implements AdaptyPlugin {
         const successData: any = parsedResponse.success;
 
         // Apply decoder if available for this method
-        const Coder = getCoder(methodName);
-        if (Coder) {
-          const coder = new Coder();
-
-          // Handle array responses (like get_paywall_products)
-          if (Array.isArray(successData)) {
-            return successData.map((item: any) => coder.decode(item)) as ExtractSuccessContent<ResponseByMethod<M>>;
-          } else {
-            return coder.decode(successData) as ExtractSuccessContent<ResponseByMethod<M>>;
-          }
+        const coder = getCoder(methodName);
+        if (coder) {
+          return coder.decode(successData) as ExtractSuccessContent<ResponseByMethod<M>>;
         }
 
         // Return raw data for methods without specific coders
