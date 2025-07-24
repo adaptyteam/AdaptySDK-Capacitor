@@ -363,10 +363,14 @@ export class Adapty implements AdaptyPlugin {
 
   async identify(options: { customerUserId: string }): Promise<void> {
     const method = 'identify';
-    const args = {
-      customer_user_id: options.customerUserId,
+
+    const argsWithUndefined: Req['Identify.Request'] = {
       method,
+      customer_user_id: options.customerUserId,
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
