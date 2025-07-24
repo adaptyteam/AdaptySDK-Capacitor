@@ -310,6 +310,7 @@ export class Adapty implements AdaptyPlugin {
     return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
+  //todo: refactor later
   async getOnboarding(options: {
     placementId: string;
     locale?: string;
@@ -350,7 +351,13 @@ export class Adapty implements AdaptyPlugin {
 
   async getProfile(): Promise<AdaptyProfile> {
     const method = 'get_profile';
-    const args = { method };
+
+    const argsWithUndefined: Req['GetProfile.Request'] = {
+      method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
     return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
