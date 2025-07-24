@@ -38,7 +38,13 @@ import type { AdaptyUiMediaCache } from './shared/ui/types';
 import { filterUndefined } from './shared/utils/compact-object';
 import { mergeOptions } from './shared/utils/merge-options';
 import type { AdaptyPlugin } from './types/adapty-plugin';
-import type { AdaptyDefaultOptions, GetPaywallOptions, GetPaywallOptionsWithDefaults } from './types/configs';
+import type {
+  AdaptyDefaultOptions,
+  GetPaywallOptions,
+  GetPaywallOptionsWithDefaults,
+  GetPaywallForDefaultAudienceOptions,
+  GetPaywallForDefaultAudienceOptionsWithDefaults,
+} from './types/configs';
 import version from './version';
 
 type Req = components['requests'];
@@ -256,9 +262,9 @@ export class Adapty implements AdaptyPlugin {
       load_timeout: params.loadTimeoutMs / 1000,
       locale: optionsWithDefault.locale,
       fetch_policy:
-        params.fetchPolicy !== 'return_cache_data_if_not_expired_else_load'
-          ? { type: params.fetchPolicy }
-          : { type: params.fetchPolicy, max_age: params.maxAgeSeconds },
+        params.fetchPolicy === 'return_cache_data_if_not_expired_else_load'
+          ? { type: params.fetchPolicy, max_age: params.maxAgeSeconds }
+          : { type: params.fetchPolicy },
     };
 
     const args = filterUndefined(argsWithUndefined);
@@ -266,18 +272,26 @@ export class Adapty implements AdaptyPlugin {
     return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
-  async getPaywallForDefaultAudience(options: {
-    placementId: string;
-    locale?: string;
-    params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<AdaptyPaywall> {
+  async getPaywallForDefaultAudience(options: GetPaywallForDefaultAudienceOptions): Promise<AdaptyPaywall> {
     const method = 'get_paywall_for_default_audience';
-    const args = {
-      placement_id: options.placementId,
-      locale: options.locale,
+    const optionsWithDefault = mergeOptions<GetPaywallForDefaultAudienceOptionsWithDefaults>(
+      options,
+      this.options[method],
+    );
+    const params = optionsWithDefault.params;
+
+    const argsWithUndefined: Req['GetPaywallForDefaultAudience.Request'] = {
       method,
-      ...(options.params || {}),
+      placement_id: optionsWithDefault.placementId,
+      locale: optionsWithDefault.locale,
+      fetch_policy:
+        params.fetchPolicy === 'return_cache_data_if_not_expired_else_load'
+          ? { type: params.fetchPolicy, max_age: params.maxAgeSeconds }
+          : { type: params.fetchPolicy ?? 'reload_revalidating_cache_data' },
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     return await this.handleMethodCall(method, JSON.stringify(args));
   }
 

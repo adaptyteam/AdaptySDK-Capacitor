@@ -1,4 +1,4 @@
-import type { GetPlacementParamsInput } from '../shared/types/inputs';
+import type { GetPlacementParamsInput, GetPlacementForDefaultAudienceParamsInput } from '../shared/types/inputs';
 
 /**
  * Describes the options for the `getPaywall` method.
@@ -8,6 +8,16 @@ export interface GetPaywallOptions {
   placementId: string;
   locale?: string;
   params?: GetPlacementParamsInput;
+}
+
+/**
+ * Describes the options for the `getPaywallForDefaultAudience` method.
+ * @public
+ */
+export interface GetPaywallForDefaultAudienceOptions {
+  placementId: string;
+  locale?: string;
+  params?: GetPlacementForDefaultAudienceParamsInput;
 }
 
 /**
@@ -21,6 +31,12 @@ export interface AdaptyDefaultOptions {
   get_paywall: {
     params: Required<GetPlacementParamsInput>;
   };
+  /**
+   * Default options for the `getPaywallForDefaultAudience` method.
+   */
+  get_paywall_for_default_audience: {
+    params: GetPlacementForDefaultAudienceParamsInput;
+  };
 }
 
 /**
@@ -28,3 +44,10 @@ export interface AdaptyDefaultOptions {
  * @public
  */
 export type GetPaywallOptionsWithDefaults = AdaptyDefaultOptions['get_paywall'] & GetPaywallOptions;
+
+/**
+ * Merged type that combines GetPaywallForDefaultAudienceOptions with required params from AdaptyDefaultOptions
+ * @public
+ */
+export type GetPaywallForDefaultAudienceOptionsWithDefaults = AdaptyDefaultOptions['get_paywall_for_default_audience'] &
+  GetPaywallForDefaultAudienceOptions;

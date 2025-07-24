@@ -8,4 +8,9 @@ export const defaultAdaptyOptions: AdaptyDefaultOptions = {
       loadTimeoutMs: 5000,
     },
   },
+  get_paywall_for_default_audience: {
+    params: {
+      fetchPolicy: FetchPolicy.ReloadRevalidatingCacheData,
+    },
+  },
 };
