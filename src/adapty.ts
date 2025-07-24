@@ -246,7 +246,13 @@ export class Adapty implements AdaptyPlugin {
 
   async isActivated(): Promise<boolean> {
     const method = 'is_activated';
-    const args = { method };
+
+    const argsWithUndefined: Req['IsActivated.Request'] = {
+      method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
     const result = await this.handleMethodCall(method, JSON.stringify(args));
     return result;
   }
