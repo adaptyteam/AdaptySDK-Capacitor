@@ -16,8 +16,8 @@
     "preview": "vite preview",
     "android": "yarn build && yarn cap run android --target Pixel_9_Pro",
     "ios": "yarn build && yarn cap run ios --target 0D3D6293-9DDD-4420-B1EA-ACF32640F09E",
-    "dev:ios": "yarn cap run ios --live-reload --no-sync  --port 5173 --target 0D3D6293-9DDD-4420-B1EA-ACF32640F09E",
-    "dev:android": "yarn cap run android --live-reload --no-sync --port 5173 --target Pixel_9_Pro",
+    "dev:ios": "yarn cap run ios --live-reload --no-sync --host 192.168.1.76 --port 5173 --target 0D3D6293-9DDD-4420-B1EA-ACF32640F09E",
+    "dev:android": "yarn cap run android --live-reload --no-sync --host 192.168.1.76 --port 5173 --target Pixel_9_Pro",
     "link-assets": "ruby scripts/copy-adapty-assets.rb",
     "capacitor:sync:before": "ruby scripts/copy-adapty-assets.rb"
   },

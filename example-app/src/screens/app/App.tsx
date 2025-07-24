@@ -23,6 +23,20 @@ const App: React.FC = () => {
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
   const [customerUserId, setCustomerUserId] = useState<string>('');
 
+  // Paywall extended configuration
+  const [placementId, setPlacementId] = useState<string>(getPlacementId());
+  const [locale, setLocale] = useState<string>('');
+  const [timeout, setTimeout] = useState<string>('6000');
+  const [maxAge, setMaxAge] = useState<string>('120');
+  const [customTagsJson, setCustomTagsJson] = useState<string>('{"USERNAME":"TestUser","CITY":"Capacitor"}');
+  const [fetchPolicyIndex, setFetchPolicyIndex] = useState<number>(0);
+
+  const fetchPolicies = [
+    'reload_revalidating_cache_data',
+    'return_cache_data_else_load',
+    'return_cache_data_if_not_expired_else_load'
+  ] as const;
+
   const adapty = new Adapty();
 
   const testActivate = async () => {
@@ -81,30 +95,58 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchPaywall = async () => {
+  const fetchPaywall = async (forDefaultAudience: boolean = false) => {
     if (!isActivated) return;
 
     setIsLoadingPaywall(true);
     try {
-      console.log('[ADAPTY] Fetching paywall...');
-      const paywall = await adapty.getPaywallForDefaultAudience({
-        placementId: getPlacementId(),
-        params: {
-          fetchPolicy: 'reload_revalidating_cache_data',
-        },
-      });
+      console.log('[ADAPTY] Fetching paywall:', placementId);
+      const fetchPolicy = fetchPolicies[fetchPolicyIndex];
+
+      let paywall: AdaptyPaywall;
+
+      if (forDefaultAudience) {
+        // Create params based on fetch policy
+        let params: any = { fetchPolicy };
+
+        if (fetchPolicy === 'return_cache_data_if_not_expired_else_load') {
+          params.maxAgeSeconds = parseFloat(maxAge);
+        }
+
+        paywall = await adapty.getPaywallForDefaultAudience({
+          placementId: placementId,
+          ...(locale ? { locale } : {}),
+          params,
+        });
+      } else {
+        // For regular getPaywall, add timeout support
+        let params: any = { fetchPolicy };
+
+        if (fetchPolicy === 'return_cache_data_if_not_expired_else_load') {
+          params.maxAgeSeconds = parseFloat(maxAge);
+        }
+
+        params.loadTimeoutMs = parseFloat(timeout);
+
+        paywall = await adapty.getPaywall({
+          placementId: placementId,
+          ...(locale ? { locale } : {}),
+          params,
+        });
+      }
 
       console.log('[ADAPTY] Paywall fetched:', paywall);
       setPaywall(paywall);
 
-      // // Log show paywall
-      // await adapty.logShowPaywall({ paywall });
-      //
-      // // Fetch products
-      // const productsResult = await adapty.getPaywallProducts({ paywall });
-      // setProducts(productsResult);
-      //
-      // setResult(`Paywall loaded: ${paywall.name}`);
+      // Log show paywall
+      await adapty.logShowPaywall({ paywall });
+
+      // Fetch products
+      const productsResult = await adapty.getPaywallProducts({ paywall });
+      setProducts(productsResult);
+
+      const audienceType = forDefaultAudience ? 'for default audience' : '';
+      setResult(`Paywall loaded ${audienceType}: ${paywall.name}`);
     } catch (error) {
       console.error('[ADAPTY] Error fetching paywall', error);
       setResult(`Error fetching paywall: ${error}`);
@@ -170,6 +212,23 @@ const App: React.FC = () => {
     }
   };
 
+  const createWebPaywallUrl = async () => {
+    if (!paywall) {
+      setResult('Error: Paywall not loaded. Please load paywall first.');
+      return;
+    }
+
+    try {
+      console.log('[ADAPTY] Creating web paywall URL...');
+      const url = await adapty.createWebPaywallUrl({ paywallOrProduct: paywall });
+      setResult(`Web paywall URL created: ${url}`);
+      console.log('[ADAPTY] Web paywall URL:', url);
+    } catch (error) {
+      console.error('[ADAPTY] Error creating web paywall URL', error);
+      setResult(`Error creating web paywall URL: ${error}`);
+    }
+  };
+
   const openWebPaywall = async () => {
     if (!paywall) {
       setResult('Error: Paywall not loaded. Please load paywall first.');
@@ -183,6 +242,29 @@ const App: React.FC = () => {
     } catch (error) {
       console.error('[ADAPTY] Error opening web paywall', error);
       setResult(`Error opening web paywall: ${error}`);
+    }
+  };
+
+  const createWebPaywallUrlForProduct = async (product: AdaptyPaywallProduct) => {
+    try {
+      console.log('[ADAPTY] Creating web paywall URL for product:', product.vendorProductId);
+      const url = await adapty.createWebPaywallUrl({ paywallOrProduct: product });
+      setResult(`Web URL for ${product.vendorProductId}: ${url}`);
+      console.log('[ADAPTY] Web paywall URL for product:', url);
+    } catch (error) {
+      console.error('[ADAPTY] Error creating web paywall URL for product', error);
+      setResult(`Error creating web URL for product: ${error}`);
+    }
+  };
+
+  const openWebPaywallForProduct = async (product: AdaptyPaywallProduct) => {
+    try {
+      console.log('[ADAPTY] Opening web paywall for product:', product.vendorProductId);
+      await adapty.openWebPaywall({ paywallOrProduct: product });
+      setResult(`Web paywall opened for: ${product.vendorProductId}`);
+    } catch (error) {
+      console.error('[ADAPTY] Error opening web paywall for product', error);
+      setResult(`Error opening web paywall for product: ${error}`);
     }
   };
 
@@ -250,11 +332,16 @@ const App: React.FC = () => {
     try {
       setResult('Creating paywall view...');
 
+      let customTags: Record<string, string>;
+      try {
+        customTags = JSON.parse(customTagsJson);
+      } catch (error) {
+        customTags = {};
+        console.warn('[ADAPTY] Invalid custom tags JSON, using empty object:', error);
+      }
+
       const view = await createPaywallView(paywall, {
-        customTags: {
-          'USERNAME': 'TestUser',
-          'CITY': 'Capacitor',
-        },
+        customTags,
       });
 
       // Register event handlers for paywall view
@@ -414,7 +501,92 @@ const App: React.FC = () => {
   const renderPaywallSection = () => {
     return (
       <div className="section">
-        <h3 className="section-title">Paywall ({getPlacementId()})</h3>
+        <h3 className="section-title">Paywall Configuration</h3>
+
+        {/* Configuration inputs */}
+        <div className="input-group">
+          <input
+            type="text"
+            value={placementId}
+            onChange={(e) => setPlacementId(e.target.value)}
+            placeholder="Placement ID"
+            className="input"
+            disabled={!isActivated}
+          />
+          <input
+            type="text"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value)}
+            placeholder="Locale (optional)"
+            className="input"
+            disabled={!isActivated}
+          />
+        </div>
+
+        <div className="input-group">
+          <input
+            type="text"
+            value={timeout}
+            onChange={(e) => setTimeout(e.target.value)}
+            placeholder="Timeout (ms)"
+            className="input"
+            disabled={!isActivated}
+          />
+          <input
+            type="text"
+            value={maxAge}
+            onChange={(e) => setMaxAge(e.target.value)}
+            placeholder="Max age (seconds)"
+            className="input"
+            disabled={!isActivated}
+          />
+        </div>
+
+        <div className="input-group">
+          <select
+            value={fetchPolicyIndex}
+            onChange={(e) => setFetchPolicyIndex(parseInt(e.target.value))}
+            className="input"
+            disabled={!isActivated}
+          >
+            {fetchPolicies.map((policy, index) => (
+              <option key={policy} value={index}>
+                {policy.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="input-group">
+          <textarea
+            value={customTagsJson}
+            onChange={(e) => setCustomTagsJson(e.target.value)}
+            placeholder="Custom tags (JSON)"
+            className="input"
+            rows={2}
+            disabled={!isActivated}
+          />
+        </div>
+
+        {/* Load buttons */}
+        <div className="button-group">
+          <button
+            onClick={() => fetchPaywall(false)}
+            disabled={isLoadingPaywall || !isActivated}
+            className={`button button-primary ${(isLoadingPaywall || !isActivated) ? 'loading' : ''}`}
+          >
+            {isLoadingPaywall ? 'Loading...' : 'Load Paywall'}
+          </button>
+          <button
+            onClick={() => fetchPaywall(true)}
+            disabled={isLoadingPaywall || !isActivated}
+            className={`button button-secondary ${(isLoadingPaywall || !isActivated) ? 'loading' : ''}`}
+          >
+            {isLoadingPaywall ? 'Loading...' : 'Load (Default Audience)'}
+          </button>
+        </div>
+
+        {/* Paywall info */}
         <div className="info-box">
           {paywall ? (
             <div>
@@ -424,6 +596,15 @@ const App: React.FC = () => {
               <div><strong>Has Remote Config:</strong> {paywall.remoteConfig ? '✅ Yes' : '❌ No'}</div>
               <div><strong>Has Paywall Builder:</strong> {paywall.paywallBuilder ? '✅ Yes' : '❌ No'}</div>
               <div><strong>Products Count:</strong> {products.length}</div>
+              {paywall.remoteConfig && (
+                <div>
+                  <div><strong>Config Locale:</strong> {paywall.remoteConfig.lang}</div>
+                  <div><strong>Config Data:</strong> {paywall.remoteConfig.dataString}</div>
+                </div>
+              )}
+              {paywall.paywallBuilder && (
+                <div><strong>Builder Locale:</strong> {paywall.paywallBuilder.lang}</div>
+              )}
 
               {products.length > 0 && (
                 <div className="products-list">
@@ -433,12 +614,26 @@ const App: React.FC = () => {
                       <div className="product-title">{product.localizedTitle}</div>
                       <div className="product-price">Price: {product.price?.localizedString || 'N/A'}</div>
                       <div className="product-id">ID: {product.vendorProductId}</div>
-                      <button
-                        onClick={() => makePurchase(product)}
-                        className="button button-success button-small"
-                      >
-                        Purchase
-                      </button>
+                      <div className="product-buttons">
+                        <button
+                          onClick={() => makePurchase(product)}
+                          className="button button-success button-small"
+                        >
+                          Purchase
+                        </button>
+                        <button
+                          onClick={() => createWebPaywallUrlForProduct(product)}
+                          className="button button-info button-small"
+                        >
+                          Create Web URL
+                        </button>
+                        <button
+                          onClick={() => openWebPaywallForProduct(product)}
+                          className="button button-purple button-small"
+                        >
+                          Open Web
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -448,20 +643,22 @@ const App: React.FC = () => {
             <div>No paywall loaded</div>
           )}
         </div>
+
+        {/* Action buttons */}
         <div className="button-group">
-          <button
-            onClick={fetchPaywall}
-            disabled={isLoadingPaywall || !isActivated}
-            className={`button button-primary ${(isLoadingPaywall || !isActivated) ? 'loading' : ''}`}
-          >
-            {isLoadingPaywall ? 'Loading...' : 'Load Paywall'}
-          </button>
           <button
             onClick={presentPaywall}
             disabled={!paywall || !paywall.hasViewConfiguration}
             className="button button-success"
           >
             Present Paywall
+          </button>
+          <button
+            onClick={createWebPaywallUrl}
+            disabled={!paywall}
+            className="button button-info"
+          >
+            Create Web URL
           </button>
           <button
             onClick={openWebPaywall}
@@ -660,7 +857,7 @@ const App: React.FC = () => {
       <main>
         <h1 className="title">Adapty Capacitor Plugin</h1>
         <p className="description">
-          This project demonstrates the functionality of the Adapty Capacitor plugin.
+          This project devtools for development and testing.
         </p>
 
         {/* Credentials Info */}
