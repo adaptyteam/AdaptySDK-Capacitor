@@ -419,7 +419,13 @@ export class Adapty implements AdaptyPlugin {
 
   async logout(): Promise<void> {
     const method = 'logout';
-    const args = { method };
+
+    const argsWithUndefined: Req['Logout.Request'] = {
+      method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
