@@ -297,10 +297,16 @@ export class Adapty implements AdaptyPlugin {
 
   async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<AdaptyPaywallProduct[]> {
     const method = 'get_paywall_products';
-    const args = {
-      paywall: options.paywall,
+
+    const paywallCoder = new AdaptyPaywallCoder();
+
+    const argsWithUndefined: Req['GetPaywallProducts.Request'] = {
       method,
+      paywall: paywallCoder.encode(options.paywall),
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
