@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingPaywall, setIsLoadingPaywall] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
+  const [customerUserId, setCustomerUserId] = useState<string>('');
 
   const adapty = new Adapty();
 
@@ -352,6 +353,31 @@ const App: React.FC = () => {
     }
   };
 
+  const renderIdentifySection = () => {
+    return (
+      <div className="section">
+        <h3 className="section-title">Identify User</h3>
+        <div className="input-group">
+          <input
+            type="text"
+            value={customerUserId}
+            onChange={(e) => setCustomerUserId(e.target.value)}
+            placeholder="customer user ID"
+            className="input"
+            disabled={!isActivated}
+          />
+          <button
+            onClick={identify}
+            disabled={!isActivated || !customerUserId.trim()}
+            className="button button-info"
+          >
+            Identify User
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderProfileSection = () => {
     const accessLevel = getAccessLevel();
 
@@ -494,11 +520,15 @@ const App: React.FC = () => {
 
   const identify = async () => {
     if (!isActivated) return;
+    if (!customerUserId.trim()) {
+      setResult('Error: Customer User ID is required');
+      return;
+    }
 
     try {
       console.log('[ADAPTY] Identifying user...');
-      await adapty.identify({ customerUserId: 'test-user-' + Date.now() });
-      setResult('User identified successfully');
+      await adapty.identify({ customerUserId: customerUserId.trim() });
+      setResult(`User identified successfully with ID: ${customerUserId.trim()}`);
       await fetchProfile(); // Refresh profile
     } catch (error) {
       console.error('[ADAPTY] Error identifying user', error);
@@ -588,13 +618,6 @@ const App: React.FC = () => {
           >
             Update Attribution
           </button>
-          <button
-            onClick={identify}
-            disabled={!isActivated}
-            className="button button-info"
-          >
-            Identify User
-          </button>
         </div>
         <div className="button-group">
           <button
@@ -680,6 +703,9 @@ const App: React.FC = () => {
             {result}
           </div>
         )}
+
+        {/* Identify Section */}
+        {isActivated && renderIdentifySection()}
 
         {/* Profile Section */}
         {isActivated && renderProfileSection()}

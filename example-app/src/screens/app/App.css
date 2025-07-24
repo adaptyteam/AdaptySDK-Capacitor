@@ -45,6 +45,27 @@
   font-size: 14px;
 }
 
+.input {
+  padding: 8px;
+  margin-right: 10px;
+  width: 300px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.input:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.6;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
 .button-group {
   display: flex;
   gap: 10px;
