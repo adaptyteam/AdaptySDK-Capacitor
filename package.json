@@ -99,5 +99,8 @@
     "android": {
       "src": "android"
     }
+  },
+  "dependencies": {
+    "ts-deepmerge": "^7.0.3"
   }
 }

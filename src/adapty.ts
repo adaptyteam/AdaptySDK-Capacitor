@@ -25,7 +25,6 @@ import type {
   MakePurchaseParamsInput,
   FileLocation,
   LogLevel,
-  FetchPolicy,
 } from './shared/types/inputs';
 import {
   isErrorResponse,
@@ -35,8 +34,9 @@ import {
   type MethodResponseMap,
 } from './shared/types/method-types';
 import type { AdaptyUiMediaCache } from './shared/ui/types';
+import { mergeOptions } from './shared/utils/merge-options';
 import type { AdaptyPlugin } from './types/adapty-plugin';
-import type { AdaptyDefaultOptions, GetPaywallOptions } from './types/configs';
+import type { AdaptyDefaultOptions, GetPaywallOptions, GetPaywallOptionsWithDefaults } from './types/configs';
 import version from './version';
 
 interface ProfileEventData {
@@ -63,47 +63,14 @@ function getCoder(method: MethodName) {
   return new CoderClass();
 }
 
-type GetPaywallParamsWithDefaults = GetPlacementForDefaultAudienceParamsInput & {
-  loadTimeoutMs: number;
-  fetchPolicy: FetchPolicy;
-};
-type GetPaywallOptionsWithDefaults = Omit<GetPaywallOptions, 'params'> & {
-  params: GetPaywallParamsWithDefaults;
-};
-
 export class Adapty implements AdaptyPlugin {
   private activating: Promise<void> | null = null;
-  private readonly options: AdaptyDefaultOptions;
-  private defaultMediaCache: AdaptyUiMediaCache = {
+  private readonly options: AdaptyDefaultOptions = defaultAdaptyOptions;
+  private readonly defaultMediaCache: AdaptyUiMediaCache = {
     memoryStorageTotalCostLimit: 100 * 1024 * 1024,
     memoryStorageCountLimit: 2147483647,
     diskStorageSizeLimit: 100 * 1024 * 1024,
   };
-
-  constructor(options: AdaptyDefaultOptions = defaultAdaptyOptions) {
-    this.options = options;
-  }
-
-  // Overload for get_paywall
-  private mergeOptions(key: 'get_paywall', options: GetPaywallOptions): GetPaywallOptionsWithDefaults;
-  // Generic implementation
-  private mergeOptions<T extends { params?: any }>(key: keyof AdaptyDefaultOptions, options: T): T {
-    const defaults = (this.options[key] || {}) as any;
-
-    const merged = {
-      ...defaults,
-      ...options,
-    };
-
-    if (defaults.params || options.params) {
-      merged.params = {
-        ...(defaults.params || {}),
-        ...(options.params || {}),
-      };
-    }
-
-    return merged;
-  }
 
   /**
    * Handle method calls through crossplatform bridge with type safety
@@ -276,13 +243,13 @@ export class Adapty implements AdaptyPlugin {
 
   async getPaywall(options: GetPaywallOptions): Promise<AdaptyPaywall> {
     const method = 'get_paywall';
-    const finalOptions = this.mergeOptions(method, options);
-    const params = finalOptions.params;
+    const optionsWithDefault = mergeOptions<GetPaywallOptionsWithDefaults>(options, this.options[method]);
+    const params = optionsWithDefault.params;
 
     const args: any = {
       method,
-      placement_id: finalOptions.placementId,
-      locale: finalOptions.locale,
+      placement_id: optionsWithDefault.placementId,
+      locale: optionsWithDefault.locale,
       load_timeout: params.loadTimeoutMs / 1000,
     };
 

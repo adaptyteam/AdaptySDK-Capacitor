@@ -18,5 +18,13 @@ export interface AdaptyDefaultOptions {
   /**
    * Default options for the `getPaywall` method.
    */
-  get_paywall: Pick<GetPaywallOptions, 'params'>;
+  get_paywall: {
+    params: Required<GetPlacementParamsInput>;
+  };
 }
+
+/**
+ * Merged type that combines GetPaywallOptions with required params from AdaptyDefaultOptions
+ * @public
+ */
+export type GetPaywallOptionsWithDefaults = AdaptyDefaultOptions['get_paywall'] & GetPaywallOptions;
