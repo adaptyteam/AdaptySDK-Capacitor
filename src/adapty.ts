@@ -185,8 +185,11 @@ export class Adapty implements AdaptyPlugin {
   }
 
   private async performActivation(apiKey: string, params: ActivateParamsInput): Promise<void> {
-    // Build configuration object
-    const configuration: Record<string, any> = {
+    const method = 'activate';
+
+    const coder = new AdaptyUiMediaCacheCoder();
+
+    const configurationWithUndefined: components['defs']['AdaptyConfiguration'] = {
       api_key: apiKey,
       cross_platform_sdk_name: 'capacitor',
       cross_platform_sdk_version: version,
@@ -194,53 +197,25 @@ export class Adapty implements AdaptyPlugin {
       ip_address_collection_disabled: params.ipAddressCollectionDisabled ?? false,
       server_cluster: params.serverCluster ?? 'default',
       activate_ui: params.activateUi ?? true,
+      customer_user_id: params.customerUserId,
+      log_level: params.logLevel,
+      backend_base_url: params.backendBaseUrl,
+      backend_fallback_base_url: params.backendFallbackBaseUrl,
+      backend_configs_base_url: params.backendConfigsBaseUrl,
+      backend_proxy_host: params.backendProxyHost,
+      backend_proxy_port: params.backendProxyPort,
+      media_cache: coder.encode(params.mediaCache ?? this.defaultMediaCache),
+      google_adid_collection_disabled: params.android?.adIdCollectionDisabled,
+      apple_idfa_collection_disabled: params.ios?.idfaCollectionDisabled,
     };
 
-    if (params.customerUserId) {
-      configuration.customer_user_id = params.customerUserId;
-    }
-
-    if (params.logLevel) {
-      configuration.log_level = params.logLevel;
-    }
-
-    if (params.backendBaseUrl) {
-      configuration.backend_base_url = params.backendBaseUrl;
-    }
-
-    if (params.backendFallbackBaseUrl) {
-      configuration.backend_fallback_base_url = params.backendFallbackBaseUrl;
-    }
-
-    if (params.backendConfigsBaseUrl) {
-      configuration.backend_configs_base_url = params.backendConfigsBaseUrl;
-    }
-
-    if (params.backendProxyHost) {
-      configuration.backend_proxy_host = params.backendProxyHost;
-    }
-
-    if (params.backendProxyPort) {
-      configuration.backend_proxy_port = params.backendProxyPort;
-    }
-
-    // Encode media cache configuration
-    const coder = new AdaptyUiMediaCacheCoder();
-    configuration.media_cache = coder.encode(params.mediaCache ?? this.defaultMediaCache);
-
-    if (params.android?.adIdCollectionDisabled !== undefined) {
-      configuration.google_adid_collection_disabled = params.android.adIdCollectionDisabled;
-    }
-
-    if (params.ios?.idfaCollectionDisabled !== undefined) {
-      configuration.apple_idfa_collection_disabled = params.ios.idfaCollectionDisabled;
-    }
-
-    const method = 'activate';
-    const activateRequest = {
-      configuration: configuration,
+    const activateRequestWithUndefined: Req['Activate.Request'] = {
       method,
+      configuration: filterUndefined(configurationWithUndefined),
     };
+
+    const activateRequest = filterUndefined(activateRequestWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(activateRequest));
   }
 
