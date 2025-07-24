@@ -18,6 +18,7 @@ import type {
   AdaptyProfileParameters,
   RefundPreference,
 } from './shared/types';
+import type { components } from './shared/types/api';
 import type {
   ActivateParamsInput,
   GetPlacementParamsInput,
@@ -34,10 +35,13 @@ import {
   type MethodResponseMap,
 } from './shared/types/method-types';
 import type { AdaptyUiMediaCache } from './shared/ui/types';
+import { filterUndefined } from './shared/utils/compact-object';
 import { mergeOptions } from './shared/utils/merge-options';
 import type { AdaptyPlugin } from './types/adapty-plugin';
 import type { AdaptyDefaultOptions, GetPaywallOptions, GetPaywallOptionsWithDefaults } from './types/configs';
 import version from './version';
+
+type Req = components['requests'];
 
 interface ProfileEventData {
   profile: AdaptyProfile;
@@ -246,23 +250,18 @@ export class Adapty implements AdaptyPlugin {
     const optionsWithDefault = mergeOptions<GetPaywallOptionsWithDefaults>(options, this.options[method]);
     const params = optionsWithDefault.params;
 
-    const args: any = {
+    const argsWithUndefined: Req['GetPaywall.Request'] = {
       method,
       placement_id: optionsWithDefault.placementId,
-      locale: optionsWithDefault.locale,
       load_timeout: params.loadTimeoutMs / 1000,
+      locale: optionsWithDefault.locale,
+      fetch_policy:
+        params.fetchPolicy !== 'return_cache_data_if_not_expired_else_load'
+          ? { type: params.fetchPolicy }
+          : { type: params.fetchPolicy, max_age: params.maxAgeSeconds },
     };
 
-    if (params.fetchPolicy !== 'return_cache_data_if_not_expired_else_load') {
-      args['fetch_policy'] = {
-        type: params.fetchPolicy,
-      };
-    } else {
-      args['fetch_policy'] = {
-        type: params.fetchPolicy,
-        max_age: params.maxAgeSeconds,
-      };
-    }
+    const args = filterUndefined(argsWithUndefined);
 
     return await this.handleMethodCall(method, JSON.stringify(args));
   }
