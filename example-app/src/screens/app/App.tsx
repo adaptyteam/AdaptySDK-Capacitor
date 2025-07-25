@@ -456,7 +456,7 @@ const App: React.FC = () => {
           <button
             onClick={identify}
             disabled={!isActivated || !customerUserId.trim()}
-            className="button button-info"
+            className="button button-secondary"
           >
             Identify User
           </button>
@@ -490,7 +490,7 @@ const App: React.FC = () => {
         <button
           onClick={fetchProfile}
           disabled={isLoadingProfile}
-          className={`button button-info ${isLoadingProfile ? 'loading' : ''}`}
+          className={`button button-primary ${isLoadingProfile ? 'loading' : ''}`}
         >
           {isLoadingProfile ? 'Loading...' : 'Refresh Profile'}
         </button>
@@ -617,19 +617,19 @@ const App: React.FC = () => {
                       <div className="product-buttons">
                         <button
                           onClick={() => makePurchase(product)}
-                          className="button button-success button-small"
+                          className="button button-primary button-small"
                         >
                           Purchase
                         </button>
                         <button
                           onClick={() => createWebPaywallUrlForProduct(product)}
-                          className="button button-info button-small"
+                          className="button button-secondary button-small"
                         >
                           Create Web URL
                         </button>
                         <button
                           onClick={() => openWebPaywallForProduct(product)}
-                          className="button button-purple button-small"
+                          className="button button-secondary button-small"
                         >
                           Open Web
                         </button>
@@ -649,21 +649,21 @@ const App: React.FC = () => {
           <button
             onClick={presentPaywall}
             disabled={!paywall || !paywall.hasViewConfiguration}
-            className="button button-success"
+            className="button button-primary"
           >
             Present Paywall
           </button>
           <button
             onClick={createWebPaywallUrl}
             disabled={!paywall}
-            className="button button-info"
+            className="button button-secondary"
           >
             Create Web URL
           </button>
           <button
             onClick={openWebPaywall}
             disabled={!paywall}
-            className="button button-purple"
+            className="button button-secondary"
           >
             Open Web Paywall
           </button>
@@ -693,7 +693,7 @@ const App: React.FC = () => {
           <button
             onClick={fetchOnboarding}
             disabled={isLoadingOnboarding || !isActivated}
-            className={`button button-success ${(isLoadingOnboarding || !isActivated) ? 'loading' : ''}`}
+            className={`button button-primary ${(isLoadingOnboarding || !isActivated) ? 'loading' : ''}`}
           >
             {isLoadingOnboarding ? 'Loading...' : 'Load Onboarding'}
           </button>
@@ -797,14 +797,14 @@ const App: React.FC = () => {
           <button
             onClick={restorePurchases}
             disabled={!isActivated}
-            className="button button-orange"
+            className="button button-primary"
           >
             Restore Purchases
           </button>
           <button
             onClick={updateProfile}
             disabled={!isActivated}
-            className="button button-teal"
+            className="button button-secondary"
           >
             Update Profile
           </button>
@@ -820,21 +820,21 @@ const App: React.FC = () => {
           <button
             onClick={presentCodeRedemptionSheet}
             disabled={!isActivated}
-            className="button button-purple"
+            className="button button-secondary"
           >
             Code Redemption (iOS)
           </button>
           <button
             onClick={setLogLevel}
             disabled={!isActivated}
-            className="button button-warning"
+            className="button button-secondary"
           >
             Set Log Level
           </button>
           <button
             onClick={setIntegrationId}
             disabled={!isActivated}
-            className="button button-purple"
+            className="button button-secondary"
           >
             Set Integration ID
           </button>
@@ -857,7 +857,7 @@ const App: React.FC = () => {
       <main>
         <h1 className="title">Adapty Capacitor Plugin</h1>
         <p className="description">
-          This project devtools for development and testing.
+          This project is devtools for development and testing.
         </p>
 
         {/* Credentials Info */}
