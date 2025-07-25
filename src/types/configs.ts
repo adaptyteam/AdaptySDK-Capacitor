@@ -1,4 +1,9 @@
-import type { GetPlacementParamsInput, GetPlacementForDefaultAudienceParamsInput } from '../shared/types/inputs';
+import type { AdaptyPaywallProduct } from '../shared/types';
+import type {
+  GetPlacementParamsInput,
+  GetPlacementForDefaultAudienceParamsInput,
+  MakePurchaseParamsInput,
+} from '../shared/types/inputs';
 
 /**
  * Describes the options for the `getPaywall` method.
@@ -18,6 +23,15 @@ export interface GetPaywallForDefaultAudienceOptions {
   placementId: string;
   locale?: string;
   params?: GetPlacementForDefaultAudienceParamsInput;
+}
+
+/**
+ * Describes the options for the `makePurchase` method.
+ * @public
+ */
+export interface MakePurchaseOptions {
+  product: AdaptyPaywallProduct;
+  params?: MakePurchaseParamsInput;
 }
 
 /**

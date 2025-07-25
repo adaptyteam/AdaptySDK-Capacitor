@@ -183,12 +183,42 @@ export type AdaptyAndroidSubscriptionUpdateReplacementMode =
 export interface AdaptyAndroidSubscriptionUpdateParameters {
   oldSubVendorProductId: string;
   prorationMode: AdaptyAndroidSubscriptionUpdateReplacementMode;
-  isOfferPersonalized?: boolean;
 }
 
-export interface MakePurchaseParamsInput {
-  android?: AdaptyAndroidSubscriptionUpdateParameters;
+export interface AdaptyAndroidPurchaseParams {
+  /**
+   * Subscription update parameters
+   * @platform android
+   */
+  subscriptionUpdateParams?: {
+    oldSubVendorProductId: string;
+    prorationMode: AdaptyAndroidSubscriptionUpdateReplacementMode;
+  };
+  /**
+   * Whether the offer is personalized
+   * @platform android
+   * @see {@link https://developer.android.com/google/play/billing/integrate#personalized-price}
+   */
+  isOfferPersonalized?: boolean;
+  /**
+   * Obfuscated account ID
+   * @platform android
+   */
+  obfuscatedAccountId?: string;
+  /**
+   * Obfuscated profile ID
+   * @platform android
+   */
+  obfuscatedProfileId?: string;
 }
+
+export type MakePurchaseParamsInput = {
+      /**
+       * Android purchase parameters
+       * @platform android
+       */
+      android?: AdaptyAndroidPurchaseParams;
+    };
 
 export type FileLocation = {
   ios: {

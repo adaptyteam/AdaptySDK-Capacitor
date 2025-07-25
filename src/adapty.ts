@@ -6,6 +6,7 @@ import { AdaptyOnboardingCoder } from './shared/coders/adapty-onboarding';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
 import { AdaptyProfileCoder } from './shared/coders/adapty-profile';
+import { AdaptyPurchaseParamsCoder } from './shared/coders/adapty-purchase-params';
 import { AdaptyPurchaseResultCoder } from './shared/coders/adapty-purchase-result';
 import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
 import { createArrayCoder } from './shared/coders/array';
@@ -23,7 +24,6 @@ import type {
   ActivateParamsInput,
   GetPlacementParamsInput,
   GetPlacementForDefaultAudienceParamsInput,
-  MakePurchaseParamsInput,
   FileLocation,
   LogLevel,
 } from './shared/types/inputs';
@@ -44,6 +44,7 @@ import type {
   GetPaywallOptionsWithDefaults,
   GetPaywallForDefaultAudienceOptions,
   GetPaywallForDefaultAudienceOptionsWithDefaults,
+  MakePurchaseOptions,
 } from './types/configs';
 import version from './version';
 
@@ -410,21 +411,27 @@ export class Adapty implements AdaptyPlugin {
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
-  async makePurchase(options: {
-    product: AdaptyPaywallProduct;
-    params?: MakePurchaseParamsInput;
-  }): Promise<AdaptyPurchaseResult> {
+  async makePurchase(options: MakePurchaseOptions): Promise<AdaptyPurchaseResult> {
     const method = 'make_purchase';
-    const args = {
-      product: options.product,
-      method,
-      ...(options.params || {}),
-    };
-    const rawResult = await this.handleMethodCall(method, JSON.stringify(args));
+    const params = options.params ?? {};
 
-    // Decode the purchase result using the coder to convert snake_case to camelCase
-    const purchaseResultCoder = new AdaptyPurchaseResultCoder();
-    return purchaseResultCoder.decode(rawResult as any);
+    const productCoder = new AdaptyPaywallProductCoder();
+    const purchaseParamsCoder = new AdaptyPurchaseParamsCoder();
+
+    const encodedProduct = productCoder.encode(options.product);
+    const productInput = productCoder.getInput(encodedProduct);
+    const purchaseParams = purchaseParamsCoder.encode(params);
+
+    const argsWithUndefined: Req['MakePurchase.Request'] = {
+      method,
+      product: productInput,
+      subscription_update_params: purchaseParams.subscription_update_params,
+      is_offer_personalized: purchaseParams.is_offer_personalized,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async presentCodeRedemptionSheet(): Promise<void> {
