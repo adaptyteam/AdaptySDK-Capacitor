@@ -6,7 +6,6 @@ import {
   AdaptyPaywallProduct,
   AdaptyOnboarding,
   createPaywallView,
-  EventHandlers,
 } from '@adapty/capacitor';
 import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
 import './App.css';
@@ -47,6 +46,7 @@ const App: React.FC = () => {
         params: {
           logLevel: 'verbose',
           observerMode: false,
+          __ignoreActivationOnFastRefresh: import.meta.env.DEV,
         }
       });
       setResult('Adapty activated successfully!');
