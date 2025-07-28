@@ -41,15 +41,21 @@ const App: React.FC = () => {
   const testActivate = async () => {
     try {
       setResult('Activating Adapty...');
+      const trimmedCustomerUserId = customerUserId.trim();
+
       await adapty.activate({
         apiKey: getApiKey(),
         params: {
+          // serverCluster: 'cn',
+          // backendBaseUrl: 'http://localhost:8080',
+          ...(trimmedCustomerUserId ? { customerUserId: trimmedCustomerUserId } : {}),
           logLevel: 'verbose',
           observerMode: false,
           __ignoreActivationOnFastRefresh: import.meta.env.DEV,
         }
       });
-      setResult('Adapty activated successfully!');
+      const customerIdMessage = trimmedCustomerUserId ? ` customer user id: ${trimmedCustomerUserId}` : '';
+      setResult(`Adapty activated successfully!${customerIdMessage}`);
       setIsActivated(true);
 
       // Add event listener for profile updates
@@ -451,11 +457,10 @@ const App: React.FC = () => {
             onChange={(e) => setCustomerUserId(e.target.value)}
             placeholder="customer user ID"
             className="input"
-            disabled={!isActivated}
           />
           <button
             onClick={identify}
-            disabled={!isActivated || !customerUserId.trim()}
+            disabled={!customerUserId.trim()}
             className="button button-secondary"
           >
             Identify User
@@ -716,7 +721,6 @@ const App: React.FC = () => {
   };
 
   const identify = async () => {
-    if (!isActivated) return;
     if (!customerUserId.trim()) {
       setResult('Error: Customer User ID is required');
       return;
@@ -724,9 +728,13 @@ const App: React.FC = () => {
 
     try {
       console.log('[ADAPTY] Identifying user...');
-      await adapty.identify({ customerUserId: customerUserId.trim() });
-      setResult(`User identified successfully with ID: ${customerUserId.trim()}`);
-      await fetchProfile(); // Refresh profile
+      if (isActivated) {
+        await adapty.identify({ customerUserId: customerUserId.trim() });
+        setResult(`User identified successfully with ID: ${customerUserId.trim()}`);
+        await fetchProfile();
+      } else {
+        setResult('Customer user Id will be set on activation');
+      }
     } catch (error) {
       console.error('[ADAPTY] Error identifying user', error);
       setResult(`Error identifying user: ${error}`);
@@ -876,6 +884,9 @@ const App: React.FC = () => {
           </div>
         </div>
 
+        {/* Identify Section */}
+        {renderIdentifySection()}
+
         {/* Activation Section */}
         <div className="section">
           <h3 className="section-title">SDK Activation</h3>
@@ -900,9 +911,6 @@ const App: React.FC = () => {
             {result}
           </div>
         )}
-
-        {/* Identify Section */}
-        {isActivated && renderIdentifySection()}
 
         {/* Profile Section */}
         {isActivated && renderProfileSection()}
