@@ -12,5 +12,8 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    watch: {
+      ignored: ['!**/node_modules/@adapty/capacitor/**', '**/node_modules/**', '**/.git/**'],
+    },
   },
 });
