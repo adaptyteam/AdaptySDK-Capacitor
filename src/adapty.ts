@@ -358,10 +358,16 @@ export class Adapty implements AdaptyPlugin {
 
   async logShowPaywall(options: { paywall: AdaptyPaywall }): Promise<void> {
     const method = 'log_show_paywall';
-    const args = {
-      paywall: options.paywall,
+
+    const paywallCoder = new AdaptyPaywallCoder();
+
+    const argsWithUndefined: Req['LogShowPaywall.Request'] = {
       method,
+      paywall: paywallCoder.encode(options.paywall),
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
@@ -436,28 +442,40 @@ export class Adapty implements AdaptyPlugin {
 
   async presentCodeRedemptionSheet(): Promise<void> {
     const method = 'present_code_redemption_sheet';
-    const args = { method };
+
+    const argsWithUndefined: Req['PresentCodeRedemptionSheet.Request'] = {
+      method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void> {
     const method = 'report_transaction';
-    const args = {
+
+    const argsWithUndefined: Req['ReportTransaction.Request'] = {
+      method,
       transaction_id: options.transactionId,
       variation_id: options.variationId,
-      method,
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async restorePurchases(): Promise<AdaptyProfile> {
     const method = 'restore_purchases';
-    const args = { method };
-    const rawProfile = await this.handleMethodCall(method, JSON.stringify(args));
 
-    // Decode the profile using the coder to convert snake_case to camelCase
-    const profileCoder = new AdaptyProfileCoder();
-    return profileCoder.decode(rawProfile as any);
+    const argsWithUndefined: Req['RestorePurchases.Request'] = {
+      method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async setFallback(options: { fileLocation: FileLocation }): Promise<void> {
