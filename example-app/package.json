@@ -10,6 +10,7 @@
   "scripts": {
     "credentials": "node scripts/credentials.js",
     "credentials-force": "node scripts/credentials.js --force-bundle",
+    "postinstall": "yarn credentials",
     "prestart": "yarn credentials",
     "start": "vite",
     "build": "vite build",
