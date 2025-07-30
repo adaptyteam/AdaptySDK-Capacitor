@@ -6,6 +6,7 @@ import { AdaptyOnboardingCoder } from './shared/coders/adapty-onboarding';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
 import { AdaptyProfileCoder } from './shared/coders/adapty-profile';
+import { AdaptyProfileParametersCoder } from './shared/coders/adapty-profile-parameters';
 import { AdaptyPurchaseParamsCoder } from './shared/coders/adapty-purchase-params';
 import { AdaptyPurchaseResultCoder } from './shared/coders/adapty-purchase-result';
 import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
@@ -551,10 +552,16 @@ export class Adapty implements AdaptyPlugin {
 
   async updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {
     const method = 'update_profile';
-    const args = {
-      params: options.params,
+
+    const profileParametersCoder = new AdaptyProfileParametersCoder();
+
+    const argsWithUndefined: Req['UpdateProfile.Request'] = {
       method,
+      params: profileParametersCoder.encode(options.params),
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
