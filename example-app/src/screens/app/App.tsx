@@ -21,6 +21,8 @@ const App: React.FC = () => {
   const [isLoadingPaywall, setIsLoadingPaywall] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
   const [customerUserId, setCustomerUserId] = useState<string>('');
+  const [transactionId, setTransactionId] = useState<string>('');
+  const [variationId, setVariationId] = useState<string>('');
 
   // Paywall extended configuration
   const [placementId, setPlacementId] = useState<string>(getPlacementId());
@@ -797,7 +799,40 @@ const App: React.FC = () => {
     }
   };
 
-  const renderActionsSection = () => {
+  const renderReportTransactionSection = () => {
+    return (
+      <div className="section">
+        <h3 className="section-title">Report Transaction</h3>
+        <div className="input-group">
+          <input
+            type="text"
+            value={transactionId}
+            onChange={(e) => setTransactionId(e.target.value)}
+            placeholder="Transaction ID (required)"
+            className="input"
+            disabled={!isActivated}
+          />
+          <input
+            type="text"
+            value={variationId}
+            onChange={(e) => setVariationId(e.target.value)}
+            placeholder="Variation ID (optional)"
+            className="input"
+            disabled={!isActivated}
+          />
+          <button
+            onClick={reportTransaction}
+            disabled={!isActivated || !transactionId.trim()}
+            className="button button-primary"
+          >
+            Report Transaction
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderOtherActionsSection = () => {
     return (
       <div className="section">
         <h3 className="section-title">Other Actions</h3>
@@ -858,6 +893,25 @@ const App: React.FC = () => {
         </div>
       </div>
     );
+  };
+
+  const reportTransaction = async () => {
+    if (!isActivated || !transactionId.trim()) {
+      setResult('Error: Transaction ID is required');
+      return;
+    }
+
+    try {
+      console.log('[ADAPTY] Reporting transaction...', transactionId, variationId);
+      await adapty.reportTransaction({
+        transactionId: transactionId.trim(),
+        ...(variationId.trim() ? { variationId: variationId.trim() } : {}),
+      });
+      setResult(`Transaction reported successfully: ${transactionId.trim()}`);
+    } catch (error) {
+      console.error('[ADAPTY] Error reporting transaction', error);
+      setResult(`Error reporting transaction: ${error}`);
+    }
   };
 
   return (
@@ -921,8 +975,11 @@ const App: React.FC = () => {
         {/* Onboarding Section */}
         {isActivated && renderOnboardingSection()}
 
-        {/* Actions Section */}
-        {isActivated && renderActionsSection()}
+        {/* Report Transaction Section */}
+        {isActivated && renderReportTransactionSection()}
+
+        {/* Other Actions Section */}
+        {isActivated && renderOtherActionsSection()}
 
         {/* Configuration Info */}
         <div className="config-section">
