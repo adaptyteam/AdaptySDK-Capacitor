@@ -44,6 +44,21 @@ export class AdaptyProfileCoder extends SimpleCoder<Model, Serializable> {
       required: true,
       type: 'string',
     },
+    segmentHash: {
+      key: 'segment_hash',
+      required: true,
+      type: 'string',
+    },
+    isTestUser: {
+      key: 'is_test_user',
+      required: true,
+      type: 'boolean',
+    },
+    timestamp: {
+      key: 'timestamp',
+      required: true,
+      type: 'number',
+    },
     subscriptions: {
       key: 'subscriptions',
       required: false,
