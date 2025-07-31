@@ -12,8 +12,10 @@ class AdaptyCapacitorImplementation {
 
     private var activityProvider: (() -> android.app.Activity?)? = null
     private var eventCallback: ((String, String) -> Unit)? = null
+    private var context: Context? = null
 
     fun initialize(context: Context, eventCallback: ((String, String) -> Unit)? = null) {
+        this.context = context
         this.eventCallback = eventCallback
         
         CrossplatformHelper.init(
@@ -23,11 +25,7 @@ class AdaptyCapacitorImplementation {
                 // Forward events to Capacitor bridge
                 this.eventCallback?.invoke(eventName, eventData ?: "")
             },
-            { value ->
-                // Return FileLocation based on the value - for now use empty asset as stub
-                // This will be handled properly when we implement file location functionality
-                FileLocation.fromAsset("")
-            }
+            { value -> extractFileLocation(value) },
         )
 
         crossplatformHelper.setActivity {
@@ -47,6 +45,22 @@ class AdaptyCapacitorImplementation {
         }.onFailure { e ->
             Log.e("AdaptyCapacitor", "Exception during method call: ${e.message}")
             callback(null)
+        }
+    }
+
+    private fun extractFileLocation(value: String): FileLocation {
+        val context = this.context ?: throw IllegalStateException("Context not initialized")
+        return if (value.lastOrNull() == 'r') {
+            FileLocation.fromResId(
+                context,
+                context.resources.getIdentifier(
+                    value.dropLast(1),
+                    "raw",
+                    context.packageName,
+                )
+            )
+        } else {
+            FileLocation.fromAsset(value.dropLast(1))
         }
     }
 } 
