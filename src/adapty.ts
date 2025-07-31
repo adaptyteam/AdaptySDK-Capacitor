@@ -524,11 +524,15 @@ export class Adapty implements AdaptyPlugin {
 
   async updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void> {
     const method = 'update_attribution_data';
-    const args = {
-      attribution: options.attribution,
-      source: options.source,
+
+    const argsWithUndefined: Req['UpdateAttributionData.Request'] = {
       method,
+      attribution: JSON.stringify(options.attribution),
+      source: options.source,
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
