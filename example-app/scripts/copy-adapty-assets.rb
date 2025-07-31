@@ -85,8 +85,9 @@ def update_ios_project
     # Add the file to the App group
     file_ref = app_group.new_reference(file_name)
     
-    # Add the file to the target's resources build phase
-    target.add_file_references([file_ref])
+    # Add the file to the target's resources build phase (NOT sources!)
+    resources_build_phase = target.resources_build_phase
+    resources_build_phase.add_file_reference(file_ref)
     
     # Save the project
     project.save

@@ -6,6 +6,7 @@ import {
   AdaptyPaywallProduct,
   AdaptyOnboarding,
   createPaywallView,
+  FileLocation,
 } from '@adapty/capacitor';
 import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
 import './App.css';
@@ -799,6 +800,30 @@ const App: React.FC = () => {
     }
   };
 
+  const testSetFallback = async () => {
+    if (!isActivated) return;
+
+    try {
+      console.log('[ADAPTY] Setting fallback paywalls...');
+
+      const fileLocation: FileLocation = {
+        ios: {
+          fileName: 'ios_fallback.json'
+        },
+        android: {
+          relativeAssetPath: 'android_fallback.json'
+        }
+      };
+
+      await adapty.setFallback({ fileLocation });
+      setResult('Fallback paywalls set successfully');
+      console.log('[ADAPTY] Fallback paywalls set successfully');
+    } catch (error) {
+      console.error('[ADAPTY] Error setting fallback paywalls', error);
+      setResult(`Error setting fallback paywalls: ${error}`);
+    }
+  };
+
   const renderReportTransactionSection = () => {
     return (
       <div className="section">
@@ -880,6 +905,15 @@ const App: React.FC = () => {
             className="button button-secondary"
           >
             Set Integration ID
+          </button>
+        </div>
+        <div className="button-group">
+          <button
+            onClick={testSetFallback}
+            disabled={!isActivated}
+            className="button button-secondary"
+          >
+            Set Fallback Paywalls
           </button>
         </div>
         <div className="button-group">

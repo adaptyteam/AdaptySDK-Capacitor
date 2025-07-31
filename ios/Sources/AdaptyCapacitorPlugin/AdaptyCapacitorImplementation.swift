@@ -17,6 +17,14 @@ enum Log {
 
     @objc static func setup() {
         Task { @MainActor in
+            let assetResolver: (String) -> URL? = { @MainActor assetId in
+                return Bundle.main.url(forResource: assetId, withExtension: nil)
+            }
+            if #available(iOS 15.0, *) {
+                AdaptyPlugin.register(createPaywallView: assetResolver)
+            }
+            AdaptyPlugin.register(setFallbackRequests: assetResolver)
+
             AdaptyPlugin.register(eventHandler: shared)
         }
     }
