@@ -130,11 +130,6 @@ export interface AdaptyPlugin {
   setFallback(options: { fileLocation: FileLocation }): Promise<void>;
 
   /**
-   * @deprecated Use setFallback instead
-   */
-  setFallbackPaywalls(options: { paywallsLocation: FileLocation }): Promise<void>;
-
-  /**
    * Sets an integration identifier.
    */
   setIntegrationIdentifier(options: { key: string; value: string }): Promise<void>;

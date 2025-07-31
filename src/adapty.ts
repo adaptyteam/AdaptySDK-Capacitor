@@ -1,4 +1,5 @@
 import type { PluginListenerHandle } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
 import { defaultAdaptyOptions } from './default-configs';
@@ -487,19 +488,30 @@ export class Adapty implements AdaptyPlugin {
 
   async setFallback(options: { fileLocation: FileLocation }): Promise<void> {
     const method = 'set_fallback';
-    const args = {
-      file_location: options.fileLocation,
-      method,
-    };
-    await this.handleMethodCall(method, JSON.stringify(args));
-  }
 
-  async setFallbackPaywalls(options: { paywallsLocation: FileLocation }): Promise<void> {
-    const method = 'set_fallback';
-    const args = {
-      paywalls_location: options.paywallsLocation,
+    const platform = Capacitor.getPlatform();
+    let fileLocationString: string;
+
+    if (platform === 'ios') {
+      fileLocationString = options.fileLocation.ios.fileName;
+    } else if (platform === 'android') {
+      // Add suffixes to distinguish resource types on Android
+      if ('relativeAssetPath' in options.fileLocation.android) {
+        fileLocationString = `${options.fileLocation.android.relativeAssetPath}a`;
+      } else {
+        fileLocationString = `${options.fileLocation.android.rawResName}r`;
+      }
+    } else {
+      fileLocationString = '';
+    }
+
+    const argsWithUndefined: Req['SetFallback.Request'] = {
       method,
+      asset_id: fileLocationString,
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
@@ -515,10 +527,14 @@ export class Adapty implements AdaptyPlugin {
 
   async setLogLevel(options: { logLevel: LogLevel }): Promise<void> {
     const method = 'set_log_level';
-    const args = {
+
+    const argsWithUndefined: Req['SetLogLevel.Request'] = {
       method,
-      log_level: options.logLevel,
+      value: options.logLevel,
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
