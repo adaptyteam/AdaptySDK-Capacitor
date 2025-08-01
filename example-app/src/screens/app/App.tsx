@@ -995,7 +995,7 @@ const App: React.FC = () => {
 
         {/* Result Display */}
         {result && (
-          <div className={`result-box ${isActivated ? 'success' : 'default'}`}>
+          <div className={`result-box ${result.startsWith('Error') ? 'error' : 'success'}`}>
             {result}
           </div>
         )}

@@ -151,6 +151,12 @@
   border: 1px solid #dee2e6;
 }
 
+.result-box.error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
 .info-box {
   padding: 15px;
   background-color: #f8f9fa;
