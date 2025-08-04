@@ -25,6 +25,8 @@ const App: React.FC = () => {
   const [transactionId, setTransactionId] = useState<string>('');
   const [variationId, setVariationId] = useState<string>('');
   const [webPaywallUrl, setWebPaywallUrl] = useState<string>('');
+  const [integrationIdKey, setIntegrationIdKey] = useState<string>('one_signal_subscription_id');
+  const [integrationIdValue, setIntegrationIdValue] = useState<string>('testOSSubId');
 
   // Paywall extended configuration
   const [placementId, setPlacementId] = useState<string>(getPlacementId());
@@ -477,6 +479,37 @@ const App: React.FC = () => {
     );
   };
 
+  const renderIntegrationSection = () => {
+    return (
+      <div className="section">
+        <h3 className="section-title">Integration Identifiers</h3>
+        <div className="input-group">
+          <input
+            type="text"
+            value={integrationIdKey}
+            onChange={(e) => setIntegrationIdKey(e.target.value)}
+            placeholder="Integration Key (e.g., one_signal_subscription_id)"
+            className="input"
+          />
+          <input
+            type="text"
+            value={integrationIdValue}
+            onChange={(e) => setIntegrationIdValue(e.target.value)}
+            placeholder="Integration Value"
+            className="input"
+          />
+          <button
+            onClick={setIntegrationId}
+            disabled={!isActivated || !integrationIdKey.trim() || !integrationIdValue.trim()}
+            className="button button-secondary"
+          >
+            Set Integration ID
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderProfileSection = () => {
     const accessLevel = getAccessLevel();
 
@@ -625,9 +658,7 @@ const App: React.FC = () => {
                     <div key={product.vendorProductId} className="product-item">
                       <div className="product-title">{product.localizedTitle}</div>
                       <div className="product-price">Price: {product.price?.localizedString || 'N/A'}</div>
-                      <div className="product-id">ID: {product.vendorProductId}</div>
-                      
-                      {/* Product-specific actions */}
+                      <div className="product-id">ID: {product.vendorProductId}</div>                     
                       <div className="product-actions-comment">
                         Actions for this specific product:
                       </div>
@@ -819,9 +850,9 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      console.log('[ADAPTY] Setting integration identifier...');
-      await adapty.setIntegrationIdentifier({ key: 'test_key', value: 'test_value' });
-      setResult('Integration identifier set successfully');
+      console.log('[ADAPTY] Setting integration identifier:', integrationIdKey, integrationIdValue);
+      await adapty.setIntegrationIdentifier({ key: integrationIdKey, value: integrationIdValue });
+      setResult(`Integration identifier set successfully: ${integrationIdKey} = ${integrationIdValue}`);
     } catch (error) {
       console.error('[ADAPTY] Error setting integration identifier', error);
       setResult(`Error setting integration identifier: ${error}`);
@@ -927,13 +958,7 @@ const App: React.FC = () => {
           >
             Set Log Level
           </button>
-          <button
-            onClick={setIntegrationId}
-            disabled={!isActivated}
-            className="button button-secondary"
-          >
-            Set Integration ID
-          </button>
+
         </div>
         <div className="button-group">
           <button
@@ -1000,7 +1025,6 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Identify Section */}
         {renderIdentifySection()}
 
         {/* Activation Section */}
@@ -1039,6 +1063,9 @@ const App: React.FC = () => {
 
         {/* Report Transaction Section */}
         {isActivated && renderReportTransactionSection()}
+
+        {/* Integration Section */}
+        {isActivated && renderIntegrationSection()}
 
         {/* Other Actions Section */}
         {isActivated && renderOtherActionsSection()}

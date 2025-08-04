@@ -534,11 +534,14 @@ export class Adapty implements AdaptyPlugin {
 
   async setIntegrationIdentifier(options: { key: string; value: string }): Promise<void> {
     const method = 'set_integration_identifiers';
-    const args = {
+
+    const argsWithUndefined: Req['SetIntegrationIdentifier.Request'] = {
       method,
-      key: options.key,
-      value: options.value,
+      key_values: { [options.key]: options.value },
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
