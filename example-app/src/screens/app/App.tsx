@@ -24,6 +24,7 @@ const App: React.FC = () => {
   const [customerUserId, setCustomerUserId] = useState<string>('');
   const [transactionId, setTransactionId] = useState<string>('');
   const [variationId, setVariationId] = useState<string>('');
+  const [webPaywallUrl, setWebPaywallUrl] = useState<string>('');
 
   // Paywall extended configuration
   const [placementId, setPlacementId] = useState<string>(getPlacementId());
@@ -230,11 +231,13 @@ const App: React.FC = () => {
     try {
       console.log('[ADAPTY] Creating web paywall URL...');
       const url = await adapty.createWebPaywallUrl({ paywallOrProduct: paywall });
+      setWebPaywallUrl(url);
       setResult(`Web paywall URL created: ${url}`);
       console.log('[ADAPTY] Web paywall URL:', url);
     } catch (error) {
       console.error('[ADAPTY] Error creating web paywall URL', error);
       setResult(`Error creating web paywall URL: ${error}`);
+      setWebPaywallUrl('');
     }
   };
 
@@ -259,6 +262,7 @@ const App: React.FC = () => {
       console.log('[ADAPTY] Creating web paywall URL for product:', product.vendorProductId);
       const url = await adapty.createWebPaywallUrl({ paywallOrProduct: product });
       setResult(`Web URL for ${product.vendorProductId}: ${url}`);
+      alert(`Web paywall URL for ${product.vendorProductId}: ${url}`);
       console.log('[ADAPTY] Web paywall URL for product:', url);
     } catch (error) {
       console.error('[ADAPTY] Error creating web paywall URL for product', error);
@@ -622,6 +626,12 @@ const App: React.FC = () => {
                       <div className="product-title">{product.localizedTitle}</div>
                       <div className="product-price">Price: {product.price?.localizedString || 'N/A'}</div>
                       <div className="product-id">ID: {product.vendorProductId}</div>
+                      
+                      {/* Product-specific actions */}
+                      <div className="product-actions-comment">
+                        Actions for this specific product:
+                      </div>
+                      
                       <div className="product-buttons">
                         <button
                           onClick={() => makePurchase(product)}
@@ -630,17 +640,18 @@ const App: React.FC = () => {
                           Purchase
                         </button>
                         <button
-                          onClick={() => createWebPaywallUrlForProduct(product)}
-                          className="button button-secondary button-small"
-                        >
-                          Create Web URL
-                        </button>
-                        <button
                           onClick={() => openWebPaywallForProduct(product)}
                           className="button button-secondary button-small"
                         >
-                          Open Web
+                          Open Web Paywall for product (iOS)
                         </button>
+                        <button
+                          onClick={() => createWebPaywallUrlForProduct(product)}
+                          className="button button-secondary button-small"
+                        >
+                          Create Web URL (iOS)
+                        </button>
+
                       </div>
                     </div>
                   ))}
@@ -661,21 +672,38 @@ const App: React.FC = () => {
           >
             Present Paywall
           </button>
-          <button
-            onClick={createWebPaywallUrl}
-            disabled={!paywall}
-            className="button button-secondary"
-          >
-            Create Web URL
-          </button>
-          <button
-            onClick={openWebPaywall}
-            disabled={!paywall}
-            className="button button-secondary"
-          >
-            Open Web Paywall
-          </button>
+
+                     <button
+             onClick={openWebPaywall}
+             disabled={!paywall}
+             className="button button-secondary"
+           >
+             Open Web Paywall (iOS)
+           </button>
+
+          
+
         </div>
+
+          {/* Combined Create Web URL Button + Input */}
+          <div className="web-url-container">
+            <button
+              onClick={createWebPaywallUrl}
+              disabled={!paywall}
+              className="web-url-button"
+            >
+              Create Web URL (iOS)
+            </button>
+            <input
+              type="text"
+              value={webPaywallUrl}
+              placeholder="Generated URL will appear here..."
+              readOnly
+              className={`web-url-input ${webPaywallUrl ? 'has-value' : ''}`}
+              onClick={(e) => webPaywallUrl && (e.target as HTMLInputElement).select()}
+              title={webPaywallUrl ? 'Click to select URL for copying' : 'No URL generated yet'}
+            />
+          </div>
       </div>
     );
   };

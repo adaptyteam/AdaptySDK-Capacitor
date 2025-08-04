@@ -131,10 +131,10 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
-   * Helper method to check if object is a paywall
+   * Helper method to check if object is a paywall product
    */
-  private isPaywall(obj: AdaptyPaywall | AdaptyPaywallProduct): obj is AdaptyPaywall {
-    return 'placement' in obj && 'paywallId' in obj;
+  private isPaywallProduct(obj: AdaptyPaywall | AdaptyPaywallProduct): obj is AdaptyPaywallProduct {
+    return 'vendorProductId' in obj;
   }
 
   /**
@@ -375,21 +375,38 @@ export class Adapty implements AdaptyPlugin {
 
   async openWebPaywall(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void> {
     const method = 'open_web_paywall';
-    const args = {
-      paywall_or_product: options.paywallOrProduct,
+
+    const paywallCoder = new AdaptyPaywallCoder();
+    const productCoder = new AdaptyPaywallProductCoder();
+
+    const argsWithUndefined: Req['OpenWebPaywall.Request'] = {
       method,
+      ...(this.isPaywallProduct(options.paywallOrProduct)
+        ? { product: productCoder.encode(options.paywallOrProduct) }
+        : { paywall: paywallCoder.encode(options.paywallOrProduct) }),
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string> {
     const method = 'create_web_paywall_url';
-    const args = this.isPaywall(options.paywallOrProduct)
-      ? { method, paywall: options.paywallOrProduct }
-      : { method, product: options.paywallOrProduct };
 
-    const url = await this.handleMethodCall(method, JSON.stringify(args));
-    return url as string;
+    const paywallCoder = new AdaptyPaywallCoder();
+    const productCoder = new AdaptyPaywallProductCoder();
+
+    const argsWithUndefined: Req['CreateWebPaywallUrl.Request'] = {
+      method,
+      ...(this.isPaywallProduct(options.paywallOrProduct)
+        ? { product: productCoder.encode(options.paywallOrProduct) }
+        : { paywall: paywallCoder.encode(options.paywallOrProduct) }),
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async logShowOnboarding(options: {

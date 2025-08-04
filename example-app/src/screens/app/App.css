@@ -202,6 +202,14 @@
   margin-bottom: 5px;
 }
 
+.product-actions-comment {
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 8px;
+  margin-bottom: 5px;
+}
+
 .product-buttons {
   display: flex;
   gap: 5px;
@@ -238,6 +246,59 @@
 /* Loading states */
 .loading {
   opacity: 0.6;
+}
+
+/* Combined Web URL Button + Input */
+.web-url-container {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: white;
+}
+
+.web-url-button {
+  padding: 10px 16px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.web-url-button:enabled {
+  background-color: #007bff;
+  cursor: pointer;
+}
+
+.web-url-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.web-url-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-family: monospace;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  color: #6c757d;
+  background-color: #ffffff;
+}
+
+.web-url-input.has-value {
+  background-color: #f8f9fa;
+  color: #333;
 }
 
 /* Responsive design */
