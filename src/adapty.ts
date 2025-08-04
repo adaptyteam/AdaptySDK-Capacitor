@@ -573,20 +573,38 @@ export class Adapty implements AdaptyPlugin {
   }
 
   async updateCollectingRefundDataConsent(options: { consent: boolean }): Promise<void> {
+    const platform = Capacitor.getPlatform();
+    if (platform === 'android') {
+      return Promise.resolve();
+    }
+
     const method = 'update_collecting_refund_data_consent';
-    const args = {
-      consent: options.consent,
+
+    const argsWithUndefined: Req['UpdateCollectingRefundDataConsent.Request'] = {
       method,
+      consent: options.consent,
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
   async updateRefundPreference(options: { refundPreference: RefundPreference }): Promise<void> {
+    const platform = Capacitor.getPlatform();
+    if (platform === 'android') {
+      return Promise.resolve();
+    }
+
     const method = 'update_refund_preference';
-    const args = {
-      refund_preference: options.refundPreference,
+
+    const argsWithUndefined: Req['UpdateRefundPreference.Request'] = {
       method,
+      refund_preference: options.refundPreference,
     };
+
+    const args = filterUndefined(argsWithUndefined);
+
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 

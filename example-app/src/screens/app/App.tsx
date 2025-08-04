@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import {
   Adapty,
   AdaptyProfile,
@@ -7,6 +8,7 @@ import {
   AdaptyOnboarding,
   createPaywallView,
   FileLocation,
+  RefundPreference,
 } from '@adapty/capacitor';
 import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
 import './App.css';
@@ -27,6 +29,20 @@ const App: React.FC = () => {
   const [webPaywallUrl, setWebPaywallUrl] = useState<string>('');
   const [integrationIdKey, setIntegrationIdKey] = useState<string>('one_signal_subscription_id');
   const [integrationIdValue, setIntegrationIdValue] = useState<string>('testOSSubId');
+  const [collectingRefundDataConsent, setCollectingRefundDataConsent] = useState<boolean>(false);
+  const [refundPreferenceIdx, setRefundPreferenceIdx] = useState<number>(0);
+
+  const refundPreferences = [
+    RefundPreference.NoPreference,
+    RefundPreference.Grant,
+    RefundPreference.Decline,
+  ];
+
+  const refundPreferenceLabels = [
+    'No Preference',
+    'Grant',
+    'Decline',
+  ];
 
   // Paywall extended configuration
   const [placementId, setPlacementId] = useState<string>(getPlacementId());
@@ -510,6 +526,68 @@ const App: React.FC = () => {
     );
   };
 
+  const renderRefundDataSection = () => {
+    const platform = Capacitor.getPlatform();
+    const isIOS = platform === 'ios';
+    
+    return (
+      <div className="section">
+        <h3 className="section-title">Refund Saver (iOS only)</h3>
+        {!isIOS && (
+          <div className="info-box" style={{ marginBottom: '10px' }}>
+            <div className="info-box-item">
+              <strong>⚠️ Not available on {platform}</strong>
+            </div>
+          </div>
+        )}
+        
+        {/* Refund Preference */}
+        {isIOS && (
+          <div className="refund-item">
+            <label>Refund Preference:</label>
+            <div className="clickable-param" onClick={() => {
+              if (isIOS) {
+                setRefundPreferenceIdx((refundPreferenceIdx + 1) % refundPreferences.length);
+              }
+            }}>
+              <span>{refundPreferenceLabels[refundPreferenceIdx]}</span>
+              <span className="param-value">{refundPreferences[refundPreferenceIdx]}</span>
+            </div>
+            <button
+              onClick={updateRefundPreference}
+              disabled={!isActivated || !isIOS}
+              className="button button-secondary refund-button"
+            >
+              Update Refund Preference
+            </button>
+          </div>
+        )}
+
+        {/* Collecting Refund Data Consent */}
+        {isIOS && (
+          <div className="refund-item">
+            <label>Collecting Refund Data Consent:</label>
+            <div className="clickable-param" onClick={() => {
+              if (isIOS) {
+                setCollectingRefundDataConsent(!collectingRefundDataConsent);
+              }
+            }}>
+              <span>Consent</span>
+              <span className="param-value">{collectingRefundDataConsent.toString()}</span>
+            </div>
+            <button
+              onClick={updateRefundDataConsent}
+              disabled={!isActivated || !isIOS}
+              className="button button-secondary refund-button"
+            >
+              Update Collecting Refund Data Consent
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderProfileSection = () => {
     const accessLevel = getAccessLevel();
 
@@ -859,6 +937,33 @@ const App: React.FC = () => {
     }
   };
 
+  const updateRefundDataConsent = async () => {
+    if (!isActivated) return;
+
+    try {
+      console.log('[ADAPTY] Updating collecting refund data consent:', collectingRefundDataConsent);
+      await adapty.updateCollectingRefundDataConsent({ consent: collectingRefundDataConsent });
+      setResult(`Collecting refund data consent updated successfully: ${collectingRefundDataConsent}`);
+    } catch (error) {
+      console.error('[ADAPTY] Error updating collecting refund data consent', error);
+      setResult(`Error updating collecting refund data consent: ${error}`);
+    }
+  };
+
+  const updateRefundPreference = async () => {
+    if (!isActivated) return;
+
+    try {
+      const refundPreference = refundPreferences[refundPreferenceIdx];
+      console.log('[ADAPTY] Updating refund preference:', refundPreference);
+      await adapty.updateRefundPreference({ refundPreference });
+      setResult(`Refund preference updated successfully: ${refundPreference}`);
+    } catch (error) {
+      console.error('[ADAPTY] Error updating refund preference', error);
+      setResult(`Error updating refund preference: ${error}`);
+    }
+  };
+
   const testSetFallback = async () => {
     if (!isActivated) return;
 
@@ -1066,6 +1171,9 @@ const App: React.FC = () => {
 
         {/* Integration Section */}
         {isActivated && renderIntegrationSection()}
+
+        {/* Refund Data Section */}
+        {isActivated && renderRefundDataSection()}
 
         {/* Other Actions Section */}
         {isActivated && renderOtherActionsSection()}

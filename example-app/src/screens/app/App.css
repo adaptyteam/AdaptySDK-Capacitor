@@ -281,6 +281,7 @@
 .web-url-button:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .web-url-input {
@@ -299,6 +300,74 @@
 .web-url-input.has-value {
   background-color: #f8f9fa;
   color: #333;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.checkbox-label input[type='checkbox'] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.clickable-param {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  margin-bottom: 10px;
+  transition: background-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.clickable-param:hover {
+  background-color: #f0f0f0;
+}
+
+.clickable-param:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.param-value {
+  font-family: monospace;
+  font-weight: bold;
+  color: #007acc;
+  min-width: 150px;
+  text-align: right;
+}
+
+.refund-item {
+  margin-bottom: 20px;
+  padding: 15px;
+}
+
+.refund-item:last-child {
+  margin-bottom: 0;
+}
+
+.refund-item label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.refund-button {
+  width: 100%;
+  margin-top: 10px;
 }
 
 /* Responsive design */
