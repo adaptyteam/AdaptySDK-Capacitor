@@ -529,7 +529,7 @@ const App: React.FC = () => {
   const renderRefundDataSection = () => {
     const platform = Capacitor.getPlatform();
     const isIOS = platform === 'ios';
-    
+
     return (
       <div className="section">
         <h3 className="section-title">Refund Saver (iOS only)</h3>
@@ -540,7 +540,7 @@ const App: React.FC = () => {
             </div>
           </div>
         )}
-        
+
         {/* Refund Preference */}
         {isIOS && (
           <div className="refund-item">
@@ -736,11 +736,11 @@ const App: React.FC = () => {
                     <div key={product.vendorProductId} className="product-item">
                       <div className="product-title">{product.localizedTitle}</div>
                       <div className="product-price">Price: {product.price?.localizedString || 'N/A'}</div>
-                      <div className="product-id">ID: {product.vendorProductId}</div>                     
+                      <div className="product-id">ID: {product.vendorProductId}</div>
                       <div className="product-actions-comment">
                         Actions for this specific product:
                       </div>
-                      
+
                       <div className="product-buttons">
                         <button
                           onClick={() => makePurchase(product)}
@@ -790,7 +790,7 @@ const App: React.FC = () => {
              Open Web Paywall (iOS)
            </button>
 
-          
+
 
         </div>
 
@@ -1111,7 +1111,7 @@ const App: React.FC = () => {
       <main>
         <h1 className="title">Adapty Capacitor Plugin</h1>
         <p className="description">
-          This project is devtools for development and testing.
+          This project is devtools for plugin API.
         </p>
 
         {/* Credentials Info */}
