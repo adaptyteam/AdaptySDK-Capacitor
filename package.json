@@ -62,6 +62,7 @@
     "@ionic/eslint-config": "^0.4.0",
     "@ionic/prettier-config": "^4.0.0",
     "@ionic/swiftlint-config": "^2.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@types/jest": "30.0.0",
     "eslint": "^8.57.0",
     "husky": "^9.1.7",
