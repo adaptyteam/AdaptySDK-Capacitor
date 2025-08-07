@@ -1,5 +1,9 @@
 import { LogLevel } from '../types/inputs';
-import VERSION from '../version';
+import VERSION from '../../version';
+
+// Type for lazy evaluation functions
+type LazyMessage = () => string;
+type LazyParams = () => Record<string, any>;
 
 export class Log {
   public static logLevel: LogLevel | null = null;
@@ -51,13 +55,14 @@ export class Log {
 
   /**
    * Logs a message to the console if the log level is appropriate.
+   * Uses lazy evaluation to avoid unnecessary computations.
    * @internal
    */
   public static log(
     logLevel: LogLevel,
     funcName: string,
-    message: string,
-    params?: Record<string, any>,
+    message: LazyMessage,
+    params?: LazyParams,
   ): void {
     if (!Log.logLevel) {
       return;
@@ -67,41 +72,45 @@ export class Log {
     const messageLevel = Log.getLogLevelInt(logLevel);
 
     if (messageLevel <= currentLevel) {
-      const output = Log.formatMessage(message, funcName);
+      // Lazy evaluation: only compute message and params if we're actually logging
+      const resolvedMessage = message();
+      const resolvedParams = params ? params() : undefined;
+      
+      const output = Log.formatMessage(resolvedMessage, funcName);
       const logger = Log.getLogger(logLevel);
 
-      logger(output, params);
+      logger(output, resolvedParams);
     }
   }
 
   public static info(
     funcName: string,
-    message: string,
-    params?: Record<string, any>,
+    message: LazyMessage,
+    params?: LazyParams,
   ): void {
     this.log(LogLevel.INFO, funcName, message, params);
   }
 
   public static warn(
     funcName: string,
-    message: string,
-    params?: Record<string, any>,
+    message: LazyMessage,
+    params?: LazyParams,
   ): void {
     this.log(LogLevel.WARN, funcName, message, params);
   }
 
   public static error(
     funcName: string,
-    message: string,
-    params?: Record<string, any>,
+    message: LazyMessage,
+    params?: LazyParams,
   ): void {
     this.log(LogLevel.ERROR, funcName, message, params);
   }
 
   public static verbose(
     funcName: string,
-    message: string,
-    params?: Record<string, any>,
+    message: LazyMessage,
+    params?: LazyParams,
   ): void {
     this.log(LogLevel.VERBOSE, funcName, message, params);
   }
