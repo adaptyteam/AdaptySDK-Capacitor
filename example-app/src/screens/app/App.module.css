@@ -1,41 +1,41 @@
-.app-container {
+.AppContainer {
   padding: 20px;
   font-family: Arial, sans-serif;
   max-width: 800px;
   margin: 0 auto;
 }
 
-.title {
+.Title {
   font-size: 1.8rem;
   margin-bottom: 1rem;
   margin-top: 2.5rem;
 }
 
-.description {
+.Description {
   margin-bottom: 1.5rem;
   color: #666;
 }
 
-.section {
+.Section {
   margin-bottom: 20px;
 }
 
-.section-title {
+.SectionTitle {
   font-size: 1rem;
   margin-bottom: 1rem;
 }
 
-.input-group {
+.InputGroup {
   margin-bottom: 20px;
 }
 
-.input-label {
+.InputLabel {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
 }
 
-.text-input {
+.TextInput {
   padding: 8px;
   margin-top: 5px;
   margin-right: 10px;
@@ -45,7 +45,7 @@
   font-size: 14px;
 }
 
-.input {
+.Input {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -55,35 +55,35 @@
   min-width: 0;
 }
 
-.input:disabled {
+.Input:disabled {
   background-color: #f8f9fa;
   opacity: 0.6;
 }
 
-.input-group {
+.InputGroup {
   display: flex;
   align-items: stretch;
   gap: 10px;
   margin-bottom: 10px;
 }
 
-.input-group .input:only-child {
+.InputGroup .Input:only-child {
   flex: 1;
 }
 
-.input-group .input:not(:only-child) {
+.InputGroup .Input:not(:only-child) {
   flex: 1;
   max-width: calc(50% - 5px);
 }
 
-.button-group {
+.ButtonGroup {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 10px;
 }
 
-.button {
+.Button {
   padding: 8px 16px;
   color: white;
   border: none;
@@ -93,71 +93,71 @@
   transition: opacity 0.2s;
 }
 
-.button:disabled {
+.Button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.button-primary {
+.ButtonPrimary {
   background-color: #007bff;
 }
 
-.button-success {
+.ButtonSuccess {
   background-color: #28a745;
 }
 
-.button-info {
+.ButtonInfo {
   background-color: #17a2b8;
 }
 
-.button-warning {
+.ButtonWarning {
   background-color: #ffc107;
   color: black;
 }
 
-.button-secondary {
+.ButtonSecondary {
   background-color: #6c757d;
 }
 
-.button-purple {
+.ButtonPurple {
   background-color: #6f42c1;
 }
 
-.button-orange {
+.ButtonOrange {
   background-color: #fd7e14;
 }
 
-.button-teal {
+.ButtonTeal {
   background-color: #20c997;
 }
 
-.button-danger {
+.ButtonDanger {
   background-color: #dc3545;
 }
 
-.result-box {
+.ResultBox {
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 20px;
 }
 
-.result-box.success {
+.ResultBoxSuccess {
   background-color: #d4edda;
   border: 1px solid #c3e6cb;
 }
 
-.result-box.default {
+.ResultBoxDefault {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
 }
 
-.result-box.error {
+.ResultBoxError {
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
   color: #721c24;
 }
 
-.info-box {
+.InfoBox {
   padding: 15px;
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
@@ -165,19 +165,19 @@
   margin-bottom: 10px;
 }
 
-.info-box-item {
+.InfoBoxItem {
   margin-bottom: 10px;
 }
 
-.info-box-item:last-child {
+.InfoBoxItem:last-child {
   margin-bottom: 0;
 }
 
-.products-list {
+.ProductsList {
   margin-top: 10px;
 }
 
-.product-item {
+.ProductItem {
   margin-left: 20px;
   margin-top: 5px;
   padding: 5px;
@@ -186,23 +186,23 @@
   border: 1px solid #dee2e6;
 }
 
-.product-title {
+.ProductTitle {
   font-weight: bold;
   margin-bottom: 3px;
 }
 
-.product-price {
+.ProductPrice {
   color: #666;
   margin-bottom: 3px;
 }
 
-.product-id {
+.ProductId {
   color: #999;
   font-size: 12px;
   margin-bottom: 5px;
 }
 
-.product-actions-comment {
+.ProductActionsComment {
   color: #999;
   font-size: 12px;
   font-style: italic;
@@ -210,46 +210,46 @@
   margin-bottom: 5px;
 }
 
-.product-buttons {
+.ProductButtons {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
   margin-top: 5px;
 }
 
-.button-small {
+.ButtonSmall {
   padding: 4px 8px;
   font-size: 12px;
   margin-top: 0;
 }
 
-.config-section {
+.ConfigSection {
   margin-top: 30px;
   font-size: 14px;
   color: #6c757d;
 }
 
-.config-title {
+.ConfigTitle {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
-.config-list {
+.ConfigList {
   margin: 0;
   padding-left: 20px;
 }
 
-.config-list li {
+.ConfigList li {
   margin-bottom: 5px;
 }
 
 /* Loading states */
-.loading {
+.Loading {
   opacity: 0.6;
 }
 
 /* Combined Web URL Button + Input */
-.web-url-container {
+.WebUrlContainer {
   display: flex;
   align-items: center;
   gap: 0;
@@ -260,7 +260,7 @@
   background-color: white;
 }
 
-.web-url-button {
+.WebUrlButton {
   padding: 10px 16px;
   border: none;
   color: white;
@@ -273,18 +273,18 @@
   transition: background-color 0.2s;
 }
 
-.web-url-button:enabled {
+.WebUrlButton:enabled {
   background-color: #007bff;
   cursor: pointer;
 }
 
-.web-url-button:disabled {
+.WebUrlButton:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.web-url-input {
+.WebUrlInput {
   flex: 1;
   padding: 10px 12px;
   border: none;
@@ -297,12 +297,12 @@
   background-color: #ffffff;
 }
 
-.web-url-input.has-value {
+.WebUrlInputHasValue {
   background-color: #f8f9fa;
   color: #333;
 }
 
-.checkbox-label {
+.CheckboxLabel {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -312,12 +312,12 @@
   margin-bottom: 10px;
 }
 
-.checkbox-label input[type='checkbox'] {
+.CheckboxLabel input[type='checkbox'] {
   margin: 0;
   cursor: pointer;
 }
 
-.clickable-param {
+.ClickableParam {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -332,16 +332,16 @@
   box-sizing: border-box;
 }
 
-.clickable-param:hover {
+.ClickableParam:hover {
   background-color: #f0f0f0;
 }
 
-.clickable-param:disabled {
+.ClickableParam:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.param-value {
+.ParamValue {
   font-family: monospace;
   font-weight: bold;
   color: #007acc;
@@ -349,43 +349,50 @@
   text-align: right;
 }
 
-.refund-item {
+.RefundItem {
   margin-bottom: 20px;
   padding: 15px;
 }
 
-.refund-item:last-child {
+.RefundItem:last-child {
   margin-bottom: 0;
 }
 
-.refund-item label {
+.RefundItem label {
   display: block;
   font-weight: bold;
   margin-bottom: 10px;
   color: #333;
 }
 
-.refund-button {
+.RefundButton {
   width: 100%;
   margin-top: 10px;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .app-container {
+  .AppContainer {
     padding: 10px;
   }
 
-  .text-input {
+  .TextInput {
     width: 100%;
     margin-bottom: 10px;
   }
 
-  .button-group {
+  .ButtonGroup {
     justify-content: flex-start;
   }
 
-  .button {
+  .Button {
     min-width: 120px;
   }
+}
+
+.Success {
+}
+.Error {
+}
+.HasValue {
 }

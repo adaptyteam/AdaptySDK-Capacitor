@@ -1,5 +1,5 @@
 import { JsLog, formatDate } from '../../helpers';
-import './Logs.css';
+import styles from './Logs.module.css';
 
 interface LogsProps {
   logs: JsLog[];
@@ -9,11 +9,11 @@ interface LogsProps {
 
 function Logs({ logs, onLogClick, onBack }: LogsProps) {
   return (
-    <div className="logs-container">
-      <div className="logs-header">
-        <div className="logs-header-content">
-          <button 
-            className="back-button-ios" 
+    <div className={styles.LogsContainer}>
+      <div className={styles.LogsHeader}>
+        <div className={styles.LogsHeaderContent}>
+          <button
+            className={styles.BackButtonIOS}
             onClick={onBack}
             title="Back to App"
           >
@@ -22,7 +22,7 @@ function Logs({ logs, onLogClick, onBack }: LogsProps) {
           <h2>{logs.length} logs (Newest first)</h2>
         </div>
       </div>
-      <div className="logs-list">
+      <div className={styles.LogsList}>
         {logs.slice().reverse().map((log, index) => (
           <LogLine
             key={index}
@@ -57,23 +57,23 @@ function LogLine({ log, isFirst, isLast, onClick }: LogLineProps) {
   };
 
   return (
-    <div 
-      className={`log-line ${isFirst ? 'first' : ''} ${isLast ? 'last' : ''}`}
+    <div
+      className={`${styles.LogLine} ${isFirst ? styles.LogLineFirst : ''} ${isLast ? styles.LogLineLast : ''}`}
       onClick={onClick}
     >
-      <div className="log-content">
-        <div className="log-icon">
-          <div 
-            className="log-level-indicator"
+      <div className={styles.LogContent}>
+        <div className={styles.LogIcon}>
+          <div
+            className={styles.LogLevelIndicator}
             style={{ backgroundColor: getLogLevelColor(log.logLevel) }}
           />
         </div>
-        <div className="log-body">
-          <div className="log-header">
-            <span className="func-name">{log.funcName}</span>
-            <span className="timestamp">{formatDate(log.isoDate)}</span>
+        <div className={styles.LogBody}>
+          <div className={styles.LogHeader}>
+            <span className={styles.FuncName}>{log.funcName}</span>
+            <span className={styles.Timestamp}>{formatDate(log.isoDate)}</span>
           </div>
-          <div className="log-message">{log.message}</div>
+          <div className={styles.LogMessage}>{log.message}</div>
         </div>
       </div>
     </div>

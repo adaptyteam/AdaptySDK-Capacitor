@@ -8,7 +8,7 @@ import Logs from './screens/logs/Logs';
 import LogPayload from './screens/logs/log/LogPayload';
 import Profile from './screens/profile/Profile';
 import { JsLog } from './helpers';
-import './main.css';
+import styles from './main.module.css';
 import JsLogsListener from './JsLogsListener';
 import { LogsProvider, useLogs } from './logs-context';
 
@@ -50,12 +50,14 @@ function Tabs() {
     { to: '/profile', label: 'Profile' },
   ];
   return (
-    <nav className="tabs">
+    <nav className={styles.Tabs}>
       {tabs.map((t) => (
         <NavLink
           key={t.to}
           to={t.to}
-          className={({ isActive }) => `tab-link${isActive ? ' active' : ''}`}
+          className={({ isActive }) =>
+            `${styles.TabLink}${isActive ? ' ' + styles.TabLinkActive : ''}`
+          }
         >
           {t.label}
         </NavLink>
@@ -90,7 +92,7 @@ function RouterApp() {
       <BackHandler />
       <JsLogsListener />
       <ScrollToTopOnTabChange />
-      <div className="router-container">
+      <div className={styles.RouterContainer}>
         <Routes>
           <Route path="/" element={<Navigate to="/app" replace />} />
           <Route path="/app" element={<AppRoute />} />

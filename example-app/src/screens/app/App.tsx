@@ -11,7 +11,7 @@ import {
   RefundPreference,
 } from '@adapty/capacitor';
 import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
-import './App.css';
+import styles from './App.module.css';
 
 const App: React.FC = () => {
   const [result, setResult] = useState<string>('');
@@ -473,20 +473,20 @@ const App: React.FC = () => {
 
   const renderIdentifySection = () => {
     return (
-      <div className="section">
-        <h3 className="section-title">Identify User</h3>
-        <div className="input-group">
+      <div className={styles.Section}>
+        <h3 className={styles.SectionTitle}>Identify User</h3>
+        <div className={styles.InputGroup}>
           <input
             type="text"
             value={customerUserId}
             onChange={(e) => setCustomerUserId(e.target.value)}
             placeholder="customer user ID"
-            className="input"
+            className={styles.Input}
           />
           <button
             onClick={identify}
             disabled={!customerUserId.trim()}
-            className="button button-secondary"
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
             Identify User
           </button>
@@ -497,27 +497,27 @@ const App: React.FC = () => {
 
   const renderIntegrationSection = () => {
     return (
-      <div className="section">
-        <h3 className="section-title">Integration Identifiers</h3>
-        <div className="input-group">
+      <div className={styles.Section}>
+        <h3 className={styles.SectionTitle}>Integration Identifiers</h3>
+        <div className={styles.InputGroup}>
           <input
             type="text"
             value={integrationIdKey}
             onChange={(e) => setIntegrationIdKey(e.target.value)}
             placeholder="Integration Key (e.g., one_signal_subscription_id)"
-            className="input"
+            className={styles.Input}
           />
           <input
             type="text"
             value={integrationIdValue}
             onChange={(e) => setIntegrationIdValue(e.target.value)}
             placeholder="Integration Value"
-            className="input"
+            className={styles.Input}
           />
           <button
             onClick={setIntegrationId}
             disabled={!isActivated || !integrationIdKey.trim() || !integrationIdValue.trim()}
-            className="button button-secondary"
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
             Set Integration ID
           </button>
@@ -531,11 +531,11 @@ const App: React.FC = () => {
     const isIOS = platform === 'ios';
 
     return (
-      <div className="section">
-        <h3 className="section-title">Refund Saver (iOS only)</h3>
+      <div className={styles.Section}>
+        <h3 className={styles.SectionTitle}>Refund Saver (iOS only)</h3>
         {!isIOS && (
-          <div className="info-box" style={{ marginBottom: '10px' }}>
-            <div className="info-box-item">
+          <div className={styles.InfoBox} style={{ marginBottom: '10px' }}>
+            <div className={styles.InfoBoxItem}>
               <strong>⚠️ Not available on {platform}</strong>
             </div>
           </div>
@@ -543,20 +543,20 @@ const App: React.FC = () => {
 
         {/* Refund Preference */}
         {isIOS && (
-          <div className="refund-item">
+          <div className={styles.RefundItem}>
             <label>Refund Preference:</label>
-            <div className="clickable-param" onClick={() => {
+            <div className={styles.ClickableParam} onClick={() => {
               if (isIOS) {
                 setRefundPreferenceIdx((refundPreferenceIdx + 1) % refundPreferences.length);
               }
             }}>
               <span>{refundPreferenceLabels[refundPreferenceIdx]}</span>
-              <span className="param-value">{refundPreferences[refundPreferenceIdx]}</span>
+              <span className={styles.ParamValue}>{refundPreferences[refundPreferenceIdx]}</span>
             </div>
             <button
               onClick={updateRefundPreference}
               disabled={!isActivated || !isIOS}
-              className="button button-secondary refund-button"
+              className={`${styles.Button} ${styles.ButtonSecondary} ${styles.RefundButton}`}
             >
               Update Refund Preference
             </button>
@@ -565,20 +565,20 @@ const App: React.FC = () => {
 
         {/* Collecting Refund Data Consent */}
         {isIOS && (
-          <div className="refund-item">
+          <div className={styles.RefundItem}>
             <label>Collecting Refund Data Consent:</label>
-            <div className="clickable-param" onClick={() => {
+            <div className={styles.ClickableParam} onClick={() => {
               if (isIOS) {
                 setCollectingRefundDataConsent(!collectingRefundDataConsent);
               }
             }}>
               <span>Consent</span>
-              <span className="param-value">{collectingRefundDataConsent.toString()}</span>
+              <span className={styles.ParamValue}>{collectingRefundDataConsent.toString()}</span>
             </div>
             <button
               onClick={updateRefundDataConsent}
               disabled={!isActivated || !isIOS}
-              className="button button-secondary refund-button"
+              className={`${styles.Button} ${styles.ButtonSecondary} ${styles.RefundButton}`}
             >
               Update Collecting Refund Data Consent
             </button>
@@ -592,10 +592,10 @@ const App: React.FC = () => {
     const accessLevel = getAccessLevel();
 
     return (
-      <div className="section">
-        <h3 className="section-title">Profile Information</h3>
-        <div className="info-box">
-          <div className="info-box-item">
+      <div className={styles.Section}>
+        <h3 className={styles.SectionTitle}>Profile Information</h3>
+        <div className={styles.InfoBox}>
+          <div className={styles.InfoBoxItem}>
             <strong>Profile ID:</strong> {profile?.profileId || 'Not loaded'}
           </div>
           {accessLevel ? (
@@ -613,7 +613,7 @@ const App: React.FC = () => {
         <button
           onClick={fetchProfile}
           disabled={isLoadingProfile}
-          className={`button button-primary ${isLoadingProfile ? 'loading' : ''}`}
+          className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingProfile ? styles.Loading : ''}`}
         >
           {isLoadingProfile ? 'Loading...' : 'Refresh Profile'}
         </button>
@@ -623,17 +623,17 @@ const App: React.FC = () => {
 
   const renderPaywallSection = () => {
     return (
-      <div className="section">
-        <h3 className="section-title">Paywall Configuration</h3>
+      <div className={styles.Section}>
+        <h3 className={styles.SectionTitle}>Paywall Configuration</h3>
 
         {/* Configuration inputs */}
-        <div className="input-group">
+        <div className={styles.InputGroup}>
           <input
             type="text"
             value={placementId}
             onChange={(e) => setPlacementId(e.target.value)}
             placeholder="Placement ID"
-            className="input"
+            className={styles.Input}
             disabled={!isActivated}
           />
           <input
@@ -641,18 +641,18 @@ const App: React.FC = () => {
             value={locale}
             onChange={(e) => setLocale(e.target.value)}
             placeholder="Locale (optional)"
-            className="input"
+            className={styles.Input}
             disabled={!isActivated}
           />
         </div>
 
-        <div className="input-group">
+        <div className={styles.InputGroup}>
           <input
             type="text"
             value={timeout}
             onChange={(e) => setTimeout(e.target.value)}
             placeholder="Timeout (ms)"
-            className="input"
+            className={styles.Input}
             disabled={!isActivated}
           />
           <input
@@ -660,16 +660,16 @@ const App: React.FC = () => {
             value={maxAge}
             onChange={(e) => setMaxAge(e.target.value)}
             placeholder="Max age (seconds)"
-            className="input"
+            className={styles.Input}
             disabled={!isActivated}
           />
         </div>
 
-        <div className="input-group">
+        <div className={styles.InputGroup}>
           <select
             value={fetchPolicyIndex}
             onChange={(e) => setFetchPolicyIndex(parseInt(e.target.value))}
-            className="input"
+            className={styles.Input}
             disabled={!isActivated}
           >
             {fetchPolicies.map((policy, index) => (
@@ -680,37 +680,37 @@ const App: React.FC = () => {
           </select>
         </div>
 
-        <div className="input-group">
+        <div className={styles.InputGroup}>
           <textarea
             value={customTagsJson}
             onChange={(e) => setCustomTagsJson(e.target.value)}
             placeholder="Custom tags (JSON)"
-            className="input"
+            className={styles.Input}
             rows={2}
             disabled={!isActivated}
           />
         </div>
 
         {/* Load buttons */}
-        <div className="button-group">
+        <div className={styles.ButtonGroup}>
           <button
             onClick={() => fetchPaywall(false)}
             disabled={isLoadingPaywall || !isActivated}
-            className={`button button-primary ${(isLoadingPaywall || !isActivated) ? 'loading' : ''}`}
+            className={`${styles.Button} ${styles.ButtonPrimary} ${(isLoadingPaywall || !isActivated) ? styles.Loading : ''}`}
           >
             {isLoadingPaywall ? 'Loading...' : 'Load Paywall'}
           </button>
           <button
             onClick={() => fetchPaywall(true)}
             disabled={isLoadingPaywall || !isActivated}
-            className={`button button-secondary ${(isLoadingPaywall || !isActivated) ? 'loading' : ''}`}
+            className={`${styles.Button} ${styles.ButtonSecondary} ${(isLoadingPaywall || !isActivated) ? styles.Loading : ''}`}
           >
             {isLoadingPaywall ? 'Loading...' : 'Load (Default Audience)'}
           </button>
         </div>
 
         {/* Paywall info */}
-        <div className="info-box">
+        <div className={styles.InfoBox}>
           {paywall ? (
             <div>
               <div><strong>Paywall ID:</strong> {paywall.name}</div>
@@ -730,33 +730,33 @@ const App: React.FC = () => {
               )}
 
               {products.length > 0 && (
-                <div className="products-list">
+                <div className={styles.ProductsList}>
                   <strong>Products:</strong>
                   {products.map((product) => (
-                    <div key={product.vendorProductId} className="product-item">
-                      <div className="product-title">{product.localizedTitle}</div>
-                      <div className="product-price">Price: {product.price?.localizedString || 'N/A'}</div>
-                      <div className="product-id">ID: {product.vendorProductId}</div>
-                      <div className="product-actions-comment">
+                    <div key={product.vendorProductId} className={styles.ProductItem}>
+                      <div className={styles.ProductTitle}>{product.localizedTitle}</div>
+                      <div className={styles.ProductPrice}>Price: {product.price?.localizedString || 'N/A'}</div>
+                      <div className={styles.ProductId}>ID: {product.vendorProductId}</div>
+                      <div className={styles.ProductActionsComment}>
                         Actions for this specific product:
                       </div>
 
-                      <div className="product-buttons">
+                      <div className={styles.ProductButtons}>
                         <button
                           onClick={() => makePurchase(product)}
-                          className="button button-primary button-small"
+                          className={`${styles.Button} ${styles.ButtonPrimary} ${styles.ButtonSmall}`}
                         >
                           Purchase
                         </button>
                         <button
                           onClick={() => openWebPaywallForProduct(product)}
-                          className="button button-secondary button-small"
+                          className={`${styles.Button} ${styles.ButtonSecondary} ${styles.ButtonSmall}`}
                         >
                           Open Web Paywall for product (iOS)
                         </button>
                         <button
                           onClick={() => createWebPaywallUrlForProduct(product)}
-                          className="button button-secondary button-small"
+                          className={`${styles.Button} ${styles.ButtonSecondary} ${styles.ButtonSmall}`}
                         >
                           Create Web URL (iOS)
                         </button>
@@ -773,11 +773,11 @@ const App: React.FC = () => {
         </div>
 
         {/* Action buttons */}
-        <div className="button-group">
+        <div className={styles.ButtonGroup}>
           <button
             onClick={presentPaywall}
             disabled={!paywall || !paywall.hasViewConfiguration}
-            className="button button-primary"
+            className={`${styles.Button} ${styles.ButtonPrimary}`}
           >
             Present Paywall
           </button>
@@ -785,7 +785,7 @@ const App: React.FC = () => {
                      <button
              onClick={openWebPaywall}
              disabled={!paywall}
-             className="button button-secondary"
+             className={`${styles.Button} ${styles.ButtonSecondary}`}
            >
              Open Web Paywall (iOS)
            </button>
@@ -795,11 +795,11 @@ const App: React.FC = () => {
         </div>
 
           {/* Combined Create Web URL Button + Input */}
-          <div className="web-url-container">
+          <div className={styles.WebUrlContainer}>
             <button
               onClick={createWebPaywallUrl}
               disabled={!paywall}
-              className="web-url-button"
+              className={styles.WebUrlButton}
             >
               Create Web URL (iOS)
             </button>
@@ -808,7 +808,7 @@ const App: React.FC = () => {
               value={webPaywallUrl}
               placeholder="Generated URL will appear here..."
               readOnly
-              className={`web-url-input ${webPaywallUrl ? 'has-value' : ''}`}
+              className={`${styles.WebUrlInput} ${webPaywallUrl ? styles.WebUrlInputHasValue : ''}`}
               onClick={(e) => webPaywallUrl && (e.target as HTMLInputElement).select()}
               title={webPaywallUrl ? 'Click to select URL for copying' : 'No URL generated yet'}
             />
@@ -819,9 +819,9 @@ const App: React.FC = () => {
 
   const renderOnboardingSection = () => {
     return (
-      <div className="section">
-        <h3 className="section-title">Onboarding ({getPlacementId()})</h3>
-        <div className="info-box">
+      <div className={styles.Section}>
+        <h3 className={styles.SectionTitle}>Onboarding ({getPlacementId()})</h3>
+        <div className={styles.InfoBox}>
           {onboarding ? (
             <div>
               <div><strong>Onboarding ID:</strong> {onboarding.name}</div>
@@ -834,11 +834,11 @@ const App: React.FC = () => {
             <div>No onboarding loaded</div>
           )}
         </div>
-        <div className="button-group">
+        <div className={styles.ButtonGroup}>
           <button
             onClick={fetchOnboarding}
             disabled={isLoadingOnboarding || !isActivated}
-            className={`button button-primary ${(isLoadingOnboarding || !isActivated) ? 'loading' : ''}`}
+            className={`${styles.Button} ${styles.ButtonPrimary} ${(isLoadingOnboarding || !isActivated) ? styles.Loading : ''}`}
           >
             {isLoadingOnboarding ? 'Loading...' : 'Load Onboarding'}
           </button>
@@ -990,15 +990,15 @@ const App: React.FC = () => {
 
   const renderReportTransactionSection = () => {
     return (
-      <div className="section">
-        <h3 className="section-title">Report Transaction</h3>
-        <div className="input-group">
+      <div className={styles.Section}>
+        <h3 className={styles.SectionTitle}>Report Transaction</h3>
+        <div className={styles.InputGroup}>
           <input
             type="text"
             value={transactionId}
             onChange={(e) => setTransactionId(e.target.value)}
             placeholder="Transaction ID (required)"
-            className="input"
+            className={styles.Input}
             disabled={!isActivated}
           />
           <input
@@ -1006,13 +1006,13 @@ const App: React.FC = () => {
             value={variationId}
             onChange={(e) => setVariationId(e.target.value)}
             placeholder="Variation ID (optional)"
-            className="input"
+            className={styles.Input}
             disabled={!isActivated}
           />
           <button
             onClick={reportTransaction}
             disabled={!isActivated || !transactionId.trim()}
-            className="button button-primary"
+            className={`${styles.Button} ${styles.ButtonPrimary}`}
           >
             Report Transaction
           </button>
@@ -1023,62 +1023,62 @@ const App: React.FC = () => {
 
   const renderOtherActionsSection = () => {
     return (
-      <div className="section">
-        <h3 className="section-title">Other Actions</h3>
-        <div className="button-group">
+      <div className={styles.Section}>
+        <h3 className={styles.SectionTitle}>Other Actions</h3>
+        <div className={styles.ButtonGroup}>
           <button
             onClick={restorePurchases}
             disabled={!isActivated}
-            className="button button-primary"
+            className={`${styles.Button} ${styles.ButtonPrimary}`}
           >
             Restore Purchases
           </button>
           <button
             onClick={updateProfile}
             disabled={!isActivated}
-            className="button button-secondary"
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
             Update Profile
           </button>
           <button
             onClick={updateAttribution}
             disabled={!isActivated}
-            className="button button-secondary"
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
             Update Attribution
           </button>
         </div>
-        <div className="button-group">
+        <div className={styles.ButtonGroup}>
           <button
             onClick={presentCodeRedemptionSheet}
             disabled={!isActivated}
-            className="button button-secondary"
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
             Code Redemption (iOS)
           </button>
           <button
             onClick={setLogLevel}
             disabled={!isActivated}
-            className="button button-secondary"
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
             Set Log Level
           </button>
 
         </div>
-        <div className="button-group">
+        <div className={styles.ButtonGroup}>
           <button
             onClick={testSetFallback}
             disabled={!isActivated}
-            className="button button-secondary"
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
             Set Fallback Paywalls
           </button>
         </div>
-        <div className="button-group">
+        <div className={styles.ButtonGroup}>
           <button
             onClick={logout}
             disabled={!isActivated}
-            className="button button-danger"
+            className={`${styles.Button} ${styles.ButtonDanger}`}
           >
             Logout
           </button>
@@ -1107,24 +1107,24 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="app-container">
+    <div className={styles.AppContainer}>
       <main>
-        <h1 className="title">Adapty Capacitor Plugin</h1>
-        <p className="description">
+        <h1 className={styles.Title}>Adapty Capacitor Plugin</h1>
+        <p className={styles.Description}>
           This project is devtools for plugin API.
         </p>
 
         {/* Credentials Info */}
-        <div className="section">
-          <h3 className="section-title">Configuration from .adapty-credentials.json file</h3>
-          <div className="info-box">
-            <div className="info-box-item">
+        <div className={styles.Section}>
+          <h3 className={styles.SectionTitle}>Configuration from .adapty-credentials.json file</h3>
+          <div className={styles.InfoBox}>
+            <div className={styles.InfoBoxItem}>
               <strong>API Key:</strong> {getApiKey() ? `${getApiKey().substring(0, 20)}...` : 'Not loaded'}
             </div>
-            <div className="info-box-item">
+            <div className={styles.InfoBoxItem}>
               <strong>Placement ID:</strong> {getPlacementId()}
             </div>
-            <div className="info-box-item">
+            <div className={styles.InfoBoxItem}>
               <strong>iOS Bundle ID:</strong> {getIosBundle()}
             </div>
           </div>
@@ -1133,17 +1133,17 @@ const App: React.FC = () => {
         {renderIdentifySection()}
 
         {/* Activation Section */}
-        <div className="section">
-          <h3 className="section-title">SDK Activation</h3>
+        <div className={styles.Section}>
+          <h3 className={styles.SectionTitle}>SDK Activation</h3>
           <button
             onClick={testActivate}
-            className={`button ${isActivated ? 'button-success' : 'button-primary'}`}
+            className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
           >
             {isActivated ? 'Activated' : 'Activate Adapty'}
           </button>
           <button
             onClick={testIsActivated}
-            className="button button-secondary"
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
             style={{ marginLeft: '10px' }}
           >
             Check Status
@@ -1152,7 +1152,7 @@ const App: React.FC = () => {
 
         {/* Result Display */}
         {result && (
-          <div className={`result-box ${result.startsWith('Error') ? 'error' : 'success'}`}>
+          <div className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}>
             {result}
           </div>
         )}
@@ -1179,9 +1179,9 @@ const App: React.FC = () => {
         {isActivated && renderOtherActionsSection()}
 
         {/* Configuration Info */}
-        <div className="config-section">
-          <h3 className="config-title">SDK Status:</h3>
-          <ul className="config-list">
+        <div className={styles.ConfigSection}>
+          <h3 className={styles.ConfigTitle}>SDK Status:</h3>
+          <ul className={styles.ConfigList}>
             <li>Status: {isActivated ? '✅ Activated' : '❌ Not activated'}</li>
             <li>Profile Loaded: {profile ? '✅ Yes' : '❌ No'}</li>
             <li>Paywall Loaded: {paywall ? '✅ Yes' : '❌ No'}</li>

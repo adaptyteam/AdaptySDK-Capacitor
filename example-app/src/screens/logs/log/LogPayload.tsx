@@ -1,6 +1,6 @@
 import React from 'react';
 import { JsLog, dateFormat } from '../../../helpers';
-import './LogPayload.css';
+import styles from './LogPayload.module.css';
 import { useParams } from 'react-router-dom';
 import { useLogs } from '../../../logs-context';
 
@@ -17,23 +17,23 @@ function LogPayload({ onBack }: LogPayloadProps) {
 
   const renderValue = (value: any): React.ReactNode => {
     if (value === null) {
-      return <span className="null-value">null</span>;
+      return <span className={styles.NullValue}>null</span>;
     }
     if (value === undefined) {
-      return <span className="undefined-value">undefined</span>;
+      return <span className={styles.UndefinedValue}>undefined</span>;
     }
     if (typeof value === 'string') {
-      return <span className="string-value">"{value}"</span>;
+      return <span className={styles.StringValue}>"{value}"</span>;
     }
     if (typeof value === 'number') {
-      return <span className="number-value">{value}</span>;
+      return <span className={styles.NumberValue}>{value}</span>;
     }
     if (typeof value === 'boolean') {
-      return <span className="boolean-value">{value.toString()}</span>;
+      return <span className={styles.BooleanValue}>{value.toString()}</span>;
     }
     if (typeof value === 'object') {
       return (
-        <pre className="object-value">
+        <pre className={styles.ObjectValue}>
           {JSON.stringify(value, null, 2)}
         </pre>
       );
@@ -41,52 +41,63 @@ function LogPayload({ onBack }: LogPayloadProps) {
     return String(value);
   };
 
+  const getLogLevelClass = (level: string) => {
+    switch (level) {
+      case 'error': return styles.LogLevelError;
+      case 'warn': return styles.LogLevelWarn;
+      case 'info': return styles.LogLevelInfo;
+      case 'debug': return styles.LogLevelDebug;
+      case 'verbose': return styles.LogLevelVerbose;
+      default: return '';
+    }
+  };
+
   return (
-    <div className="log-payload-container">
-      <div className="log-payload-header">
-        <button className="back-button" onClick={onBack}>
+    <div className={styles.LogPayloadContainer}>
+      <div className={styles.LogPayloadHeader}>
+        <button className={styles.BackButton} onClick={onBack}>
           ← Back to Logs
         </button>
         <h2>Log Details</h2>
       </div>
 
-      <div className="log-payload-content">
-        <div className="section">
+      <div className={styles.LogPayloadContent}>
+        <div className={styles.Section}>
           <h3>INFO</h3>
-          <div className="info-grid">
-            <div className="info-item">
-              <span className="label">Level:</span>
-              <span className={`value log-level-${log.logLevel}`}>
+          <div className={styles.InfoGrid}>
+            <div className={styles.InfoItem}>
+              <span className={styles.InfoItemLabel}>Level:</span>
+              <span className={`${styles.InfoItemValue} ${getLogLevelClass(log.logLevel)}`}>
                 {log.logLevel}
               </span>
             </div>
-            <div className="info-item">
-              <span className="label">DateTime:</span>
-              <span className="value">
+            <div className={styles.InfoItem}>
+              <span className={styles.InfoItemLabel}>DateTime:</span>
+              <span className={styles.InfoItemValue}>
                 {dateFormat(log.isoDate)}
               </span>
             </div>
-            <div className="info-item">
-              <span className="label">Function:</span>
-              <span className="value">{log.funcName}</span>
+            <div className={styles.InfoItem}>
+              <span className={styles.InfoItemLabel}>Function:</span>
+              <span className={styles.InfoItemValue}>{log.funcName}</span>
             </div>
-            <div className="info-item full-width">
-              <span className="label">Message:</span>
-              <span className="value">{log.message}</span>
+            <div className={`${styles.InfoItem} ${styles.InfoItemFullWidth}`}>
+              <span className={styles.InfoItemLabel}>Message:</span>
+              <span className={styles.InfoItemValue}>{log.message}</span>
             </div>
           </div>
         </div>
 
         {log.args && log.args.length > 0 && (
-          <div className="section">
+          <div className={styles.Section}>
             <h3>ARGS</h3>
-            <div className="args-list">
+            <div className={styles.ArgsList}>
               {log.args.map((arg, index) => (
-                <div key={index} className="arg-item">
-                  <div className="arg-header">
-                    <span className="arg-index">[{index}]</span>
+                <div key={index} className={styles.ArgItem}>
+                  <div className={styles.ArgHeader}>
+                    <span className={styles.ArgIndex}>[{index}]</span>
                   </div>
-                  <div className="arg-value">
+                  <div className={styles.ArgValue}>
                     {renderValue(arg)}
                   </div>
                 </div>

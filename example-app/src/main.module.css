@@ -1,5 +1,5 @@
 /* Layout for the routed content to avoid overlap with bottom tabs */
-.router-container {
+.RouterContainer {
   min-height: 100vh;
   /*background-color: #f5f5f7;*/
   /*padding-top: 60px;*/
@@ -7,7 +7,7 @@
 }
 
 /* Bottom tab bar */
-.tabs {
+.Tabs {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -21,13 +21,14 @@
 }
 
 /* Tab link styles */
-.tab-link {
+.TabLink {
   color: #333;
   text-decoration: none;
   font-size: 22px;
   font-weight: 500;
 }
 
-.tab-link.active {
+/* active state as a separate class for CSS Modules */
+.TabLinkActive {
   color: #007aff;
 }

@@ -1,20 +1,20 @@
-.logs-container {
+.LogsContainer {
   padding: 40px 20px 20px 20px;
   max-width: 800px;
   margin: 0 auto;
 }
 
-.logs-header {
+.LogsHeader {
   margin-bottom: 20px;
 }
 
-.logs-header-content {
+.LogsHeaderContent {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.logs-header h2 {
+.LogsHeader h2 {
   color: #333;
   font-size: 18px;
   font-weight: 600;
@@ -23,7 +23,7 @@
   text-align: center;
 }
 
-.back-button-ios {
+.BackButtonIOS {
   background: transparent;
   color: #007aff;
   border: none;
@@ -41,55 +41,57 @@
   flex-shrink: 0;
 }
 
-.back-button-ios:hover {
+.BackButtonIOS:hover {
   background: rgba(0, 122, 255, 0.1);
   transform: scale(1.05);
 }
 
-.back-button-ios:active {
+.BackButtonIOS:active {
   background: rgba(0, 122, 255, 0.2);
   transform: scale(0.95);
 }
 
-.logs-list {
+.LogsList {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.log-line {
+.LogLine {
   border-bottom: 1px solid #e5e5e7;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.log-line:hover {
+.LogLine:hover {
   background-color: #f5f5f7;
 }
 
-.log-line.last {
+/* flattened state classes */
+.LogLineLast {
   border-bottom: none;
 }
 
-.log-line.first {
+.LogLineFirst {
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
 }
 
-.log-line.last {
+/* duplicate bottom rounding when last */
+.LogLineLast {
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }
 
-.log-content {
+.LogContent {
   display: flex;
   align-items: flex-start;
   padding: 12px 16px;
   gap: 12px;
 }
 
-.log-icon {
+.LogIcon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,18 +99,18 @@
   margin-top: 4px;
 }
 
-.log-level-indicator {
+.LogLevelIndicator {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
 
-.log-body {
+.LogBody {
   flex: 1;
   min-width: 0;
 }
 
-.log-header {
+.LogHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -116,21 +118,21 @@
   gap: 12px;
 }
 
-.func-name {
+.FuncName {
   color: #666;
   font-size: 13px;
   font-weight: 500;
   flex-shrink: 0;
 }
 
-.timestamp {
+.Timestamp {
   color: #999;
   font-size: 12px;
   font-family: 'Monaco', 'Menlo', monospace;
   flex-shrink: 0;
 }
 
-.log-message {
+.LogMessage {
   color: #333;
   font-size: 14px;
   line-height: 1.4;

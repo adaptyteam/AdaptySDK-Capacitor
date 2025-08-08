@@ -1,17 +1,17 @@
-.log-payload-container {
+.LogPayloadContainer {
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
 }
 
-.log-payload-header {
+.LogPayloadHeader {
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.back-button {
+.BackButton {
   background: #007aff;
   color: white;
   border: none;
@@ -23,31 +23,31 @@
   transition: background-color 0.2s ease;
 }
 
-.back-button:hover {
+.BackButton:hover {
   background: #0056cc;
 }
 
-.log-payload-header h2 {
+.LogPayloadHeader h2 {
   color: #333;
   font-size: 24px;
   font-weight: 600;
   margin: 0;
 }
 
-.log-payload-content {
+.LogPayloadContent {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.section {
+.Section {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.section h3 {
+.Section h3 {
   background: #f5f5f7;
   color: #333;
   font-size: 14px;
@@ -58,24 +58,24 @@
   letter-spacing: 0.5px;
 }
 
-.info-grid {
+.InfoGrid {
   padding: 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.info-item {
+.InfoItem {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.info-item.full-width {
+.InfoItemFullWidth {
   grid-column: 1 / -1;
 }
 
-.info-item .label {
+.InfoItemLabel {
   color: #666;
   font-size: 12px;
   font-weight: 500;
@@ -83,91 +83,91 @@
   letter-spacing: 0.5px;
 }
 
-.info-item .value {
+.InfoItemValue {
   color: #333;
   font-size: 14px;
   word-break: break-word;
 }
 
-.log-level-error {
+.LogLevelError {
   color: #ff4444 !important;
   font-weight: 600;
 }
 
-.log-level-warn {
+.LogLevelWarn {
   color: #ffaa00 !important;
   font-weight: 600;
 }
 
-.log-level-info {
+.LogLevelInfo {
   color: #4777ff !important;
   font-weight: 600;
 }
 
-.log-level-debug {
+.LogLevelDebug {
   color: #888888 !important;
   font-weight: 600;
 }
 
-.log-level-verbose {
+.LogLevelVerbose {
   color: #666666 !important;
   font-weight: 600;
 }
 
-.args-list {
+.ArgsList {
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.arg-item {
+.ArgItem {
   border: 1px solid #e5e5e7;
   border-radius: 8px;
   overflow: hidden;
 }
 
-.arg-header {
+.ArgHeader {
   background: #f9f9f9;
   padding: 8px 12px;
   border-bottom: 1px solid #e5e5e7;
 }
 
-.arg-index {
+.ArgIndex {
   color: #666;
   font-size: 12px;
   font-weight: 500;
   font-family: 'Monaco', 'Menlo', monospace;
 }
 
-.arg-value {
+.ArgValue {
   padding: 12px;
 }
 
-.null-value {
+.NullValue {
   color: #999;
   font-style: italic;
 }
 
-.undefined-value {
+.UndefinedValue {
   color: #999;
   font-style: italic;
 }
 
-.string-value {
+.StringValue {
   color: #22aa44;
 }
 
-.number-value {
+.NumberValue {
   color: #0066cc;
 }
 
-.boolean-value {
+.BooleanValue {
   color: #aa3333;
   font-weight: 500;
 }
 
-.object-value {
+.ObjectValue {
   background: #f8f8f8;
   color: #333;
   font-family: 'Monaco', 'Menlo', monospace;
@@ -181,7 +181,7 @@
 }
 
 @media (max-width: 768px) {
-  .info-grid {
+  .InfoGrid {
     grid-template-columns: 1fr;
   }
 }
