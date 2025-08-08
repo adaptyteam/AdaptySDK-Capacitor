@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './screens/app/App';
 import Logs from './screens/logs/Logs';
-import LogPayload from './screens/logs/LogPayload';
+import LogPayload from './screens/logs/log/LogPayload.tsx';
 import { useJsLogs, JsLog } from './helpers';
 
 type Screen = 'app' | 'logs' | 'logPayload';
@@ -30,16 +30,16 @@ function MainApp() {
     switch (currentScreen) {
       case 'logs':
         return (
-          <Logs 
-            logs={logs} 
+          <Logs
+            logs={logs}
             onLogClick={navigateToLogPayload}
             onBack={navigateToApp}
           />
         );
       case 'logPayload':
         return selectedLog ? (
-          <LogPayload 
-            log={selectedLog} 
+          <LogPayload
+            log={selectedLog}
             onBack={() => setCurrentScreen('logs')}
           />
         ) : null;
@@ -60,4 +60,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <MainApp />
   </React.StrictMode>,
-); 
+);

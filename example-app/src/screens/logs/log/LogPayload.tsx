@@ -1,5 +1,5 @@
 import React from 'react';
-import { JsLog, dateFormat } from '../../helpers';
+import { JsLog, dateFormat } from '../../../helpers.ts';
 import './LogPayload.css';
 
 interface LogPayloadProps {
@@ -92,4 +92,4 @@ function LogPayload({ log, onBack }: LogPayloadProps) {
   );
 }
 
-export default LogPayload; 
+export default LogPayload;
