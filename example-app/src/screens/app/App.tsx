@@ -13,11 +13,7 @@ import {
 import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
 import './App.css';
 
-interface AppProps {
-  onNavigateToLogs?: () => void;
-}
-
-const App: React.FC<AppProps> = ({ onNavigateToLogs }) => {
+const App: React.FC = () => {
   const [result, setResult] = useState<string>('');
   const [isActivated, setIsActivated] = useState(false);
   const [profile, setProfile] = useState<AdaptyProfile | null>(null);
@@ -1067,6 +1063,7 @@ const App: React.FC<AppProps> = ({ onNavigateToLogs }) => {
           >
             Set Log Level
           </button>
+
         </div>
         <div className="button-group">
           <button
@@ -1111,26 +1108,11 @@ const App: React.FC<AppProps> = ({ onNavigateToLogs }) => {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <div className="header-content">
-          <div className="header-text">
-            <h1 className="title">Adapty Capacitor Plugin</h1>
-            <p className="description">
-              This project is devtools for plugin API.
-            </p>
-          </div>
-          {onNavigateToLogs && (
-            <button
-              onClick={onNavigateToLogs}
-              className="logs-button"
-              title="View Logs"
-            >
-              📋
-            </button>
-          )}
-        </div>
-      </header>
       <main>
+        <h1 className="title">Adapty Capacitor Plugin</h1>
+        <p className="description">
+          This project is devtools for plugin API.
+        </p>
 
         {/* Credentials Info */}
         <div className="section">

@@ -1,55 +1,8 @@
 .app-container {
+  padding: 20px;
   font-family: Arial, sans-serif;
   max-width: 800px;
   margin: 0 auto;
-}
-
-.app-header {
-  padding: 20px 20px 0 20px;
-  margin-bottom: 20px;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 20px;
-}
-
-.header-text {
-  flex: 1;
-}
-
-.logs-button {
-  background: #007aff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  transition:
-    background-color 0.2s ease,
-    transform 0.1s ease;
-  flex-shrink: 0;
-  margin-top: 4px;
-}
-
-.logs-button:hover {
-  background: #0056cc;
-  transform: scale(1.05);
-}
-
-.logs-button:active {
-  transform: scale(0.95);
-}
-
-main {
-  padding: 0 20px 20px 20px;
 }
 
 .title {
