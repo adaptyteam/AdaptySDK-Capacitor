@@ -1034,13 +1034,6 @@ const App: React.FC = () => {
             Restore Purchases
           </button>
           <button
-            onClick={updateProfile}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Update Profile
-          </button>
-          <button
             onClick={updateAttribution}
             disabled={!isActivated}
             className={`${styles.Button} ${styles.ButtonSecondary}`}

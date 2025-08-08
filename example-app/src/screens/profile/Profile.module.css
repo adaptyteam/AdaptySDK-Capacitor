@@ -1,0 +1,90 @@
+.AppContainer {
+  padding: 20px;
+  padding-top: 60px;
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.Section {
+  margin-bottom: 20px;
+}
+
+.SectionTitle {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.InputGroup {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.Input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: vertical;
+  flex: 1;
+  min-width: 0;
+}
+
+.Input:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.6;
+}
+
+.ButtonGroup {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.Button {
+  padding: 8px 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.Button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ButtonPrimary {
+  background-color: #007bff;
+}
+
+.ButtonSecondary {
+  background-color: #6c757d;
+}
+
+.ResultBox {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.ResultBoxSuccess {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.ResultBoxError {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.MutedNote {
+  font-size: 12px;
+  color: #777;
+}
