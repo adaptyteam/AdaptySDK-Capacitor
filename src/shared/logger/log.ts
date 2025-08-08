@@ -1,4 +1,6 @@
+//import type { LogLevel } from '../types/inputs';
 import { LogLevel } from '../types/inputs';
+
 import VERSION from '../../version';
 
 // Type for lazy evaluation functions
