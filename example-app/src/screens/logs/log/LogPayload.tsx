@@ -1,13 +1,18 @@
 import React from 'react';
-import { JsLog, dateFormat } from '../../../helpers.ts';
+import { JsLog, dateFormat, getJsLogsStore } from '../../../helpers.ts';
 import './LogPayload.css';
+import { useParams } from 'react-router-dom';
 
 interface LogPayloadProps {
-  log: JsLog;
   onBack: () => void;
 }
 
-function LogPayload({ log, onBack }: LogPayloadProps) {
+function LogPayload({ onBack }: LogPayloadProps) {
+  const { id } = useParams();
+  const decodedId = id ? decodeURIComponent(id) : '';
+  const log = getJsLogsStore().find((l) => l.isoDate === decodedId) as JsLog | undefined;
+  if (!log) return null;
+
   const renderValue = (value: any): React.ReactNode => {
     if (value === null) {
       return <span className="null-value">null</span>;

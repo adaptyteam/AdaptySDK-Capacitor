@@ -71,19 +71,16 @@ function LogsRoute() {
   const logs = useJsLogs();
   const navigate = useNavigate();
   const onLogClick = (log: JsLog) => {
-    // Navigate to a details route and pass the log via location state
-    const uniq = Date.now().toString();
-    navigate(`/logs/${uniq}`, { state: { log } });
+    // Use isoDate as URL-safe identifier to avoid passing non-cloneable state
+    const id = encodeURIComponent(log.isoDate);
+    navigate(`/logs/${id}`);
   };
   return <Logs logs={logs} onLogClick={onLogClick} onBack={() => navigate('/app')} />;
 }
 
 function LogPayloadRoute() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const log = (location.state as { log?: JsLog } | null)?.log;
-  if (!log) return null;
-  return <LogPayload log={log} onBack={() => navigate(-1)} />;
+  return <LogPayload onBack={() => navigate(-1)} />;
 }
 
 function RouterApp() {
