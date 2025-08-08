@@ -1,0 +1,187 @@
+.log-payload-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.log-payload-header {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.back-button {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  align-self: flex-start;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background: #0056cc;
+}
+
+.log-payload-header h2 {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.log-payload-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.section h3 {
+  background: #f5f5f7;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-grid {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.info-item .label {
+  color: #666;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item .value {
+  color: #333;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.log-level-error {
+  color: #ff4444 !important;
+  font-weight: 600;
+}
+
+.log-level-warn {
+  color: #ffaa00 !important;
+  font-weight: 600;
+}
+
+.log-level-info {
+  color: #4777ff !important;
+  font-weight: 600;
+}
+
+.log-level-debug {
+  color: #888888 !important;
+  font-weight: 600;
+}
+
+.log-level-verbose {
+  color: #666666 !important;
+  font-weight: 600;
+}
+
+.args-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.arg-item {
+  border: 1px solid #e5e5e7;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.arg-header {
+  background: #f9f9f9;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e5e7;
+}
+
+.arg-index {
+  color: #666;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.arg-value {
+  padding: 12px;
+}
+
+.null-value {
+  color: #999;
+  font-style: italic;
+}
+
+.undefined-value {
+  color: #999;
+  font-style: italic;
+}
+
+.string-value {
+  color: #22aa44;
+}
+
+.number-value {
+  color: #0066cc;
+}
+
+.boolean-value {
+  color: #aa3333;
+  font-weight: 500;
+}
+
+.object-value {
+  background: #f8f8f8;
+  color: #333;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
