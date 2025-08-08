@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-
 // Constants for error messages
 const ADAPTY_PREFIX = '[ADAPTY]';
 const CREDENTIALS_FILE = '.adapty-credentials.json';
@@ -39,31 +37,6 @@ export interface JsLog {
   funcName: string;
   args: any[];
   isoDate: string;
-}
-
-// In-memory log store with subscription support
-let jsLogsStore: JsLog[] = [];
-const jsLogsSubscribers = new Set<(logs: JsLog[]) => void>();
-
-export function getJsLogsStore(): JsLog[] {
-  return jsLogsStore;
-}
-
-export function subscribeJsLogs(handler: (logs: JsLog[]) => void): () => void {
-  jsLogsSubscribers.add(handler);
-  return () => jsLogsSubscribers.delete(handler);
-}
-
-export function appendJsLog(log: JsLog): void {
-  jsLogsStore = [...jsLogsStore, log];
-  jsLogsSubscribers.forEach((cb) => cb(jsLogsStore));
-}
-
-// useJsLogs subscribes to the global log store
-export function useJsLogs(): JsLog[] {
-  const [logs, setLogs] = useState<JsLog[]>(getJsLogsStore());
-  useEffect(() => subscribeJsLogs(setLogs), []);
-  return logs;
 }
 
 export function formatDate(date: string | Date): string {

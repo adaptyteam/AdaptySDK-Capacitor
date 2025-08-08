@@ -7,9 +7,10 @@ import App from './screens/app/App';
 import Logs from './screens/logs/Logs';
 import LogPayload from './screens/logs/log/LogPayload';
 import Profile from './screens/profile/Profile';
-import { useJsLogs, JsLog } from './helpers';
+import { JsLog } from './helpers';
 import './main.css';
 import JsLogsListener from './JsLogsListener';
+import { LogsProvider, useLogs } from './logs-context';
 
 function BackHandler() {
   // Handle Android hardware back: navigate back if possible, otherwise exit app
@@ -68,7 +69,7 @@ function AppRoute() {
 }
 
 function LogsRoute() {
-  const logs = useJsLogs();
+  const { logs } = useLogs();
   const navigate = useNavigate();
   const onLogClick = (log: JsLog) => {
     // Use isoDate as URL-safe identifier to avoid passing non-cloneable state
@@ -106,6 +107,8 @@ function RouterApp() {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterApp />
+    <LogsProvider>
+      <RouterApp />
+    </LogsProvider>
   </React.StrictMode>,
 );

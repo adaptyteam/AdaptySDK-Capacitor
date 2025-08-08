@@ -1,7 +1,8 @@
 import React from 'react';
-import { JsLog, dateFormat, getJsLogsStore } from '../../../helpers.ts';
+import { JsLog, dateFormat } from '../../../helpers';
 import './LogPayload.css';
 import { useParams } from 'react-router-dom';
+import { useLogs } from '../../../logs-context';
 
 interface LogPayloadProps {
   onBack: () => void;
@@ -10,7 +11,8 @@ interface LogPayloadProps {
 function LogPayload({ onBack }: LogPayloadProps) {
   const { id } = useParams();
   const decodedId = id ? decodeURIComponent(id) : '';
-  const log = getJsLogsStore().find((l) => l.isoDate === decodedId) as JsLog | undefined;
+  const { logs } = useLogs();
+  const log = logs.find((l) => l.isoDate === decodedId) as JsLog | undefined;
   if (!log) return null;
 
   const renderValue = (value: any): React.ReactNode => {

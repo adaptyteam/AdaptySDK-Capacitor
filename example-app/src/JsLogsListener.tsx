@@ -1,8 +1,11 @@
 import { useEffect } from 'react';
-import { appendJsLog, JsLog } from './helpers';
+import { JsLog } from './helpers';
+import { useLogs } from './logs-context';
 
 // Listens to console.* and pushes Adapty-related logs into global store
 export default function JsLogsListener() {
+  const { append } = useLogs();
+
   useEffect(() => {
     type ConsoleKey = keyof typeof console;
     type Console = Record<ConsoleKey, any>;
@@ -23,13 +26,13 @@ export default function JsLogsListener() {
           const funcName = msg[2]?.replace('"', '').replace('":', '') ?? 'unknown';
           const message = msg.slice(3).join(' ') || args.join(' ');
 
-          appendJsLog({ logLevel: method as JsLog['logLevel'], message, isoDate, funcName, args });
+          append({ logLevel: method as JsLog['logLevel'], message, isoDate, funcName, args });
         } else if (args[0] && typeof args[0] === 'string' && args[0].includes('[ADAPTY]')) {
           const timestamp = new Date().toISOString();
           const message = args.join(' ');
           const funcName = 'console';
 
-          appendJsLog({ logLevel: method as JsLog['logLevel'], message, isoDate: timestamp, funcName, args });
+          append({ logLevel: method as JsLog['logLevel'], message, isoDate: timestamp, funcName, args });
         }
       };
     };
@@ -41,7 +44,7 @@ export default function JsLogsListener() {
         (console as any)[m] = originalConsoleMethods[m];
       });
     };
-  }, []);
+  }, [append]);
 
   return null;
 } 
