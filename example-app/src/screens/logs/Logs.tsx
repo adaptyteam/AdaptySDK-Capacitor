@@ -1,4 +1,3 @@
-import React from 'react';
 import { JsLog, formatDate } from '../../helpers';
 import './Logs.css';
 

@@ -12,6 +12,7 @@ def capacitor_pods
   pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
   pod 'AdaptyCapacitor', :path => '../../node_modules/@adapty/capacitor'
+  pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
 end
 
 target 'App' do
