@@ -9,6 +9,7 @@ import LogPayload from './screens/logs/log/LogPayload';
 import Profile from './screens/profile/Profile';
 import { useJsLogs, JsLog } from './helpers';
 import './main.css';
+import JsLogsListener from './JsLogsListener';
 
 function BackHandler() {
   // Handle Android hardware back: navigate back if possible, otherwise exit app
@@ -89,6 +90,7 @@ function RouterApp() {
   return (
     <HashRouter>
       <BackHandler />
+      <JsLogsListener />
       <ScrollToTopOnTabChange />
       <div className="router-container">
         <Routes>

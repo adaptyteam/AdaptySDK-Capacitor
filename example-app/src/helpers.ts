@@ -41,64 +41,28 @@ export interface JsLog {
   isoDate: string;
 }
 
-type ConsoleKey = keyof typeof console;
-type Console = Record<ConsoleKey, any>;
+// In-memory log store with subscription support
+let jsLogsStore: JsLog[] = [];
+const jsLogsSubscribers = new Set<(logs: JsLog[]) => void>();
 
-const consoleMethods: Array<'debug' | 'info' | 'warn' | 'error'> = ['debug', 'info', 'warn', 'error'];
+export function getJsLogsStore(): JsLog[] {
+  return jsLogsStore;
+}
 
-// useJsLogs pipes JS logs to the state of the component
+export function subscribeJsLogs(handler: (logs: JsLog[]) => void): () => void {
+  jsLogsSubscribers.add(handler);
+  return () => jsLogsSubscribers.delete(handler);
+}
+
+export function appendJsLog(log: JsLog): void {
+  jsLogsStore = [...jsLogsStore, log];
+  jsLogsSubscribers.forEach((cb) => cb(jsLogsStore));
+}
+
+// useJsLogs subscribes to the global log store
 export function useJsLogs(): JsLog[] {
-  const [logs, setLogs] = useState<JsLog[]>([]);
-
-  useEffect(() => {
-    // Store the original console methods
-    const originalConsoleMethods = consoleMethods.reduce<Console>((acc, method) => {
-      const methodKey = method as ConsoleKey;
-      acc[methodKey] = console[methodKey];
-      return acc;
-    }, {} as Console);
-
-    // Override console method
-    const overrideConsoleMethod = (method: ConsoleKey): void => {
-      (console as Console)[method] = (...args: any[]) => {
-        // Call the original console method
-        originalConsoleMethods[method](...args);
-
-        // Append the new log to the state, if it is adapty related
-        if (args[0] && typeof args[0] === 'string' && args[0].includes('[adapty')) {
-          const msg = args[0].split(' ');
-          // msg format `[${now}] [adapty@${version}] "${funcName}": ${message}`;
-          // extract isoDate, funcName, message
-          const isoDate = msg[0].replace('[', '').replace(']', '');
-          const funcName = msg[2].replace('"', '').replace('":', '');
-          const message = msg.slice(3).join(' ');
-
-          setLogs((prevLogs) => [...prevLogs, { logLevel: method as any, message, isoDate, funcName, args }]);
-        } else if (args[0] && typeof args[0] === 'string' && args[0].includes('[ADAPTY]')) {
-          // Also capture our custom [ADAPTY] logs
-          const timestamp = new Date().toISOString();
-          const message = args.join(' ');
-          const funcName = 'console';
-
-          setLogs((prevLogs) => [
-            ...prevLogs,
-            { logLevel: method as any, message, isoDate: timestamp, funcName, args },
-          ]);
-        }
-      };
-    };
-
-    // Apply the override to all console methods
-    consoleMethods.forEach(overrideConsoleMethod);
-
-    // Restore the original console methods when the component is unmounted
-    return () => {
-      consoleMethods.forEach((method) => {
-        console[method] = originalConsoleMethods[method];
-      });
-    };
-  }, []);
-
+  const [logs, setLogs] = useState<JsLog[]>(getJsLogsStore());
+  useEffect(() => subscribeJsLogs(setLogs), []);
   return logs;
 }
 
