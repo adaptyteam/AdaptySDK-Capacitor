@@ -66,6 +66,32 @@ export class Adapty implements AdaptyPlugin {
   };
 
   /**
+   * Helper method for logging encode operations
+   */
+  private encodeWithLogging<T, R>(
+    coder: { encode(data: T): R },
+    data: T,
+    methodName: string,
+    parentCtx?: LogContext,
+  ): R {
+    if (!parentCtx) {
+      return coder.encode(data);
+    }
+
+    const encodeLog = parentCtx.encode({ methodName: `encode/${methodName}` });
+    encodeLog.start(() => ({ data }));
+
+    try {
+      const result = coder.encode(data);
+      encodeLog.success(() => ({ result }));
+      return result;
+    } catch (error) {
+      encodeLog.failed(() => ({ error }));
+      throw error;
+    }
+  }
+
+  /**
    * Handle method calls through crossplatform bridge with type safety
    */
   public async handleMethodCall<M extends MethodName>(
@@ -100,9 +126,24 @@ export class Adapty implements AdaptyPlugin {
 
         // Apply decoder if available for this method
         const coder = getCoder(methodName);
-        const result = coder
-          ? (coder.decode(successData) as MethodResponseMap[M])
-          : (successData as MethodResponseMap[M]);
+        let result: MethodResponseMap[M];
+
+        if (coder) {
+          // Create decode scope for logging decode operations
+          const ctx = log ? new LogContext() : undefined;
+          const decodeLog = ctx?.decode({ methodName: `decode/${methodName}` });
+          decodeLog?.start(() => ({ successData }));
+
+          try {
+            result = coder.decode(successData) as MethodResponseMap[M];
+            decodeLog?.success(() => ({ result }));
+          } catch (error) {
+            decodeLog?.failed(() => ({ error }));
+            throw error;
+          }
+        } else {
+          result = successData as MethodResponseMap[M];
+        }
 
         if (log) {
           log.success(() => ({ result }));
@@ -306,7 +347,7 @@ export class Adapty implements AdaptyPlugin {
 
     const argsWithUndefined: Req['GetPaywallProducts.Request'] = {
       method,
-      paywall: paywallCoder.encode(options.paywall),
+      paywall: this.encodeWithLogging(paywallCoder, options.paywall, 'AdaptyPaywall', ctx),
     };
 
     const args = filterUndefined(argsWithUndefined);
@@ -481,9 +522,9 @@ export class Adapty implements AdaptyPlugin {
     const productCoder = new AdaptyPaywallProductCoder();
     const purchaseParamsCoder = new AdaptyPurchaseParamsCoder();
 
-    const encodedProduct = productCoder.encode(options.product);
+    const encodedProduct = this.encodeWithLogging(productCoder, options.product, 'AdaptyPaywallProduct', ctx);
     const productInput = productCoder.getInput(encodedProduct);
-    const purchaseParams = purchaseParamsCoder.encode(params);
+    const purchaseParams = this.encodeWithLogging(purchaseParamsCoder, params, 'AdaptyPurchaseParams', ctx);
 
     const argsWithUndefined: Req['MakePurchase.Request'] = {
       method,
@@ -666,7 +707,7 @@ export class Adapty implements AdaptyPlugin {
 
     const argsWithUndefined: Req['UpdateProfile.Request'] = {
       method,
-      params: profileParametersCoder.encode(options.params),
+      params: this.encodeWithLogging(profileParametersCoder, options.params, 'AdaptyProfileParameters', ctx),
     };
 
     const args = filterUndefined(argsWithUndefined);
