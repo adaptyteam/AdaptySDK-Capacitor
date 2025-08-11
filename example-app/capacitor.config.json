@@ -5,6 +5,10 @@
   "plugins": {
     "SplashScreen": {
       "launchAutoHide": false
+    },
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "DARK"
     }
   }
 }

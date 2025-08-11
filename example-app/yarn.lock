@@ -218,6 +218,11 @@
   resolved "https://registry.yarnpkg.com/@capacitor/ios/-/ios-7.0.0.tgz#ecc8944fab99c4f8574d467b319586c6547b3346"
   integrity sha512-FuCoTx2HRYPhIUOT+J87rHkjT4m1yNLsIaG5/qkt9JG5k3KIYATKbp8EHjtLAMqyJWJKBmjkjpFExNesr/t6kA==
 
+"@capacitor/status-bar@^7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-7.0.2.tgz#e48d0b7d41f24efb0781c25aa25b1f94f6f224fc"
+  integrity sha512-fYYkkdzCbQV+MjZVnaQTFl5I4bddnFW8ZrPVxDjNoGVPTUG7H58Ij1+NcuNxHLXjJvZOoZeYJ3w3I16Wb2zssw==
+
 "@esbuild/aix-ppc64@0.21.5":
   version "0.21.5"
   resolved "https://registry.yarnpkg.com/@esbuild/aix-ppc64/-/aix-ppc64-0.21.5.tgz#c7184a326533fcdf1b8ee0733e21c713b975575f"

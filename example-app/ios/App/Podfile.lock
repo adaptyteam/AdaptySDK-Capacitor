@@ -15,12 +15,15 @@ PODS:
   - CapacitorApp (7.0.2):
     - Capacitor
   - CapacitorCordova (7.0.0)
+  - CapacitorStatusBar (7.0.2):
+    - Capacitor
 
 DEPENDENCIES:
   - "AdaptyCapacitor (from `../../node_modules/@adapty/capacitor`)"
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
 
 SPEC REPOS:
   trunk:
@@ -37,6 +40,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/app"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorStatusBar:
+    :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
   Adapty: c4b22d6e30237e73da7c4f718fcd43d59f014600
@@ -46,7 +51,8 @@ SPEC CHECKSUMS:
   Capacitor: fcbee427ff437f414bbb3bc2d39364ad9bd2b8a5
   CapacitorApp: efc1e9748a8ea5d3e789cd82a4f451341cc7ac93
   CapacitorCordova: 345f93b7edd121db98e4ec20ac94d6d7bcaf7e48
+  CapacitorStatusBar: 5526833b87fa9c96a2a90c1322bb1f663c04505f
 
-PODFILE CHECKSUM: 7283abcc1385893b72d1e2630f4ae530c44f41ab
+PODFILE CHECKSUM: b51eb70df6496dd8644d4e79358c155b2ceac04b
 
 COCOAPODS: 1.15.2
