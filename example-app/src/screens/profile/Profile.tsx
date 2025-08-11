@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { adapty } from '@adapty/capacitor';
+import { useEffect, useState } from 'react';
+import { adapty, Gender } from '@adapty/capacitor';
 import styles from './Profile.module.css';
 
 function Profile() {
@@ -7,6 +7,8 @@ function Profile() {
   const [phoneNumber, setPhoneNumber] = useState<string>('+14325671098');
   const [firstName, setFirstName] = useState<string>('John');
   const [lastName, setLastName] = useState<string>('Doe');
+  const [gender, setGender] = useState<Gender>(Gender.Other);
+  const [birthday, setBirthday] = useState<string>('1990-01-01');
   const [isActivated, setIsActivated] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
 
@@ -34,7 +36,7 @@ function Profile() {
 
     try {
       await adapty.updateProfile({
-        params: { email, phoneNumber, firstName, lastName },
+        params: { email, phoneNumber, firstName, lastName, gender, birthday },
       });
       setResult('Profile updated successfully');
     } catch (error) {
@@ -57,6 +59,16 @@ function Profile() {
         </div>
         <div className={styles.InputGroup}>
           <input className={styles.Input} type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="last name" />
+        </div>
+        <div className={styles.InputGroup}>
+          <select className={styles.Input} value={gender} onChange={(e) => setGender(e.target.value as Gender)}>
+            <option value={Gender.Female}>Female</option>
+            <option value={Gender.Male}>Male</option>
+            <option value={Gender.Other}>Other</option>
+          </select>
+        </div>
+        <div className={styles.InputGroup}>
+          <input className={styles.Input} type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} placeholder="birthday" />
         </div>
         <div className={styles.ButtonGroup}>
           <button className={`${styles.Button} ${styles.ButtonPrimary}`} onClick={updateProfile} disabled={!isActivated}>
