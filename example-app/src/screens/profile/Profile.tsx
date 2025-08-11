@@ -46,8 +46,10 @@ function Profile() {
 
   return (
     <div className={styles.AppContainer}>
+      <div className={styles.ProfileHeader}>
+        <h2 className={styles.ProfileTitle}>Update Profile</h2>
+      </div>
       <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Update Profile</h3>
         <div className={styles.InputGroup}>
           <input className={styles.Input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" />
         </div>
