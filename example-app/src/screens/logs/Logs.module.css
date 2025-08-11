@@ -1,25 +1,33 @@
 .LogsContainer {
-  padding: 40px 20px 20px 20px;
+  padding: 40px 10px 10px 20px;
   max-width: 800px;
   margin: 0 auto;
 }
 
 .LogsHeader {
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 
 .LogsHeaderContent {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 }
 
 .LogsHeader h2 {
   color: #333;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 600;
   margin: 0;
-  flex: 1;
+  text-align: center;
+}
+
+.LogsSubheader {
+  color: #666;
+  font-size: 14px;
+  font-weight: 400;
   text-align: center;
 }
 

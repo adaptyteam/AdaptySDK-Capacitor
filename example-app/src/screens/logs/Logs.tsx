@@ -11,7 +11,10 @@ function Logs({ logs, onLogClick }: LogsProps) {
     <div className={styles.LogsContainer}>
       <div className={styles.LogsHeader}>
         <div className={styles.LogsHeaderContent}>
-          <h2>{logs.length} logs (Newest first)</h2>
+          <h2>Logs</h2>
+          <div className={styles.LogsSubheader}>
+            {logs.length} logs (Newest first)
+          </div>
         </div>
       </div>
       <div className={styles.LogsList}>

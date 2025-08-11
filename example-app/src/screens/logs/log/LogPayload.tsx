@@ -56,7 +56,7 @@ function LogPayload({ onBack }: LogPayloadProps) {
     <div className={styles.LogPayloadContainer}>
       <div className={styles.LogPayloadHeader}>
         <button className={styles.BackButton} onClick={onBack}>
-          ← Back to Logs
+          ← Back
         </button>
         <h2>Log Details</h2>
       </div>
