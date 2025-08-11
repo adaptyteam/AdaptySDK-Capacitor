@@ -78,7 +78,7 @@ function LogsRoute() {
     const id = encodeURIComponent(log.isoDate);
     navigate(`/logs/${id}`);
   };
-  return <Logs logs={logs} onLogClick={onLogClick} onBack={() => navigate('/app')} />;
+  return <Logs logs={logs} onLogClick={onLogClick} />;
 }
 
 function LogPayloadRoute() {

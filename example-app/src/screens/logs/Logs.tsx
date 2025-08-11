@@ -4,21 +4,13 @@ import styles from './Logs.module.css';
 interface LogsProps {
   logs: JsLog[];
   onLogClick: (log: JsLog) => void;
-  onBack: () => void;
 }
 
-function Logs({ logs, onLogClick, onBack }: LogsProps) {
+function Logs({ logs, onLogClick }: LogsProps) {
   return (
     <div className={styles.LogsContainer}>
       <div className={styles.LogsHeader}>
         <div className={styles.LogsHeaderContent}>
-          <button
-            className={styles.BackButtonIOS}
-            onClick={onBack}
-            title="Back to App"
-          >
-            ← Back
-          </button>
           <h2>{logs.length} logs (Newest first)</h2>
         </div>
       </div>
