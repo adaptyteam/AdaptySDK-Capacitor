@@ -1,5 +1,6 @@
-//import type { LogLevel } from '../types/inputs';
 import { LogLevel } from '../types/inputs';
+import type { LogEvent, LogSink, LoggerConfig } from './types';
+import { consoleLogSink } from './console-sink';
 
 import VERSION from '../../version';
 
@@ -9,6 +10,8 @@ type LazyParams = () => Record<string, any>;
 
 export class Log {
   public static logLevel: LogLevel | null = null;
+  private static sinks: LogSink[] = [consoleLogSink];
+  private static defaultMeta?: LoggerConfig['defaultMeta'];
 
   // Formats a message for logging
   private static formatMessage(message: string, funcName: string): string {
@@ -18,24 +21,33 @@ export class Log {
     return `[${now}] [adapty@${version}] "${funcName}": ${message}`;
   }
 
-  // Gets the appropriate logger for a log level
-  private static getLogger(
-    logLevel: LogLevel,
-  ): (message: string, ...optionalParams: any[]) => void {
-    switch (logLevel) {
-      /* eslint-disable no-console */
-      case LogLevel.ERROR:
-        return console.error;
-      case LogLevel.WARN:
-        return console.warn;
-      case LogLevel.VERBOSE:
-        return console.debug;
-      case LogLevel.INFO:
-        return console.info;
-      default:
-        return console.log;
-      /* eslint-enable no-console */
+
+  /** Configure JS logger: replace sinks and/or set default metadata */
+  public static configure(config: LoggerConfig): void {
+    if (config.sinks) {
+      for (const sink of this.sinks) sink.destroy?.();
+      this.sinks = config.sinks.slice();
     }
+    this.defaultMeta = config.defaultMeta;
+  }
+
+  /** Register additional sink */
+  public static addSink(sink: LogSink): void {
+    this.sinks.push(sink);
+  }
+
+  /** Remove sink by id and call its destroy if present */
+  public static removeSink(id: string): void {
+    const sink = this.sinks.find(sink => sink.id === id);
+    this.sinks = this.sinks.filter(sink => sink.id !== id);
+    sink?.destroy?.();
+  }
+
+  /** Clear all sinks and destroy them */
+  public static clearSinks(): void {
+    const prev = this.sinks;
+    this.sinks = [];
+    for (const sink of prev) sink.destroy?.();
   }
 
   /**
@@ -74,14 +86,33 @@ export class Log {
     const messageLevel = Log.getLogLevelInt(logLevel);
 
     if (messageLevel <= currentLevel) {
-      // Lazy evaluation: only compute message and params if we're actually logging
+      // Lazy evaluation: only compute once per entry
       const resolvedMessage = message();
       const resolvedParams = params ? params() : undefined;
-      
-      const output = Log.formatMessage(resolvedMessage, funcName);
-      const logger = Log.getLogger(logLevel);
+      const mergedParams =
+        this.defaultMeta
+          ? { ...(this.defaultMeta as Record<string, unknown>), ...(resolvedParams ?? {}) }
+          : resolvedParams;
 
-      logger(output, resolvedParams);
+      const formatted = Log.formatMessage(resolvedMessage, funcName);
+      const event: LogEvent = {
+        timestamp: new Date().toISOString(),
+        version: String(VERSION),
+        level: logLevel,
+        funcName,
+        message: resolvedMessage,
+        params: mergedParams,
+        formatted,
+      };
+
+      for (const sink of this.sinks) {
+        if (sink.levels && !sink.levels.includes(logLevel)) continue;
+        try {
+          sink.handle(event);
+        } catch {
+          // ignore sink errors
+        }
+      }
     }
   }
 

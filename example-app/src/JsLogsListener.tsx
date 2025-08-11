@@ -1,50 +1,33 @@
 import { useEffect } from 'react';
-import { JsLog } from './helpers';
+import { adapty, consoleLogSink } from '@adapty/capacitor';
+import type { JsLog } from './helpers';
 import { useLogs } from './logs-context';
+import type { LogEvent } from '@adapty/capacitor';
 
-// Listens to console.* and pushes Adapty-related logs into global store
+
+// Registers Adapty JS logger sinks: keep console + push logs into example store
 export default function JsLogsListener() {
   const { append } = useLogs();
 
   useEffect(() => {
-    type ConsoleKey = keyof typeof console;
-    type Console = Record<ConsoleKey, any>;
-    const consoleMethods: Array<'debug' | 'info' | 'warn' | 'error'> = ['debug', 'info', 'warn', 'error'];
 
-    const originalConsoleMethods = consoleMethods.reduce<Record<string, any>>((acc, method) => {
-      acc[method] = console[method];
-      return acc;
-    }, {});
-
-    const overrideConsoleMethod = (method: ConsoleKey): void => {
-      (console as Console)[method] = (...args: any[]) => {
-        originalConsoleMethods[method](...args);
-
-        if (args[0] && typeof args[0] === 'string' && args[0].includes('[adapty')) {
-          const msg = args[0].split(' ');
-          const isoDate = msg[0]?.replace('[', '').replace(']', '') ?? new Date().toISOString();
-          const funcName = msg[2]?.replace('"', '').replace('":', '') ?? 'unknown';
-          const message = msg.slice(3).join(' ') || args.join(' ');
-
-          append({ logLevel: method as JsLog['logLevel'], message, isoDate, funcName, args });
-        } else if (args[0] && typeof args[0] === 'string' && args[0].includes('[ADAPTY]')) {
-          const timestamp = new Date().toISOString();
-          const message = args.join(' ');
-          const funcName = 'console';
-
-          append({ logLevel: method as JsLog['logLevel'], message, isoDate: timestamp, funcName, args });
-        }
-      };
+    const memorySink = {
+      id: 'example-memory',
+      handle: (e: LogEvent) => {
+        append({
+          logLevel: e.level as JsLog['logLevel'],
+          message: e.message,
+          funcName: e.funcName,
+          isoDate: e.timestamp,
+          args: e.params ? [e.params] : [],
+        });
+      },
     };
 
-    ;['debug', 'info', 'warn', 'error'].forEach((m) => overrideConsoleMethod(m as ConsoleKey));
+    adapty.setLogLevel({ logger: { sinks: [consoleLogSink, memorySink] } }).catch(() => {});
 
-    return () => {
-      ;['debug', 'info', 'warn', 'error'].forEach((m) => {
-        (console as any)[m] = originalConsoleMethods[m];
-      });
-    };
+    // no cleanup needed; sinks remain for app lifetime
   }, [append]);
 
   return null;
-} 
+}

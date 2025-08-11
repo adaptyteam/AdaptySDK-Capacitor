@@ -17,6 +17,7 @@ import type {
   FileLocation,
   LogLevel,
 } from '../shared/types/inputs';
+import type { LoggerConfig } from '../shared/logger';
 
 export interface AdaptyPlugin {
   /**
@@ -135,9 +136,9 @@ export interface AdaptyPlugin {
   setIntegrationIdentifier(options: { key: string; value: string }): Promise<void>;
 
   /**
-   * Sets the log level for the SDK.
+   * Sets the log level for the SDK or configures JS logger sinks.
    */
-  setLogLevel(options: { logLevel: LogLevel }): Promise<void>;
+  setLogLevel(options: { logLevel?: LogLevel; logger?: LoggerConfig }): Promise<void>;
 
   /**
    * Updates attribution data for the current user.

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import {
-  Adapty,
+  adapty,
   AdaptyProfile,
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -57,8 +57,6 @@ const App: React.FC = () => {
     'return_cache_data_else_load',
     'return_cache_data_if_not_expired_else_load'
   ] as const;
-
-  const adapty = new Adapty();
 
   const testActivate = async () => {
     try {

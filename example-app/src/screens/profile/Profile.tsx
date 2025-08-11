@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Adapty } from '@adapty/capacitor';
+import { adapty } from '@adapty/capacitor';
 import styles from './Profile.module.css';
 
 function Profile() {
@@ -10,7 +10,6 @@ function Profile() {
   const [isActivated, setIsActivated] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
 
-  const adapty = new Adapty();
 
   useEffect(() => {
     let isMounted = true;
@@ -79,4 +78,4 @@ function Profile() {
   );
 }
 
-export default Profile; 
+export default Profile;

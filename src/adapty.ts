@@ -11,6 +11,7 @@ import { AdaptyProfileParametersCoder } from './shared/coders/adapty-profile-par
 import { AdaptyPurchaseParamsCoder } from './shared/coders/adapty-purchase-params';
 import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
 import { Log, LogContext } from './shared/logger';
+import type { LoggerConfig } from './shared/logger';
 import type { LogScope } from './shared/logger';
 import type {
   AdaptyPaywall,
@@ -622,24 +623,30 @@ export class Adapty implements AdaptyPlugin {
     await this.handleMethodCall(method, JSON.stringify(args));
   }
 
-  async setLogLevel(options: { logLevel: LogLevel }): Promise<void> {
+  async setLogLevel(options: { logLevel?: LogLevel; logger?: LoggerConfig }): Promise<void> {
     const method = 'set_log_level';
 
-    const ctx = new LogContext();
-    const log = ctx.call({ methodName: method });
-    log.start(() => ({ options }));
+    if (options.logger) {
+      Log.configure(options.logger);
+    }
 
-    // Update log level immediately
-    Log.logLevel = options.logLevel;
+    if (options.logLevel !== undefined) {
+      const ctx = new LogContext();
+      const log = ctx.call({ methodName: method });
+      log.start(() => ({ options: { logLevel: options.logLevel } }));
 
-    const argsWithUndefined: Req['SetLogLevel.Request'] = {
-      method,
-      value: options.logLevel,
-    };
+      // Update log level immediately
+      Log.logLevel = options.logLevel;
 
-    const args = filterUndefined(argsWithUndefined);
+      const argsWithUndefined: Req['SetLogLevel.Request'] = {
+        method,
+        value: options.logLevel,
+      };
 
-    await this.handleMethodCall(method, JSON.stringify(args), log);
+      const args = filterUndefined(argsWithUndefined);
+
+      await this.handleMethodCall(method, JSON.stringify(args), log);
+    }
   }
 
   async updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void> {
