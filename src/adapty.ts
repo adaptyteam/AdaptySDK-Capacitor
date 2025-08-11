@@ -4,15 +4,13 @@ import { Capacitor } from '@capacitor/core';
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
 import { getCoder } from './coder-registry';
 import { defaultAdaptyOptions } from './default-configs';
-import { AdaptyOnboardingCoder } from './shared/coders/adapty-onboarding';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
 import { AdaptyProfileParametersCoder } from './shared/coders/adapty-profile-parameters';
 import { AdaptyPurchaseParamsCoder } from './shared/coders/adapty-purchase-params';
 import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
 import { Log, LogContext } from './shared/logger';
-import type { LoggerConfig } from './shared/logger';
-import type { LogScope } from './shared/logger';
+import type { LoggerConfig, LogScope } from './shared/logger';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -275,13 +273,17 @@ export class Adapty implements AdaptyPlugin {
   async isActivated(): Promise<boolean> {
     const method = 'is_activated';
 
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({}));
+
     const argsWithUndefined: Req['IsActivated.Request'] = {
       method,
     };
 
     const args = filterUndefined(argsWithUndefined);
 
-    const result = await this.handleMethodCall(method, JSON.stringify(args));
+    const result = await this.handleMethodCall(method, JSON.stringify(args), log);
     return result;
   }
 
@@ -363,14 +365,19 @@ export class Adapty implements AdaptyPlugin {
     params?: GetPlacementParamsInput;
   }): Promise<AdaptyOnboarding> {
     const method = 'get_onboarding';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
     const args = {
       placement_id: options.placementId,
       locale: options.locale,
       method,
       ...(options.params || {}),
     };
-    const onboarding = await this.handleMethodCall(method, JSON.stringify(args));
 
+    const onboarding = await this.handleMethodCall(method, JSON.stringify(args), log);
     // Decode the onboarding using the coder to convert snake_case to camelCase
     const onboardingCoder = new AdaptyOnboardingCoder();
     return onboardingCoder.decode(onboarding as any);
@@ -382,13 +389,18 @@ export class Adapty implements AdaptyPlugin {
     params?: GetPlacementForDefaultAudienceParamsInput;
   }): Promise<AdaptyOnboarding> {
     const method = 'get_onboarding_for_default_audience';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
     const args = {
       placement_id: options.placementId,
       locale: options.locale,
       method,
       ...(options.params || {}),
     };
-    const onboarding = await this.handleMethodCall(method, JSON.stringify(args));
+    const onboarding = await this.handleMethodCall(method, JSON.stringify(args), log);
 
     // Decode the onboarding using the coder to convert snake_case to camelCase
     const onboardingCoder = new AdaptyOnboardingCoder();
@@ -431,20 +443,28 @@ export class Adapty implements AdaptyPlugin {
   async logShowPaywall(options: { paywall: AdaptyPaywall }): Promise<void> {
     const method = 'log_show_paywall';
 
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
     const paywallCoder = new AdaptyPaywallCoder();
 
     const argsWithUndefined: Req['LogShowPaywall.Request'] = {
       method,
-      paywall: paywallCoder.encode(options.paywall),
+      paywall: this.encodeWithLogging(paywallCoder, options.paywall, 'AdaptyPaywall', ctx),
     };
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async openWebPaywall(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void> {
     const method = 'open_web_paywall';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
 
     const paywallCoder = new AdaptyPaywallCoder();
     const productCoder = new AdaptyPaywallProductCoder();
@@ -452,17 +472,21 @@ export class Adapty implements AdaptyPlugin {
     const argsWithUndefined: Req['OpenWebPaywall.Request'] = {
       method,
       ...(this.isPaywallProduct(options.paywallOrProduct)
-        ? { product: productCoder.encode(options.paywallOrProduct) }
-        : { paywall: paywallCoder.encode(options.paywallOrProduct) }),
+        ? { product: this.encodeWithLogging(productCoder, options.paywallOrProduct, 'AdaptyPaywallProduct', ctx) }
+        : { paywall: this.encodeWithLogging(paywallCoder, options.paywallOrProduct, 'AdaptyPaywall', ctx) }),
     };
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string> {
     const method = 'create_web_paywall_url';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
 
     const paywallCoder = new AdaptyPaywallCoder();
     const productCoder = new AdaptyPaywallProductCoder();
@@ -470,13 +494,13 @@ export class Adapty implements AdaptyPlugin {
     const argsWithUndefined: Req['CreateWebPaywallUrl.Request'] = {
       method,
       ...(this.isPaywallProduct(options.paywallOrProduct)
-        ? { product: productCoder.encode(options.paywallOrProduct) }
-        : { paywall: paywallCoder.encode(options.paywallOrProduct) }),
+        ? { product: this.encodeWithLogging(productCoder, options.paywallOrProduct, 'AdaptyPaywallProduct', ctx) }
+        : { paywall: this.encodeWithLogging(paywallCoder, options.paywallOrProduct, 'AdaptyPaywall', ctx) }),
     };
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args));
+    return await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async logShowOnboarding(options: {
@@ -485,6 +509,10 @@ export class Adapty implements AdaptyPlugin {
     screenName?: string;
   }): Promise<void> {
     const method = 'log_show_onboarding';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
 
     const argsWithUndefined: Req['LogShowOnboarding.Request'] = {
       method,
@@ -497,11 +525,15 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async logout(): Promise<void> {
     const method = 'logout';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({}));
 
     const argsWithUndefined: Req['Logout.Request'] = {
       method,
@@ -509,7 +541,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async makePurchase(options: MakePurchaseOptions): Promise<AdaptyPurchaseResult> {
@@ -542,17 +574,25 @@ export class Adapty implements AdaptyPlugin {
   async presentCodeRedemptionSheet(): Promise<void> {
     const method = 'present_code_redemption_sheet';
 
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({}));
+
     const argsWithUndefined: Req['PresentCodeRedemptionSheet.Request'] = {
       method,
     };
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void> {
     const method = 'report_transaction';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
 
     const argsWithUndefined: Req['ReportTransaction.Request'] = {
       method,
@@ -562,7 +602,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async restorePurchases(): Promise<AdaptyProfile> {
@@ -600,6 +640,10 @@ export class Adapty implements AdaptyPlugin {
       fileLocationString = '';
     }
 
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ platform, fileLocationString }));
+
     const argsWithUndefined: Req['SetFallback.Request'] = {
       method,
       asset_id: fileLocationString,
@@ -607,11 +651,15 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async setIntegrationIdentifier(options: { key: string; value: string }): Promise<void> {
     const method = 'set_integration_identifiers';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
 
     const argsWithUndefined: Req['SetIntegrationIdentifier.Request'] = {
       method,
@@ -620,7 +668,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async setLogLevel(options: { logLevel?: LogLevel; logger?: LoggerConfig }): Promise<void> {
@@ -675,6 +723,10 @@ export class Adapty implements AdaptyPlugin {
 
     const method = 'update_collecting_refund_data_consent';
 
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
     const argsWithUndefined: Req['UpdateCollectingRefundDataConsent.Request'] = {
       method,
       consent: options.consent,
@@ -682,7 +734,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async updateRefundPreference(options: { refundPreference: RefundPreference }): Promise<void> {
@@ -693,6 +745,10 @@ export class Adapty implements AdaptyPlugin {
 
     const method = 'update_refund_preference';
 
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
     const argsWithUndefined: Req['UpdateRefundPreference.Request'] = {
       method,
       refund_preference: options.refundPreference,
@@ -700,7 +756,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    await this.handleMethodCall(method, JSON.stringify(args));
+    await this.handleMethodCall(method, JSON.stringify(args), log);
   }
 
   async updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {

@@ -6,6 +6,8 @@ import { AdaptyPaywallCoder } from '../coders/adapty-paywall';
 import { AdaptyError } from '../adapty-error';
 import type { components } from '../types/api';
 import { ViewEmitter } from './view-emitter';
+import { LogContext } from '../logger';
+import type { LogScope } from '../logger';
 
 type Req = components['requests'];
 
@@ -30,6 +32,10 @@ export class ViewController {
     adaptyPlugin: Adapty,
   ): Promise<ViewController> {
     const controller = new ViewController(adaptyPlugin);
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: 'createPaywallView' });
+    log.start({ paywall, params });
 
     const coder = new AdaptyPaywallCoder();
     const data: Req['AdaptyUICreatePaywallView.Request'] = {
@@ -77,7 +83,11 @@ export class ViewController {
       data.custom_timers = convertTimerInfo(params.customTimers);
     }
 
-    const result = await controller.adaptyPlugin.handleMethodCall('adapty_ui_create_paywall_view', JSON.stringify(data)) as AdaptyUiView;
+    const result = await controller.adaptyPlugin.handleMethodCall(
+      'adapty_ui_create_paywall_view',
+      JSON.stringify(data),
+      log as unknown as LogScope,
+    ) as AdaptyUiView;
     controller.id = result.id;
     
     return controller;
@@ -104,6 +114,10 @@ export class ViewController {
    * @throws {AdaptyError}
    */
   public async present(): Promise<void> {
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: 'present' });
+    log.start({ _id: this.id });
+
     if (this.id === null) {
       throw new AdaptyError({
         adaptyCode: 2002,
@@ -116,7 +130,11 @@ export class ViewController {
       id: this.id,
     };
 
-    await this.adaptyPlugin.handleMethodCall('adapty_ui_present_paywall_view', JSON.stringify(data));
+    await this.adaptyPlugin.handleMethodCall(
+      'adapty_ui_present_paywall_view',
+      JSON.stringify(data),
+      log as unknown as LogScope,
+    );
   }
 
   /**
@@ -125,6 +143,10 @@ export class ViewController {
    * @throws {AdaptyError}
    */
   public async dismiss(): Promise<void> {
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: 'dismiss' });
+    log.start({ _id: this.id });
+
     if (this.id === null) {
       throw new AdaptyError({
         adaptyCode: 2002,
@@ -138,7 +160,11 @@ export class ViewController {
       destroy: false,
     };
 
-    await this.adaptyPlugin.handleMethodCall('adapty_ui_dismiss_paywall_view', JSON.stringify(data));
+    await this.adaptyPlugin.handleMethodCall(
+      'adapty_ui_dismiss_paywall_view',
+      JSON.stringify(data),
+      log as unknown as LogScope,
+    );
   }
 
   /**
@@ -155,6 +181,10 @@ export class ViewController {
    * @throws {AdaptyError}
    */
   public async showDialog(config: AdaptyUiDialogConfig): Promise<AdaptyUiDialogActionType> {
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: 'showDialog' });
+    log.start({ _id: this.id });
+
     if (this.id === null) {
       throw new AdaptyError({
         adaptyCode: 2002,
@@ -175,7 +205,11 @@ export class ViewController {
       configuration: dialogConfig,
     };
 
-    return await this.adaptyPlugin.handleMethodCall('adapty_ui_show_dialog', JSON.stringify(data));
+    return await this.adaptyPlugin.handleMethodCall(
+      'adapty_ui_show_dialog',
+      JSON.stringify(data),
+      log as unknown as LogScope,
+    );
   }
 
   /**
@@ -201,6 +235,10 @@ export class ViewController {
   public registerEventHandlers(
     eventHandlers: Partial<EventHandlers> = DEFAULT_EVENT_HANDLERS,
   ): () => void {
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: 'registerEventHandlers' });
+    log.start({ _id: this.id });
+
     if (this.id === null) {
       throw new AdaptyError({
         adaptyCode: 2002,
