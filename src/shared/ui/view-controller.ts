@@ -6,8 +6,7 @@ import { AdaptyPaywallCoder } from '../coders/adapty-paywall';
 import { AdaptyError } from '../adapty-error';
 import type { components } from '../types/api';
 import { ViewEmitter } from './view-emitter';
-import { LogContext } from '../logger';
-import type { LogScope } from '../logger';
+import { LogContext, Log } from '../logger';
 
 type Req = components['requests'];
 
@@ -34,12 +33,13 @@ export class ViewController {
     const controller = new ViewController(adaptyPlugin);
 
     const ctx = new LogContext();
-    const log = ctx.call({ methodName: 'createPaywallView' });
+    const methodKey = 'adapty_ui_create_paywall_view';
+    const log = ctx.call({ methodName: methodKey });
     log.start({ paywall, params });
 
     const coder = new AdaptyPaywallCoder();
     const data: Req['AdaptyUICreatePaywallView.Request'] = {
-      method: 'adapty_ui_create_paywall_view',
+      method: methodKey,
       paywall: coder.encode(paywall),
       preload_products: params.prefetchProducts ?? true,
       load_timeout: (params.loadTimeoutMs ?? 5000) / 1000,
@@ -84,9 +84,10 @@ export class ViewController {
     }
 
     const result = await controller.adaptyPlugin.handleMethodCall(
-      'adapty_ui_create_paywall_view',
+      methodKey,
       JSON.stringify(data),
-      log as unknown as LogScope,
+      ctx,
+      log,
     ) as AdaptyUiView;
     controller.id = result.id;
     
@@ -115,7 +116,8 @@ export class ViewController {
    */
   public async present(): Promise<void> {
     const ctx = new LogContext();
-    const log = ctx.call({ methodName: 'present' });
+    const methodKey = 'adapty_ui_present_paywall_view';
+    const log = ctx.call({ methodName: methodKey });
     log.start({ _id: this.id });
 
     if (this.id === null) {
@@ -126,14 +128,15 @@ export class ViewController {
     }
 
     const data: Req['AdaptyUIPresentPaywallView.Request'] = {
-      method: 'adapty_ui_present_paywall_view',
+      method: methodKey,
       id: this.id,
     };
 
     await this.adaptyPlugin.handleMethodCall(
-      'adapty_ui_present_paywall_view',
+      methodKey,
       JSON.stringify(data),
-      log as unknown as LogScope,
+      ctx,
+      log,
     );
   }
 
@@ -144,7 +147,8 @@ export class ViewController {
    */
   public async dismiss(): Promise<void> {
     const ctx = new LogContext();
-    const log = ctx.call({ methodName: 'dismiss' });
+    const methodKey = 'adapty_ui_dismiss_paywall_view';
+    const log = ctx.call({ methodName: methodKey });
     log.start({ _id: this.id });
 
     if (this.id === null) {
@@ -155,15 +159,16 @@ export class ViewController {
     }
 
     const data: Req['AdaptyUIDismissPaywallView.Request'] = {
-      method: 'adapty_ui_dismiss_paywall_view',
+      method: methodKey,
       id: this.id,
       destroy: false,
     };
 
     await this.adaptyPlugin.handleMethodCall(
-      'adapty_ui_dismiss_paywall_view',
+      methodKey,
       JSON.stringify(data),
-      log as unknown as LogScope,
+      ctx,
+      log,
     );
   }
 
@@ -182,7 +187,8 @@ export class ViewController {
    */
   public async showDialog(config: AdaptyUiDialogConfig): Promise<AdaptyUiDialogActionType> {
     const ctx = new LogContext();
-    const log = ctx.call({ methodName: 'showDialog' });
+    const methodKey = 'adapty_ui_show_dialog';
+    const log = ctx.call({ methodName: methodKey });
     log.start({ _id: this.id });
 
     if (this.id === null) {
@@ -200,15 +206,16 @@ export class ViewController {
     };
 
     const data: Req['AdaptyUIShowDialog.Request'] = {
-      method: 'adapty_ui_show_dialog',
+      method: methodKey,
       id: this.id,
       configuration: dialogConfig,
     };
 
     return await this.adaptyPlugin.handleMethodCall(
-      'adapty_ui_show_dialog',
+      methodKey,
       JSON.stringify(data),
-      log as unknown as LogScope,
+      ctx,
+      log,
     );
   }
 
@@ -246,7 +253,7 @@ export class ViewController {
       });
     }
 
-    console.log('[AdaptyCapacitor] Registering event handlers for view:', this.id);
+    Log.verbose('registerEventHandlers', () => 'Registering event handlers for view', () => ({ id: this.id }));
 
     // Create ViewEmitter if not exists
     if (!this.viewEmitter) {
@@ -266,7 +273,7 @@ export class ViewController {
       try {
         await this.dismiss();
       } catch (error) {
-        console.warn('[AdaptyCapacitor] Failed to dismiss paywall:', error);
+        Log.warn('registerEventHandlers', () => 'Failed to dismiss paywall', () => ({ error }));
       }
     };
 
@@ -280,16 +287,16 @@ export class ViewController {
             onRequestClose
           );
           subscriptions.push(subscription);
-          console.log('[AdaptyCapacitor] Registered handler for:', eventName);
+          Log.verbose('registerEventHandlers', () => 'Registered handler for', () => ({ eventName }));
         } catch (error) {
-          console.error(`[AdaptyCapacitor] Failed to register handler for ${eventName}:`, error);
+          Log.error('registerEventHandlers', () => `Failed to register handler for ${eventName}`, () => ({ error }));
         }
       }
     });
 
     // Return unsubscribe function
     const unsubscribe = () => {
-      console.log('[AdaptyCapacitor] Unsubscribing event handlers for view:', this.id);
+      Log.info('registerEventHandlers', () => 'Unsubscribing event handlers for view', () => ({ id: this.id }));
       if (this.viewEmitter) {
         this.viewEmitter.removeAllListeners();
         this.viewEmitter = null;

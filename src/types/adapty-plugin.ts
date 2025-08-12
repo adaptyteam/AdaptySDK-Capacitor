@@ -1,5 +1,6 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
+import type { LoggerConfig } from '../shared/logger';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -17,7 +18,6 @@ import type {
   FileLocation,
   LogLevel,
 } from '../shared/types/inputs';
-import type { LoggerConfig } from '../shared/logger';
 
 export interface AdaptyPlugin {
   /**

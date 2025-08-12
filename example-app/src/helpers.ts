@@ -5,9 +5,9 @@ const CREDENTIALS_COMMAND = "Please run 'yarn run credentials' to generate the c
 
 import credentialsFile from '../.adapty-credentials.json';
 
-const credentials: { token?: string; placement_id?: string; ios_bundle?: string } = credentialsFile;
+const credentials: { token?: string; placement_id?: string; ios_bundle?: string; android_application_id?: string } =
+  credentialsFile;
 
-// This function is only for this example
 export function getApiKey(): string {
   if (!credentials?.token) {
     throw new Error(`${ADAPTY_PREFIX} Token not found in ${CREDENTIALS_FILE} file. ${CREDENTIALS_COMMAND}`);
@@ -15,7 +15,6 @@ export function getApiKey(): string {
   return credentials.token;
 }
 
-// This function is only for this example
 export function getPlacementId(): string {
   if (!credentials?.placement_id) {
     throw new Error(`${ADAPTY_PREFIX} Placement ID not found in ${CREDENTIALS_FILE} file. ${CREDENTIALS_COMMAND}`);
@@ -23,12 +22,20 @@ export function getPlacementId(): string {
   return credentials.placement_id;
 }
 
-// This function is only for this example
 export function getIosBundle(): string {
   if (!credentials?.ios_bundle) {
     throw new Error(`${ADAPTY_PREFIX} iOS bundle not found in ${CREDENTIALS_FILE} file. ${CREDENTIALS_COMMAND}`);
   }
   return credentials.ios_bundle;
+}
+
+export function getAndroidApplicationId(): string {
+  if (!credentials?.android_application_id) {
+    throw new Error(
+      `${ADAPTY_PREFIX} Android application id not found in ${CREDENTIALS_FILE} file. ${CREDENTIALS_COMMAND}`,
+    );
+  }
+  return credentials.android_application_id;
 }
 
 export interface JsLog {

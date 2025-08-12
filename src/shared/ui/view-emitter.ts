@@ -1,5 +1,7 @@
 import type { EventHandlers } from './types';
 import { AdaptyCapacitorPlugin } from '../../bridge/plugin';
+import { LogContext } from '../logger';
+import { parsePaywallEvent } from '../coders/parse';
 
 type EventName = keyof EventHandlers;
 
@@ -92,38 +94,36 @@ export class ViewEmitter {
             const subscription = (AdaptyCapacitorPlugin as any).addListener(
                 config.nativeEvent,
                 function (arg: CapacitorEventArg) {
-                    console.log('[ViewEmitter] Received event:', config.nativeEvent, 'data:', arg);
+                    const ctx = new LogContext();
+                    const log = ctx.event({ methodName: config.nativeEvent });
+                    log.start({ raw: arg });
 
                     // Strict validation: events must come in {data: "json_string"} format
                     if (!arg || typeof arg !== 'object' || !arg.data) {
-                        const error = `[ViewEmitter] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`;
-                        console.error(error);
-                        throw new Error(error);
+                        const error = new Error(`[ViewEmitter] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`);
+                        log.failed({ error });
+                        throw error;
                     }
 
                     const rawEventData: string = arg.data;
-                    console.log('[ViewEmitter] Extracted raw event data from wrapper:', rawEventData);
 
-                    // Parse JSON string
+                    // Parse JSON string using shared parser with decode logging
                     let eventData: ParsedEventData;
                     if (typeof rawEventData === 'string') {
                         try {
-                            eventData = JSON.parse(rawEventData) as ParsedEventData;
-                            console.log('[ViewEmitter] Parsed JSON event data:', eventData);
+                            eventData = parsePaywallEvent(rawEventData, ctx) as ParsedEventData;
                         } catch (error) {
-                            const errorMsg = `[ViewEmitter] Failed to parse event data JSON: ${error}. Raw data: ${rawEventData}`;
-                            console.error(errorMsg);
-                            throw new Error(errorMsg);
+                            log.failed({ error });
+                            throw error;
                         }
                     } else {
-                        const errorMsg = `[ViewEmitter] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`;
-                        console.error(errorMsg);
-                        throw new Error(errorMsg);
+                        const err = new Error(`[ViewEmitter] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`);
+                        log.failed({ error: err });
+                        throw err;
                     }
 
                     const eventViewId = eventData?.view?.id ?? null;
                     if (viewId !== eventViewId) {
-                        console.log('[ViewEmitter] Event filtered out - view mismatch:', eventViewId, 'vs', viewId);
                         return;
                     }
 
@@ -133,7 +133,6 @@ export class ViewEmitter {
                             config.propertyMap &&
                             eventData?.action?.type !== config.propertyMap['action']
                         ) {
-                            console.log('[ViewEmitter] Event filtered out - action mismatch:', eventData?.action?.type, 'vs', config.propertyMap['action']);
                             continue;
                         }
 
@@ -141,21 +140,17 @@ export class ViewEmitter {
                             config.handlerName,
                             eventData,
                         );
-                        console.log('[ViewEmitter] Calling handler:', config.handlerName, 'with args:', callbackArgs);
 
                         const cb = handler as (...args: typeof callbackArgs) => boolean;
                         try {
                             const shouldClose = cb(...callbackArgs);
-                            console.log('[ViewEmitter] Handler result:', shouldClose);
-
                             if (shouldClose) {
-                                console.log('[ViewEmitter] Requesting close due to handler result');
                                 onRequestClose().catch((error) => {
-                                    console.error('[ViewEmitter] Error during onRequestClose:', error);
+                                    log.failed({ error });
                                 });
                             }
                         } catch (error) {
-                            console.error('[ViewEmitter] Error in event handler:', error);
+                            log.failed({ error });
                         }
                     }
                 },
@@ -167,10 +162,9 @@ export class ViewEmitter {
     }
 
     public removeAllListeners() {
-        console.log('[ViewEmitter] Removing all listeners for view:', this.viewId);
         this.eventListeners.forEach(subscription => {
-            subscription.remove().catch((error) => {
-                console.warn('[ViewEmitter] Failed to remove listener:', error);
+            subscription.remove().catch((_error) => {
+                // intentionally ignore errors during cleanup
             });
         });
         this.eventListeners.clear();

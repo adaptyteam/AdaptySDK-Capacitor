@@ -10,7 +10,7 @@ import {
   FileLocation,
   RefundPreference,
 } from '@adapty/capacitor';
-import { getApiKey, getPlacementId, getIosBundle } from '../../helpers';
+import { getApiKey, getPlacementId, getIosBundle, getAndroidApplicationId } from '../../helpers';
 import styles from './App.module.css';
 
 const App: React.FC = () => {
@@ -1117,6 +1117,9 @@ const App: React.FC = () => {
             </div>
             <div className={styles.InfoBoxItem}>
               <strong>iOS Bundle ID:</strong> {getIosBundle()}
+            </div>
+            <div className={styles.InfoBoxItem}>
+              <strong>Android Application ID:</strong> {getAndroidApplicationId()}
             </div>
           </div>
         </div>
