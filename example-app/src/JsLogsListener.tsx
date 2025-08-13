@@ -24,7 +24,7 @@ export default function JsLogsListener() {
       },
     };
 
-    adapty.setLogLevel({ logger: { sinks: [consoleLogSink, memorySink] } }).catch(() => {});
+    adapty.setLogLevel({ logger: { sinks: [consoleLogSink, memorySink] } });
 
     // no cleanup needed; sinks remain for app lifetime
   }, [append]);
