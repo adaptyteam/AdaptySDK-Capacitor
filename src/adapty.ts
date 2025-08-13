@@ -4,7 +4,6 @@ import { Capacitor } from '@capacitor/core';
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
 import { getCoder } from './coder-registry';
 import { defaultAdaptyOptions } from './default-configs';
-import { AdaptyOnboardingCoder } from './shared/coders/adapty-onboarding';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
 import { AdaptyProfileParametersCoder } from './shared/coders/adapty-profile-parameters';
@@ -23,13 +22,7 @@ import type {
   RefundPreference,
 } from './shared/types';
 import type { components } from './shared/types/api';
-import type {
-  ActivateParamsInput,
-  GetPlacementParamsInput,
-  GetPlacementForDefaultAudienceParamsInput,
-  FileLocation,
-  LogLevel,
-} from './shared/types/inputs';
+import type { ActivateParamsInput, FileLocation, LogLevel } from './shared/types/inputs';
 import {
   isErrorResponse,
   isSuccessResponse,
@@ -48,6 +41,10 @@ import type {
   GetPaywallForDefaultAudienceOptions,
   GetPaywallForDefaultAudienceOptionsWithDefaults,
   MakePurchaseOptions,
+  GetOnboardingOptions,
+  GetOnboardingOptionsWithDefaults,
+  GetOnboardingForDefaultAudienceOptions,
+  GetOnboardingForDefaultAudienceOptionsWithDefaults,
 } from './types/configs';
 import version from './version';
 
@@ -385,53 +382,56 @@ export class Adapty implements AdaptyPlugin {
     return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
-  //todo: refactor later
-  async getOnboarding(options: {
-    placementId: string;
-    locale?: string;
-    params?: GetPlacementParamsInput;
-  }): Promise<AdaptyOnboarding> {
+  async getOnboarding(options: GetOnboardingOptions): Promise<AdaptyOnboarding> {
     const method = 'get_onboarding';
+    const optionsWithDefault = mergeOptions<GetOnboardingOptionsWithDefaults>(options, this.options[method]);
+    const params = optionsWithDefault.params;
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
-    log.start(() => ({ options }));
+    log.start(() => ({ optionsWithDefault }));
 
-    const args = {
-      placement_id: options.placementId,
-      locale: options.locale,
+    const argsWithUndefined: Req['GetOnboarding.Request'] = {
       method,
-      ...(options.params || {}),
+      placement_id: optionsWithDefault.placementId,
+      locale: optionsWithDefault.locale,
+      load_timeout: params.loadTimeoutMs / 1000,
+      fetch_policy:
+        params.fetchPolicy === 'return_cache_data_if_not_expired_else_load'
+          ? { type: params.fetchPolicy, max_age: params.maxAgeSeconds }
+          : { type: params.fetchPolicy },
     };
 
-    const onboarding = await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
-    // Decode the onboarding using the coder to convert snake_case to camelCase
-    const onboardingCoder = new AdaptyOnboardingCoder();
-    return onboardingCoder.decode(onboarding as any);
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
-  async getOnboardingForDefaultAudience(options: {
-    placementId: string;
-    locale?: string;
-    params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<AdaptyOnboarding> {
+  async getOnboardingForDefaultAudience(options: GetOnboardingForDefaultAudienceOptions): Promise<AdaptyOnboarding> {
     const method = 'get_onboarding_for_default_audience';
+    const optionsWithDefault = mergeOptions<GetOnboardingForDefaultAudienceOptionsWithDefaults>(
+      options,
+      this.options[method],
+    );
+    const params = optionsWithDefault.params;
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
-    log.start(() => ({ options }));
+    log.start(() => ({ optionsWithDefault }));
 
-    const args = {
-      placement_id: options.placementId,
-      locale: options.locale,
+    const argsWithUndefined: Req['GetOnboardingForDefaultAudience.Request'] = {
       method,
-      ...(options.params || {}),
+      placement_id: optionsWithDefault.placementId,
+      locale: optionsWithDefault.locale,
+      fetch_policy:
+        params.fetchPolicy === 'return_cache_data_if_not_expired_else_load'
+          ? { type: params.fetchPolicy, max_age: params.maxAgeSeconds }
+          : { type: params.fetchPolicy ?? 'reload_revalidating_cache_data' },
     };
-    const onboarding = await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
 
-    // Decode the onboarding using the coder to convert snake_case to camelCase
-    const onboardingCoder = new AdaptyOnboardingCoder();
-    return onboardingCoder.decode(onboarding as any);
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
   async getProfile(): Promise<AdaptyProfile> {

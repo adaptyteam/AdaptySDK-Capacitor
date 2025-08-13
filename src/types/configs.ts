@@ -26,6 +26,27 @@ export interface GetPaywallForDefaultAudienceOptions {
 }
 
 /**
+ * Describes the options for the `getOnboarding` method.
+ * @public
+ */
+export interface GetOnboardingOptions {
+  placementId: string;
+  locale?: string;
+  params?: GetPlacementParamsInput;
+}
+
+/**
+ * Describes the options for the `getOnboardingForDefaultAudience` method.
+ * @public
+ */
+export interface GetOnboardingForDefaultAudienceOptions {
+  placementId: string;
+  locale?: string;
+  // Keep same input shape as RN: allow loadTimeoutMs even though it is not used by schema
+  params?: GetPlacementParamsInput;
+}
+
+/**
  * Describes the options for the `makePurchase` method.
  * @public
  */
@@ -51,6 +72,19 @@ export interface AdaptyDefaultOptions {
   get_paywall_for_default_audience: {
     params: GetPlacementForDefaultAudienceParamsInput;
   };
+  /**
+   * Default options for the `getOnboarding` method.
+   */
+  get_onboarding: {
+    params: Required<GetPlacementParamsInput>;
+  };
+  /**
+   * Default options for the `getOnboardingForDefaultAudience` method.
+   * Keep parity with RN by using `GetPlacementParamsInput`.
+   */
+  get_onboarding_for_default_audience: {
+    params: GetPlacementParamsInput;
+  };
 }
 
 /**
@@ -65,3 +99,16 @@ export type GetPaywallOptionsWithDefaults = AdaptyDefaultOptions['get_paywall'] 
  */
 export type GetPaywallForDefaultAudienceOptionsWithDefaults = AdaptyDefaultOptions['get_paywall_for_default_audience'] &
   GetPaywallForDefaultAudienceOptions;
+
+/**
+ * Merged type for `getOnboarding` with defaults
+ * @public
+ */
+export type GetOnboardingOptionsWithDefaults = AdaptyDefaultOptions['get_onboarding'] & GetOnboardingOptions;
+
+/**
+ * Merged type for `getOnboardingForDefaultAudience` with defaults
+ * @public
+ */
+export type GetOnboardingForDefaultAudienceOptionsWithDefaults =
+  AdaptyDefaultOptions['get_onboarding_for_default_audience'] & GetOnboardingForDefaultAudienceOptions;

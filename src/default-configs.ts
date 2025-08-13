@@ -13,4 +13,16 @@ export const defaultAdaptyOptions: AdaptyDefaultOptions = {
       fetchPolicy: FetchPolicy.ReloadRevalidatingCacheData,
     },
   },
+  get_onboarding: {
+    params: {
+      fetchPolicy: FetchPolicy.ReloadRevalidatingCacheData,
+      loadTimeoutMs: 5000,
+    },
+  },
+  get_onboarding_for_default_audience: {
+    params: {
+      fetchPolicy: FetchPolicy.ReloadRevalidatingCacheData,
+      loadTimeoutMs: 5000,
+    },
+  },
 };

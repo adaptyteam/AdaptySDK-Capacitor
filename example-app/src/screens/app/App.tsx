@@ -798,28 +798,101 @@ const App: React.FC = () => {
   const renderOnboardingSection = () => {
     return (
       <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Onboarding ({getPlacementId()})</h3>
-        <div className={styles.InfoBox}>
-          {onboarding ? (
-            <div>
-              <div><strong>Onboarding ID:</strong> {onboarding.name}</div>
-              <div><strong>Variation ID:</strong> {onboarding.variationId}</div>
-              <div><strong>Revision:</strong> {onboarding.placement.revision}</div>
-              <div><strong>Has Remote Config:</strong> {onboarding.remoteConfig ? '✅ Yes' : '❌ No'}</div>
-              <div><strong>Has Onboarding Builder:</strong> {onboarding.onboardingBuilder ? '✅ Yes' : '❌ No'}</div>
-            </div>
-          ) : (
-            <div>No onboarding loaded</div>
-          )}
+        <h3 className={styles.SectionTitle}>Onboarding Configuration</h3>
+
+        <div className={styles.InputGroup}>
+          <input
+            type="text"
+            value={placementId}
+            onChange={(e) => setPlacementId(e.target.value)}
+            placeholder="Placement ID"
+            className={styles.Input}
+            disabled={!isActivated}
+          />
+          <input
+            type="text"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value)}
+            placeholder="Locale (optional)"
+            className={styles.Input}
+            disabled={!isActivated}
+          />
         </div>
+
+        <div className={styles.InputGroup}>
+          <input
+            type="text"
+            value={timeout}
+            onChange={(e) => setTimeout(e.target.value)}
+            placeholder="Timeout (ms)"
+            className={styles.Input}
+            disabled={!isActivated}
+          />
+          <input
+            type="text"
+            value={maxAge}
+            onChange={(e) => setMaxAge(e.target.value)}
+            placeholder="Max age (seconds)"
+            className={styles.Input}
+            disabled={!isActivated}
+          />
+        </div>
+
+        <div className={styles.InputGroup}>
+          <select
+            value={fetchPolicyIndex}
+            onChange={(e) => setFetchPolicyIndex(parseInt(e.target.value))}
+            className={styles.Input}
+            disabled={!isActivated}
+          >
+            {fetchPolicies.map((policy, index) => (
+              <option key={policy} value={index}>
+                {policy.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Load buttons */}
         <div className={styles.ButtonGroup}>
           <button
-            onClick={fetchOnboarding}
+            onClick={() => fetchOnboarding(false)}
             disabled={isLoadingOnboarding || !isActivated}
             className={`${styles.Button} ${styles.ButtonPrimary} ${(isLoadingOnboarding || !isActivated) ? styles.Loading : ''}`}
           >
             {isLoadingOnboarding ? 'Loading...' : 'Load Onboarding'}
           </button>
+          <button
+            onClick={() => fetchOnboarding(true)}
+            disabled={isLoadingOnboarding || !isActivated}
+            className={`${styles.Button} ${styles.ButtonSecondary} ${(isLoadingOnboarding || !isActivated) ? styles.Loading : ''}`}
+          >
+            {isLoadingOnboarding ? 'Loading...' : 'Load (Default Audience)'}
+          </button>
+        </div>
+
+        {/* Onboarding info */}
+        <div className={styles.InfoBox}>
+          {onboarding ? (
+            <div>
+              <div><strong>Onboarding Name:</strong> {onboarding.name}</div>
+              <div><strong>Variation ID:</strong> {onboarding.variationId}</div>
+              <div><strong>Revision:</strong> {onboarding.placement.revision}</div>
+              <div><strong>Has Remote Config:</strong> {onboarding.remoteConfig ? '✅ Yes' : '❌ No'}</div>
+              <div><strong>Has Onboarding Builder:</strong> {onboarding.onboardingBuilder ? '✅ Yes' : '❌ No'}</div>
+              {onboarding.remoteConfig && (
+                <div>
+                  <div><strong>Config Locale:</strong> {onboarding.remoteConfig.lang}</div>
+                  <div><strong>Config Data:</strong> {onboarding.remoteConfig.dataString}</div>
+                </div>
+              )}
+              {onboarding.onboardingBuilder && (
+                <div><strong>Builder Locale:</strong> {onboarding.onboardingBuilder.lang}</div>
+              )}
+            </div>
+          ) : (
+            <div>No onboarding loaded</div>
+          )}
         </div>
       </div>
     );
@@ -859,28 +932,52 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchOnboarding = async () => {
+  const fetchOnboarding = async (forDefaultAudience: boolean = false) => {
     if (!isActivated) return;
 
     setIsLoadingOnboarding(true);
     try {
-      console.log('[ADAPTY] Fetching onboarding...');
-      const onboardingResult = await adapty.getOnboardingForDefaultAudience({
-        placementId: getPlacementId(),
-        params: {
-          fetchPolicy: 'reload_revalidating_cache_data',
-        },
-      });
+      console.log('[ADAPTY] Fetching onboarding:', placementId);
+      const fetchPolicy = fetchPolicies[fetchPolicyIndex];
+
+      let onboardingResult: AdaptyOnboarding;
+
+      if (forDefaultAudience) {
+        let params: any = { fetchPolicy };
+        if (fetchPolicy === 'return_cache_data_if_not_expired_else_load') {
+          params.maxAgeSeconds = parseFloat(maxAge);
+        }
+
+        onboardingResult = await adapty.getOnboardingForDefaultAudience({
+          placementId,
+          ...(locale ? { locale } : {}),
+          params,
+        });
+      } else {
+        let params: any = { fetchPolicy };
+        if (fetchPolicy === 'return_cache_data_if_not_expired_else_load') {
+          params.maxAgeSeconds = parseFloat(maxAge);
+        }
+        params.loadTimeoutMs = parseFloat(timeout);
+
+        onboardingResult = await adapty.getOnboarding({
+          placementId,
+          ...(locale ? { locale } : {}),
+          params,
+        });
+      }
+
       setOnboarding(onboardingResult);
 
       // Log show onboarding
       await adapty.logShowOnboarding({
         screenOrder: 1,
         onboardingName: onboardingResult.name,
-        screenName: 'screen_1'
+        screenName: 'screen_1',
       });
 
-      setResult(`Onboarding loaded: ${onboardingResult.name}`);
+      const audienceType = forDefaultAudience ? 'for default audience' : '';
+      setResult(`Onboarding loaded ${audienceType}: ${onboardingResult.name}`);
     } catch (error) {
       console.error('[ADAPTY] Error fetching onboarding', error);
       setResult(`Error fetching onboarding: ${error}`);
