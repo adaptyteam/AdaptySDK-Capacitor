@@ -10,7 +10,7 @@ import {
   FileLocation,
   RefundPreference,
 } from '@adapty/capacitor';
-import { getApiKey, getPlacementId, getIosBundle, getAndroidApplicationId } from '../../helpers';
+import { getApiKey, getPlacementId, getIosBundle, getAndroidApplicationId, getOnboardingPlacementId } from '../../helpers';
 import styles from './App.module.css';
 
 const App: React.FC = () => {
@@ -46,6 +46,7 @@ const App: React.FC = () => {
 
   // Paywall extended configuration
   const [placementId, setPlacementId] = useState<string>(getPlacementId());
+  const [onboardingPlacementId, setOnboardingPlacementId] = useState<string>(getOnboardingPlacementId());
   const [locale, setLocale] = useState<string>('');
   const [timeout, setTimeout] = useState<string>('6000');
   const [maxAge, setMaxAge] = useState<string>('120');
@@ -803,9 +804,9 @@ const App: React.FC = () => {
         <div className={styles.InputGroup}>
           <input
             type="text"
-            value={placementId}
-            onChange={(e) => setPlacementId(e.target.value)}
-            placeholder="Placement ID"
+            value={onboardingPlacementId}
+            onChange={(e) => setOnboardingPlacementId(e.target.value)}
+            placeholder="Onboarding Placement ID"
             className={styles.Input}
             disabled={!isActivated}
           />
@@ -937,7 +938,7 @@ const App: React.FC = () => {
 
     setIsLoadingOnboarding(true);
     try {
-      console.log('[ADAPTY] Fetching onboarding:', placementId);
+      console.log('[ADAPTY] Fetching onboarding:', onboardingPlacementId);
       const fetchPolicy = fetchPolicies[fetchPolicyIndex];
 
       let onboardingResult: AdaptyOnboarding;
@@ -949,7 +950,7 @@ const App: React.FC = () => {
         }
 
         onboardingResult = await adapty.getOnboardingForDefaultAudience({
-          placementId,
+          placementId: onboardingPlacementId,
           ...(locale ? { locale } : {}),
           params,
         });
@@ -961,7 +962,7 @@ const App: React.FC = () => {
         params.loadTimeoutMs = parseFloat(timeout);
 
         onboardingResult = await adapty.getOnboarding({
-          placementId,
+          placementId: onboardingPlacementId,
           ...(locale ? { locale } : {}),
           params,
         });

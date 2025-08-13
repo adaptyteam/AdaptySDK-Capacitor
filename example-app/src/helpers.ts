@@ -5,8 +5,13 @@ const CREDENTIALS_COMMAND = "Please run 'yarn run credentials' to generate the c
 
 import credentialsFile from '../.adapty-credentials.json';
 
-const credentials: { token?: string; placement_id?: string; ios_bundle?: string; android_application_id?: string } =
-  credentialsFile;
+const credentials: {
+  token?: string;
+  placement_id?: string;
+  onboarding_placement_id?: string;
+  ios_bundle?: string;
+  android_application_id?: string;
+} = credentialsFile;
 
 export function getApiKey(): string {
   if (!credentials?.token) {
@@ -20,6 +25,15 @@ export function getPlacementId(): string {
     throw new Error(`${ADAPTY_PREFIX} Placement ID not found in ${CREDENTIALS_FILE} file. ${CREDENTIALS_COMMAND}`);
   }
   return credentials.placement_id;
+}
+
+export function getOnboardingPlacementId(): string {
+  if (!credentials?.onboarding_placement_id) {
+    throw new Error(
+      `${ADAPTY_PREFIX} Onboarding Placement ID not found in ${CREDENTIALS_FILE} file. ${CREDENTIALS_COMMAND}`,
+    );
+  }
+  return credentials.onboarding_placement_id;
 }
 
 export function getIosBundle(): string {

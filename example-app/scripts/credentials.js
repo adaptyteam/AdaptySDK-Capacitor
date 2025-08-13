@@ -9,6 +9,7 @@ var token_key = 'token';
 var ios_bundle_key = 'ios_bundle';
 var android_application_id_key = 'android_application_id';
 var placement_id_key = 'placement_id';
+var onboarding_placement_id_key = 'onboarding_placement_id';
 
 // Parse command line arguments
 var args = process.argv.slice(2);
@@ -72,6 +73,18 @@ function read_credentials_sync(obj = {}) {
     result[placement_id_key] = input_placement_id;
   } else if (cache_placement) {
     result[placement_id_key] = cache_placement;
+  }
+
+  // Onboarding Placement ID
+  var cache_onboarding_placement = obj[onboarding_placement_id_key];
+  var input_onboarding_placement_id = prompt(
+    `Enter your onboarding placement ID${cache_onboarding_placement ? ` (${cache_onboarding_placement})` : ''}: `,
+  );
+
+  if (input_onboarding_placement_id) {
+    result[onboarding_placement_id_key] = input_onboarding_placement_id;
+  } else if (cache_onboarding_placement) {
+    result[onboarding_placement_id_key] = cache_onboarding_placement;
   }
 
   if (result[ios_bundle_key] !== cache_bundle || forceBundleUpdate) {
