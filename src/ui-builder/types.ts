@@ -162,7 +162,7 @@ export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
   onCustomAction: () => false,
   onProductSelected: () => false,
   onPurchaseStarted: () => false,
-  onPurchaseCompleted: (purchaseResult: any, _product: any) => purchaseResult?.type !== 'user_cancelled',
+  onPurchaseCompleted: (purchaseResult: any) => purchaseResult?.type !== 'user_cancelled',
   onPurchaseFailed: () => false,
   onRestoreStarted: () => false,
   onRestoreCompleted: () => true,
@@ -175,30 +175,30 @@ export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
 };
 
 export type OnboardingStateUpdatedAction =
-    | {
-  elementId: string;
-  elementType: 'select';
-  value: AdaptyUiOnboardingStateParams;
-}
-    | {
-  elementId: string;
-  elementType: 'multi_select';
-  value: AdaptyUiOnboardingStateParams[];
-}
-    | {
-  elementId: string;
-  elementType: 'input';
-  value: { type: 'text' | 'email'; value: string } | { type: 'number'; value: number };
-}
-    | {
-  elementId: string;
-  elementType: 'date_picker';
-  value: {
-    day?: number;
-    month?: number;
-    year?: number;
-  };
-};
+  | {
+      elementId: string;
+      elementType: 'select';
+      value: AdaptyUiOnboardingStateParams;
+    }
+  | {
+      elementId: string;
+      elementType: 'multi_select';
+      value: AdaptyUiOnboardingStateParams[];
+    }
+  | {
+      elementId: string;
+      elementType: 'input';
+      value: { type: 'text' | 'email'; value: string } | { type: 'number'; value: number };
+    }
+  | {
+      elementId: string;
+      elementType: 'date_picker';
+      value: {
+        day?: number;
+        month?: number;
+        year?: number;
+      };
+    };
 
 export interface AdaptyUiView {
   id: string;

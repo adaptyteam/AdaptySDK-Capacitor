@@ -1,14 +1,15 @@
 import { Adapty } from '../adapty';
 import type { AdaptyPaywall } from '../shared/types';
-import type { CreatePaywallViewParamsInput } from '../shared/ui/types';
-import { ViewController } from '../shared/ui/view-controller';
+
+import type { CreatePaywallViewParamsInput } from './types';
+import { ViewController } from './view-controller';
 
 const adaptyPlugin = new Adapty();
 
 // Export UI types and classes for convenience
 export { ViewController };
 export type { CreatePaywallViewParamsInput };
-export type { AdaptyUiView, AdaptyUiDialogConfig, AdaptyUiDialogActionType, EventHandlers } from '../shared/ui/types';
+export type { AdaptyUiView, AdaptyUiDialogConfig, AdaptyUiDialogActionType, EventHandlers } from './types';
 
 /**
  * Creates a paywall view controller.

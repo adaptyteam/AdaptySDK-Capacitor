@@ -1,7 +1,7 @@
 import type { Def } from '../types/schema';
 import type { Properties } from './types';
 import { SimpleCoder } from './coder';
-import { AdaptyUiOnboardingMeta } from '../ui/types';
+import { AdaptyUiOnboardingMeta } from '../../ui-builder/types';
 
 type Model = AdaptyUiOnboardingMeta;
 type Serializable = Def['AdaptyUI.OnboardingMeta'];

@@ -1,5 +1,5 @@
 import { AdaptyUiOnboardingMetaCoder } from './adapty-ui-onboarding-meta';
-import type { AdaptyUiOnboardingMeta } from '../ui/types';
+import type { AdaptyUiOnboardingMeta } from '../../ui-builder/types';
 import type { Def } from '../types/schema';
 
 type Model = AdaptyUiOnboardingMeta;

@@ -30,7 +30,6 @@ import {
   type MethodName,
   type MethodResponseMap,
 } from './shared/types/method-types';
-import type { AdaptyUiMediaCache } from './shared/ui/types';
 import { filterUndefined } from './shared/utils/compact-object';
 import { mergeOptions } from './shared/utils/merge-options';
 import type { AdaptyPlugin } from './types/adapty-plugin';
@@ -46,6 +45,7 @@ import type {
   GetOnboardingForDefaultAudienceOptions,
   GetOnboardingForDefaultAudienceOptionsWithDefaults,
 } from './types/configs';
+import type { AdaptyUiMediaCache } from './ui-builder/types';
 import version from './version';
 
 type Req = components['requests'];

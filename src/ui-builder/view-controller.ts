@@ -1,12 +1,19 @@
-import { Adapty } from '../../adapty';
-import type { AdaptyPaywall } from '../types';
-import type { AdaptyUiView, CreatePaywallViewParamsInput, AdaptyUiDialogConfig, AdaptyUiDialogActionType, EventHandlers } from './types';
+import type { Adapty } from '../adapty';
+import { AdaptyError } from '../shared/adapty-error';
+import { AdaptyPaywallCoder } from '../shared/coders/adapty-paywall';
+import { LogContext, Log } from '../shared/logger';
+import type { AdaptyPaywall } from '../shared/types';
+import type { components } from '../shared/types/api';
+
+import type {
+  AdaptyUiView,
+  CreatePaywallViewParamsInput,
+  AdaptyUiDialogConfig,
+  AdaptyUiDialogActionType,
+  EventHandlers,
+} from './types';
 import { DEFAULT_EVENT_HANDLERS } from './types';
-import { AdaptyPaywallCoder } from '../coders/adapty-paywall';
-import { AdaptyError } from '../adapty-error';
-import type { components } from '../types/api';
 import { ViewEmitter } from './view-emitter';
-import { LogContext, Log } from '../logger';
 
 type Req = components['requests'];
 
@@ -71,7 +78,7 @@ export class ViewController {
 
         const result: Record<string, string> = {};
         for (const key in timerInfo) {
-          if (timerInfo.hasOwnProperty(key)) {
+          if (Object.prototype.hasOwnProperty.call(timerInfo, key)) {
             const date = timerInfo[key];
             if (date instanceof Date) {
               result[key] = formatDate(date);
@@ -83,14 +90,14 @@ export class ViewController {
       data.custom_timers = convertTimerInfo(params.customTimers);
     }
 
-    const result = await controller.adaptyPlugin.handleMethodCall(
+    const result = (await controller.adaptyPlugin.handleMethodCall(
       methodKey,
       JSON.stringify(data),
       ctx,
       log,
-    ) as AdaptyUiView;
+    )) as AdaptyUiView;
     controller.id = result.id;
-    
+
     return controller;
   }
 
@@ -132,12 +139,7 @@ export class ViewController {
       id: this.id,
     };
 
-    await this.adaptyPlugin.handleMethodCall(
-      methodKey,
-      JSON.stringify(data),
-      ctx,
-      log,
-    );
+    await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
   }
 
   /**
@@ -164,12 +166,7 @@ export class ViewController {
       destroy: false,
     };
 
-    await this.adaptyPlugin.handleMethodCall(
-      methodKey,
-      JSON.stringify(data),
-      ctx,
-      log,
-    );
+    await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
   }
 
   /**
@@ -211,12 +208,7 @@ export class ViewController {
       configuration: dialogConfig,
     };
 
-    return await this.adaptyPlugin.handleMethodCall(
-      methodKey,
-      JSON.stringify(data),
-      ctx,
-      log,
-    );
+    return await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
   }
 
   /**
@@ -239,9 +231,7 @@ export class ViewController {
    * @param {Partial<EventHandlers> | undefined} [eventHandlers] - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public registerEventHandlers(
-    eventHandlers: Partial<EventHandlers> = DEFAULT_EVENT_HANDLERS,
-  ): () => void {
+  public registerEventHandlers(eventHandlers: Partial<EventHandlers> = DEFAULT_EVENT_HANDLERS): () => void {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'registerEventHandlers' });
     log.start({ _id: this.id });
@@ -253,12 +243,15 @@ export class ViewController {
       });
     }
 
-    Log.verbose('registerEventHandlers', () => 'Registering event handlers for view', () => ({ id: this.id }));
+    Log.verbose(
+      'registerEventHandlers',
+      () => 'Registering event handlers for view',
+      () => ({ id: this.id }),
+    );
 
-    // Create ViewEmitter if not exists
-    if (!this.viewEmitter) {
-      this.viewEmitter = new ViewEmitter(this.id);
-    }
+    // Create ViewEmitter if not exists and capture local reference
+    const viewEmitter = this.viewEmitter ?? new ViewEmitter(this.id);
+    this.viewEmitter = viewEmitter;
 
     const finalEventHandlers: EventHandlers = {
       ...DEFAULT_EVENT_HANDLERS,
@@ -273,7 +266,11 @@ export class ViewController {
       try {
         await this.dismiss();
       } catch (error) {
-        Log.warn('registerEventHandlers', () => 'Failed to dismiss paywall', () => ({ error }));
+        Log.warn(
+          'registerEventHandlers',
+          () => 'Failed to dismiss paywall',
+          () => ({ error }),
+        );
       }
     };
 
@@ -281,22 +278,30 @@ export class ViewController {
     Object.entries(finalEventHandlers).forEach(([eventName, handler]) => {
       if (handler && typeof handler === 'function') {
         try {
-          const subscription = this.viewEmitter!.addListener(
-            eventName as keyof EventHandlers,
-            handler,
-            onRequestClose
-          );
+          const subscription = viewEmitter.addListener(eventName as keyof EventHandlers, handler, onRequestClose);
           subscriptions.push(subscription);
-          Log.verbose('registerEventHandlers', () => 'Registered handler for', () => ({ eventName }));
+          Log.verbose(
+            'registerEventHandlers',
+            () => 'Registered handler for',
+            () => ({ eventName }),
+          );
         } catch (error) {
-          Log.error('registerEventHandlers', () => `Failed to register handler for ${eventName}`, () => ({ error }));
+          Log.error(
+            'registerEventHandlers',
+            () => `Failed to register handler for ${eventName}`,
+            () => ({ error }),
+          );
         }
       }
     });
 
     // Return unsubscribe function
     const unsubscribe = () => {
-      Log.info('registerEventHandlers', () => 'Unsubscribing event handlers for view', () => ({ id: this.id }));
+      Log.info(
+        'registerEventHandlers',
+        () => 'Unsubscribing event handlers for view',
+        () => ({ id: this.id }),
+      );
       if (this.viewEmitter) {
         this.viewEmitter.removeAllListeners();
         this.viewEmitter = null;
@@ -305,4 +310,4 @@ export class ViewController {
 
     return unsubscribe;
   }
-} 
+}

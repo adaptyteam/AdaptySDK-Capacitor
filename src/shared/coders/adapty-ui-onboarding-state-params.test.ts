@@ -1,5 +1,5 @@
 import { AdaptyUiOnboardingStateParamsCoder } from './adapty-ui-onboarding-state-params';
-import type { AdaptyUiOnboardingStateParams } from '../ui/types';
+import type { AdaptyUiOnboardingStateParams } from '../../ui-builder/types';
 import type { Def } from '../types/schema';
 
 type Model = AdaptyUiOnboardingStateParams;
