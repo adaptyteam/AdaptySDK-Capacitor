@@ -1,13 +1,13 @@
 import { Adapty } from '../adapty';
 import type { AdaptyPaywall } from '../shared/types';
 
+import { PaywallViewController } from './paywall-view-controller';
 import type { CreatePaywallViewParamsInput } from './types';
-import { ViewController } from './view-controller';
 
 const adaptyPlugin = new Adapty();
 
 // Export UI types and classes for convenience
-export { ViewController };
+export { PaywallViewController };
 export type { CreatePaywallViewParamsInput };
 export type { AdaptyUiView, AdaptyUiDialogConfig, AdaptyUiDialogActionType, EventHandlers } from './types';
 
@@ -19,7 +19,7 @@ export type { AdaptyUiView, AdaptyUiDialogConfig, AdaptyUiDialogActionType, Even
  *
  * @param {AdaptyPaywall} paywall - paywall that you want to present.
  * @param {CreatePaywallViewParamsInput | undefined} [params] - additional params.
- * @returns {Promise<ViewController>} ViewController — A promise that resolves to a ViewController instance.
+ * @returns {Promise<PaywallViewController>} ViewController — A promise that resolves to a ViewController instance.
  *
  * @example
  * ```ts
@@ -35,8 +35,8 @@ export type { AdaptyUiView, AdaptyUiDialogConfig, AdaptyUiDialogActionType, Even
 export async function createPaywallView(
   paywall: AdaptyPaywall,
   params: CreatePaywallViewParamsInput = {},
-): Promise<ViewController> {
-  const controller = await ViewController.create(paywall, params, adaptyPlugin);
+): Promise<PaywallViewController> {
+  const controller = await PaywallViewController.create(paywall, params, adaptyPlugin);
 
   return controller;
 }

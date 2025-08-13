@@ -32,7 +32,7 @@ interface ParsedEventData {
   id: string;
 }
 
-export class ViewEmitter {
+export class PaywallViewEmitter {
   private viewId: string;
   private eventListeners: Map<string, CapacitorEventSubscription> = new Map();
   private handlers: Map<

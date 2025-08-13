@@ -5,6 +5,7 @@ import { LogContext, Log } from '../shared/logger';
 import type { AdaptyPaywall } from '../shared/types';
 import type { components } from '../shared/types/api';
 
+import { PaywallViewEmitter } from './paywall-view-emitter';
 import type {
   AdaptyUiView,
   CreatePaywallViewParamsInput,
@@ -13,7 +14,6 @@ import type {
   EventHandlers,
 } from './types';
 import { DEFAULT_EVENT_HANDLERS } from './types';
-import { ViewEmitter } from './view-emitter';
 
 type Req = components['requests'];
 
@@ -21,10 +21,10 @@ type Req = components['requests'];
  * Provides methods to control created paywall view
  * @public
  */
-export class ViewController {
+export class PaywallViewController {
   private id: string | null = null;
   private adaptyPlugin: Adapty;
-  private viewEmitter: ViewEmitter | null = null;
+  private viewEmitter: PaywallViewEmitter | null = null;
 
   /**
    * Intended way to create a ViewController instance.
@@ -36,8 +36,8 @@ export class ViewController {
     paywall: AdaptyPaywall,
     params: CreatePaywallViewParamsInput,
     adaptyPlugin: Adapty,
-  ): Promise<ViewController> {
-    const controller = new ViewController(adaptyPlugin);
+  ): Promise<PaywallViewController> {
+    const controller = new PaywallViewController(adaptyPlugin);
 
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_create_paywall_view';
@@ -250,7 +250,7 @@ export class ViewController {
     );
 
     // Create ViewEmitter if not exists and capture local reference
-    const viewEmitter = this.viewEmitter ?? new ViewEmitter(this.id);
+    const viewEmitter = this.viewEmitter ?? new PaywallViewEmitter(this.id);
     this.viewEmitter = viewEmitter;
 
     const finalEventHandlers: EventHandlers = {

@@ -7,7 +7,7 @@ export { consoleLogSink } from './shared/logger';
 export * from './shared/constants';
 export type * from './types/configs';
 
-export { createPaywallView, ViewController } from './ui-builder/index';
+export { createPaywallView, PaywallViewController } from './ui-builder/index';
 export type {
   CreatePaywallViewParamsInput,
   AdaptyUiView,
