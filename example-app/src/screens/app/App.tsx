@@ -195,26 +195,6 @@ const App: React.FC = () => {
     }
   };
 
-  const updateProfile = async () => {
-    if (!isActivated) return;
-
-    try {
-      console.log('[ADAPTY] Updating profile...');
-      await adapty.updateProfile({
-        params: {
-          email: 'john@example.com',
-          phoneNumber: '+14325671098',
-          firstName: 'John',
-          lastName: 'Doe',
-        },
-      });
-      setResult('Profile updated successfully');
-      await fetchProfile(); // Refresh profile
-    } catch (error) {
-      console.error('[ADAPTY] Error updating profile', error);
-      setResult(`Error updating profile: ${error}`);
-    }
-  };
 
   const updateAttribution = async () => {
     if (!isActivated) return;

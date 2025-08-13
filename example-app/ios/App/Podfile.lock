@@ -15,14 +15,22 @@ PODS:
   - CapacitorApp (7.0.2):
     - Capacitor
   - CapacitorCordova (7.0.0)
+  - CapacitorFilesystem (7.1.4):
+    - Capacitor
+    - IONFilesystemLib (~> 1.0.1)
+  - CapacitorShare (7.0.2):
+    - Capacitor
   - CapacitorStatusBar (7.0.2):
     - Capacitor
+  - IONFilesystemLib (1.0.1)
 
 DEPENDENCIES:
   - "AdaptyCapacitor (from `../../node_modules/@adapty/capacitor`)"
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
+  - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
 
 SPEC REPOS:
@@ -30,6 +38,7 @@ SPEC REPOS:
     - Adapty
     - AdaptyPlugin
     - AdaptyUI
+    - IONFilesystemLib
 
 EXTERNAL SOURCES:
   AdaptyCapacitor:
@@ -40,6 +49,10 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/app"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
+  CapacitorShare:
+    :path: "../../node_modules/@capacitor/share"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
 
@@ -51,8 +64,11 @@ SPEC CHECKSUMS:
   Capacitor: fcbee427ff437f414bbb3bc2d39364ad9bd2b8a5
   CapacitorApp: efc1e9748a8ea5d3e789cd82a4f451341cc7ac93
   CapacitorCordova: 345f93b7edd121db98e4ec20ac94d6d7bcaf7e48
+  CapacitorFilesystem: ac0a386949ed6c295a3dffa129ecd26b881ae5be
+  CapacitorShare: 051c3ceee0ddf3bb54574851a622bbb317eed5bd
   CapacitorStatusBar: 5526833b87fa9c96a2a90c1322bb1f663c04505f
+  IONFilesystemLib: 89258b8e3e85465da93127d25d7ce37f977e8a6f
 
-PODFILE CHECKSUM: b51eb70df6496dd8644d4e79358c155b2ceac04b
+PODFILE CHECKSUM: b36a20960e45799586cd8db4b83e901cda07c600
 
 COCOAPODS: 1.15.2

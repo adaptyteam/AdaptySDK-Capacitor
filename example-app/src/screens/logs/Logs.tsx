@@ -1,5 +1,9 @@
+import { useCallback } from 'react';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { JsLog, formatDate } from '../../helpers';
 import styles from './Logs.module.css';
+
 
 interface LogsProps {
   logs: JsLog[];
@@ -7,6 +11,35 @@ interface LogsProps {
 }
 
 function Logs({ logs, onLogClick }: LogsProps) {
+  const exportAsJson = useCallback(async () => {
+    const pretty = JSON.stringify(logs, null, 2);
+    const fileName = `adapty-capacitor-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+
+    try {
+      const writeRes = await Filesystem.writeFile({
+        path: fileName,
+        data: pretty,
+        directory: Directory.Cache,
+        encoding: Encoding.UTF8,
+      });
+
+      // Resolve shareable URI (especially for Android content://)
+      let fileUri: string | undefined = writeRes.uri as unknown as string | undefined;
+      try {
+        const { uri } = await Filesystem.getUri({ path: fileName, directory: Directory.Cache });
+        if (uri) fileUri = uri;
+      } catch {}
+
+      await Share.share({
+        title: 'Adapty Logs',
+        url: fileUri,
+        dialogTitle: 'Share logs JSON',
+      });
+    } catch (err) {
+      alert('Failed to export logs.');
+    }
+  }, [logs]);
+
   return (
     <div className={styles.LogsContainer}>
       <div className={styles.LogsHeader}>
@@ -16,6 +49,9 @@ function Logs({ logs, onLogClick }: LogsProps) {
             {logs.length} logs (Newest first)
           </div>
         </div>
+        <button className={styles.ExportButton} onClick={exportAsJson}>
+          Export JSON
+        </button>
       </div>
       <div className={styles.LogsList}>
         {logs.slice().reverse().map((log, index) => (
@@ -75,4 +111,4 @@ function LogLine({ log, isFirst, isLast, onClick }: LogLineProps) {
   );
 }
 
-export default Logs; 
+export default Logs;

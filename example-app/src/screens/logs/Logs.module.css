@@ -7,6 +7,10 @@
 .LogsHeader {
   margin-top: 20px;
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .LogsHeaderContent {
@@ -29,6 +33,34 @@
   font-size: 14px;
   font-weight: 400;
   text-align: center;
+}
+
+.ExportButton {
+  background: #007aff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.ExportButton:hover {
+  background: #0062cc;
+  transform: scale(1.03);
+}
+
+.ExportButton:active {
+  background: #004fa3;
+  transform: scale(0.98);
 }
 
 .BackButtonIOS {
