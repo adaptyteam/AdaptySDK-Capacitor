@@ -7,7 +7,7 @@ import type { components } from '../shared/types/api';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 import { DEFAULT_ONBOARDING_EVENT_HANDLERS } from './types';
-import type { AdaptyUiView, type OnboardingEventHandlers } from './types';
+import type { AdaptyUiView, OnboardingEventHandlers } from './types';
 
 type Req = components['requests'];
 

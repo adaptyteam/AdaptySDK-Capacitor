@@ -517,7 +517,6 @@ const App: React.FC = () => {
       return;
     }
     try {
-      debugger;
       console.log('[ADAPTY]2 Logging custom onboarding shown...');
       await adapty.logShowOnboarding({
         screenOrder: 1,
@@ -991,7 +990,7 @@ const App: React.FC = () => {
             disabled={!isActivated}
             className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
-            Log custom onboarding shown
+            logShowOnboarding (deprecated)
           </button>
         </div>
       </div>
@@ -1288,9 +1287,6 @@ const App: React.FC = () => {
           <div className={styles.InfoBox}>
             <div className={styles.InfoBoxItem}>
               <strong>API Key:</strong> {getApiKey() ? `${getApiKey().substring(0, 20)}...` : 'Not loaded'}
-            </div>
-            <div className={styles.InfoBoxItem}>
-              <strong>Placement ID:</strong> {getPlacementId()}
             </div>
             <div className={styles.InfoBoxItem}>
               <strong>iOS Bundle ID:</strong> {getIosBundle()}
