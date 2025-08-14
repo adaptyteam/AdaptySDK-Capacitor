@@ -1,15 +1,17 @@
 import { Adapty } from '../adapty';
-import type { AdaptyPaywall } from '../shared/types';
+import type { AdaptyOnboarding, AdaptyPaywall } from '../shared/types';
 
+import { OnboardingViewController } from './onboarding-view-controller';
 import { PaywallViewController } from './paywall-view-controller';
 import type { CreatePaywallViewParamsInput } from './types';
 
 const adaptyPlugin = new Adapty();
 
 // Export UI types and classes for convenience
-export { PaywallViewController };
+export { PaywallViewController, OnboardingViewController };
 export type { CreatePaywallViewParamsInput };
 export type { AdaptyUiView, AdaptyUiDialogConfig, AdaptyUiDialogActionType, EventHandlers } from './types';
+export type { OnboardingEventHandlers } from './types';
 
 /**
  * Creates a paywall view controller.
@@ -38,5 +40,17 @@ export async function createPaywallView(
 ): Promise<PaywallViewController> {
   const controller = await PaywallViewController.create(paywall, params, adaptyPlugin);
 
+  return controller;
+}
+
+/**
+ * Creates an onboarding view controller.
+ * You can use it to further configure a view or present it.
+ *
+ * @param {AdaptyOnboarding} onboarding - onboarding that you want to present.
+ * @returns {Promise<OnboardingViewController>} ViewController — A promise that resolves to a ViewController instance.
+ */
+export async function createOnboardingView(onboarding: AdaptyOnboarding): Promise<OnboardingViewController> {
+  const controller = await OnboardingViewController.create(onboarding, adaptyPlugin);
   return controller;
 }

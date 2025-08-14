@@ -7,6 +7,7 @@ import {
   AdaptyPaywallProduct,
   AdaptyOnboarding,
   createPaywallView,
+  createOnboardingView,
   FileLocation,
   RefundPreference,
 } from '@adapty/capacitor';
@@ -447,6 +448,86 @@ const App: React.FC = () => {
     } catch (error: any) {
       console.error('[ADAPTY] Failed to present paywall:', error);
       setResult(`❌ Failed to present paywall: ${error.message}`);
+    }
+  };
+
+  const presentOnboarding = async () => {
+    if (!onboarding) {
+      setResult('❌ No onboarding loaded. Please load onboarding first.');
+      return;
+    }
+
+    if (!onboarding.hasViewConfiguration) {
+      setResult('❌ Onboarding does not have view configuration (no Onboarding Builder).');
+      return;
+    }
+
+    try {
+      setResult('Creating onboarding view...');
+
+      const view = await createOnboardingView(onboarding);
+
+      view.registerEventHandlers({
+        onClose: (actionId, meta) => {
+          console.log('[ADAPTY] Onboarding closed', { actionId, meta });
+          setResult('👋 Onboarding closed');
+          return true;
+        },
+        onFinishedLoading: (meta) => {
+          console.log('[ADAPTY] Onboarding finished loading', meta);
+          return false;
+        },
+        onCustom: (actionId, meta) => {
+          console.log('[ADAPTY] Onboarding custom action', { actionId, meta });
+          return false;
+        },
+        onPaywall: (actionId, meta) => {
+          console.log('[ADAPTY] Onboarding paywall action', { actionId, meta });
+          return false;
+        },
+        onAnalytics: (event, meta) => {
+          console.log('[ADAPTY] Onboarding analytics', { event, meta });
+          return false;
+        },
+        onStateUpdated: (action, meta) => {
+          console.log('[ADAPTY] Onboarding state updated', { action, meta });
+          return false;
+        },
+        onError: (error) => {
+          console.log('[ADAPTY] Onboarding error', error);
+          setResult(`❌ Onboarding error: ${error?.message || 'unknown error'}`);
+          return false;
+        },
+      });
+
+      setResult('✅ Onboarding view created. Presenting...');
+
+      await view.present();
+
+      setResult('✅ Onboarding presented successfully!');
+    } catch (error: any) {
+      console.error('[ADAPTY] Failed to present onboarding:', error);
+      setResult(`❌ Failed to present onboarding: ${error?.message || error}`);
+    }
+  };
+
+  const logCustomOnboardingShown = async () => {
+    if (!isActivated) {
+      setResult('❌ SDK is not activated');
+      return;
+    }
+    try {
+      debugger;
+      console.log('[ADAPTY]2 Logging custom onboarding shown...');
+      await adapty.logShowOnboarding({
+        screenOrder: 1,
+        ...(onboarding?.name ? { onboardingName: onboarding.name } : {}),
+        screenName: 'screen_1',
+      });
+      setResult('✅ Logged custom onboarding shown');
+    } catch (error) {
+      console.error('[ADAPTY] Error logging custom onboarding shown', error);
+      setResult(`❌ Error logging onboarding: ${error}`);
     }
   };
 
@@ -894,6 +975,24 @@ const App: React.FC = () => {
           ) : (
             <div>No onboarding loaded</div>
           )}
+        </div>
+
+        {/* Action buttons */}
+        <div className={styles.ButtonGroup}>
+          <button
+            onClick={presentOnboarding}
+            disabled={!onboarding || !onboarding.hasViewConfiguration}
+            className={`${styles.Button} ${styles.ButtonPrimary}`}
+          >
+            Present Onboarding
+          </button>
+          <button
+            onClick={logCustomOnboardingShown}
+            disabled={!isActivated}
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
+          >
+            Log custom onboarding shown
+          </button>
         </div>
       </div>
     );

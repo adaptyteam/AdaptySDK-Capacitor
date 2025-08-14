@@ -269,3 +269,26 @@ export interface CreatePaywallViewParamsInput {
 
   // customAssets?: Record<string, AdaptyCustomAsset>; // TODO: implement custom assets
 }
+
+// ===================== Onboarding UI Events =====================
+
+export interface OnboardingEventHandlers {
+  onClose: (actionId: string, meta: AdaptyUiOnboardingMeta) => EventHandlerResult;
+  onCustom: (actionId: string, meta: AdaptyUiOnboardingMeta) => EventHandlerResult;
+  onPaywall: (actionId: string, meta: AdaptyUiOnboardingMeta) => EventHandlerResult;
+  onStateUpdated: (action: OnboardingStateUpdatedAction, meta: AdaptyUiOnboardingMeta) => EventHandlerResult;
+  onFinishedLoading: (meta: AdaptyUiOnboardingMeta) => EventHandlerResult;
+  onAnalytics: (
+    event: {
+      name: string;
+      element_id?: string;
+      reply?: string;
+    },
+    meta: AdaptyUiOnboardingMeta,
+  ) => EventHandlerResult;
+  onError: (error: any) => EventHandlerResult;
+}
+
+export const DEFAULT_ONBOARDING_EVENT_HANDLERS: Partial<OnboardingEventHandlers> = {
+  onClose: () => true,
+};
