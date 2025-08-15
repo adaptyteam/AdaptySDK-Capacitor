@@ -10,7 +10,9 @@ import Profile from './screens/profile/Profile';
 import { JsLog } from './helpers';
 import styles from './main.module.css';
 import JsLogsListener from './JsLogsListener';
-import { LogsProvider, useLogs } from './logs-context';
+import { LogsProvider, useLogs } from './contexts/LogsContext.tsx';
+import { AppProvider } from './contexts/AppContext';
+import { ProfileProvider } from './contexts/ProfileContext';
 
 function BackHandler() {
   // Handle Android hardware back: navigate back if possible, otherwise exit app
@@ -110,7 +112,11 @@ function RouterApp() {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <LogsProvider>
-      <RouterApp />
+      <AppProvider>
+        <ProfileProvider>
+          <RouterApp />
+        </ProfileProvider>
+      </AppProvider>
     </LogsProvider>
   </React.StrictMode>,
 );

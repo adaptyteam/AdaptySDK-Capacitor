@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { adapty, consoleLogSink } from '@adapty/capacitor';
 import type { JsLog } from './helpers';
-import { useLogs } from './logs-context';
+import { useLogs } from './contexts/LogsContext.tsx';
 import type { LogEvent } from '@adapty/capacitor';
 
 

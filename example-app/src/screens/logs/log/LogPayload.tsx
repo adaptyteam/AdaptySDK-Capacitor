@@ -2,7 +2,7 @@ import React from 'react';
 import { JsLog, dateFormat } from '../../../helpers';
 import styles from './LogPayload.module.css';
 import { useParams } from 'react-router-dom';
-import { useLogs } from '../../../logs-context';
+import { useLogs } from '../../../contexts/LogsContext.tsx';
 
 interface LogPayloadProps {
   onBack: () => void;
@@ -60,7 +60,7 @@ function LogPayload({ onBack }: LogPayloadProps) {
         }
         return val;
       }, 2);
-      
+
       return (
         <pre className={styles.ObjectValue}>
           {serializedObject}

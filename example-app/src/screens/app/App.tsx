@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import {
   adapty,
-  AdaptyProfile,
   AdaptyPaywall,
   AdaptyPaywallProduct,
   AdaptyOnboarding,
@@ -11,27 +10,63 @@ import {
   FileLocation,
   RefundPreference,
 } from '@adapty/capacitor';
-import { getApiKey, getPlacementId, getIosBundle, getAndroidApplicationId, getOnboardingPlacementId } from '../../helpers';
+import { getApiKey, getIosBundle, getAndroidApplicationId } from '../../helpers';
+import { useAppContext } from '../../contexts/AppContext';
 import styles from './App.module.css';
 
 const App: React.FC = () => {
+  // Get context state and actions
+  const {
+    // State
+    isActivated,
+    profile,
+    paywall,
+    products,
+    onboarding,
+    customerUserId,
+    transactionId,
+    variationId,
+    webPaywallUrl,
+    integrationIdKey,
+    integrationIdValue,
+    collectingRefundDataConsent,
+    refundPreferenceIdx,
+    placementId,
+    onboardingPlacementId,
+    locale,
+    timeout,
+    maxAge,
+    customTagsJson,
+    fetchPolicyIndex,
+    
+    // Actions
+    setIsActivated,
+    setProfile,
+    setPaywall,
+    setProducts,
+    setOnboarding,
+    setCustomerUserId,
+    setTransactionId,
+    setVariationId,
+    setWebPaywallUrl,
+    setIntegrationIdKey,
+    setIntegrationIdValue,
+    setCollectingRefundDataConsent,
+    setRefundPreferenceIdx,
+    setPlacementId,
+    setOnboardingPlacementId,
+    setLocale,
+    setTimeout,
+    setMaxAge,
+    setCustomTagsJson,
+    setFetchPolicyIndex,
+  } = useAppContext();
+
+  // Local state for temporary/UI state that should not persist
   const [result, setResult] = useState<string>('');
-  const [isActivated, setIsActivated] = useState(false);
-  const [profile, setProfile] = useState<AdaptyProfile | null>(null);
-  const [paywall, setPaywall] = useState<AdaptyPaywall | null>(null);
-  const [products, setProducts] = useState<AdaptyPaywallProduct[]>([]);
-  const [onboarding, setOnboarding] = useState<AdaptyOnboarding | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingPaywall, setIsLoadingPaywall] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
-  const [customerUserId, setCustomerUserId] = useState<string>('');
-  const [transactionId, setTransactionId] = useState<string>('');
-  const [variationId, setVariationId] = useState<string>('');
-  const [webPaywallUrl, setWebPaywallUrl] = useState<string>('');
-  const [integrationIdKey, setIntegrationIdKey] = useState<string>('one_signal_subscription_id');
-  const [integrationIdValue, setIntegrationIdValue] = useState<string>('testOSSubId');
-  const [collectingRefundDataConsent, setCollectingRefundDataConsent] = useState<boolean>(false);
-  const [refundPreferenceIdx, setRefundPreferenceIdx] = useState<number>(0);
 
   const refundPreferences = [
     RefundPreference.NoPreference,
@@ -45,14 +80,7 @@ const App: React.FC = () => {
     'Decline',
   ];
 
-  // Paywall extended configuration
-  const [placementId, setPlacementId] = useState<string>(getPlacementId());
-  const [onboardingPlacementId, setOnboardingPlacementId] = useState<string>(getOnboardingPlacementId());
-  const [locale, setLocale] = useState<string>('');
-  const [timeout, setTimeout] = useState<string>('6000');
-  const [maxAge, setMaxAge] = useState<string>('120');
-  const [customTagsJson, setCustomTagsJson] = useState<string>('{"USERNAME":"TestUser","CITY":"Capacitor"}');
-  const [fetchPolicyIndex, setFetchPolicyIndex] = useState<number>(0);
+
 
   const fetchPolicies = [
     'reload_revalidating_cache_data',

@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react';
 import { adapty, Gender } from '@adapty/capacitor';
+import { useProfileContext } from '../../contexts/ProfileContext';
 import styles from './Profile.module.css';
 
 function Profile() {
-  const [email, setEmail] = useState<string>('john@example.com');
-  const [phoneNumber, setPhoneNumber] = useState<string>('+14325671098');
-  const [firstName, setFirstName] = useState<string>('John');
-  const [lastName, setLastName] = useState<string>('Doe');
-  const [gender, setGender] = useState<Gender>(Gender.Other);
-  const [birthday, setBirthday] = useState<string>('1990-01-01');
+  // Get profile context state and actions
+  const {
+    email,
+    phoneNumber,
+    firstName,
+    lastName,
+    gender,
+    birthday,
+    setEmail,
+    setPhoneNumber,
+    setFirstName,
+    setLastName,
+    setGender,
+    setBirthday,
+  } = useProfileContext();
+
+  // Local state for temporary/UI state that should not persist
   const [isActivated, setIsActivated] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
 

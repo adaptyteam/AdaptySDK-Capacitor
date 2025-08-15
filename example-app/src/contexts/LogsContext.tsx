@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState, type PropsWithChildren } from 'react';
-import type { JsLog } from './helpers';
+import type { JsLog } from '../helpers.ts';
 
 interface LogsContextValue {
   logs: JsLog[];
