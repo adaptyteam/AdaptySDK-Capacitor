@@ -54,7 +54,6 @@ function LogPayload({ onBack }: LogPayloadProps) {
       return <span className={styles.BooleanValue}>{value.toString()}</span>;
     }
     if (typeof value === 'object') {
-      // Handle objects that might contain functions
       const serializedObject = JSON.stringify(value, (_key, val) => {
         if (typeof val === 'function') {
           return `[Function: ${val.name || 'anonymous'}]`;

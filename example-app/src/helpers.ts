@@ -73,3 +73,63 @@ export function dateFormat(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   return d.toLocaleDateString() + ', ' + d.toLocaleTimeString();
 }
+
+const funcNameColors = [
+  '#FF6B8A',
+  '#FFD93D',
+  '#6BCF7F',
+  '#4DABF7',
+  '#9775FA',
+  '#FF8787',
+  '#74C0FC',
+  '#F783AC',
+  '#FFB84D',
+  '#C084FC',
+  '#51CF66',
+  '#FFE066',
+  '#66D9EF',
+  '#FF9F43',
+  '#845EC2',
+  '#FF6B6B',
+  '#4ECDC4',
+  '#45B7D1',
+  '#96CEB4',
+  '#FECA57',
+  '#FF9FF3',
+  '#54A0FF',
+  '#5F27CD',
+  '#00D2D3',
+  '#FF9F1A',
+];
+
+function hashFuncName(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+}
+
+export function getFuncNameColor(funcName: string): string {
+  const hash = hashFuncName(funcName);
+  return funcNameColors[hash % funcNameColors.length];
+}
+
+export function getLogLevelColor(level: string): string {
+  switch (level) {
+    case 'error':
+      return '#ff4444';
+    case 'warn':
+      return '#ffaa00';
+    case 'info':
+      return '#4777ff';
+    case 'debug':
+      return '#888888';
+    case 'verbose':
+      return '#666666';
+    default:
+      return '#000000';
+  }
+}

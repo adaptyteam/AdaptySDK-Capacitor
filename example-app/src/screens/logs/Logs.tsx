@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import { JsLog, formatDate } from '../../helpers';
+import { JsLog, formatDate, getFuncNameColor, getLogLevelColor } from '../../helpers';
 import styles from './Logs.module.css';
 
 
@@ -76,21 +76,15 @@ interface LogLineProps {
 }
 
 function LogLine({ log, isFirst, isLast, onClick }: LogLineProps) {
-  const getLogLevelColor = (level: string) => {
-    switch (level) {
-      case 'error': return '#ff4444';
-      case 'warn': return '#ffaa00';
-      case 'info': return '#4777ff';
-      case 'debug': return '#888888';
-      case 'verbose': return '#666666';
-      default: return '#000000';
-    }
-  };
+  const borderStyle = useMemo(() => ({
+    borderLeft: `6px solid ${getFuncNameColor(log.funcName)}`
+  }), [log.funcName]);
 
   return (
     <div
       className={`${styles.LogLine} ${isFirst ? styles.LogLineFirst : ''} ${isLast ? styles.LogLineLast : ''}`}
       onClick={onClick}
+      style={borderStyle}
     >
       <div className={styles.LogContent}>
         <div className={styles.LogIcon}>
