@@ -22,6 +22,28 @@ function LogPayload({ onBack }: LogPayloadProps) {
     if (value === undefined) {
       return <span className={styles.UndefinedValue}>undefined</span>;
     }
+    if (typeof value === 'function') {
+      try {
+        const result = value();
+        return (
+          <div className={styles.FunctionValue}>
+            <div className={styles.FunctionLabel}>function() → </div>
+            <div className={styles.FunctionResult}>
+              {renderValue(result)}
+            </div>
+          </div>
+        );
+      } catch (error) {
+        return (
+          <div className={styles.FunctionValue}>
+            <div className={styles.FunctionLabel}>function() → </div>
+            <div className={styles.FunctionError}>
+              Error: {error instanceof Error ? error.message : String(error)}
+            </div>
+          </div>
+        );
+      }
+    }
     if (typeof value === 'string') {
       return <span className={styles.StringValue}>"{value}"</span>;
     }
@@ -32,9 +54,17 @@ function LogPayload({ onBack }: LogPayloadProps) {
       return <span className={styles.BooleanValue}>{value.toString()}</span>;
     }
     if (typeof value === 'object') {
+      // Handle objects that might contain functions
+      const serializedObject = JSON.stringify(value, (_key, val) => {
+        if (typeof val === 'function') {
+          return `[Function: ${val.name || 'anonymous'}]`;
+        }
+        return val;
+      }, 2);
+      
       return (
         <pre className={styles.ObjectValue}>
-          {JSON.stringify(value, null, 2)}
+          {serializedObject}
         </pre>
       );
     }
@@ -90,7 +120,7 @@ function LogPayload({ onBack }: LogPayloadProps) {
 
         {log.args && log.args.length > 0 && (
           <div className={styles.Section}>
-            <h3>ARGS</h3>
+            <h3>Call arguments</h3>
             <div className={styles.ArgsList}>
               {log.args.map((arg, index) => (
                 <div key={index} className={styles.ArgItem}>

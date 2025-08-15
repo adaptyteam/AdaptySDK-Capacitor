@@ -170,16 +170,16 @@ export class OnboardingViewController {
     Object.entries(finalEventHandlers).forEach(([eventName, handler]) => {
       if (handler && typeof handler === 'function') {
         try {
-          viewEmitter.addListener(eventName as keyof OnboardingEventHandlers, handler as any, onRequestClose);
+          viewEmitter.addListener(eventName as keyof OnboardingEventHandlers, handler, onRequestClose);
           Log.verbose(
             'registerEventHandlers',
-            () => 'Registered handler for',
-            () => ({ eventName }),
+            () => 'Registered onboarding handler',
+            () => ({ eventName, handler }),
           );
         } catch (error) {
           Log.error(
             'registerEventHandlers',
-            () => `Failed to register handler for ${eventName}`,
+            () => `Failed to register onboarding handler for ${eventName}`,
             () => ({ error }),
           );
         }

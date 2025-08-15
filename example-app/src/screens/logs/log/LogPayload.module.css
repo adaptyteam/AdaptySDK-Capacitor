@@ -181,6 +181,32 @@
   white-space: pre;
 }
 
+.FunctionValue {
+  background: #fff4e6;
+  border: 1px solid #ffcc80;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.FunctionLabel {
+  color: #ff8f00;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.FunctionResult {
+  margin-left: 16px;
+}
+
+.FunctionError {
+  color: #d32f2f;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  margin-left: 16px;
+}
+
 @media (max-width: 768px) {
   .InfoGrid {
     grid-template-columns: 1fr;

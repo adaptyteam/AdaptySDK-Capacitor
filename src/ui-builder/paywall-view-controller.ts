@@ -283,7 +283,7 @@ export class PaywallViewController {
           Log.verbose(
             'registerEventHandlers',
             () => 'Registered handler for',
-            () => ({ eventName }),
+            () => ({ eventName, handler }),
           );
         } catch (error) {
           Log.error(
