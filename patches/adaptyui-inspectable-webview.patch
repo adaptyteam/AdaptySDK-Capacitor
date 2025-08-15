@@ -1,0 +1,12 @@
+--- a/AdaptyUI/Onboardings/Rendering/AdaptyOnboardingUIView.swift
++++ b/AdaptyUI/Onboardings/Rendering/AdaptyOnboardingUIView.swift
+@@ -19,6 +19,9 @@ extension WKWebView {
+         config.mediaTypesRequiringUserActionForPlayback = []
+ 
+         let webView = WKWebView(frame: .zero, configuration: config)
++        if #available(iOS 16.4, *) {
++            webView.isInspectable = true
++        }
+ 
+         return webView
+     }

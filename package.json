@@ -52,6 +52,7 @@
     "dev-example-js": "yarn build && yarn sync-all-files && cd ./example-app && yarn build && yarn cap copy",
     "dev-example": "yarn build && yarn sync-all-files && cd ./example-app && yarn build && yarn cap sync --deployment",
     "dev-example-full": "yarn build && cd ./example-app && yarn --force &&  yarn build && yarn cap sync",
+    "patch-adaptyui-webview": "git apply --directory=example-app/ios/App/Pods/AdaptyUI patches/adaptyui-inspectable-webview.patch",
     "prepare": "husky"
   },
   "devDependencies": {
