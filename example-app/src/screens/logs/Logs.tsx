@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { JsLog, formatDate, getFuncNameColor, getLogLevelColor } from '../../helpers';
@@ -10,9 +10,25 @@ interface LogsProps {
   onLogClick: (log: JsLog) => void;
 }
 
+type LogFilter = 'sdk' | 'app' | 'all';
+
 function Logs({ logs, onLogClick }: LogsProps) {
+  const [filter, setFilter] = useState<LogFilter>('sdk');
+
+  const filteredLogs = useMemo(() => {
+    switch (filter) {
+      case 'sdk':
+        return logs.filter(log => log.isSDK);
+      case 'app':
+        return logs.filter(log => !log.isSDK);
+      case 'all':
+      default:
+        return logs;
+    }
+  }, [logs, filter]);
+
   const exportAsJson = useCallback(async () => {
-    const pretty = JSON.stringify(logs, null, 2);
+    const pretty = JSON.stringify(filteredLogs, null, 2);
     const fileName = `adapty-capacitor-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
 
     try {
@@ -38,7 +54,7 @@ function Logs({ logs, onLogClick }: LogsProps) {
     } catch (err) {
       alert('Failed to export logs.');
     }
-  }, [logs]);
+  }, [filteredLogs]);
 
   return (
     <div className={styles.LogsContainer}>
@@ -46,21 +62,43 @@ function Logs({ logs, onLogClick }: LogsProps) {
         <div className={styles.LogsHeaderContent}>
           <h2>Logs</h2>
           <div className={styles.LogsSubheader}>
-            {logs.length} logs (Newest first)
+            {filteredLogs.length} logs (Newest first)
           </div>
         </div>
-        <button className={styles.ExportButton} onClick={exportAsJson}>
-          Export JSON
-        </button>
+        <div className={styles.LogsControls}>
+          <div className={styles.FilterButtons}>
+            <button 
+              className={`${styles.FilterButton} ${filter === 'sdk' ? styles.FilterButtonActive : ''}`}
+              onClick={() => setFilter('sdk')}
+            >
+              SDK
+            </button>
+            <button 
+              className={`${styles.FilterButton} ${filter === 'app' ? styles.FilterButtonActive : ''}`}
+              onClick={() => setFilter('app')}
+            >
+              App
+            </button>
+            <button 
+              className={`${styles.FilterButton} ${filter === 'all' ? styles.FilterButtonActive : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All
+            </button>
+          </div>
+          <button className={styles.ExportButton} onClick={exportAsJson}>
+            Export JSON
+          </button>
+        </div>
       </div>
       <div className={styles.LogsList}>
-        {logs.slice().reverse().map((log, index) => (
+        {filteredLogs.slice().reverse().map((log, index) => (
           <LogLine
             key={index}
             log={log}
             onClick={() => onLogClick(log)}
             isFirst={index === 0}
-            isLast={index === logs.length - 1}
+            isLast={index === filteredLogs.length - 1}
           />
         ))}
       </div>

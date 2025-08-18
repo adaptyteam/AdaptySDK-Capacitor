@@ -8,9 +8,9 @@
   margin-top: 20px;
   margin-bottom: 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 }
 
 .LogsHeaderContent {
@@ -18,6 +18,53 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
+}
+
+.LogsControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.FilterButtons {
+  display: flex;
+  background: #f1f1f1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.FilterButton {
+  background: transparent;
+  color: #666;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-right: 1px solid #e0e0e0;
+}
+
+.FilterButton:last-child {
+  border-right: none;
+}
+
+.FilterButton:hover {
+  background: rgba(0, 122, 255, 0.1);
+  color: #007aff;
+}
+
+.FilterButtonActive {
+  background: #007aff;
+  color: #fff;
+}
+
+.FilterButtonActive:hover {
+  background: #0062cc;
+  color: #fff;
 }
 
 .LogsHeader h2 {

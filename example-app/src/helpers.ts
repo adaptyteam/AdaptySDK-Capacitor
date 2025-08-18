@@ -58,6 +58,7 @@ export interface JsLog {
   funcName: string;
   args: any[];
   isoDate: string;
+  isSDK: boolean;
 }
 
 export function formatDate(date: string | Date): string {
@@ -132,4 +133,21 @@ export function getLogLevelColor(level: string): string {
     default:
       return '#000000';
   }
+}
+
+export function createLog(
+  logLevel: JsLog['logLevel'],
+  message: string,
+  funcName: string,
+  isSDK: boolean,
+  args: any[] = [],
+): JsLog {
+  return {
+    logLevel,
+    message,
+    funcName,
+    args,
+    isoDate: new Date().toISOString(),
+    isSDK,
+  };
 }

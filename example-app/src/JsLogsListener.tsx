@@ -20,6 +20,7 @@ export default function JsLogsListener() {
           funcName: e.funcName,
           isoDate: e.timestamp,
           args: e.params ? [e.params] : [],
+          isSDK: true,
         });
       },
     };
