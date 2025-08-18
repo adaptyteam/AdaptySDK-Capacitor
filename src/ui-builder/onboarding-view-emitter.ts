@@ -1,3 +1,5 @@
+import type { PluginListenerHandle } from '@capacitor/core';
+
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
 import { parseOnboardingEvent } from '../shared/coders/parse';
 import { LogContext } from '../shared/logger';
@@ -6,17 +8,13 @@ import type { OnboardingEventHandlers } from './types';
 
 type EventName = keyof OnboardingEventHandlers;
 
-interface CapacitorEventSubscription {
-  remove: () => Promise<void>;
-}
-
 interface CapacitorEventArg {
   data: string; // JSON string from native
 }
 
 export class OnboardingViewEmitter {
   private viewId: string;
-  private eventListeners: Map<string, CapacitorEventSubscription> = new Map();
+  private eventListeners: Map<string, PluginListenerHandle> = new Map();
   private handlers: Map<
     string,
     {
@@ -34,7 +32,7 @@ export class OnboardingViewEmitter {
     event: EventName,
     callback: OnboardingEventHandlers[EventName],
     onRequestClose: () => Promise<void>,
-  ): CapacitorEventSubscription {
+  ): PluginListenerHandle {
     const viewId = this.viewId;
     const config = HANDLER_TO_EVENT_CONFIG[event];
 

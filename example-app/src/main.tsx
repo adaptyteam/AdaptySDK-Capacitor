@@ -10,6 +10,7 @@ import Profile from './screens/profile/Profile';
 import { JsLog } from './helpers';
 import styles from './main.module.css';
 import JsLogsListener from './JsLogsListener';
+import EventsListener from './EventsListener';
 import { LogsProvider, useLogs } from './contexts/LogsContext.tsx';
 import { AppProvider } from './contexts/AppContext';
 import { ProfileProvider } from './contexts/ProfileContext';
@@ -93,6 +94,7 @@ function RouterApp() {
     <HashRouter>
       <BackHandler />
       <JsLogsListener />
+      <EventsListener />
       <ScrollToTopOnTabChange />
       <div className={styles.RouterContainer}>
         <Routes>

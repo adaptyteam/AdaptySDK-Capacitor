@@ -783,7 +783,7 @@ export class Adapty implements AdaptyPlugin {
   addListener(
     eventName: 'onLatestProfileLoad',
     listenerFunc: (data: { profile: AdaptyProfile }) => void,
-  ): Promise<PluginListenerHandle> & PluginListenerHandle {
+  ): Promise<PluginListenerHandle> {
     return AdaptyCapacitorPlugin.addListener(eventName, (arg: any) => {
       const ctx = new LogContext();
       const log = ctx.event({ methodName: eventName });

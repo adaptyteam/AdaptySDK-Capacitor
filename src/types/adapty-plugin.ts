@@ -166,7 +166,7 @@ export interface AdaptyPlugin {
   addListener(
     eventName: 'onLatestProfileLoad',
     listenerFunc: (data: { profile: AdaptyProfile }) => void,
-  ): Promise<PluginListenerHandle> & PluginListenerHandle;
+  ): Promise<PluginListenerHandle>;
 
   /**
    * Removes all listeners.

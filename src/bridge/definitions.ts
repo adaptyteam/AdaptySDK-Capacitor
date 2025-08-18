@@ -5,7 +5,6 @@ import type { AdaptyProfile } from '../shared/types';
 export interface AdaptyCapacitorPlugin {
   /**
    * Handles crossplatform method calls
-   * @internal
    */
   handleMethodCall(options: { methodName: string; args: string }): Promise<any>;
 
@@ -15,7 +14,7 @@ export interface AdaptyCapacitorPlugin {
   addListener(
     eventName: 'onLatestProfileLoad',
     listenerFunc: (data: { profile: AdaptyProfile }) => void,
-  ): Promise<PluginListenerHandle> & PluginListenerHandle;
+  ): Promise<PluginListenerHandle>;
 
   /**
    * Removes all event listeners

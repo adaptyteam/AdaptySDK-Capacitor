@@ -116,12 +116,6 @@ const App: React.FC = () => {
       setResult(`Adapty activated successfully!${customerIdMessage}`);
       setIsActivated(true);
 
-      // Add event listener for profile updates
-      adapty.addListener('onLatestProfileLoad', (data) => {
-        log('info', `NEW PROFILE EVENT: ${JSON.stringify(data)}`, 'onLatestProfileLoad');
-        setProfile(data.profile);
-      });
-
       // Fetch initial profile
       await fetchProfile();
     } catch (error) {
@@ -1327,6 +1321,14 @@ const App: React.FC = () => {
         {result && (
           <div className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}>
             {result}
+          </div>
+        )}
+        
+        {/* Events Section */}
+        {isActivated && (
+          <div className={styles.Section}>
+            <h3 className={styles.SectionTitle}>Event Listeners</h3>
+              <p>📝 Events will appear in Logs tab</p>
           </div>
         )}
 

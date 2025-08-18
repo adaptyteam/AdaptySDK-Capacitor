@@ -1,3 +1,5 @@
+import type { PluginListenerHandle } from '@capacitor/core';
+
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
 import { parsePaywallEvent } from '../shared/coders/parse';
 import { LogContext } from '../shared/logger';
@@ -5,10 +7,6 @@ import { LogContext } from '../shared/logger';
 import type { EventHandlers } from './types';
 
 type EventName = keyof EventHandlers;
-
-interface CapacitorEventSubscription {
-  remove: () => Promise<void>;
-}
 
 interface CapacitorEventArg {
   data: string; // JSON string from native
@@ -34,7 +32,7 @@ interface ParsedEventData {
 
 export class PaywallViewEmitter {
   private viewId: string;
-  private eventListeners: Map<string, CapacitorEventSubscription> = new Map();
+  private eventListeners: Map<string, PluginListenerHandle> = new Map();
   private handlers: Map<
     string,
     {
@@ -52,7 +50,7 @@ export class PaywallViewEmitter {
     event: EventName,
     callback: EventHandlers[EventName],
     onRequestClose: () => Promise<void>,
-  ): CapacitorEventSubscription {
+  ): PluginListenerHandle {
     const viewId = this.viewId;
     const config = HANDLER_TO_EVENT_CONFIG[event];
 

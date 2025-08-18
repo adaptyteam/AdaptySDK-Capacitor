@@ -9,8 +9,8 @@ export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacit
   override addListener(
     eventName: 'onLatestProfileLoad',
     listenerFunc: (data: { profile: AdaptyProfile }) => void,
-  ): Promise<PluginListenerHandle> & PluginListenerHandle {
-    return super.addListener(eventName, listenerFunc) as Promise<PluginListenerHandle> & PluginListenerHandle;
+  ): Promise<PluginListenerHandle> {
+    return super.addListener(eventName, listenerFunc);
   }
 
   override async removeAllListeners(): Promise<void> {
