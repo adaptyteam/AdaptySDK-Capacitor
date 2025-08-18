@@ -93,11 +93,6 @@ export interface AdaptyPlugin {
   createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string>;
 
   /**
-   * Logs that an onboarding screen was shown to the user.
-   */
-  logShowOnboarding(options: { screenOrder: number; onboardingName?: string; screenName?: string }): Promise<void>;
-
-  /**
    * Logs out the current user.
    */
   logout(): Promise<void>;

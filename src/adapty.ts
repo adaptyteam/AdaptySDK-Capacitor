@@ -530,37 +530,6 @@ export class Adapty implements AdaptyPlugin {
     return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
-  /**
-   * Logs a custom onboarding screen analytic event.
-   *
-   * @deprecated This method is deprecated and will be removed in a future release.
-   * The event is not used by dashboard analytics.
-   */
-  async logShowOnboarding(options: {
-    screenOrder: number;
-    onboardingName?: string;
-    screenName?: string;
-  }): Promise<void> {
-    const method = 'log_show_onboarding';
-
-    const ctx = new LogContext();
-    const log = ctx.call({ methodName: method });
-    log.start(() => ({ options }));
-
-    const argsWithUndefined: Req['LogShowOnboarding.Request'] = {
-      method,
-      params: {
-        onboarding_screen_order: options.screenOrder,
-        onboarding_name: options.onboardingName,
-        onboarding_screen_name: options.screenName,
-      },
-    };
-
-    const args = filterUndefined(argsWithUndefined);
-
-    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
-  }
-
   async logout(): Promise<void> {
     const method = 'logout';
 

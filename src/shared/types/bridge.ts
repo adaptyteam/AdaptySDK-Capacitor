@@ -69,7 +69,7 @@ export const MethodNames = [
   'get_onboarding_for_default_audience',
   'get_profile',
   'identify',
-  'log_show_onboarding',
+
   'log_show_paywall',
   'logout',
   'make_purchase',

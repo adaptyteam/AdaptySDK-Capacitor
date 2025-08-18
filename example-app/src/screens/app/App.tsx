@@ -547,24 +547,7 @@ const App: React.FC = () => {
     }
   };
 
-  const logCustomOnboardingShown = async () => {
-    if (!isActivated) {
-      setResult('❌ SDK is not activated');
-      return;
-    }
-    try {
-      log('info', 'Logging custom onboarding shown...', 'logShowOnboarding');
-      await adapty.logShowOnboarding({
-        screenOrder: 1,
-        ...(onboarding?.name ? { onboardingName: onboarding.name } : {}),
-        screenName: 'screen_1',
-      });
-      setResult('✅ Logged custom onboarding shown');
-    } catch (error) {
-      log('error', `Error logging custom onboarding shown: ${error}`, 'logShowOnboarding');
-      setResult(`❌ Error logging onboarding: ${error}`);
-    }
-  };
+
 
   const renderIdentifySection = () => {
     return (
@@ -1021,13 +1004,7 @@ const App: React.FC = () => {
           >
             Present Onboarding
           </button>
-          <button
-            onClick={logCustomOnboardingShown}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            logShowOnboarding (deprecated)
-          </button>
+
         </div>
       </div>
     );
@@ -1103,13 +1080,6 @@ const App: React.FC = () => {
       }
 
       setOnboarding(onboardingResult);
-
-      // Log show onboarding
-      await adapty.logShowOnboarding({
-        screenOrder: 1,
-        onboardingName: onboardingResult.name,
-        screenName: 'screen_1',
-      });
 
       const audienceType = forDefaultAudience ? 'for default audience' : '';
       setResult(`Onboarding loaded ${audienceType}: ${onboardingResult.name}`);

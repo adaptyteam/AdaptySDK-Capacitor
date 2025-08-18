@@ -29,7 +29,7 @@ export type MethodName =
   | 'get_log_level'
   | 'set_log_level'
   | 'logout'
-  | 'log_show_onboarding'
+
   | 'log_show_paywall'
   | 'make_purchase'
   | 'open_web_paywall'
@@ -96,7 +96,7 @@ export type MethodResponseMap = {
   'get_log_level': LogLevel;
   'set_log_level': true;
   'logout': true;
-  'log_show_onboarding': true;
+
   'log_show_paywall': true;
   'make_purchase': AdaptyPurchaseResult;
   'open_web_paywall': true;
