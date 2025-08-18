@@ -134,6 +134,15 @@ function LogPayload({ onBack }: LogPayloadProps) {
             </div>
           </div>
         )}
+
+        {log.stackTrace && (
+          <div className={styles.Section}>
+            <h3>Stack Trace</h3>
+            <pre className={styles.StackTrace}>
+              {log.stackTrace}
+            </pre>
+          </div>
+        )}
       </div>
     </div>
   );

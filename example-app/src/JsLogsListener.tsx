@@ -14,6 +14,9 @@ export default function JsLogsListener() {
     const memorySink = {
       id: 'example-memory',
       handle: (e: LogEvent) => {
+        // SDK logs might not have stack trace, so we capture it here
+        const stackTrace = new Error().stack?.split('\n').slice(2).join('\n') || '';
+        
         append({
           logLevel: e.level as JsLog['logLevel'],
           message: e.message,
@@ -21,6 +24,7 @@ export default function JsLogsListener() {
           isoDate: e.timestamp,
           args: e.params ? [e.params] : [],
           isSDK: true,
+          stackTrace,
         });
       },
     };
