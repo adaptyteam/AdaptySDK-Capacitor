@@ -74,14 +74,14 @@ function AppRoute() {
 }
 
 function LogsRoute() {
-  const { logs } = useLogs();
+  const { logs, clear } = useLogs();
   const navigate = useNavigate();
   const onLogClick = (log: JsLog) => {
     // Use isoDate as URL-safe identifier to avoid passing non-cloneable state
     const id = encodeURIComponent(log.isoDate);
     navigate(`/logs/${id}`);
   };
-  return <Logs logs={logs} onLogClick={onLogClick} />;
+  return <Logs logs={logs} onLogClick={onLogClick} onClearLogs={clear} />;
 }
 
 function LogPayloadRoute() {

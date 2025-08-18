@@ -8,11 +8,12 @@ import styles from './Logs.module.css';
 interface LogsProps {
   logs: JsLog[];
   onLogClick: (log: JsLog) => void;
+  onClearLogs: () => void;
 }
 
 type LogFilter = 'sdk' | 'app' | 'all';
 
-function Logs({ logs, onLogClick }: LogsProps) {
+function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
   const [filter, setFilter] = useState<LogFilter>('sdk');
 
   const filteredLogs = useMemo(() => {
@@ -87,7 +88,10 @@ function Logs({ logs, onLogClick }: LogsProps) {
             </button>
           </div>
           <button className={styles.ExportButton} onClick={exportAsJson}>
-            Export JSON
+            Export
+          </button>
+          <button className={styles.ClearButton} onClick={onClearLogs}>
+            Clear
           </button>
         </div>
       </div>

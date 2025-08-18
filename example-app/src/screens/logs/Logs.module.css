@@ -110,6 +110,34 @@
   transform: scale(0.98);
 }
 
+.ClearButton {
+  background: #ff3b30;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.ClearButton:hover {
+  background: #d70015;
+  transform: scale(1.03);
+}
+
+.ClearButton:active {
+  background: #a20012;
+  transform: scale(0.98);
+}
+
 .BackButtonIOS {
   background: transparent;
   color: #007aff;
