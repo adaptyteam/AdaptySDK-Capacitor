@@ -1328,7 +1328,7 @@ const App: React.FC = () => {
         {isActivated && (
           <div className={styles.Section}>
             <h3 className={styles.SectionTitle}>Event Listeners</h3>
-              <p>📝 Events will appear in Logs tab</p>
+              <p>Events will appear in Logs tab</p>
           </div>
         )}
 
