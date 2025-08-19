@@ -22,7 +22,7 @@ export default function JsLogsListener() {
           message: e.message,
           funcName: e.funcName,
           isoDate: e.timestamp,
-          args: e.params ? [e.params] : [],
+          params: e.params ?? {},
           isSDK: true,
           stackTrace,
         });

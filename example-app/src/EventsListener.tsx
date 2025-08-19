@@ -16,7 +16,7 @@ export default function EventsListener() {
       try {
         listenerHandleRef.current = await adapty.addListener('onLatestProfileLoad', (data) => {
           const logMessage = `Profile loaded from event: ${data.profile.profileId}`;
-          appendLog(createLog('info', logMessage, 'event handler onLatestProfileLoad', false, [data]));
+          appendLog(createLog('info', logMessage, 'event handler onLatestProfileLoad', false, { data }));
           
           // Update profile in app context
           setProfile(data.profile);

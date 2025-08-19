@@ -56,7 +56,7 @@ export interface JsLog {
   logLevel: 'error' | 'warn' | 'info' | 'debug' | 'verbose';
   message: string;
   funcName: string;
-  args: any[];
+  params: Record<string, any>;
   isoDate: string;
   isSDK: boolean;
   stackTrace: string;
@@ -141,7 +141,7 @@ export function createLog(
   message: string,
   funcName: string,
   isSDK: boolean,
-  args: any[] = [],
+  params: Record<string, any> = {},
 ): JsLog {
   // Capture stack trace, skip first 2 lines (Error and createLog function)
   const stackTrace = new Error().stack?.split('\n').slice(2).join('\n') || '';
@@ -150,7 +150,7 @@ export function createLog(
     logLevel,
     message,
     funcName,
-    args,
+    params,
     isoDate: new Date().toISOString(),
     isSDK,
     stackTrace,

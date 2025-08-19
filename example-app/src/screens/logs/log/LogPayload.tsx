@@ -117,20 +117,11 @@ function LogPayload({ onBack }: LogPayloadProps) {
           </div>
         </div>
 
-        {log.args && log.args.length > 0 && (
+        {log.params && Object.keys(log.params).length > 0 && (
           <div className={styles.Section}>
-            <h3>Call arguments</h3>
-            <div className={styles.ArgsList}>
-              {log.args.map((arg, index) => (
-                <div key={index} className={styles.ArgItem}>
-                  <div className={styles.ArgHeader}>
-                    <span className={styles.ArgIndex}>[{index}]</span>
-                  </div>
-                  <div className={styles.ArgValue}>
-                    {renderValue(arg)}
-                  </div>
-                </div>
-              ))}
+            <h3>Parameters</h3>
+            <div className={styles.ParamsList}>
+              {renderValue(log.params)}
             </div>
           </div>
         )}

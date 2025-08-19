@@ -115,34 +115,8 @@
   font-weight: 600;
 }
 
-.ArgsList {
+.ParamsList {
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.ArgItem {
-  border: 1px solid #e5e5e7;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.ArgHeader {
-  background: #f9f9f9;
-  padding: 8px 12px;
-  border-bottom: 1px solid #e5e5e7;
-}
-
-.ArgIndex {
-  color: #666;
-  font-size: 12px;
-  font-weight: 500;
-  font-family: 'Monaco', 'Menlo', monospace;
-}
-
-.ArgValue {
-  padding: 12px;
 }
 
 .NullValue {
