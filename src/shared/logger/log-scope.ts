@@ -1,7 +1,7 @@
 import { ScopeArgs } from './log-context';
 
-type LogArgs<T> = T;
-type LogCallback = (args: LogArgs<any>) => void;
+export type LogArgs = () => Record<string, any>;
+type LogCallback = (LazyParams: LogArgs) => void;
 
 interface LogScopeConstructor extends ScopeArgs {
   onStart: LogCallback;
@@ -28,19 +28,19 @@ export class LogScope {
     this.onWaitComplete = args.onWaitComplete;
   }
 
-  public start<T>(args: LogArgs<T>) {
+  public start(args: LogArgs) {
     this.onStart(args);
   }
-  public wait<T>(args?: LogArgs<T>) {
+  public wait(args: LogArgs) {
     this.onWait(args);
   }
-  public waitComplete<T>(args?: LogArgs<T>) {
+  public waitComplete(args: LogArgs) {
     this.onWaitComplete(args);
   }
-  public success<T>(args?: LogArgs<T>) {
+  public success(args: LogArgs) {
     this.onSuccess(args);
   }
-  public failed<T>(args: LogArgs<T>) {
+  public failed(args: LogArgs) {
     this.onFailed(args);
   }
 }

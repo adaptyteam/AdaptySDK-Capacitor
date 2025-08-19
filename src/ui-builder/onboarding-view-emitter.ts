@@ -51,7 +51,7 @@ export class OnboardingViewEmitter {
         function (arg: CapacitorEventArg) {
           const ctx = new LogContext();
           const log = ctx.event({ methodName: config.nativeEvent });
-          log.start({ raw: arg });
+          log.start(() => ({ raw: arg }));
 
           if (!arg || typeof arg !== 'object' || !arg.data) {
             const error = new Error(
@@ -59,7 +59,7 @@ export class OnboardingViewEmitter {
                 arg,
               )}`,
             );
-            log.failed({ error });
+            log.failed(() => ({ error }));
             throw error;
           }
 
@@ -69,14 +69,14 @@ export class OnboardingViewEmitter {
             try {
               eventData = parseOnboardingEvent(rawEventData, ctx) as Record<string, any>;
             } catch (error) {
-              log.failed({ error });
+              log.failed(() => ({ error }));
               throw error;
             }
           } else {
             const err = new Error(
               `[OnboardingViewEmitter] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
             );
-            log.failed({ error: err });
+            log.failed(() => ({ error: err }));
             throw err;
           }
 
@@ -94,11 +94,11 @@ export class OnboardingViewEmitter {
               const shouldClose = cb(...callbackArgs);
               if (shouldClose) {
                 onRequestClose().catch((error) => {
-                  log.failed({ error });
+                  log.failed(() => ({ error }));
                 });
               }
             } catch (error) {
-              log.failed({ error });
+              log.failed(() => ({ error }));
             }
           }
         },

@@ -787,14 +787,14 @@ export class Adapty implements AdaptyPlugin {
     return AdaptyCapacitorPlugin.addListener(eventName, (arg: any) => {
       const ctx = new LogContext();
       const log = ctx.event({ methodName: eventName });
-      log.start({ raw: arg });
+      log.start(() => ({ raw: arg }));
 
       try {
         if (!arg || typeof arg !== 'object' || !arg.data) {
           const error = new Error(
             `[Adapty] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`,
           );
-          log.failed({ error });
+          log.failed(() => ({ error }));
           throw error;
         }
 
@@ -806,25 +806,25 @@ export class Adapty implements AdaptyPlugin {
 
             if (profile) {
               listenerFunc({ profile });
-              log.success({ profile: 'ok' });
+              log.success(() => ({ profile: 'ok' }));
             } else {
               const err = new Error('[Adapty] Event data does not contain profile');
-              log.failed({ error: err });
+              log.failed(() => ({ error: err }));
               throw err;
             }
           } catch (error) {
-            log.failed({ error });
+            log.failed(() => ({ error }));
             throw error;
           }
         } else {
           const err = new Error(
             `[Adapty] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
           );
-          log.failed({ error: err });
+          log.failed(() => ({ error: err }));
           throw err;
         }
       } catch (error) {
-        log.failed({ error });
+        log.failed(() => ({ error }));
         throw error;
       }
     });

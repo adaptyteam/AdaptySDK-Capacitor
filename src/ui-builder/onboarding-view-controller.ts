@@ -32,7 +32,7 @@ export class OnboardingViewController {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_create_onboarding_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start({ onboarding });
+    log.start(() => ({ onboarding }));
 
     const coder = new AdaptyOnboardingCoder();
     const data: Req['AdaptyUICreateOnboardingView.Request'] = {
@@ -75,7 +75,7 @@ export class OnboardingViewController {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_present_onboarding_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start({ _id: this.id });
+    log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
       throw new AdaptyError({ adaptyCode: 2002, message: 'No view reference' });
@@ -98,7 +98,7 @@ export class OnboardingViewController {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_dismiss_onboarding_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start({ _id: this.id });
+    log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
       throw new AdaptyError({ adaptyCode: 2002, message: 'No view reference' });
@@ -135,7 +135,7 @@ export class OnboardingViewController {
   ): () => void {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'registerEventHandlers' });
-    log.start({ _id: this.id });
+    log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
       throw new AdaptyError({ adaptyCode: 2002, message: 'No view reference' });

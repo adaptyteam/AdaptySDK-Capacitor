@@ -73,14 +73,14 @@ export class PaywallViewEmitter {
         function (arg: CapacitorEventArg) {
           const ctx = new LogContext();
           const log = ctx.event({ methodName: config.nativeEvent });
-          log.start({ raw: arg });
+          log.start(() => ({ raw: arg }));
 
           // Strict validation: events must come in {data: "json_string"} format
           if (!arg || typeof arg !== 'object' || !arg.data) {
             const error = new Error(
               `[ViewEmitter] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`,
             );
-            log.failed({ error });
+            log.failed(() => ({ error }));
             throw error;
           }
 
@@ -92,14 +92,14 @@ export class PaywallViewEmitter {
             try {
               eventData = parsePaywallEvent(rawEventData, ctx) as ParsedEventData;
             } catch (error) {
-              log.failed({ error });
+              log.failed(() => ({ error }));
               throw error;
             }
           } else {
             const err = new Error(
               `[ViewEmitter] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
             );
-            log.failed({ error: err });
+            log.failed(() => ({ error: err }));
             throw err;
           }
 
@@ -121,11 +121,11 @@ export class PaywallViewEmitter {
               const shouldClose = cb(...callbackArgs);
               if (shouldClose) {
                 onRequestClose().catch((error) => {
-                  log.failed({ error });
+                  log.failed(() => ({ error }));
                 });
               }
             } catch (error) {
-              log.failed({ error });
+              log.failed(() => ({ error }));
             }
           }
         },

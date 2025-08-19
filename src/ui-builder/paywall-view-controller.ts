@@ -42,7 +42,7 @@ export class PaywallViewController {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_create_paywall_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start({ paywall, params });
+    log.start(() => ({ paywall, params }));
 
     const coder = new AdaptyPaywallCoder();
     const data: Req['AdaptyUICreatePaywallView.Request'] = {
@@ -125,7 +125,7 @@ export class PaywallViewController {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_present_paywall_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start({ _id: this.id });
+    log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
       throw new AdaptyError({
@@ -151,7 +151,7 @@ export class PaywallViewController {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_dismiss_paywall_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start({ _id: this.id });
+    log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
       throw new AdaptyError({
@@ -186,7 +186,7 @@ export class PaywallViewController {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_show_dialog';
     const log = ctx.call({ methodName: methodKey });
-    log.start({ _id: this.id });
+    log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
       throw new AdaptyError({
@@ -234,7 +234,7 @@ export class PaywallViewController {
   public registerEventHandlers(eventHandlers: Partial<EventHandlers> = DEFAULT_EVENT_HANDLERS): () => void {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'registerEventHandlers' });
-    log.start({ _id: this.id });
+    log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
       throw new AdaptyError({

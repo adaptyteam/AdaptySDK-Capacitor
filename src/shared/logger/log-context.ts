@@ -1,6 +1,6 @@
 import { Log } from './log';
 import { LogScope } from './log-scope';
-
+import type {LogArgs} from './log-scope';
 export interface ScopeArgs {
   methodName: string;
 }
@@ -12,7 +12,7 @@ type Scope = 'EVENT' | 'CALL' | 'ENCODE' | 'BRIDGE' | 'DECODE';
 interface Trace {
   action: Scope;
   fn: string;
-  payload: Record<string, any>;
+  payload: LogArgs;
   error?: boolean;
   done?: boolean;
 }
@@ -25,12 +25,12 @@ export class LogContext {
   private createScope(step: Scope, args: ScopeArgs, message: string): LogScope {
     return new LogScope({
       ...args,
-      onStart: payload => {
+      onStart: (payload) => {
         this.stack.push({ action: step, fn: args.methodName, payload });
 
-        Log.verbose(args.methodName, () => `${message}...`, () => payload);
+        Log.verbose(args.methodName, () => `${message}...`, () => payload());
       },
-      onSuccess: payload => {
+      onSuccess: (payload) => {
         this.stack.push({
           action: step,
           fn: args.methodName,
@@ -38,9 +38,9 @@ export class LogContext {
           done: true,
         });
 
-        Log.verbose(args.methodName, () => `${message}: OK`, () => payload);
+        Log.verbose(args.methodName, () => `${message}: OK`, () => payload());
       },
-      onFailed: payload => {
+      onFailed: (payload) => {
         this.stack.push({
           action: step,
           fn: args.methodName,
@@ -48,16 +48,21 @@ export class LogContext {
           error: true,
         });
 
-        payload['__stack__'] = this.stack;
-        Log.error(args.methodName, () => `${message}: FAILED`, () => payload);
+        const resolvedStack = this.stack.map(s => ({
+          ...s,
+          payload: s.payload(),
+        }));
+        const p = payload() as Record<string, any>;
+        p['__stack__'] = resolvedStack;
+        Log.error(args.methodName, () => `${message}: FAILED`, () => p);
       },
-      onWait: payload => {
+      onWait: (payload) => {
         this.stack.push({ action: step, fn: args.methodName, payload });
-        Log.verbose(args.methodName, () => `<HOLD> ${message}`, () => payload);
+        Log.verbose(args.methodName, () => `<HOLD> ${message}`, () => payload());
       },
-      onWaitComplete: payload => {
+      onWaitComplete: (payload) => {
         this.stack.push({ action: step, fn: args.methodName, payload });
-        Log.verbose(args.methodName, () => `<UNLOCKED> ${message}`, () => payload);
+        Log.verbose(args.methodName, () => `<UNLOCKED> ${message}`, () => payload());
       },
     });
   }
