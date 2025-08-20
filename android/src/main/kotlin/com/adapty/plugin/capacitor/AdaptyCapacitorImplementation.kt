@@ -15,11 +15,10 @@ class AdaptyCapacitorImplementation {
 
     fun initialize(context: Context, eventCallback: ((String, String) -> Unit)? = null) {
         this.eventCallback = eventCallback
-        
+
         CrossplatformHelper.init(
             context,
             { eventName, eventData ->
-                Log.d("AdaptyCapacitor", "CrossplatformHelper event: $eventName")
                 // Forward events to Capacitor bridge
                 this.eventCallback?.invoke(eventName, eventData ?: "")
             },
@@ -58,4 +57,4 @@ class AdaptyCapacitorImplementation {
             )
         else
             FileLocation.fromAsset(value.dropLast(1))
-} 
+}

@@ -24,16 +24,13 @@ class AdaptyCapacitorPlugin : Plugin() {
     }
 
     private fun handleNativeEvent(eventName: String, eventData: String) {
-        Log.d("AdaptyCapacitor", "Received native event: $eventName")
-        
         try {
             val eventObj = JSObject()
-            
+
             eventObj.put("data", eventData)
-            
+
             // Send event through Capacitor bridge
             notifyListeners(eventName, eventObj)
-            Log.d("AdaptyCapacitor", "Event forwarded to bridge: $eventName")
         } catch (e: Exception) {
             Log.e("AdaptyCapacitor", "Failed to handle native event $eventName: ${e.message}", e)
         }
