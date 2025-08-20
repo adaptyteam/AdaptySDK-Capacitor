@@ -3,6 +3,7 @@ import { JsLog, dateFormat } from '../../../helpers';
 import styles from './LogPayload.module.css';
 import { useParams } from 'react-router-dom';
 import { useLogs } from '../../../contexts/LogsContext.tsx';
+import { StackTrace } from '../stack-trace';
 
 interface LogPayloadProps {
   onBack: () => void;
@@ -81,11 +82,13 @@ function LogPayload({ onBack }: LogPayloadProps) {
     }
   };
 
+
+
   return (
     <div className={styles.LogPayloadContainer}>
       <div className={styles.LogPayloadHeader}>
         <button className={styles.BackButton} onClick={onBack}>
-          ← Back
+          Back
         </button>
         <h2>Log Details</h2>
       </div>
@@ -128,10 +131,13 @@ function LogPayload({ onBack }: LogPayloadProps) {
 
         {log.stackTrace && (
           <div className={styles.Section}>
-            <h3>Stack Trace</h3>
-            <pre className={styles.StackTrace}>
-              {log.stackTrace}
-            </pre>
+            <StackTrace
+              stackTrace={log.stackTrace}
+              funcName={log.funcName}
+              message={log.message}
+              logLevel={log.logLevel}
+              timestamp={dateFormat(log.isoDate)}
+            />
           </div>
         )}
       </div>
