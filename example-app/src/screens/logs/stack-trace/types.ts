@@ -4,7 +4,7 @@ export interface StackFrame {
   lineNum: number;
   colNum: number;
   fullLocation: string;
-  isAppCode: boolean;
+  isSdkCode: boolean;
   isReactCode: boolean;
 }
 

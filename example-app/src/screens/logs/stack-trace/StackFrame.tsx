@@ -9,7 +9,7 @@ interface StackFrameProps {
 
 const StackFrame: React.FC<StackFrameProps> = ({ frame, index }) => {
   const getFrameClassName = () => {
-    if (frame.isAppCode) return styles.AppCode;
+    if (frame.isSdkCode) return styles.AppCode;
     if (frame.isReactCode) return styles.ReactCode;
     return styles.OtherCode;
   };

@@ -52,7 +52,7 @@ export const parseStackTrace = (stackTrace: string): StackFrame[] => {
       lineNum: 0,
       colNum: 0,
       fullLocation: line,
-      isAppCode: false,
+      isSdkCode: false,
       isReactCode: false,
     };
   });
@@ -124,7 +124,7 @@ function parseLocationInfo(funcName: string, location: string): StackFrame {
     }
   }
 
-  const isAppCode = url.includes('@adapty/capacitor') || url.includes('/src/');
+  const isSdkCode = url.includes('@adapty/capacitor') || url.includes('/src/');
   const isReactCode = url.includes('react-dom') || url.includes('chunk-') || url.includes('.vite/deps/');
 
   const result = {
@@ -133,7 +133,7 @@ function parseLocationInfo(funcName: string, location: string): StackFrame {
     lineNum,
     colNum,
     fullLocation: location,
-    isAppCode,
+    isSdkCode,
     isReactCode,
   };
 
@@ -162,7 +162,7 @@ export const showStackTraceInConsole = (
       console.log(`${index + 1}. %c${frame.funcName}`, 'color: #999; font-style: italic;');
       console.log(`   %c${frame.fullLocation}`, 'color: #999; font-size: 11px;');
     } else {
-      const style = frame.isAppCode ? 'color: #007bff; font-weight: bold;' : 'color: #333;';
+      const style = frame.isSdkCode ? 'color: #007bff; font-weight: bold;' : 'color: #333;';
       console.log(`${index + 1}. %c${frame.funcName}`, style);
       console.log(`   %c${frame.fullLocation}`, 'color: #666; font-size: 11px;');
     }
