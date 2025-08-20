@@ -61,16 +61,16 @@
   font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', Courier, monospace;
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: #555555;
   margin-bottom: 2px;
 }
 
 .AppCode .FunctionName {
-  color: #007bff;
+  color: #0066cc;
 }
 
 .ReactCode .FunctionName {
-  color: #666;
+  color: #8b6914;
   font-style: italic;
 }
 
@@ -80,19 +80,19 @@
 }
 
 .FileName {
-  color: #495057;
+  color: #555555;
   font-weight: 500;
 }
 
 .LineNumber {
-  color: #666;
+  color: #777777;
   font-weight: 400;
 }
 
 .FullLocation {
   font-family: 'SF Mono', Monaco, Consolas, 'Liberation Mono', Courier, monospace;
   font-size: 10px;
-  color: #6c757d;
+  color: #777777;
   word-break: break-all;
   line-height: 1.3;
 }
@@ -136,4 +136,67 @@
 
 .ConsoleButton:active {
   transform: translateY(1px);
+}
+
+.ColorLegend {
+  background: #fafbfc;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.LegendTitle {
+  font-size: 10px;
+  font-weight: 600;
+  color: #555555;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.LegendItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.LegendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.LegendColor {
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.LegendColor.SdkCode {
+  color: #0066cc;
+}
+
+.LegendColor.AppCode {
+  color: #555555;
+}
+
+.LegendColor.ReactCode {
+  color: #8b6914;
+  font-style: italic;
+}
+
+.LegendText {
+  font-size: 10px;
+  color: #555555;
+  font-weight: 500;
+}
+
+.LegendNote {
+  font-size: 9px;
+  color: #777777;
+  font-style: italic;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e9ecef;
 }

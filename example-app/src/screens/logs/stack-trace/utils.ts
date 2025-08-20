@@ -159,12 +159,12 @@ export const showStackTraceInConsole = (
 
   parsedStack.forEach((frame, index) => {
     if (frame.isReactCode) {
-      console.log(`${index + 1}. %c${frame.funcName}`, 'color: #999; font-style: italic;');
-      console.log(`   %c${frame.fullLocation}`, 'color: #999; font-size: 11px;');
+      console.log(`${index + 1}. %c${frame.funcName}`, 'color: #8b6914; font-style: italic;');
+      console.log(`   %c${frame.fullLocation}`, 'color: #777777; font-size: 11px;');
     } else {
-      const style = frame.isSdkCode ? 'color: #007bff; font-weight: bold;' : 'color: #333;';
+      const style = frame.isSdkCode ? 'color: #0066cc; font-weight: bold;' : 'color: #555555;';
       console.log(`${index + 1}. %c${frame.funcName}`, style);
-      console.log(`   %c${frame.fullLocation}`, 'color: #666; font-size: 11px;');
+      console.log(`   %c${frame.fullLocation}`, 'color: #777777; font-size: 11px;');
     }
   });
 
