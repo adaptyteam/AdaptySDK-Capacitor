@@ -5,13 +5,10 @@ import { createLog } from './helpers';
 import { useLogs } from './contexts/LogsContext.tsx';
 import type { LogEvent } from '@adapty/capacitor';
 
-
-// Registers Adapty JS logger sinks: keep console + push logs into example store
 export default function JsLogsListener() {
   const { append } = useLogs();
 
   useEffect(() => {
-
     const memorySink = {
       id: 'example-memory',
       handle: (e: LogEvent) => {
@@ -23,14 +20,16 @@ export default function JsLogsListener() {
           e.params ?? {},
           new Date(e.timestamp).toISOString(),
         );
-        
+
         append(log);
       },
     };
 
     adapty.setLogLevel({ logger: { sinks: [consoleLogSink, memorySink] } });
 
-    // no cleanup needed; sinks remain for app lifetime
+    return () => {
+      adapty.setLogLevel({ logger: { sinks: undefined } });
+    };
   }, [append]);
 
   return null;
