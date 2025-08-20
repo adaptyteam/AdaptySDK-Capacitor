@@ -1,6 +1,6 @@
 {
   "appId": "com.example.plugin",
-  "appName": "Adapty devtools",
+  "appName": "Adapty capacitor devtools",
   "webDir": "dist",
   "plugins": {
     "SplashScreen": {

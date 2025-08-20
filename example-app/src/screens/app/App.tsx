@@ -1284,9 +1284,9 @@ const App: React.FC = () => {
   return (
     <div className={styles.AppContainer}>
       <main>
-        <h1 className={styles.Title}>Adapty Capacitor Plugin</h1>
+        <h1 className={styles.Title}>Adapty Capacitor Devtools</h1>
         <p className={styles.Description}>
-          This project is devtools for plugin API.
+          Devtools app for adapty plugin API.
         </p>
 
         {/* Credentials Info */}
