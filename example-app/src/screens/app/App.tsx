@@ -66,8 +66,8 @@ const App: React.FC = () => {
   const { append: appendLog } = useLogs();
 
   // Helper function for logging
-  const log = (level: 'info' | 'error' | 'warn', message: string, funcName: string, isSDK: boolean = false) => {
-    appendLog(createLog(level, message, funcName, isSDK));
+  const log = (level: 'info' | 'error' | 'warn', message: string, funcName: string, isSDK: boolean = false, params: Record<string, any> = {}) => {
+    appendLog(createLog(level, message, funcName, isSDK, params));
   };
 
   // Local state for temporary/UI state that should not persist
@@ -141,11 +141,11 @@ const App: React.FC = () => {
     try {
       const profile = await adapty.getProfile();
 
-      log('info', `Profile fetched: ${JSON.stringify(profile)}`, 'getProfile');
+      log('info', 'Profile fetched', 'getProfile', false, { profile });
       setProfile(profile);
       setResult('Profile fetched successfully');
     } catch (error) {
-      log('error', `Error fetching user profile: ${error}`, 'getProfile');
+      log('error', 'Error fetching user profile', 'getProfile', false, { error: String(error) });
       setResult(`Error fetching profile: ${error}`);
     } finally {
       setIsLoadingProfile(false);
@@ -157,7 +157,7 @@ const App: React.FC = () => {
 
     setIsLoadingPaywall(true);
     try {
-      log('info', `Fetching paywall: ${placementId}`, forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall');
+      log('info', 'Fetching paywall', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, { placementId, forDefaultAudience });
       const fetchPolicy = fetchPolicies[fetchPolicyIndex];
 
       let paywall: AdaptyPaywall;
@@ -192,7 +192,7 @@ const App: React.FC = () => {
         });
       }
 
-      log('info', `Paywall fetched: ${JSON.stringify(paywall)}`, forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall');
+      log('info', 'Paywall fetched', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, { paywall, forDefaultAudience });
       setPaywall(paywall);
 
       // Log show paywall
@@ -205,7 +205,7 @@ const App: React.FC = () => {
       const audienceType = forDefaultAudience ? 'for default audience' : '';
       setResult(`Paywall loaded ${audienceType}: ${paywall.name}`);
     } catch (error) {
-      log('error', `Error fetching paywall: ${error}`, forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall');
+      log('error', 'Error fetching paywall', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, { error: String(error), forDefaultAudience });
       setResult(`Error fetching paywall: ${error}`);
     } finally {
       setIsLoadingPaywall(false);
@@ -216,12 +216,12 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Restoring purchases...', 'restorePurchases');
+      log('info', 'Restoring purchases', 'restorePurchases');
       const profile = await adapty.restorePurchases();
       setProfile(profile);
       setResult('Purchases restored successfully');
     } catch (error) {
-      log('error', `Error restoring purchases: ${error}`, 'restorePurchases');
+      log('error', 'Error restoring purchases', 'restorePurchases', false, { error: String(error) });
       setResult(`Error restoring purchases: ${error}`);
     }
   };
@@ -231,7 +231,16 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Updating attribution...', 'updateAttribution');
+      log('info', 'Updating attribution', 'updateAttribution', false, { 
+        source: 'custom',
+        attribution: {
+          status: 'non_organic',
+          channel: 'Google Ads',
+          campaign: 'Adapty Web Test',
+          ad_group: 'adapty ad_group',
+          creative: 'test_creative'
+        }
+      });
       await adapty.updateAttribution({
         attribution: {
           status: 'non_organic',
@@ -244,7 +253,7 @@ const App: React.FC = () => {
       });
       setResult('Attribution updated successfully');
     } catch (error) {
-      log('error', `Error updating attribution: ${error}`, 'updateAttribution');
+      log('error', 'Error updating attribution', 'updateAttribution', false, { error: String(error), source: 'custom' });
       setResult(`Error updating attribution: ${error}`);
     }
   };
@@ -256,13 +265,13 @@ const App: React.FC = () => {
     }
 
     try {
-      log('info', 'Creating web paywall URL...', 'createWebPaywallUrl');
+      log('info', 'Creating web paywall URL', 'createWebPaywallUrl');
       const url = await adapty.createWebPaywallUrl({ paywallOrProduct: paywall });
       setWebPaywallUrl(url);
       setResult(`Web paywall URL created: ${url}`);
-      log('info', `Web paywall URL: ${url}`, 'createWebPaywallUrl');
+      log('info', 'Web paywall URL created', 'createWebPaywallUrl', false, { url });
     } catch (error) {
-      log('error', `Error creating web paywall URL: ${error}`, 'createWebPaywallUrl');
+      log('error', 'Error creating web paywall URL', 'createWebPaywallUrl', false, { error: String(error) });
       setResult(`Error creating web paywall URL: ${error}`);
       setWebPaywallUrl('');
     }
@@ -275,35 +284,35 @@ const App: React.FC = () => {
     }
 
     try {
-      log('info', 'Opening web paywall...', 'openWebPaywall');
+      log('info', 'Opening web paywall', 'openWebPaywall');
       await adapty.openWebPaywall({ paywallOrProduct: paywall });
       setResult('Web paywall opened successfully');
     } catch (error) {
-      log('error', `Error opening web paywall: ${error}`, 'openWebPaywall');
+      log('error', 'Error opening web paywall', 'openWebPaywall', false, { error: String(error) });
       setResult(`Error opening web paywall: ${error}`);
     }
   };
 
   const createWebPaywallUrlForProduct = async (product: AdaptyPaywallProduct) => {
     try {
-      log('info', `Creating web paywall URL for product: ${product.vendorProductId}`, 'createWebPaywallUrl');
+      log('info', 'Creating web paywall URL for product', 'createWebPaywallUrl', false, { productId: product.vendorProductId });
       const url = await adapty.createWebPaywallUrl({ paywallOrProduct: product });
       setResult(`Web URL for ${product.vendorProductId}: ${url}`);
       alert(`Web paywall URL for ${product.vendorProductId}: ${url}`);
-      log('info', `Web paywall URL for product: ${url}`, 'createWebPaywallUrl');
+      log('info', 'Web paywall URL for product created', 'createWebPaywallUrl', false, { url, productId: product.vendorProductId });
     } catch (error) {
-      log('error', `Error creating web paywall URL for product: ${error}`, 'createWebPaywallUrl');
+      log('error', 'Error creating web paywall URL for product', 'createWebPaywallUrl', false, { error: String(error), productId: product.vendorProductId });
       setResult(`Error creating web URL for product: ${error}`);
     }
   };
 
   const openWebPaywallForProduct = async (product: AdaptyPaywallProduct) => {
     try {
-      log('info', `Opening web paywall for product: ${product.vendorProductId}`, 'openWebPaywall');
+      log('info', 'Opening web paywall for product', 'openWebPaywall', false, { productId: product.vendorProductId });
       await adapty.openWebPaywall({ paywallOrProduct: product });
       setResult(`Web paywall opened for: ${product.vendorProductId}`);
     } catch (error) {
-      log('error', `Error opening web paywall for product: ${error}`, 'openWebPaywall');
+      log('error', 'Error opening web paywall for product', 'openWebPaywall', false, { error: String(error), productId: product.vendorProductId });
       setResult(`Error opening web paywall for product: ${error}`);
     }
   };
@@ -312,7 +321,7 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', `Making purchase: ${product.vendorProductId}`, 'makePurchase');
+      log('info', 'Making purchase', 'makePurchase', false, { productId: product.vendorProductId, product });
       const result = await adapty.makePurchase({ product });
 
       const purchaseResult = result;
@@ -328,14 +337,14 @@ const App: React.FC = () => {
         setResult(`Purchase result: ${purchaseResult.type}`);
       }
     } catch (error) {
-      log('error', `Error making purchase: ${error}`, 'makePurchase');
+      log('error', 'Error making purchase', 'makePurchase', false, { error: String(error) });
       setResult(`Error making purchase: ${error}`);
     }
   };
 
   const logout = async () => {
     try {
-      log('info', 'Logging out...', 'logout');
+      log('info', 'Logging out', 'logout');
       await adapty.logout();
       setProfile(null);
       setPaywall(null);
@@ -343,7 +352,7 @@ const App: React.FC = () => {
       setOnboarding(null);
       setResult('Logged out successfully');
     } catch (error) {
-      log('error', `Error logging out: ${error}`, 'logout');
+      log('error', 'Error logging out', 'logout', false, { error: String(error) });
       setResult(`Error logging out: ${error}`);
     }
   };
@@ -377,7 +386,7 @@ const App: React.FC = () => {
         customTags = JSON.parse(customTagsJson);
       } catch (error) {
         customTags = {};
-        log('warn', `Invalid custom tags JSON, using empty object: ${error}`, 'presentPaywall');
+        log('warn', 'Invalid custom tags JSON, using empty object', 'presentPaywall', false, { error: String(error), customTagsText: customTags });
       }
 
       const view = await createPaywallView(paywall, {
@@ -397,32 +406,32 @@ const App: React.FC = () => {
           return true; // Allow the paywall to close
         },
         onUrlPress: (url: string) => {
-          log('info', `User pressed URL: ${url}`, 'paywall.onUrlPress');
+          log('info', 'User pressed URL', 'paywall.onUrlPress', false, { url });
           setResult(`🔗 User opened URL: ${url}`);
           return false; // Don't close the paywall
         },
         onCustomAction: (action: any) => {
-          log('info', `User performed custom action: ${JSON.stringify(action)}`, 'paywall.onCustomAction');
+          log('info', 'User performed custom action', 'paywall.onCustomAction', false, { action });
           setResult(`⚡ Custom action: ${JSON.stringify(action)}`);
           return false; // Don't close the paywall
         },
         onProductSelected: (productId: string) => {
-          log('info', `User selected product: ${productId}`, 'paywall.onProductSelected');
+          log('info', 'User selected product', 'paywall.onProductSelected', false, { productId });
           setResult(`📦 Product selected: ${productId}`);
           return false; // Don't close the paywall
         },
         onPurchaseStarted: (product: any) => {
-          log('info', `Purchase started for product: ${JSON.stringify(product)}`, 'paywall.onPurchaseStarted');
+          log('info', 'Purchase started for product', 'paywall.onPurchaseStarted', false, { product });
           setResult(`🛒 Purchase started: ${product?.vendorProductId || 'unknown'}`);
           return false; // Don't close the paywall
         },
         onPurchaseCompleted: (purchaseResult: any, product: any) => {
-          log('info', `Purchase completed: ${JSON.stringify(purchaseResult)}, product: ${JSON.stringify(product)}`, 'paywall.onPurchaseCompleted');
+          log('info', 'Purchase completed', 'paywall.onPurchaseCompleted', false, { purchaseResult, product });
           setResult(`✅ Purchase completed: ${purchaseResult?.type || 'unknown'}`);
           return purchaseResult?.type !== 'user_cancelled'; // Close if not cancelled
         },
         onPurchaseFailed: (error: any, product: any) => {
-          log('error', `Purchase failed: ${JSON.stringify(error)}, product: ${JSON.stringify(product)}`, 'paywall.onPurchaseFailed');
+          log('error', 'Purchase failed', 'paywall.onPurchaseFailed', false, { error, product });
           setResult(`❌ Purchase failed: ${error?.message || 'unknown error'}`);
           return false; // Don't close the paywall
         },
@@ -432,12 +441,12 @@ const App: React.FC = () => {
           return false; // Don't close the paywall
         },
         onRestoreCompleted: (profile: any) => {
-          log('info', `Restore completed: ${JSON.stringify(profile)}`, 'paywall.onRestoreCompleted');
+          log('info', 'Restore completed', 'paywall.onRestoreCompleted', false, { profile });
           setResult('✅ Restore completed successfully');
           return true; // Close the paywall after successful restore
         },
         onRestoreFailed: (error: any) => {
-          log('error', `Restore failed: ${JSON.stringify(error)}`, 'paywall.onRestoreFailed');
+          log('error', 'Restore failed', 'paywall.onRestoreFailed', false, { error });
           setResult(`❌ Restore failed: ${error?.message || 'unknown error'}`);
           return false; // Don't close the paywall
         },
@@ -452,17 +461,17 @@ const App: React.FC = () => {
           return false; // Already closed
         },
         onRenderingFailed: (error: any) => {
-          log('error', `Rendering failed: ${JSON.stringify(error)}`, 'paywall.onRenderingFailed');
+          log('error', 'Rendering failed', 'paywall.onRenderingFailed', false, { error });
           setResult(`💥 Rendering failed: ${error?.message || 'unknown error'}`);
           return false; // Don't close the paywall
         },
         onLoadingProductsFailed: (error: any) => {
-          log('error', `Loading products failed: ${JSON.stringify(error)}`, 'paywall.onLoadingProductsFailed');
+          log('error', 'Loading products failed', 'paywall.onLoadingProductsFailed', false, { error });
           setResult(`📦❌ Products loading failed: ${error?.message || 'unknown error'}`);
           return false; // Don't close the paywall
         },
         onWebPaymentNavigationFinished: (product: any, error: any) => {
-          log('info', `Web payment navigation finished: product: ${JSON.stringify(product)}, error: ${JSON.stringify(error)}`, 'paywall.onWebPaymentNavigationFinished');
+          log('info', 'Web payment navigation finished', 'paywall.onWebPaymentNavigationFinished', false, { product, error });
           setResult(`🌐 Web payment finished: ${error ? 'with error' : 'success'}`);
           return false; // Don't close the paywall
         },
@@ -475,7 +484,7 @@ const App: React.FC = () => {
      // setTimeout(() => view.dismiss(),5000)
       setResult('✅ Paywall presented successfully!');
     } catch (error: any) {
-      log('error', `Failed to present paywall: ${error.message || error}`, 'presentPaywall');
+      log('error', 'Failed to present paywall', 'presentPaywall', false, { error: error.message || error.toString() });
       setResult(`❌ Failed to present paywall: ${error.message}`);
     }
   };
@@ -498,32 +507,32 @@ const App: React.FC = () => {
 
       view.registerEventHandlers({
         onClose: (actionId, meta) => {
-          log('info', `Onboarding closed: actionId: ${actionId}, meta: ${JSON.stringify(meta)}`, 'onboarding.onClose');
+          log('info', 'Onboarding closed', 'onboarding.onClose', false, { actionId, meta });
           setResult('👋 Onboarding closed');
           return true;
         },
         onFinishedLoading: (meta) => {
-          log('info', `Onboarding finished loading: ${JSON.stringify(meta)}`, 'onboarding.onFinishedLoading');
+          log('info', 'Onboarding finished loading', 'onboarding.onFinishedLoading', false, { meta });
           return false;
         },
         onCustom: (actionId, meta) => {
-          log('info', `Onboarding custom action: actionId: ${actionId}, meta: ${JSON.stringify(meta)}`, 'onboarding.onCustom');
+          log('info', 'Onboarding custom action', 'onboarding.onCustom', false, { actionId, meta });
           return false;
         },
         onPaywall: (actionId, meta) => {
-          log('info', `Onboarding paywall action: actionId: ${actionId}, meta: ${JSON.stringify(meta)}`, 'onboarding.onPaywall');
+          log('info', 'Onboarding paywall action', 'onboarding.onPaywall', false, { actionId, meta });
           return false;
         },
         onAnalytics: (event, meta) => {
-          log('info', `Onboarding analytics: event: ${JSON.stringify(event)}, meta: ${JSON.stringify(meta)}`, 'onboarding.onAnalytics');
+          log('info', 'Onboarding analytics', 'onboarding.onAnalytics', false, { event, meta });
           return false;
         },
         onStateUpdated: (action, meta) => {
-          log('info', `Onboarding state updated: action: ${JSON.stringify(action)}, meta: ${JSON.stringify(meta)}`, 'onboarding.onStateUpdated');
+          log('info', 'Onboarding state updated', 'onboarding.onStateUpdated', false, { action, meta });
           return false;
         },
         onError: (error) => {
-          log('error', `Onboarding error: ${JSON.stringify(error)}`, 'onboarding.onError');
+          log('error', 'Onboarding error', 'onboarding.onError', false, { error });
           setResult(`❌ Onboarding error: ${error?.message || 'unknown error'}`);
           return false;
         },
@@ -535,7 +544,7 @@ const App: React.FC = () => {
 
       setResult('✅ Onboarding presented successfully!');
     } catch (error: any) {
-      log('error', `Failed to present onboarding: ${error?.message || error}`, 'presentOnboarding');
+      log('error', 'Failed to present onboarding', 'presentOnboarding', false, { error: error?.message || error?.toString() });
       setResult(`❌ Failed to present onboarding: ${error?.message || error}`);
     }
   };
@@ -1007,11 +1016,11 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Presenting code redemption sheet (iOS only)...', 'presentCodeRedemptionSheet');
+      log('info', 'Presenting code redemption sheet (iOS only)', 'presentCodeRedemptionSheet');
       await adapty.presentCodeRedemptionSheet();
       setResult('Code redemption sheet presented successfully (iOS only)');
     } catch (error) {
-      log('error', `Error presenting code redemption sheet: ${error}`, 'presentCodeRedemptionSheet');
+      log('error', 'Error presenting code redemption sheet', 'presentCodeRedemptionSheet', false, { error: String(error) });
       setResult(`Error presenting code redemption sheet: ${error}`);
     }
   };
@@ -1023,7 +1032,7 @@ const App: React.FC = () => {
     }
 
     try {
-      log('info', 'Identifying user...', 'identify');
+      log('info', 'Identifying user', 'identify', false, { customerUserId });
       if (isActivated) {
         await adapty.identify({ customerUserId: customerUserId.trim() });
         setResult(`User identified successfully with ID: ${customerUserId.trim()}`);
@@ -1032,7 +1041,7 @@ const App: React.FC = () => {
         setResult('Customer user Id will be set on activation');
       }
     } catch (error) {
-      log('error', `Error identifying user: ${error}`, 'identify');
+      log('error', 'Error identifying user', 'identify', false, { error: String(error), customerUserId });
       setResult(`Error identifying user: ${error}`);
     }
   };
@@ -1042,7 +1051,7 @@ const App: React.FC = () => {
 
     setIsLoadingOnboarding(true);
     try {
-      log('info', `Fetching onboarding: ${onboardingPlacementId}`, forDefaultAudience ? 'getOnboardingForDefaultAudience' : 'getOnboarding');
+      log('info', 'Fetching onboarding', forDefaultAudience ? 'getOnboardingForDefaultAudience' : 'getOnboarding', false, { onboardingPlacementId, forDefaultAudience });
       const fetchPolicy = fetchPolicies[fetchPolicyIndex];
 
       let onboardingResult: AdaptyOnboarding;
@@ -1077,7 +1086,7 @@ const App: React.FC = () => {
       const audienceType = forDefaultAudience ? 'for default audience' : '';
       setResult(`Onboarding loaded ${audienceType}: ${onboardingResult.name}`);
     } catch (error) {
-      log('error', `Error fetching onboarding: ${error}`, forDefaultAudience ? 'getOnboardingForDefaultAudience' : 'getOnboarding');
+      log('error', 'Error fetching onboarding', forDefaultAudience ? 'getOnboardingForDefaultAudience' : 'getOnboarding', false, { error: String(error), onboardingPlacementId, forDefaultAudience });
       setResult(`Error fetching onboarding: ${error}`);
     } finally {
       setIsLoadingOnboarding(false);
@@ -1088,11 +1097,11 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Setting log level to verbose...', 'setLogLevel');
+      log('info', 'Setting log level to verbose', 'setLogLevel');
       await adapty.setLogLevel({ logLevel: 'verbose' });
       setResult('Log level set to verbose successfully');
     } catch (error) {
-      log('error', `Error setting log level: ${error}`, 'setLogLevel');
+      log('error', 'Error setting log level', 'setLogLevel', false, { error: String(error) });
       setResult(`Error setting log level: ${error}`);
     }
   };
@@ -1101,11 +1110,11 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', `Setting integration identifier: ${integrationIdKey} = ${integrationIdValue}`, 'setIntegrationIdentifier');
+      log('info', 'Setting integration identifier', 'setIntegrationIdentifier', false, { key: integrationIdKey, value: integrationIdValue });
       await adapty.setIntegrationIdentifier({ key: integrationIdKey, value: integrationIdValue });
       setResult(`Integration identifier set successfully: ${integrationIdKey} = ${integrationIdValue}`);
     } catch (error) {
-      log('error', `Error setting integration identifier: ${error}`, 'setIntegrationIdentifier');
+      log('error', 'Error setting integration identifier', 'setIntegrationIdentifier', false, { error: String(error), key: integrationIdKey, value: integrationIdValue });
       setResult(`Error setting integration identifier: ${error}`);
     }
   };
@@ -1114,11 +1123,11 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', `Updating collecting refund data consent: ${collectingRefundDataConsent}`, 'updateCollectingRefundDataConsent');
+      log('info', 'Updating collecting refund data consent', 'updateCollectingRefundDataConsent', false, { consent: collectingRefundDataConsent });
       await adapty.updateCollectingRefundDataConsent({ consent: collectingRefundDataConsent });
       setResult(`Collecting refund data consent updated successfully: ${collectingRefundDataConsent}`);
     } catch (error) {
-      log('error', `Error updating collecting refund data consent: ${error}`, 'updateCollectingRefundDataConsent');
+      log('error', 'Error updating collecting refund data consent', 'updateCollectingRefundDataConsent', false, { error: String(error), consent: collectingRefundDataConsent });
       setResult(`Error updating collecting refund data consent: ${error}`);
     }
   };
@@ -1128,11 +1137,11 @@ const App: React.FC = () => {
 
     try {
       const refundPreference = refundPreferences[refundPreferenceIdx];
-      log('info', `Updating refund preference: ${refundPreference}`, 'updateRefundPreference');
+      log('info', 'Updating refund preference', 'updateRefundPreference', false, { preference: refundPreference });
       await adapty.updateRefundPreference({ refundPreference });
       setResult(`Refund preference updated successfully: ${refundPreference}`);
     } catch (error) {
-      log('error', `Error updating refund preference: ${error}`, 'updateRefundPreference');
+      log('error', 'Error updating refund preference', 'updateRefundPreference', false, { error: String(error), preference: refundPreferences });
       setResult(`Error updating refund preference: ${error}`);
     }
   };
@@ -1141,7 +1150,7 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Setting fallback paywalls...', 'setFallback');
+      log('info', 'Setting fallback paywalls', 'setFallback');
 
       const fileLocation: FileLocation = {
         ios: {
@@ -1156,7 +1165,7 @@ const App: React.FC = () => {
       setResult('Fallback paywalls set successfully');
       log('info', 'Fallback paywalls set successfully', 'setFallback');
     } catch (error) {
-      log('error', `Error setting fallback paywalls: ${error}`, 'setFallback');
+      log('error', 'Error setting fallback paywalls', 'setFallback', false, { error: String(error) });
       setResult(`Error setting fallback paywalls: ${error}`);
     }
   };
@@ -1260,14 +1269,14 @@ const App: React.FC = () => {
     }
 
     try {
-      log('info', `Reporting transaction: ${transactionId}, variationId: ${variationId}`, 'reportTransaction');
+      log('info', 'Reporting transaction', 'reportTransaction', false, { transactionId, variationId });
       await adapty.reportTransaction({
         transactionId: transactionId.trim(),
         ...(variationId.trim() ? { variationId: variationId.trim() } : {}),
       });
       setResult(`Transaction reported successfully: ${transactionId.trim()}`);
     } catch (error) {
-      log('error', `Error reporting transaction: ${error}`, 'reportTransaction');
+      log('error', 'Error reporting transaction', 'reportTransaction', false, { error: String(error), transactionId, variationId });
       setResult(`Error reporting transaction: ${error}`);
     }
   };
