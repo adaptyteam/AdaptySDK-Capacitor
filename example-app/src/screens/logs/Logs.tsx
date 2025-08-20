@@ -29,7 +29,7 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
   }, [logs, filter]);
 
   const exportAsJson = useCallback(async () => {
-    const pretty = JSON.stringify(filteredLogs, null, 2);
+    const pretty = JSON.stringify(logs, null, 2);
     const fileName = `adapty-capacitor-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
 
     try {
@@ -55,7 +55,7 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
     } catch (err) {
       alert('Failed to export logs.');
     }
-  }, [filteredLogs]);
+  }, [logs]);
 
   return (
     <div className={styles.LogsContainer}>
@@ -68,19 +68,19 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
         </div>
         <div className={styles.LogsControls}>
           <div className={styles.FilterButtons}>
-            <button 
+            <button
               className={`${styles.FilterButton} ${filter === 'sdk' ? styles.FilterButtonActive : ''}`}
               onClick={() => setFilter('sdk')}
             >
               SDK
             </button>
-            <button 
+            <button
               className={`${styles.FilterButton} ${filter === 'app' ? styles.FilterButtonActive : ''}`}
               onClick={() => setFilter('app')}
             >
               App
             </button>
-            <button 
+            <button
               className={`${styles.FilterButton} ${filter === 'all' ? styles.FilterButtonActive : ''}`}
               onClick={() => setFilter('all')}
             >
