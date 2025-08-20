@@ -98,7 +98,7 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
       <div className={styles.LogsList}>
         {filteredLogs.slice().reverse().map((log, index) => (
           <LogLine
-            key={index}
+            key={log.id}
             log={log}
             onClick={() => onLogClick(log)}
             isFirst={index === 0}

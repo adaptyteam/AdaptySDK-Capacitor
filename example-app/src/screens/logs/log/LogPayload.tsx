@@ -11,9 +11,8 @@ interface LogPayloadProps {
 
 function LogPayload({ onBack }: LogPayloadProps) {
   const { id } = useParams();
-  const decodedId = id ? decodeURIComponent(id) : '';
   const { logs } = useLogs();
-  const log = logs.find((l) => l.isoDate === decodedId) as JsLog | undefined;
+  const log = logs.find((l) => l.id === id) as JsLog | undefined;
   if (!log) return null;
 
   const renderValue = (value: any): React.ReactNode => {

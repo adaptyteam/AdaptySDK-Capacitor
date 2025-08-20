@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { adapty, consoleLogSink } from '@adapty/capacitor';
 import type { JsLog } from './helpers';
+import { createLog } from './helpers';
 import { useLogs } from './contexts/LogsContext.tsx';
 import type { LogEvent } from '@adapty/capacitor';
 
@@ -14,18 +15,16 @@ export default function JsLogsListener() {
     const memorySink = {
       id: 'example-memory',
       handle: (e: LogEvent) => {
-        // SDK logs might not have stack trace, so we capture it here
-        const stackTrace = new Error().stack?.split('\n').slice(2).join('\n') || '';
+        const log = createLog(
+          e.level as JsLog['logLevel'],
+          e.message,
+          e.funcName,
+          true, // isSDK
+          e.params ?? {},
+          new Date(e.timestamp).toISOString(),
+        );
         
-        append({
-          logLevel: e.level as JsLog['logLevel'],
-          message: e.message,
-          funcName: e.funcName,
-          isoDate: e.timestamp,
-          params: e.params ?? {},
-          isSDK: true,
-          stackTrace,
-        });
+        append(log);
       },
     };
 

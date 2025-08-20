@@ -139,7 +139,6 @@ const App: React.FC = () => {
 
     setIsLoadingProfile(true);
     try {
-      log('info', 'Fetching user profile...', 'getProfile');
       const profile = await adapty.getProfile();
 
       log('info', `Profile fetched: ${JSON.stringify(profile)}`, 'getProfile');

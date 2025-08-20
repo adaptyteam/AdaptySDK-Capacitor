@@ -53,6 +53,7 @@ export function getAndroidApplicationId(): string {
 }
 
 export interface JsLog {
+  id: string;
   logLevel: 'error' | 'warn' | 'info' | 'debug' | 'verbose';
   message: string;
   funcName: string;
@@ -136,22 +137,36 @@ export function getLogLevelColor(level: string): string {
   }
 }
 
+/**
+ * Generate a unique ID for logs
+ * Uses crypto.randomUUID() if available, otherwise falls back to timestamp + random
+ */
+export function generateLogId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+}
+
 export function createLog(
   logLevel: JsLog['logLevel'],
   message: string,
   funcName: string,
   isSDK: boolean,
   params: Record<string, any> = {},
+  isoDate: string = new Date().toISOString(),
 ): JsLog {
   // Capture stack trace, skip first 2 lines (Error and createLog function)
   const stackTrace = new Error().stack?.split('\n').slice(2).join('\n') || '';
 
   return {
+    id: generateLogId(),
     logLevel,
     message,
     funcName,
     params,
-    isoDate: new Date().toISOString(),
+    isoDate,
     isSDK,
     stackTrace,
   };
