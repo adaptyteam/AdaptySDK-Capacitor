@@ -15,6 +15,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "tsc": "tsc --noEmit",
+    "update-cap-config": "yarn cap copy && yarn cap sync",
     "android": "yarn build && yarn cap run android --target Pixel_9_Pro",
     "ios": "yarn build && yarn cap run ios --target 0D3D6293-9DDD-4420-B1EA-ACF32640F09E",
     "dev:ios": "yarn cap run ios --live-reload --no-sync --host 192.168.1.76 --port 5173 --target 0D3D6293-9DDD-4420-B1EA-ACF32640F09E",
