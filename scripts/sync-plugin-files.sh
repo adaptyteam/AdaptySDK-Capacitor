@@ -3,7 +3,7 @@
 # Script to sync all plugin files from 'files' section to node_modules
 # This replaces the need for 'yarn install --check-files' which is slow
 
-TARGET_DIR="./example-app/node_modules/@adapty/capacitor"
+TARGET_DIR="./examples/adapty-devtools/node_modules/@adapty/capacitor"
 
 echo "🔄 Syncing plugin files to node_modules..."
 
@@ -35,4 +35,4 @@ rsync -av ./Package.swift "$TARGET_DIR/"
 echo "📄 Syncing AdaptyCapacitor.podspec ..."
 rsync -av ./AdaptyCapacitor.podspec "$TARGET_DIR/"
 
-echo "✅ Plugin files synced successfully!" 
+echo "✅ Plugin files synced successfully!"

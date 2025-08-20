@@ -1,4 +1,4 @@
-example-app/android
-example-app/ios
-example-app/dist
+examples/adapty-devtools/android
+examples/adapty-devtools/ios
+examples/adapty-devtools/dist
 src/shared/
