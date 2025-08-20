@@ -72,11 +72,6 @@ export function formatDate(date: string | Date): string {
   return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
-export function dateFormat(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleDateString() + ', ' + d.toLocaleTimeString();
-}
-
 const funcNameColors = [
   '#FF6B8A',
   '#FFD93D',

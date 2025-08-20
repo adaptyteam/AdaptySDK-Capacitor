@@ -1,5 +1,5 @@
 import React from 'react';
-import { JsLog, dateFormat } from '../../../helpers';
+import { JsLog, formatDate } from '../../../helpers';
 import styles from './LogPayload.module.css';
 import { useParams } from 'react-router-dom';
 import { useLogs } from '../../../contexts/LogsContext.tsx';
@@ -103,9 +103,9 @@ function LogPayload({ onBack }: LogPayloadProps) {
               </span>
             </div>
             <div className={styles.InfoItem}>
-              <span className={styles.InfoItemLabel}>DateTime:</span>
+              <span className={styles.InfoItemLabel}>Time:</span>
               <span className={styles.InfoItemValue}>
-                {dateFormat(log.isoDate)}
+                {formatDate(log.isoDate)}
               </span>
             </div>
             <div className={styles.InfoItem}>
@@ -135,7 +135,7 @@ function LogPayload({ onBack }: LogPayloadProps) {
               funcName={log.funcName}
               message={log.message}
               logLevel={log.logLevel}
-              timestamp={dateFormat(log.isoDate)}
+              timestamp={formatDate(log.isoDate)}
             />
           </div>
         )}
