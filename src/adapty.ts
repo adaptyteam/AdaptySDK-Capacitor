@@ -4,11 +4,11 @@ import { Capacitor } from '@capacitor/core';
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
 import { getCoder } from './coder-registry';
 import { defaultAdaptyOptions } from './default-configs';
+import { AdaptyConfigurationCoder } from './shared/coders/adapty-configuration';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
 import { AdaptyProfileParametersCoder } from './shared/coders/adapty-profile-parameters';
 import { AdaptyPurchaseParamsCoder } from './shared/coders/adapty-purchase-params';
-import { AdaptyConfigurationCoder } from './shared/coders/adapty-configuration';
 import { parseCommonEvent } from './shared/coders/parse';
 import { Log, LogContext } from './shared/logger';
 import type { LoggerConfig, LogScope } from './shared/logger';
@@ -771,9 +771,18 @@ export class Adapty implements AdaptyPlugin {
     await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
-  addListener(eventName: 'onLatestProfileLoad', listenerFunc: (data: { profile: AdaptyProfile }) => void): Promise<PluginListenerHandle>;
-  addListener(eventName: 'onInstallationDetailsSuccess', listenerFunc: (data: { details: AdaptyInstallationDetails }) => void): Promise<PluginListenerHandle>;
-  addListener(eventName: 'onInstallationDetailsFail', listenerFunc: (data: { error: any }) => void): Promise<PluginListenerHandle>;
+  addListener(
+    eventName: 'onLatestProfileLoad',
+    listenerFunc: (data: { profile: AdaptyProfile }) => void,
+  ): Promise<PluginListenerHandle>;
+  addListener(
+    eventName: 'onInstallationDetailsSuccess',
+    listenerFunc: (data: { details: AdaptyInstallationDetails }) => void,
+  ): Promise<PluginListenerHandle>;
+  addListener(
+    eventName: 'onInstallationDetailsFail',
+    listenerFunc: (data: { error: any }) => void,
+  ): Promise<PluginListenerHandle>;
   addListener(eventName: any, listenerFunc: any): Promise<PluginListenerHandle> {
     return AdaptyCapacitorPlugin.addListener(eventName, (arg: any) => {
       const ctx = new LogContext();
@@ -808,7 +817,11 @@ export class Adapty implements AdaptyPlugin {
                 }
                 break;
               case 'onInstallationDetailsSuccess':
-                result = parseCommonEvent('on_installation_details_success', rawEventData, ctx) as AdaptyInstallationDetails | null;
+                result = parseCommonEvent(
+                  'on_installation_details_success',
+                  rawEventData,
+                  ctx,
+                ) as AdaptyInstallationDetails | null;
                 if (result) {
                   listenerFunc({ details: result });
                   log.success(() => ({ details: 'ok' }));
@@ -829,10 +842,11 @@ export class Adapty implements AdaptyPlugin {
                   throw err;
                 }
                 break;
-              default:
+              default: {
                 const err = new Error(`[Adapty] Unsupported event: ${eventName}`);
                 log.failed(() => ({ error: err }));
                 throw err;
+              }
             }
           } catch (error) {
             log.failed(() => ({ error }));

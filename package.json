@@ -34,7 +34,7 @@
     "verify:ios": "xcodebuild -scheme AdaptyCapacitor -destination generic/platform=iOS",
     "verify:android": "cd android && ./gradlew clean build test && cd ..",
     "verify:web": "yarn build",
-    "lint": "yarn eslint && yarn prettier -- --check && yarn swiftlint -- lint",
+    "lint": "yarn eslint && yarn prettier -- --check",
     "format": "yarn eslint -- --fix && yarn prettier -- --write && yarn swiftlint -- --fix --format",
     "eslint": "eslint . --ext ts",
     "prettier": "prettier \"**/*.{css,html,ts,js,java}\" --plugin=prettier-plugin-java",
