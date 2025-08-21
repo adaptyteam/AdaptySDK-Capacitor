@@ -14,32 +14,28 @@ export default function EventsListener() {
   useEffect(() => {
     const setupEventListeners = async () => {
       try {
-        // Profile load event listener
         const profileListener = await adapty.addListener('onLatestProfileLoad', (data) => {
           const logMessage = `Profile loaded from event: ${data.profile.profileId}`;
           appendLog(createLog('info', logMessage, 'event handler onLatestProfileLoad', false, { data }));
-          
+
           // Update profile in app context
           setProfile(data.profile);
         });
         listenerHandlesRef.current.push(profileListener);
 
-        // Installation details success event listener
         const installationSuccessListener = await adapty.addListener('onInstallationDetailsSuccess', (data) => {
+          alert('installationSuccessListener')
           const logMessage = `Installation details received successfully`;
           appendLog(createLog('info', logMessage, 'event handler onInstallationDetailsSuccess', false, { data }));
         });
         listenerHandlesRef.current.push(installationSuccessListener);
 
-        // Installation details fail event listener
         const installationFailListener = await adapty.addListener('onInstallationDetailsFail', (data) => {
           const logMessage = `Installation details failed: ${data.error?.message || 'Unknown error'}`;
           appendLog(createLog('error', logMessage, 'event handler onInstallationDetailsFail', false, { data }));
         });
         listenerHandlesRef.current.push(installationFailListener);
-        
         appendLog(createLog('info', 'All event listeners registered successfully', 'EventsListener.setup', false));
-        
       } catch (error) {
         const errorMessage = `Failed to setup event listeners: ${error}`;
         appendLog(createLog('error', errorMessage, 'EventsListener.setup', false));
@@ -47,14 +43,9 @@ export default function EventsListener() {
     };
 
     setupEventListeners();
-
     return () => {
       // Remove all listeners
-      listenerHandlesRef.current.forEach((handle, index) => {
-        handle.remove().catch((error) => {
-          appendLog(createLog('error', `Failed to remove event listener ${index}: ${error}`, 'EventsListener.cleanup', false));
-        });
-      });
+      adapty.removeAllListeners();
       listenerHandlesRef.current = [];
     };
   }, [appendLog, setProfile]);
