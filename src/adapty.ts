@@ -53,6 +53,7 @@ type Req = components['requests'];
 export class Adapty implements AdaptyPlugin {
   private activating: Promise<void> | null = null;
   private resolveHeldActivation?: (() => Promise<void>) | null = null;
+  private listenerHandles: PluginListenerHandle[] = [];
   private nonWaitingMethods: MethodName[] = [
     'activate',
     'is_activated',
@@ -784,90 +785,141 @@ export class Adapty implements AdaptyPlugin {
     listenerFunc: (data: { error: any }) => void,
   ): Promise<PluginListenerHandle>;
   addListener(eventName: any, listenerFunc: any): Promise<PluginListenerHandle> {
-    return AdaptyCapacitorPlugin.addListener(eventName, (arg: any) => {
-      const ctx = new LogContext();
-      const log = ctx.event({ methodName: eventName });
-      log.start(() => ({ raw: arg }));
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: 'addListener' });
+    log.start(() => ({ eventName }));
 
-      try {
-        if (!arg || typeof arg !== 'object' || !arg.data) {
-          const error = new Error(
-            `[Adapty] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`,
-          );
-          log.failed(() => ({ error }));
-          throw error;
-        }
+    try {
+      // Map JavaScript event names to native event names
+      let nativeEventName: string;
+      switch (eventName) {
+        case 'onLatestProfileLoad':
+          nativeEventName = 'did_load_latest_profile';
+          break;
+        case 'onInstallationDetailsSuccess':
+          nativeEventName = 'on_installation_details_success';
+          break;
+        case 'onInstallationDetailsFail':
+          nativeEventName = 'on_installation_details_fail';
+          break;
+        default:
+          nativeEventName = eventName;
+      }
 
-        const rawEventData: string = arg.data;
+      const listenerHandle = (AdaptyCapacitorPlugin as any).addListener(nativeEventName, (arg: any) => {
+        const ctx = new LogContext();
+        const log = ctx.event({ methodName: eventName });
+        log.start(() => ({ raw: arg }));
 
-        if (typeof rawEventData === 'string') {
-          try {
-            let result = null;
-
-            switch (eventName) {
-              case 'onLatestProfileLoad':
-                result = parseCommonEvent('did_load_latest_profile', rawEventData, ctx) as AdaptyProfile | null;
-                if (result) {
-                  listenerFunc({ profile: result });
-                  log.success(() => ({ profile: 'ok' }));
-                } else {
-                  const err = new Error('[Adapty] Event data does not contain profile');
-                  log.failed(() => ({ error: err }));
-                  throw err;
-                }
-                break;
-              case 'onInstallationDetailsSuccess':
-                result = parseCommonEvent(
-                  'on_installation_details_success',
-                  rawEventData,
-                  ctx,
-                ) as AdaptyInstallationDetails | null;
-                if (result) {
-                  listenerFunc({ details: result });
-                  log.success(() => ({ details: 'ok' }));
-                } else {
-                  const err = new Error('[Adapty] Event data does not contain installation details');
-                  log.failed(() => ({ error: err }));
-                  throw err;
-                }
-                break;
-              case 'onInstallationDetailsFail':
-                result = parseCommonEvent('on_installation_details_fail', rawEventData, ctx);
-                if (result) {
-                  listenerFunc({ error: result });
-                  log.success(() => ({ error: 'ok' }));
-                } else {
-                  const err = new Error('[Adapty] Event data does not contain error');
-                  log.failed(() => ({ error: err }));
-                  throw err;
-                }
-                break;
-              default: {
-                const err = new Error(`[Adapty] Unsupported event: ${eventName}`);
-                log.failed(() => ({ error: err }));
-                throw err;
-              }
-            }
-          } catch (error) {
+        try {
+          if (!arg || typeof arg !== 'object' || !arg.data) {
+            const error = new Error(
+              `[Adapty] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`,
+            );
             log.failed(() => ({ error }));
             throw error;
           }
-        } else {
-          const err = new Error(
-            `[Adapty] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
-          );
-          log.failed(() => ({ error: err }));
-          throw err;
+
+          const rawEventData: string = arg.data;
+
+          if (typeof rawEventData === 'string') {
+            try {
+              let result = null;
+
+              switch (eventName) {
+                case 'onLatestProfileLoad':
+                  result = parseCommonEvent(nativeEventName, rawEventData, ctx) as AdaptyProfile | null;
+                  if (result) {
+                    listenerFunc({ profile: result });
+                    log.success(() => ({ profile: 'ok' }));
+                  } else {
+                    const err = new Error('[Adapty] Event data does not contain profile');
+                    log.failed(() => ({ error: err }));
+                    throw err;
+                  }
+                  break;
+                case 'onInstallationDetailsSuccess':
+                  result = parseCommonEvent(nativeEventName, rawEventData, ctx) as AdaptyInstallationDetails | null;
+                  if (result) {
+                    listenerFunc({ details: result });
+                    log.success(() => ({ details: 'ok' }));
+                  } else {
+                    const err = new Error('[Adapty] Event data does not contain installation details');
+                    log.failed(() => ({ error: err }));
+                    throw err;
+                  }
+                  break;
+                case 'onInstallationDetailsFail':
+                  result = parseCommonEvent(nativeEventName, rawEventData, ctx);
+                  if (result) {
+                    listenerFunc({ error: result });
+                    log.success(() => ({ error: 'ok' }));
+                  } else {
+                    const err = new Error('[Adapty] Event data does not contain error');
+                    log.failed(() => ({ error: err }));
+                    throw err;
+                  }
+                  break;
+                default: {
+                  const err = new Error(`[Adapty] Unsupported event: ${eventName}`);
+                  log.failed(() => ({ error: err }));
+                  throw err;
+                }
+              }
+            } catch (error) {
+              log.failed(() => ({ error }));
+              throw error;
+            }
+          } else {
+            const err = new Error(
+              `[Adapty] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
+            );
+            log.failed(() => ({ error: err }));
+            throw err;
+          }
+        } catch (error) {
+          log.failed(() => ({ error }));
+          throw error;
         }
-      } catch (error) {
-        log.failed(() => ({ error }));
-        throw error;
-      }
-    });
+      });
+
+      this.listenerHandles.push(listenerHandle);
+
+      log.success(() => ({
+        eventName,
+        nativeEventName,
+        totalListeners: this.listenerHandles.length,
+      }));
+
+      return listenerHandle;
+    } catch (error) {
+      log.failed(() => ({ error }));
+      throw error;
+    }
   }
 
   async removeAllListeners(): Promise<void> {
-    // Remove all listeners through Capacitor plugin
-    return AdaptyCapacitorPlugin.removeAllListeners();
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: 'removeAllListeners' });
+    log.start(() => ({ listenersCount: this.listenerHandles.length }));
+
+    try {
+      const removePromises = this.listenerHandles.map((handle, index) =>
+        handle.remove().catch((error) => {
+          log.failed(() => ({
+            message: `Failed to remove event listener ${index}`,
+            error,
+            index,
+          }));
+        }),
+      );
+
+      this.listenerHandles = [];
+      Promise.all(removePromises);
+      log.success(() => ({ message: 'All listeners removed successfully' }));
+    } catch (error) {
+      log.failed(() => ({ error }));
+      throw error;
+    }
   }
 }

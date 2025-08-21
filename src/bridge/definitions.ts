@@ -25,9 +25,4 @@ export interface AdaptyCapacitorPlugin {
     eventName: 'onInstallationDetailsFail',
     listenerFunc: (data: { error: any }) => void,
   ): Promise<PluginListenerHandle>;
-
-  /**
-   * Removes all event listeners
-   */
-  removeAllListeners(): Promise<void>;
 }

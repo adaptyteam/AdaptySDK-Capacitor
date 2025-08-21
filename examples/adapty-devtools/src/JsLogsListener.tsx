@@ -10,7 +10,7 @@ export default function JsLogsListener() {
 
   useEffect(() => {
     const memorySink = {
-      id: 'example-memory',
+      id: 'devtools-memory',
       handle: (e: LogEvent) => {
         const log = createLog(
           e.level as JsLog['logLevel'],

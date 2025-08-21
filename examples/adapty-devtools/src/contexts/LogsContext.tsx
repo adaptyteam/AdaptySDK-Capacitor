@@ -9,9 +9,11 @@ interface LogsContextValue {
 
 const LogsContext = createContext<LogsContextValue | null>(null);
 
+const MAX_LOGS = 1000;
+
 export function LogsProvider({ children }: PropsWithChildren): JSX.Element {
   const [logs, setLogs] = useState<JsLog[]>([]);
-  const append = useCallback((log: JsLog) => setLogs((prev) => [...prev, log]), []);
+  const append = useCallback((log: JsLog) => setLogs((prev) => prev.concat(log).slice(-MAX_LOGS)), []);
   const clear = useCallback(() => setLogs([]), []);
   const value = useMemo(() => ({ logs, append, clear }), [logs, append, clear]);
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
