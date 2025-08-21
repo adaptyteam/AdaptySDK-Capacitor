@@ -70,3 +70,4 @@ captures
 .externalNativeBuild
 .cursor
 .vscode
+coverage

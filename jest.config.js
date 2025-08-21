@@ -5,7 +5,7 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   modulePaths: ['./src'],
   setupFiles: ['<rootDir>/jest/jest.setup.js'],
-  testPathIgnorePatterns: ['/dist', '/node_modules/', '/example-app'],
+  testPathIgnorePatterns: ['/dist', '/node_modules/', '/examples'],
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
