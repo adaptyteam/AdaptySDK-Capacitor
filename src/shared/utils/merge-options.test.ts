@@ -103,13 +103,13 @@ describe('mergeOptions', () => {
   });
 
   describe('array handling', () => {
-    it('should merge arrays by concatenating them', () => {
+    it('should replace arrays rather than merge them', () => {
       const defaults = { items: [1, 2, 3] };
       const options = { items: [4, 5] };
       
       const result = mergeOptions(options, defaults);
       
-      expect(result).toEqual({ items: [1, 2, 3, 4, 5] });
+      expect(result).toEqual({ items: [4, 5] });
     });
 
     it('should handle arrays in nested objects', () => {
@@ -130,7 +130,7 @@ describe('mergeOptions', () => {
       
       expect(result).toEqual({
         config: {
-          tags: ['default', 'custom', 'new'],
+          tags: ['custom', 'new'],
           settings: { values: [1, 2] },
         },
       });
@@ -267,7 +267,7 @@ describe('mergeOptions', () => {
           analytics: true,
           debug: true,
         },
-        endpoints: ['/users', '/posts', '/custom'],
+        endpoints: ['/custom'],
       });
     });
 

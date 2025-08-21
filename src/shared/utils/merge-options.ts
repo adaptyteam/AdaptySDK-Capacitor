@@ -13,7 +13,7 @@ function isPlainObject(value: any): boolean {
 }
 
 /**
- * Deep merge implementation that concatenates arrays and merges objects
+ * Deep merge implementation that replaces arrays and merges objects
  */
 function deepMerge(target: any, source: any, seen = new Set()): any {
   // Handle null/undefined cases
@@ -25,12 +25,7 @@ function deepMerge(target: any, source: any, seen = new Set()): any {
     return source;
   }
 
-  // Handle arrays - concatenate them
-  if (Array.isArray(target) && Array.isArray(source)) {
-    return [...target, ...source];
-  }
-
-  // If source is array but target is not, return source
+  // Handle arrays - replace them (source overwrites target)
   if (Array.isArray(source)) {
     return source;
   }
