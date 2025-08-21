@@ -203,6 +203,17 @@ export interface components {
       success: boolean;
     };
 
+    'GetCurrentInstallationStatus.Request': {
+      method: 'get_current_installation_status';
+    };
+
+    'GetCurrentInstallationStatus.Response': OneOf<
+      [
+        { error: components['defs']['AdaptyError'] },
+        { success: components['defs']['AdaptyInstallationStatus'] },
+      ]
+    >;
+
     'GetLogLevel.Request': {
       method: 'get_log_level';
     };
@@ -394,6 +405,16 @@ export interface components {
       profile: components['defs']['AdaptyProfile'];
     };
 
+    'Event.OnInstallationDetailsSuccess': {
+      id: 'on_installation_details_success';
+      details: components['defs']['AdaptyInstallationDetails'];
+    };
+
+    'Event.OnInstallationDetailsFail': {
+      id: 'on_installation_details_fail';
+      error: components['defs']['AdaptyError'];
+    };
+
     'PaywallViewEvent.DidAppear': {
       id: 'paywall_view_did_appear';
       view: components['defs']['AdaptyUI.PaywallView'];
@@ -582,6 +603,7 @@ export interface components {
       backend_base_url?: string;
       backend_fallback_base_url?: string;
       backend_configs_base_url?: string;
+      backend_ua_base_url?: string;
       backend_proxy_host?: string;
       backend_proxy_port?: number;
       log_level?: components['defs']['AdaptyLog.Level'];
@@ -942,6 +964,25 @@ export interface components {
     };
 
     AdaptyRefundPreference: 'no_preference' | 'grant' | 'decline';
+
+    AdaptyInstallationStatus: OneOf<
+      [
+        {
+          status: 'not_available' | 'not_determined';
+        },
+        {
+          status: 'determined';
+          details: components['defs']['AdaptyInstallationDetails'];
+        },
+      ]
+    >;
+
+    AdaptyInstallationDetails: {
+      install_id?: string;
+      install_time: components['defs']['Date'];
+      app_launch_count: number;
+      payload?: string;
+    };
   };
   assets: {
     Color: {

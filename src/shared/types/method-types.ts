@@ -3,7 +3,8 @@ import type {
   AdaptyPaywallProduct, 
   AdaptyOnboarding, 
   AdaptyProfile, 
-  AdaptyPurchaseResult 
+  AdaptyPurchaseResult,
+  AdaptyInstallationStatus
 } from './';
 
 /**
@@ -26,6 +27,7 @@ export type MethodName =
   | 'get_profile'
   | 'identify'
   | 'is_activated'
+  | 'get_current_installation_status'
   | 'get_log_level'
   | 'set_log_level'
   | 'logout'
@@ -93,6 +95,7 @@ export type MethodResponseMap = {
   'get_profile': AdaptyProfile;
   'identify': true;
   'is_activated': boolean;
+  'get_current_installation_status': AdaptyInstallationStatus;
   'get_log_level': LogLevel;
   'set_log_level': true;
   'logout': true;

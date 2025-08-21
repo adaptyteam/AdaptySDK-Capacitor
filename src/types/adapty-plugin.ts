@@ -9,6 +9,8 @@ import type {
   AdaptyPurchaseResult,
   AdaptyProfileParameters,
   RefundPreference,
+  AdaptyInstallationStatus,
+  AdaptyInstallationDetails,
 } from '../shared/types';
 import type {
   ActivateParamsInput,
@@ -161,11 +163,32 @@ export interface AdaptyPlugin {
   isActivated(): Promise<boolean>;
 
   /**
+   * Gets the current installation status.
+   */
+  getCurrentInstallationStatus(): Promise<AdaptyInstallationStatus>;
+
+  /**
    * Adds a listener for profile updates.
    */
   addListener(
     eventName: 'onLatestProfileLoad',
     listenerFunc: (data: { profile: AdaptyProfile }) => void,
+  ): Promise<PluginListenerHandle>;
+
+  /**
+   * Adds a listener for installation details success events.
+   */
+  addListener(
+    eventName: 'onInstallationDetailsSuccess',
+    listenerFunc: (data: { details: AdaptyInstallationDetails }) => void,
+  ): Promise<PluginListenerHandle>;
+
+  /**
+   * Adds a listener for installation details failure events.
+   */
+  addListener(
+    eventName: 'onInstallationDetailsFail',
+    listenerFunc: (data: { error: any }) => void,
   ): Promise<PluginListenerHandle>;
 
   /**

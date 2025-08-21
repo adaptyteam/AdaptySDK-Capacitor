@@ -8,7 +8,7 @@ import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
 import { AdaptyProfileParametersCoder } from './shared/coders/adapty-profile-parameters';
 import { AdaptyPurchaseParamsCoder } from './shared/coders/adapty-purchase-params';
-import { AdaptyUiMediaCacheCoder } from './shared/coders/adapty-ui-media-cache';
+import { AdaptyConfigurationCoder } from './shared/coders/adapty-configuration';
 import { parseCommonEvent } from './shared/coders/parse';
 import { Log, LogContext } from './shared/logger';
 import type { LoggerConfig, LogScope } from './shared/logger';
@@ -20,6 +20,8 @@ import type {
   AdaptyPurchaseResult,
   AdaptyProfileParameters,
   RefundPreference,
+  AdaptyInstallationStatus,
+  AdaptyInstallationDetails,
 } from './shared/types';
 import type { components } from './shared/types/api';
 import type { ActivateParamsInput, FileLocation, LogLevel } from './shared/types/inputs';
@@ -45,8 +47,6 @@ import type {
   GetOnboardingForDefaultAudienceOptions,
   GetOnboardingForDefaultAudienceOptionsWithDefaults,
 } from './types/configs';
-import type { AdaptyUiMediaCache } from './ui-builder/types';
-import version from './version';
 
 type Req = components['requests'];
 
@@ -62,11 +62,6 @@ export class Adapty implements AdaptyPlugin {
     'set_fallback',
   ];
   private readonly options: AdaptyDefaultOptions = defaultAdaptyOptions;
-  private readonly defaultMediaCache: AdaptyUiMediaCache = {
-    memoryStorageTotalCostLimit: 100 * 1024 * 1024,
-    memoryStorageCountLimit: 2147483647,
-    diskStorageSizeLimit: 100 * 1024 * 1024,
-  };
 
   /**
    * Helper method for logging encode operations
@@ -262,31 +257,12 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ apiKey, params }));
 
-    const coder = new AdaptyUiMediaCacheCoder();
-
-    const configurationWithUndefined: components['defs']['AdaptyConfiguration'] = {
-      api_key: apiKey,
-      cross_platform_sdk_name: 'capacitor',
-      cross_platform_sdk_version: version,
-      observer_mode: params.observerMode ?? false,
-      ip_address_collection_disabled: params.ipAddressCollectionDisabled ?? false,
-      server_cluster: params.serverCluster ?? 'default',
-      activate_ui: params.activateUi ?? true,
-      customer_user_id: params.customerUserId,
-      log_level: params.logLevel,
-      backend_base_url: params.backendBaseUrl,
-      backend_fallback_base_url: params.backendFallbackBaseUrl,
-      backend_configs_base_url: params.backendConfigsBaseUrl,
-      backend_proxy_host: params.backendProxyHost,
-      backend_proxy_port: params.backendProxyPort,
-      media_cache: coder.encode(params.mediaCache ?? this.defaultMediaCache),
-      google_adid_collection_disabled: params.android?.adIdCollectionDisabled,
-      apple_idfa_collection_disabled: params.ios?.idfaCollectionDisabled,
-    };
+    const configurationCoder = new AdaptyConfigurationCoder();
+    const configuration = configurationCoder.encode(apiKey, params);
 
     const activateRequestWithUndefined: Req['Activate.Request'] = {
       method,
-      configuration: filterUndefined(configurationWithUndefined),
+      configuration,
     };
 
     const activateRequest = filterUndefined(activateRequestWithUndefined);
@@ -307,8 +283,23 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    const result = await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
-    return result;
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+  }
+
+  async getCurrentInstallationStatus(): Promise<AdaptyInstallationStatus> {
+    const method = 'get_current_installation_status';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({}));
+
+    const argsWithUndefined: Req['GetCurrentInstallationStatus.Request'] = {
+      method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
   async getPaywall(options: GetPaywallOptions): Promise<AdaptyPaywall> {
@@ -780,10 +771,10 @@ export class Adapty implements AdaptyPlugin {
     await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
-  addListener(
-    eventName: 'onLatestProfileLoad',
-    listenerFunc: (data: { profile: AdaptyProfile }) => void,
-  ): Promise<PluginListenerHandle> {
+  addListener(eventName: 'onLatestProfileLoad', listenerFunc: (data: { profile: AdaptyProfile }) => void): Promise<PluginListenerHandle>;
+  addListener(eventName: 'onInstallationDetailsSuccess', listenerFunc: (data: { details: AdaptyInstallationDetails }) => void): Promise<PluginListenerHandle>;
+  addListener(eventName: 'onInstallationDetailsFail', listenerFunc: (data: { error: any }) => void): Promise<PluginListenerHandle>;
+  addListener(eventName: any, listenerFunc: any): Promise<PluginListenerHandle> {
     return AdaptyCapacitorPlugin.addListener(eventName, (arg: any) => {
       const ctx = new LogContext();
       const log = ctx.event({ methodName: eventName });
@@ -802,15 +793,46 @@ export class Adapty implements AdaptyPlugin {
 
         if (typeof rawEventData === 'string') {
           try {
-            const profile = parseCommonEvent('did_load_latest_profile', rawEventData, ctx) as AdaptyProfile | null;
+            let result = null;
 
-            if (profile) {
-              listenerFunc({ profile });
-              log.success(() => ({ profile: 'ok' }));
-            } else {
-              const err = new Error('[Adapty] Event data does not contain profile');
-              log.failed(() => ({ error: err }));
-              throw err;
+            switch (eventName) {
+              case 'onLatestProfileLoad':
+                result = parseCommonEvent('did_load_latest_profile', rawEventData, ctx) as AdaptyProfile | null;
+                if (result) {
+                  listenerFunc({ profile: result });
+                  log.success(() => ({ profile: 'ok' }));
+                } else {
+                  const err = new Error('[Adapty] Event data does not contain profile');
+                  log.failed(() => ({ error: err }));
+                  throw err;
+                }
+                break;
+              case 'onInstallationDetailsSuccess':
+                result = parseCommonEvent('on_installation_details_success', rawEventData, ctx) as AdaptyInstallationDetails | null;
+                if (result) {
+                  listenerFunc({ details: result });
+                  log.success(() => ({ details: 'ok' }));
+                } else {
+                  const err = new Error('[Adapty] Event data does not contain installation details');
+                  log.failed(() => ({ error: err }));
+                  throw err;
+                }
+                break;
+              case 'onInstallationDetailsFail':
+                result = parseCommonEvent('on_installation_details_fail', rawEventData, ctx);
+                if (result) {
+                  listenerFunc({ error: result });
+                  log.success(() => ({ error: 'ok' }));
+                } else {
+                  const err = new Error('[Adapty] Event data does not contain error');
+                  log.failed(() => ({ error: err }));
+                  throw err;
+                }
+                break;
+              default:
+                const err = new Error(`[Adapty] Unsupported event: ${eventName}`);
+                log.failed(() => ({ error: err }));
+                throw err;
             }
           } catch (error) {
             log.failed(() => ({ error }));

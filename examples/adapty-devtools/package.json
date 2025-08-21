@@ -16,6 +16,7 @@
     "preview": "vite preview",
     "tsc": "tsc --noEmit",
     "update-cap-config": "yarn cap copy && yarn cap sync",
+    "update-native-modules": "cd ./ios/App && pod update Adapty AdaptyUI AdaptyPlugin && yarn run update-cap-config",
     "android": "yarn build && yarn cap run android",
     "ios": "yarn build && yarn cap run ios",
     "dev:ios": "yarn cap run ios --live-reload --no-sync --host 192.168.1.76 --port 5173",

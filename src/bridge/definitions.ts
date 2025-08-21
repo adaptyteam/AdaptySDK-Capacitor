@@ -1,6 +1,6 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
-import type { AdaptyProfile } from '../shared/types';
+import type { AdaptyProfile, AdaptyInstallationDetails } from '../shared/types';
 
 export interface AdaptyCapacitorPlugin {
   /**
@@ -14,6 +14,16 @@ export interface AdaptyCapacitorPlugin {
   addListener(
     eventName: 'onLatestProfileLoad',
     listenerFunc: (data: { profile: AdaptyProfile }) => void,
+  ): Promise<PluginListenerHandle>;
+
+  addListener(
+    eventName: 'onInstallationDetailsSuccess',
+    listenerFunc: (data: { details: AdaptyInstallationDetails }) => void,
+  ): Promise<PluginListenerHandle>;
+
+  addListener(
+    eventName: 'onInstallationDetailsFail',
+    listenerFunc: (data: { error: any }) => void,
   ): Promise<PluginListenerHandle>;
 
   /**

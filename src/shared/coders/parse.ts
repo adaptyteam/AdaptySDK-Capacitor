@@ -15,6 +15,8 @@ import { AdaptyOnboardingCoder } from './adapty-onboarding';
 import { AdaptyUiOnboardingMetaCoder } from './adapty-ui-onboarding-meta';
 import { AdaptyUiOnboardingStateParamsCoder } from './adapty-ui-onboarding-state-params';
 import { AdaptyUiOnboardingStateUpdatedActionCoder } from './adapty-ui-onboarding-state-updated-action';
+import { AdaptyInstallationStatusCoder } from './adapty-installation-status';
+import { AdaptyInstallationDetailsCoder } from './adapty-installation-details';
 
 const AdaptyTypes = [
   'AdaptyError',
@@ -25,6 +27,8 @@ const AdaptyTypes = [
   'AdaptyOnboarding',
   'AdaptyRemoteConfig',
   'AdaptyPaywallBuilder',
+  'AdaptyInstallationStatus',
+  'AdaptyInstallationDetails',
   'AdaptyUiView',
   'AdaptyUiDialogActionType',
   'AdaptyUiOnboardingMeta',
@@ -118,6 +122,10 @@ export function parseCommonEvent(
   switch (event) {
     case 'did_load_latest_profile':
       return getCoder('AdaptyProfile', ctx)?.decode(obj['profile']);
+    case 'on_installation_details_success':
+      return getCoder('AdaptyInstallationDetails', ctx)?.decode(obj['details']);
+    case 'on_installation_details_fail':
+      return getCoder('AdaptyError', ctx)?.decode(obj['error']);
     default:
       return null;
   }
@@ -250,6 +258,10 @@ function getCoder(
       return new AdaptyOnboardingCoder();
     case 'AdaptyPurchaseResult':
       return new AdaptyPurchaseResultCoder();
+    case 'AdaptyInstallationStatus':
+      return new AdaptyInstallationStatusCoder();
+    case 'AdaptyInstallationDetails':
+      return new AdaptyInstallationDetailsCoder();
     case 'AdaptyUiOnboardingMeta':
       return new AdaptyUiOnboardingMetaCoder();
     case 'AdaptyUiOnboardingStateParams':

@@ -1,15 +1,15 @@
 PODS:
-  - Adapty (3.8.2)
+  - Adapty (3.10.1)
   - AdaptyCapacitor (3.8.2):
-    - Adapty (= 3.8.2)
-    - AdaptyPlugin (= 3.8.2)
-    - AdaptyUI (= 3.8.2)
+    - Adapty (= 3.10.1)
+    - AdaptyPlugin (= 3.10.1)
+    - AdaptyUI (= 3.10.1)
     - Capacitor
-  - AdaptyPlugin (3.8.2):
-    - Adapty (= 3.8.2)
-    - AdaptyUI (= 3.8.2)
-  - AdaptyUI (3.8.2):
-    - Adapty (= 3.8.2)
+  - AdaptyPlugin (3.10.1):
+    - Adapty (= 3.10.1)
+    - AdaptyUI (= 3.10.1)
+  - AdaptyUI (3.10.1):
+    - Adapty (= 3.10.1)
   - Capacitor (7.0.0):
     - CapacitorCordova
   - CapacitorApp (7.0.2):
@@ -57,10 +57,10 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  Adapty: c4b22d6e30237e73da7c4f718fcd43d59f014600
-  AdaptyCapacitor: 540d90ab939631d6ce544dc51f6df16502d1154e
-  AdaptyPlugin: 1d0b46cea4494bcc3e7b4b114ee9128844596998
-  AdaptyUI: 11d3cc1d0091898f9817a78a0d7668303f108df2
+  Adapty: 0f442bc6513aa2d83d719fd76491df193ad39fca
+  AdaptyCapacitor: 13a1f0ae3c380192f901065a43f0c8f6538981ad
+  AdaptyPlugin: d703eded378d715887ed4e3b6d7272f5ca82e0ac
+  AdaptyUI: 86bb1aaa8be6172c1841acb11cd82601192b7266
   Capacitor: fcbee427ff437f414bbb3bc2d39364ad9bd2b8a5
   CapacitorApp: efc1e9748a8ea5d3e789cd82a4f451341cc7ac93
   CapacitorCordova: 345f93b7edd121db98e4ec20ac94d6d7bcaf7e48
