@@ -26,7 +26,11 @@
   },
   "keywords": [
     "capacitor",
+    "adapty",
     "plugin",
+    "purchases",
+    "in-apps",
+    "subscriptions",
     "native"
   ],
   "scripts": {

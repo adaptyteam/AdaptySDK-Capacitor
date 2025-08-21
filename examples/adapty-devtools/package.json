@@ -5,7 +5,9 @@
   "type": "module",
   "keywords": [
     "capacitor",
-    "mobile"
+    "mobile",
+    "adapty",
+    "devtools"
   ],
   "scripts": {
     "credentials": "node scripts/credentials.js",
