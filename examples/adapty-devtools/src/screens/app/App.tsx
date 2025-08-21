@@ -1248,6 +1248,13 @@ const App: React.FC = () => {
           >
             Set Fallback Paywalls
           </button>
+          <button
+            onClick={getCurrentInstallationStatus}
+            disabled={!isActivated}
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
+          >
+            Get Installation Status
+          </button>
         </div>
         <div className={styles.ButtonGroup}>
           <button
@@ -1278,6 +1285,20 @@ const App: React.FC = () => {
     } catch (error) {
       log('error', 'Error reporting transaction', 'reportTransaction', false, { error: String(error), transactionId, variationId });
       setResult(`Error reporting transaction: ${error}`);
+    }
+  };
+
+  const getCurrentInstallationStatus = async () => {
+    if (!isActivated) return;
+
+    try {
+      log('info', 'Getting current installation status', 'getCurrentInstallationStatus');
+      const installationStatus = await adapty.getCurrentInstallationStatus();
+      log('info', 'Installation status retrieved', 'getCurrentInstallationStatus', false, { installationStatus });
+      setResult(`Installation status: ${JSON.stringify(installationStatus, null, 2)}`);
+    } catch (error) {
+      log('error', 'Error getting installation status', 'getCurrentInstallationStatus', false, { error: String(error) });
+      setResult(`Error getting installation status: ${error}`);
     }
   };
 
