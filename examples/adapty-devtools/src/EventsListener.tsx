@@ -46,7 +46,7 @@ export default function EventsListener() {
     return () => {
       // Remove all listeners
       adapty.removeAllListeners();
-      listenerHandlesRef.current = [];
+      //listenerHandlesRef.current = [];
     };
   }, [appendLog, setProfile]);
 
