@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter, Routes, Route, NavLink, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { createHashRouter, RouterProvider, NavLink, useNavigate, Navigate, ScrollRestoration, Outlet } from 'react-router-dom';
 import { App as CapacitorApp } from '@capacitor/app';
 import type { PluginListenerHandle } from '@capacitor/core';
 import App from './screens/app/App';
@@ -29,19 +29,6 @@ function BackHandler() {
       handle?.remove();
     };
   }, []);
-  return null;
-}
-
-function ScrollToTopOnTabChange() {
-  const { pathname } = useLocation();
-  const prevRootRef = useRef<string | null>(null);
-  useEffect(() => {
-    const root = pathname.split('/')[1] ?? '';
-    if (prevRootRef.current !== null && prevRootRef.current !== root) {
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    }
-    prevRootRef.current = root;
-  }, [pathname]);
   return null;
 }
 
@@ -86,26 +73,63 @@ function LogPayloadRoute() {
   return <LogPayload onBack={() => navigate(-1)} />;
 }
 
-function RouterApp() {
+function Layout() {
   useInitializationService();
 
   return (
-    <HashRouter>
+    <>
       <BackHandler />
-      <ScrollToTopOnTabChange />
+      <ScrollRestoration 
+        getKey={(location) => {
+          if (location.pathname.startsWith('/logs/') || location.pathname === '/profile') {
+            return Math.random().toString();
+          }
+          return location.pathname;
+        }}
+      />
       <div className={styles.RouterContainer}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/app" replace />} />
-          <Route path="/app" element={<AppRoute />} />
-          <Route path="/logs" element={<LogsRoute />} />
-          <Route path="/logs/:id" element={<LogPayloadRoute />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<Navigate to="/app" replace />} />
-        </Routes>
+        <Outlet />
       </div>
       <Tabs />
-    </HashRouter>
+    </>
   );
+}
+
+const router = createHashRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/app" replace />
+      },
+      {
+        path: "app",
+        element: <AppRoute />
+      },
+      {
+        path: "logs",
+        element: <LogsRoute />
+      },
+      {
+        path: "logs/:id",
+        element: <LogPayloadRoute />
+      },
+      {
+        path: "profile",
+        element: <Profile />
+      },
+      {
+        path: "*",
+        element: <Navigate to="/app" replace />
+      }
+    ]
+  }
+]);
+
+function RouterApp() {
+  return <RouterProvider router={router} />;
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
