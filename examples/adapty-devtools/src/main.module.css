@@ -1,6 +1,6 @@
 /* Layout for the routed content to avoid overlap with bottom tabs */
 .RouterContainer {
-  min-height: 100vh;
+  padding-top: 60px; /* global top space for header/safe area */
   padding-bottom: 80px; /* make space for fixed tabs */
 }
 
@@ -24,6 +24,17 @@
   text-decoration: none;
   font-size: 22px;
   font-weight: 500;
+  padding: 0 20px;
+  background-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
 }
 
 /* active state as a separate class for CSS Modules */
