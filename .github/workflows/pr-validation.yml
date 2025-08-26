@@ -6,8 +6,45 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    name: Setup
+    outputs:
+      cache-hit: ${{ steps.cache-node-modules.outputs.cache-hit }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      id: cache-node-modules
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          node-modules-${{ runner.os }}-
+
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: yarn install --frozen-lockfile --prefer-offline
+
   validate-pr:
     runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check-type: js-checks
+            name: "JS Checks"
+          - check-type: android
+            name: "Android Build"
+    name: ${{ matrix.name }}
 
     steps:
     - name: Checkout code
@@ -17,22 +54,135 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'yarn'
-        cache-dependency-path: './yarn.lock'
 
-    - name: Install dependencies
-      working-directory: ./
-      run: |
-        yarn install --frozen-lockfile
-        git reset --hard HEAD
+    - name: Setup Java
+      if: matrix.check-type == 'android'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Restore node_modules cache
+      uses: actions/cache/restore@v4
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          node-modules-${{ runner.os }}-
+
+    - name: Cache Gradle dependencies
+      if: matrix.check-type == 'android'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          android/.gradle
+        key: gradle-${{ runner.os }}-${{ hashFiles('android/build.gradle', 'android/settings.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
 
     - name: Run TypeScript check
-      working-directory: ./
-      run: npx tsc --noEmit
+      if: matrix.check-type == 'js-checks'
+      run: yarn tsc
 
+    - name: Run Prettier check
+      if: matrix.check-type == 'js-checks'
+      run: yarn prettier-check
+
+    - name: Run ESLint
+      if: matrix.check-type == 'js-checks'
+      run: yarn eslint
+
+    # - name: Run unit tests
+    #   if: matrix.check-type == 'js-checks'
+    #   run: yarn test
+
+    - name: Run build verification
+      if: matrix.check-type == 'js-checks'
+      run: yarn verify:web
+
+    - name: Run Android verification
+      if: matrix.check-type == 'android'
+      run: yarn verify:android
+
+  build-ios:
+    runs-on: macos-15
+    name: iOS Build
+    needs: validate-pr
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Select Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: 'latest'
+
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      id: cache-node-modules
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          node-modules-${{ runner.os }}-
+
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: yarn install --frozen-lockfile --prefer-offline
+
+    - name: Get Xcode version
+      run: |
+        set -euo pipefail
+        XCODE_VERSION=$(xcodebuild -version | awk 'NR==1{print $2} END{}')
+        echo "XCODE_VERSION=${XCODE_VERSION}" >> $GITHUB_ENV
+
+    - name: Cache SPM checkouts
+      id: cache-spm-checkouts
+      uses: actions/cache@v4
+      with:
+        path: .spm
+        key: spm-checkouts-${{ runner.os }}-${{ env.XCODE_VERSION }}-${{ hashFiles('Package.swift', 'Package.resolved') }}
+        restore-keys: |
+          spm-checkouts-${{ runner.os }}-${{ env.XCODE_VERSION }}-
+
+    - name: Cache SPM artifacts (DerivedData)
+      id: cache-spm-artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+          .derivedData/SourcePackages
+          .derivedData/ModuleCache.noindex
+        key: spm-artifacts-${{ runner.os }}-${{ env.XCODE_VERSION }}-${{ hashFiles('Package.swift', 'Package.resolved') }}
+        restore-keys: |
+          spm-artifacts-${{ runner.os }}-${{ env.XCODE_VERSION }}-
+
+    - name: Resolve SPM dependencies
+      if: steps.cache-spm-checkouts.outputs.cache-hit != 'true' || steps.cache-spm-artifacts.outputs.cache-hit != 'true'
+      run: |
+        xcodebuild -resolvePackageDependencies \
+          -clonedSourcePackagesDirPath .spm \
+          -skipPackagePluginValidation
+
+    - name: Run iOS verification (no signing)
+      run: |
+        xcodebuild -scheme AdaptyCapacitor -destination generic/platform=iOS \
+          -derivedDataPath .derivedData \
+          -clonedSourcePackagesDirPath .spm \
+          -skipPackagePluginValidation \
+          -disableAutomaticPackageResolution \
+          CODE_SIGNING_ALLOWED=NO
 
   auto-assign-reviewers:
     runs-on: ubuntu-latest
+    name: Auto-assign reviewers
     if: github.event.action == 'opened'
 
     steps:
