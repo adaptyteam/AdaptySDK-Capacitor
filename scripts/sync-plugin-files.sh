@@ -35,4 +35,7 @@ rsync -av ./Package.swift "$TARGET_DIR/"
 echo "📄 Syncing AdaptyCapacitor.podspec ..."
 rsync -av ./AdaptyCapacitor.podspec "$TARGET_DIR/"
 
+echo "📄 Syncing package.json ..."
+rsync -av ./package.json "$TARGET_DIR/"
+
 echo "✅ Plugin files synced successfully!"

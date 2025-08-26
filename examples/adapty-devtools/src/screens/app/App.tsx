@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { Toast } from '@capacitor/toast';
 import {
   adapty,
   AdaptyPaywall,
@@ -1296,9 +1297,17 @@ const App: React.FC = () => {
       const installationStatus = await adapty.getCurrentInstallationStatus();
       log('info', 'Installation status retrieved', 'getCurrentInstallationStatus', false, { installationStatus });
       setResult(`Installation status: ${JSON.stringify(installationStatus, null, 2)}`);
+      
+      await Toast.show({
+        text: 'Installation status retrieved successfully!',
+      });
     } catch (error) {
       log('error', 'Error getting installation status', 'getCurrentInstallationStatus', false, { error: String(error) });
       setResult(`Error getting installation status: ${error}`);
+      
+      await Toast.show({
+        text: 'Failed to get installation status',
+      });
     }
   };
 
