@@ -5,9 +5,9 @@ body:
 - type: markdown
   attributes:
     value: |
-      Want event more? Request a feature, that you think would benefit this SDK
+      Want even more? Request a feature, that you think would benefit this Capacitor SDK
 - type: textarea
-  id: what-happened
+  id: feature-description
   attributes:
     label: Description
     description: |

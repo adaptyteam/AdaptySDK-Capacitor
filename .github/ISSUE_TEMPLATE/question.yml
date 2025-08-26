@@ -1,13 +1,13 @@
 name: 🤔 Question
-description: Ask a question about anything that is unclear about Adapty
+description: Ask a question about anything that is unclear about Adapty Capacitor SDK
 labels: ["question"]
 body:
 - type: markdown
   attributes:
     value: |
-      Have we missed something? Does documentation lacks something?
+      Have we missed something? Does documentation lack something?
 - type: textarea
-  id: what-happened
+  id: question
   attributes:
     label: Description
     description: |
@@ -16,10 +16,20 @@ body:
     value: "How high the moon?"
   validations:
     required: true
-- type: textarea
-  id: logs
+- type: input
+  id: version
   attributes:
-    label: System info
+    label: Version
+    description: What version of `@adapty/capacitor` are you using?
+    placeholder: v3.0.0
+  validations:
+    required: true
+- type: textarea
+  id: context
+  attributes:
+    label: Additional context
     description: |
-      Run `npx react-native` info in your terminal, copy and paste the results here.
+      If relevant, please provide your Capacitor setup info: `npx cap doctor`
     render: yml
+  validations:
+    required: false
