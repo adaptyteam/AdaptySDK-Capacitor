@@ -1,4 +1,5 @@
 examples/adapty-devtools/android
 examples/adapty-devtools/ios
-examples/adapty-devtools/dist
+examples/**/dist
+/dist
 src/shared/
