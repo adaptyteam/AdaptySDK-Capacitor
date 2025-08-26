@@ -1,25 +1,32 @@
 import { adapty } from '@adapty/capacitor';
 import type { JsLog } from '../helpers';
 import { createLog } from '../helpers';
+import { showSuccessToast, showErrorToast } from '../utils/toast';
 
 export class EventListenersManager {
   async setup(appendLog: (log: JsLog) => void, setProfile: (profile: any) => void): Promise<void> {
     await adapty.addListener('onLatestProfileLoad', (data) => {
-      const logMessage = `Profile loaded from event: ${data.profile.profileId}`;
+      const logMessage = `Event: Profile loaded from event: ${data.profile.profileId}`;
       appendLog(createLog('info', logMessage, 'event handler onLatestProfileLoad', false, { data }));
 
       // Update profile in app context
       setProfile(data.profile);
+
+      showSuccessToast('Event: Profile updated');
     });
 
     await adapty.addListener('onInstallationDetailsSuccess', (data) => {
-      const logMessage = `Installation details received successfully`;
+      const logMessage = `Event: Installation details received successfully`;
       appendLog(createLog('info', logMessage, 'event handler onInstallationDetailsSuccess', false, { data }));
+
+      showSuccessToast('Event: Installation success');
     });
 
     await adapty.addListener('onInstallationDetailsFail', (data) => {
-      const logMessage = `Installation details failed: ${data.error?.message || 'Unknown error'}`;
+      const logMessage = `Event: Installation details failed: ${data.error?.message || 'Unknown error'}`;
       appendLog(createLog('error', logMessage, 'event handler onInstallationDetailsFail', false, { data }));
+
+      showErrorToast('Event: Installation failed');
     });
 
     appendLog(createLog('info', 'All event listeners registered successfully', 'EventListenersManager.setup', false));

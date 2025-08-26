@@ -13,6 +13,7 @@ import {
 import { getApiKey, getIosBundle, getAndroidApplicationId, createLog } from '../../helpers';
 import { useAppContext } from '../../contexts/AppContext';
 import { useLogs } from '../../contexts/LogsContext';
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import styles from './App.module.css';
 
 const App: React.FC = () => {
@@ -1294,11 +1295,15 @@ const App: React.FC = () => {
     try {
       log('info', 'Getting current installation status', 'getCurrentInstallationStatus');
       const installationStatus = await adapty.getCurrentInstallationStatus();
-      log('info', 'Installation status retrieved', 'getCurrentInstallationStatus', false, { installationStatus });
+      log('info', 'Installation status updated', 'getCurrentInstallationStatus', false, { installationStatus });
       setResult(`Installation status: ${JSON.stringify(installationStatus, null, 2)}`);
+      
+      await showSuccessToast('Installation status updated successfully!');
     } catch (error) {
       log('error', 'Error getting installation status', 'getCurrentInstallationStatus', false, { error: String(error) });
       setResult(`Error getting installation status: ${error}`);
+      
+      await showErrorToast('Failed to get installation status');
     }
   };
 
