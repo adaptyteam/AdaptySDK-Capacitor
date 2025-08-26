@@ -39,9 +39,10 @@
     "verify:android": "cd android && ./gradlew clean build test && cd ..",
     "verify:web": "yarn build",
     "lint": "yarn eslint && yarn prettier -- --check",
-    "format": "yarn eslint -- --fix && yarn prettier -- --write && yarn swiftlint -- --fix --format",
+    "format": "yarn eslint -- --fix && yarn prettier && yarn swiftlint -- --fix --format",
     "eslint": "eslint . --ext ts",
-    "prettier": "prettier \"**/*.{css,html,ts,js,java}\" --plugin=prettier-plugin-java",
+    "prettier-check": "prettier \"**/*.{css,html,ts,js,tsx}\" --check",
+    "prettier": "prettier \"**/*.{css,html,ts,js,tsx}\" --write",
     "swiftlint": "node-swiftlint",
     "docgen": "docgen --api AdaptyCapacitorPlugin --output-readme README.md --output-json dist/docs.json",
     "build": "yarn clean && yarn docgen && tsc && rollup -c rollup.config.mjs",
@@ -91,7 +92,7 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{css,html,java}": [
+    "*.{css,html}": [
       "prettier --write"
     ],
     "*.swift": [
