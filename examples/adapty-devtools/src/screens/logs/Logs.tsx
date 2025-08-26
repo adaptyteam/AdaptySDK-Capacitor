@@ -4,7 +4,6 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { JsLog, formatDate, getFuncNameColor, getLogLevelColor } from '../../helpers';
 import styles from './Logs.module.css';
 
-
 interface LogsProps {
   logs: JsLog[];
   onLogClick: (log: JsLog) => void;
@@ -19,9 +18,9 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
   const filteredLogs = useMemo(() => {
     switch (filter) {
       case 'sdk':
-        return logs.filter(log => log.isSDK);
+        return logs.filter((log) => log.isSDK);
       case 'app':
-        return logs.filter(log => !log.isSDK);
+        return logs.filter((log) => !log.isSDK);
       case 'all':
       default:
         return logs;
@@ -62,9 +61,7 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
       <div className={styles.LogsHeader}>
         <div className={styles.LogsHeaderContent}>
           <h2>Logs</h2>
-          <div className={styles.LogsSubheader}>
-            {filteredLogs.length} logs (Newest first)
-          </div>
+          <div className={styles.LogsSubheader}>{filteredLogs.length} logs (Newest first)</div>
         </div>
         <div className={styles.LogsControls}>
           <div className={styles.FilterButtons}>
@@ -96,15 +93,18 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
         </div>
       </div>
       <div className={styles.LogsList}>
-        {filteredLogs.slice().reverse().map((log, index) => (
-          <LogLine
-            key={log.id}
-            log={log}
-            onClick={() => onLogClick(log)}
-            isFirst={index === 0}
-            isLast={index === filteredLogs.length - 1}
-          />
-        ))}
+        {filteredLogs
+          .slice()
+          .reverse()
+          .map((log, index) => (
+            <LogLine
+              key={log.id}
+              log={log}
+              onClick={() => onLogClick(log)}
+              isFirst={index === 0}
+              isLast={index === filteredLogs.length - 1}
+            />
+          ))}
       </div>
     </div>
   );
@@ -118,9 +118,12 @@ interface LogLineProps {
 }
 
 function LogLine({ log, isFirst, isLast, onClick }: LogLineProps) {
-  const borderStyle = useMemo(() => ({
-    borderLeft: `6px solid ${getFuncNameColor(log.funcName)}`
-  }), [log.funcName]);
+  const borderStyle = useMemo(
+    () => ({
+      borderLeft: `6px solid ${getFuncNameColor(log.funcName)}`,
+    }),
+    [log.funcName],
+  );
 
   return (
     <div
@@ -130,10 +133,7 @@ function LogLine({ log, isFirst, isLast, onClick }: LogLineProps) {
     >
       <div className={styles.LogContent}>
         <div className={styles.LogIcon}>
-          <div
-            className={styles.LogLevelIndicator}
-            style={{ backgroundColor: getLogLevelColor(log.logLevel) }}
-          />
+          <div className={styles.LogLevelIndicator} style={{ backgroundColor: getLogLevelColor(log.logLevel) }} />
         </div>
         <div className={styles.LogBody}>
           <div className={styles.LogHeader}>

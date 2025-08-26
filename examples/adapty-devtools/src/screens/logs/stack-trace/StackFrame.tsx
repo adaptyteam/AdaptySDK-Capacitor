@@ -23,16 +23,15 @@ const StackFrame: React.FC<StackFrameProps> = ({ frame, index }) => {
           <div className={styles.FileLocation}>
             <span className={styles.FileName}>{frame.fileName}</span>
             {frame.lineNum > 0 && (
-              <span className={styles.LineNumber}>:{frame.lineNum}:{frame.colNum}</span>
+              <span className={styles.LineNumber}>
+                :{frame.lineNum}:{frame.colNum}
+              </span>
             )}
           </div>
         ) : frame.fullLocation && frame.fullLocation !== frame.funcName ? (
           <div className={styles.FileLocation}>
             <span className={styles.FileName}>
-              {frame.fullLocation.length > 60 
-                ? `...${frame.fullLocation.slice(-60)}` 
-                : frame.fullLocation
-              }
+              {frame.fullLocation.length > 60 ? `...${frame.fullLocation.slice(-60)}` : frame.fullLocation}
             </span>
           </div>
         ) : null}

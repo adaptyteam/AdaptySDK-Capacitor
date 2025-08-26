@@ -28,18 +28,14 @@ function LogPayload({ onBack }: LogPayloadProps) {
         return (
           <div className={styles.FunctionValue}>
             <div className={styles.FunctionLabel}>function() → </div>
-            <div className={styles.FunctionResult}>
-              {renderValue(result)}
-            </div>
+            <div className={styles.FunctionResult}>{renderValue(result)}</div>
           </div>
         );
       } catch (error) {
         return (
           <div className={styles.FunctionValue}>
             <div className={styles.FunctionLabel}>function() → </div>
-            <div className={styles.FunctionError}>
-              Error: {error instanceof Error ? error.message : String(error)}
-            </div>
+            <div className={styles.FunctionError}>Error: {error instanceof Error ? error.message : String(error)}</div>
           </div>
         );
       }
@@ -54,34 +50,38 @@ function LogPayload({ onBack }: LogPayloadProps) {
       return <span className={styles.BooleanValue}>{value.toString()}</span>;
     }
     if (typeof value === 'object') {
-      const serializedObject = JSON.stringify(value, (_key, val) => {
-        if (typeof val === 'function') {
-          return `[Function: ${val.name || 'anonymous'}]`;
-        }
-        return val;
-      }, 2);
-
-      return (
-        <pre className={styles.ObjectValue}>
-          {serializedObject}
-        </pre>
+      const serializedObject = JSON.stringify(
+        value,
+        (_key, val) => {
+          if (typeof val === 'function') {
+            return `[Function: ${val.name || 'anonymous'}]`;
+          }
+          return val;
+        },
+        2,
       );
+
+      return <pre className={styles.ObjectValue}>{serializedObject}</pre>;
     }
     return String(value);
   };
 
   const getLogLevelClass = (level: string) => {
     switch (level) {
-      case 'error': return styles.LogLevelError;
-      case 'warn': return styles.LogLevelWarn;
-      case 'info': return styles.LogLevelInfo;
-      case 'debug': return styles.LogLevelDebug;
-      case 'verbose': return styles.LogLevelVerbose;
-      default: return '';
+      case 'error':
+        return styles.LogLevelError;
+      case 'warn':
+        return styles.LogLevelWarn;
+      case 'info':
+        return styles.LogLevelInfo;
+      case 'debug':
+        return styles.LogLevelDebug;
+      case 'verbose':
+        return styles.LogLevelVerbose;
+      default:
+        return '';
     }
   };
-
-
 
   return (
     <div className={styles.LogPayloadContainer}>
@@ -98,15 +98,11 @@ function LogPayload({ onBack }: LogPayloadProps) {
           <div className={styles.InfoGrid}>
             <div className={styles.InfoItem}>
               <span className={styles.InfoItemLabel}>Level:</span>
-              <span className={`${styles.InfoItemValue} ${getLogLevelClass(log.logLevel)}`}>
-                {log.logLevel}
-              </span>
+              <span className={`${styles.InfoItemValue} ${getLogLevelClass(log.logLevel)}`}>{log.logLevel}</span>
             </div>
             <div className={styles.InfoItem}>
               <span className={styles.InfoItemLabel}>Time:</span>
-              <span className={styles.InfoItemValue}>
-                {formatDate(log.isoDate)}
-              </span>
+              <span className={styles.InfoItemValue}>{formatDate(log.isoDate)}</span>
             </div>
             <div className={styles.InfoItem}>
               <span className={styles.InfoItemLabel}>Function:</span>
@@ -122,9 +118,7 @@ function LogPayload({ onBack }: LogPayloadProps) {
         {log.params && Object.keys(log.params).length > 0 && (
           <div className={styles.Section}>
             <h3>Parameters</h3>
-            <div className={styles.ParamsList}>
-              {renderValue(log.params)}
-            </div>
+            <div className={styles.ParamsList}>{renderValue(log.params)}</div>
           </div>
         )}
 

@@ -40,7 +40,7 @@ const App: React.FC = () => {
     maxAge,
     customTagsJson,
     fetchPolicyIndex,
-    
+
     // Actions
     setIsActivated,
     setProfile,
@@ -67,7 +67,13 @@ const App: React.FC = () => {
   const { append: appendLog } = useLogs();
 
   // Helper function for logging
-  const log = (level: 'info' | 'error' | 'warn', message: string, funcName: string, isSDK: boolean = false, params: Record<string, any> = {}) => {
+  const log = (
+    level: 'info' | 'error' | 'warn',
+    message: string,
+    funcName: string,
+    isSDK: boolean = false,
+    params: Record<string, any> = {},
+  ) => {
     appendLog(createLog(level, message, funcName, isSDK, params));
   };
 
@@ -77,24 +83,14 @@ const App: React.FC = () => {
   const [isLoadingPaywall, setIsLoadingPaywall] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
 
-  const refundPreferences = [
-    RefundPreference.NoPreference,
-    RefundPreference.Grant,
-    RefundPreference.Decline,
-  ];
+  const refundPreferences = [RefundPreference.NoPreference, RefundPreference.Grant, RefundPreference.Decline];
 
-  const refundPreferenceLabels = [
-    'No Preference',
-    'Grant',
-    'Decline',
-  ];
-
-
+  const refundPreferenceLabels = ['No Preference', 'Grant', 'Decline'];
 
   const fetchPolicies = [
     'reload_revalidating_cache_data',
     'return_cache_data_else_load',
-    'return_cache_data_if_not_expired_else_load'
+    'return_cache_data_if_not_expired_else_load',
   ] as const;
 
   const testActivate = async () => {
@@ -111,7 +107,7 @@ const App: React.FC = () => {
           logLevel: 'verbose',
           observerMode: false,
           __ignoreActivationOnFastRefresh: import.meta.env.DEV,
-        }
+        },
       });
       const customerIdMessage = trimmedCustomerUserId ? ` customer user id: ${trimmedCustomerUserId}` : '';
       setResult(`Adapty activated successfully!${customerIdMessage}`);
@@ -158,7 +154,10 @@ const App: React.FC = () => {
 
     setIsLoadingPaywall(true);
     try {
-      log('info', 'Fetching paywall', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, { placementId, forDefaultAudience });
+      log('info', 'Fetching paywall', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, {
+        placementId,
+        forDefaultAudience,
+      });
       const fetchPolicy = fetchPolicies[fetchPolicyIndex];
 
       let paywall: AdaptyPaywall;
@@ -193,7 +192,10 @@ const App: React.FC = () => {
         });
       }
 
-      log('info', 'Paywall fetched', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, { paywall, forDefaultAudience });
+      log('info', 'Paywall fetched', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, {
+        paywall,
+        forDefaultAudience,
+      });
       setPaywall(paywall);
 
       // Log show paywall
@@ -206,7 +208,13 @@ const App: React.FC = () => {
       const audienceType = forDefaultAudience ? 'for default audience' : '';
       setResult(`Paywall loaded ${audienceType}: ${paywall.name}`);
     } catch (error) {
-      log('error', 'Error fetching paywall', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, { error: String(error), forDefaultAudience });
+      log(
+        'error',
+        'Error fetching paywall',
+        forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall',
+        false,
+        { error: String(error), forDefaultAudience },
+      );
       setResult(`Error fetching paywall: ${error}`);
     } finally {
       setIsLoadingPaywall(false);
@@ -227,20 +235,19 @@ const App: React.FC = () => {
     }
   };
 
-
   const updateAttribution = async () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Updating attribution', 'updateAttribution', false, { 
+      log('info', 'Updating attribution', 'updateAttribution', false, {
         source: 'custom',
         attribution: {
           status: 'non_organic',
           channel: 'Google Ads',
           campaign: 'Adapty Web Test',
           ad_group: 'adapty ad_group',
-          creative: 'test_creative'
-        }
+          creative: 'test_creative',
+        },
       });
       await adapty.updateAttribution({
         attribution: {
@@ -254,7 +261,10 @@ const App: React.FC = () => {
       });
       setResult('Attribution updated successfully');
     } catch (error) {
-      log('error', 'Error updating attribution', 'updateAttribution', false, { error: String(error), source: 'custom' });
+      log('error', 'Error updating attribution', 'updateAttribution', false, {
+        error: String(error),
+        source: 'custom',
+      });
       setResult(`Error updating attribution: ${error}`);
     }
   };
@@ -296,13 +306,21 @@ const App: React.FC = () => {
 
   const createWebPaywallUrlForProduct = async (product: AdaptyPaywallProduct) => {
     try {
-      log('info', 'Creating web paywall URL for product', 'createWebPaywallUrl', false, { productId: product.vendorProductId });
+      log('info', 'Creating web paywall URL for product', 'createWebPaywallUrl', false, {
+        productId: product.vendorProductId,
+      });
       const url = await adapty.createWebPaywallUrl({ paywallOrProduct: product });
       setResult(`Web URL for ${product.vendorProductId}: ${url}`);
       alert(`Web paywall URL for ${product.vendorProductId}: ${url}`);
-      log('info', 'Web paywall URL for product created', 'createWebPaywallUrl', false, { url, productId: product.vendorProductId });
+      log('info', 'Web paywall URL for product created', 'createWebPaywallUrl', false, {
+        url,
+        productId: product.vendorProductId,
+      });
     } catch (error) {
-      log('error', 'Error creating web paywall URL for product', 'createWebPaywallUrl', false, { error: String(error), productId: product.vendorProductId });
+      log('error', 'Error creating web paywall URL for product', 'createWebPaywallUrl', false, {
+        error: String(error),
+        productId: product.vendorProductId,
+      });
       setResult(`Error creating web URL for product: ${error}`);
     }
   };
@@ -313,7 +331,10 @@ const App: React.FC = () => {
       await adapty.openWebPaywall({ paywallOrProduct: product });
       setResult(`Web paywall opened for: ${product.vendorProductId}`);
     } catch (error) {
-      log('error', 'Error opening web paywall for product', 'openWebPaywall', false, { error: String(error), productId: product.vendorProductId });
+      log('error', 'Error opening web paywall for product', 'openWebPaywall', false, {
+        error: String(error),
+        productId: product.vendorProductId,
+      });
       setResult(`Error opening web paywall for product: ${error}`);
     }
   };
@@ -387,7 +408,10 @@ const App: React.FC = () => {
         customTags = JSON.parse(customTagsJson);
       } catch (error) {
         customTags = {};
-        log('warn', 'Invalid custom tags JSON, using empty object', 'presentPaywall', false, { error: String(error), customTagsText: customTags });
+        log('warn', 'Invalid custom tags JSON, using empty object', 'presentPaywall', false, {
+          error: String(error),
+          customTagsText: customTags,
+        });
       }
 
       const view = await createPaywallView(paywall, {
@@ -472,7 +496,10 @@ const App: React.FC = () => {
           return false; // Don't close the paywall
         },
         onWebPaymentNavigationFinished: (product: any, error: any) => {
-          log('info', 'Web payment navigation finished', 'paywall.onWebPaymentNavigationFinished', false, { product, error });
+          log('info', 'Web payment navigation finished', 'paywall.onWebPaymentNavigationFinished', false, {
+            product,
+            error,
+          });
           setResult(`🌐 Web payment finished: ${error ? 'with error' : 'success'}`);
           return false; // Don't close the paywall
         },
@@ -482,7 +509,7 @@ const App: React.FC = () => {
 
       await view.present();
 
-     // setTimeout(() => view.dismiss(),5000)
+      // setTimeout(() => view.dismiss(),5000)
       setResult('✅ Paywall presented successfully!');
     } catch (error: any) {
       log('error', 'Failed to present paywall', 'presentPaywall', false, { error: error.message || error.toString() });
@@ -545,12 +572,12 @@ const App: React.FC = () => {
 
       setResult('✅ Onboarding presented successfully!');
     } catch (error: any) {
-      log('error', 'Failed to present onboarding', 'presentOnboarding', false, { error: error?.message || error?.toString() });
+      log('error', 'Failed to present onboarding', 'presentOnboarding', false, {
+        error: error?.message || error?.toString(),
+      });
       setResult(`❌ Failed to present onboarding: ${error?.message || error}`);
     }
   };
-
-
 
   const renderIdentifySection = () => {
     return (
@@ -626,11 +653,14 @@ const App: React.FC = () => {
         {isIOS && (
           <div className={styles.RefundItem}>
             <label>Refund Preference:</label>
-            <div className={styles.ClickableParam} onClick={() => {
-              if (isIOS) {
-                setRefundPreferenceIdx((refundPreferenceIdx + 1) % refundPreferences.length);
-              }
-            }}>
+            <div
+              className={styles.ClickableParam}
+              onClick={() => {
+                if (isIOS) {
+                  setRefundPreferenceIdx((refundPreferenceIdx + 1) % refundPreferences.length);
+                }
+              }}
+            >
               <span>{refundPreferenceLabels[refundPreferenceIdx]}</span>
               <span className={styles.ParamValue}>{refundPreferences[refundPreferenceIdx]}</span>
             </div>
@@ -648,11 +678,14 @@ const App: React.FC = () => {
         {isIOS && (
           <div className={styles.RefundItem}>
             <label>Collecting Refund Data Consent:</label>
-            <div className={styles.ClickableParam} onClick={() => {
-              if (isIOS) {
-                setCollectingRefundDataConsent(!collectingRefundDataConsent);
-              }
-            }}>
+            <div
+              className={styles.ClickableParam}
+              onClick={() => {
+                if (isIOS) {
+                  setCollectingRefundDataConsent(!collectingRefundDataConsent);
+                }
+              }}
+            >
               <span>Consent</span>
               <span className={styles.ParamValue}>{collectingRefundDataConsent.toString()}</span>
             </div>
@@ -681,14 +714,26 @@ const App: React.FC = () => {
           </div>
           {accessLevel ? (
             <div>
-              <div><strong>Premium:</strong> {accessLevel.isActive ? '✅ Active' : '❌ Not Active'}</div>
-              <div><strong>Is Lifetime:</strong> {accessLevel.isLifetime ? '✅ Yes' : '❌ No'}</div>
-              <div><strong>Activated At:</strong> {formatDate(accessLevel.activatedAt)}</div>
-              <div><strong>Expires At:</strong> {formatDate(accessLevel.expiresAt)}</div>
-              <div><strong>Will Renew:</strong> {accessLevel.willRenew ? '✅ Yes' : '❌ No'}</div>
+              <div>
+                <strong>Premium:</strong> {accessLevel.isActive ? '✅ Active' : '❌ Not Active'}
+              </div>
+              <div>
+                <strong>Is Lifetime:</strong> {accessLevel.isLifetime ? '✅ Yes' : '❌ No'}
+              </div>
+              <div>
+                <strong>Activated At:</strong> {formatDate(accessLevel.activatedAt)}
+              </div>
+              <div>
+                <strong>Expires At:</strong> {formatDate(accessLevel.expiresAt)}
+              </div>
+              <div>
+                <strong>Will Renew:</strong> {accessLevel.willRenew ? '✅ Yes' : '❌ No'}
+              </div>
             </div>
           ) : (
-            <div><strong>Status:</strong> No active subscriptions</div>
+            <div>
+              <strong>Status:</strong> No active subscriptions
+            </div>
           )}
         </div>
         <button
@@ -777,14 +822,14 @@ const App: React.FC = () => {
           <button
             onClick={() => fetchPaywall(false)}
             disabled={isLoadingPaywall || !isActivated}
-            className={`${styles.Button} ${styles.ButtonPrimary} ${(isLoadingPaywall || !isActivated) ? styles.Loading : ''}`}
+            className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingPaywall || !isActivated ? styles.Loading : ''}`}
           >
             {isLoadingPaywall ? 'Loading...' : 'Load Paywall'}
           </button>
           <button
             onClick={() => fetchPaywall(true)}
             disabled={isLoadingPaywall || !isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary} ${(isLoadingPaywall || !isActivated) ? styles.Loading : ''}`}
+            className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingPaywall || !isActivated ? styles.Loading : ''}`}
           >
             {isLoadingPaywall ? 'Loading...' : 'Load (Default Audience)'}
           </button>
@@ -794,20 +839,38 @@ const App: React.FC = () => {
         <div className={styles.InfoBox}>
           {paywall ? (
             <div>
-              <div><strong>Paywall ID:</strong> {paywall.name}</div>
-              <div><strong>Variation ID:</strong> {paywall.variationId}</div>
-              <div><strong>Revision:</strong> {paywall.placement.revision}</div>
-              <div><strong>Has Remote Config:</strong> {paywall.remoteConfig ? '✅ Yes' : '❌ No'}</div>
-              <div><strong>Has Paywall Builder:</strong> {paywall.paywallBuilder ? '✅ Yes' : '❌ No'}</div>
-              <div><strong>Products Count:</strong> {products.length}</div>
+              <div>
+                <strong>Paywall ID:</strong> {paywall.name}
+              </div>
+              <div>
+                <strong>Variation ID:</strong> {paywall.variationId}
+              </div>
+              <div>
+                <strong>Revision:</strong> {paywall.placement.revision}
+              </div>
+              <div>
+                <strong>Has Remote Config:</strong> {paywall.remoteConfig ? '✅ Yes' : '❌ No'}
+              </div>
+              <div>
+                <strong>Has Paywall Builder:</strong> {paywall.paywallBuilder ? '✅ Yes' : '❌ No'}
+              </div>
+              <div>
+                <strong>Products Count:</strong> {products.length}
+              </div>
               {paywall.remoteConfig && (
                 <div>
-                  <div><strong>Config Locale:</strong> {paywall.remoteConfig.lang}</div>
-                  <div><strong>Config Data:</strong> {paywall.remoteConfig.dataString}</div>
+                  <div>
+                    <strong>Config Locale:</strong> {paywall.remoteConfig.lang}
+                  </div>
+                  <div>
+                    <strong>Config Data:</strong> {paywall.remoteConfig.dataString}
+                  </div>
                 </div>
               )}
               {paywall.paywallBuilder && (
-                <div><strong>Builder Locale:</strong> {paywall.paywallBuilder.lang}</div>
+                <div>
+                  <strong>Builder Locale:</strong> {paywall.paywallBuilder.lang}
+                </div>
               )}
 
               {products.length > 0 && (
@@ -818,9 +881,7 @@ const App: React.FC = () => {
                       <div className={styles.ProductTitle}>{product.localizedTitle}</div>
                       <div className={styles.ProductPrice}>Price: {product.price?.localizedString || 'N/A'}</div>
                       <div className={styles.ProductId}>ID: {product.vendorProductId}</div>
-                      <div className={styles.ProductActionsComment}>
-                        Actions for this specific product:
-                      </div>
+                      <div className={styles.ProductActionsComment}>Actions for this specific product:</div>
 
                       <div className={styles.ProductButtons}>
                         <button
@@ -841,7 +902,6 @@ const App: React.FC = () => {
                         >
                           Create Web URL (iOS)
                         </button>
-
                       </div>
                     </div>
                   ))}
@@ -863,37 +923,26 @@ const App: React.FC = () => {
             Present Paywall
           </button>
 
-                     <button
-             onClick={openWebPaywall}
-             disabled={!paywall}
-             className={`${styles.Button} ${styles.ButtonSecondary}`}
-           >
-             Open Web Paywall (iOS)
-           </button>
-
-
-
+          <button onClick={openWebPaywall} disabled={!paywall} className={`${styles.Button} ${styles.ButtonSecondary}`}>
+            Open Web Paywall (iOS)
+          </button>
         </div>
 
-          {/* Combined Create Web URL Button + Input */}
-          <div className={styles.WebUrlContainer}>
-            <button
-              onClick={createWebPaywallUrl}
-              disabled={!paywall}
-              className={styles.WebUrlButton}
-            >
-              Create Web URL (iOS)
-            </button>
-            <input
-              type="text"
-              value={webPaywallUrl}
-              placeholder="Generated URL will appear here..."
-              readOnly
-              className={`${styles.WebUrlInput} ${webPaywallUrl ? styles.WebUrlInputHasValue : ''}`}
-              onClick={(e) => webPaywallUrl && (e.target as HTMLInputElement).select()}
-              title={webPaywallUrl ? 'Click to select URL for copying' : 'No URL generated yet'}
-            />
-          </div>
+        {/* Combined Create Web URL Button + Input */}
+        <div className={styles.WebUrlContainer}>
+          <button onClick={createWebPaywallUrl} disabled={!paywall} className={styles.WebUrlButton}>
+            Create Web URL (iOS)
+          </button>
+          <input
+            type="text"
+            value={webPaywallUrl}
+            placeholder="Generated URL will appear here..."
+            readOnly
+            className={`${styles.WebUrlInput} ${webPaywallUrl ? styles.WebUrlInputHasValue : ''}`}
+            onClick={(e) => webPaywallUrl && (e.target as HTMLInputElement).select()}
+            title={webPaywallUrl ? 'Click to select URL for copying' : 'No URL generated yet'}
+          />
+        </div>
       </div>
     );
   };
@@ -961,14 +1010,14 @@ const App: React.FC = () => {
           <button
             onClick={() => fetchOnboarding(false)}
             disabled={isLoadingOnboarding || !isActivated}
-            className={`${styles.Button} ${styles.ButtonPrimary} ${(isLoadingOnboarding || !isActivated) ? styles.Loading : ''}`}
+            className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingOnboarding || !isActivated ? styles.Loading : ''}`}
           >
             {isLoadingOnboarding ? 'Loading...' : 'Load Onboarding'}
           </button>
           <button
             onClick={() => fetchOnboarding(true)}
             disabled={isLoadingOnboarding || !isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary} ${(isLoadingOnboarding || !isActivated) ? styles.Loading : ''}`}
+            className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingOnboarding || !isActivated ? styles.Loading : ''}`}
           >
             {isLoadingOnboarding ? 'Loading...' : 'Load (Default Audience)'}
           </button>
@@ -978,19 +1027,35 @@ const App: React.FC = () => {
         <div className={styles.InfoBox}>
           {onboarding ? (
             <div>
-              <div><strong>Onboarding Name:</strong> {onboarding.name}</div>
-              <div><strong>Variation ID:</strong> {onboarding.variationId}</div>
-              <div><strong>Revision:</strong> {onboarding.placement.revision}</div>
-              <div><strong>Has Remote Config:</strong> {onboarding.remoteConfig ? '✅ Yes' : '❌ No'}</div>
-              <div><strong>Has Onboarding Builder:</strong> {onboarding.onboardingBuilder ? '✅ Yes' : '❌ No'}</div>
+              <div>
+                <strong>Onboarding Name:</strong> {onboarding.name}
+              </div>
+              <div>
+                <strong>Variation ID:</strong> {onboarding.variationId}
+              </div>
+              <div>
+                <strong>Revision:</strong> {onboarding.placement.revision}
+              </div>
+              <div>
+                <strong>Has Remote Config:</strong> {onboarding.remoteConfig ? '✅ Yes' : '❌ No'}
+              </div>
+              <div>
+                <strong>Has Onboarding Builder:</strong> {onboarding.onboardingBuilder ? '✅ Yes' : '❌ No'}
+              </div>
               {onboarding.remoteConfig && (
                 <div>
-                  <div><strong>Config Locale:</strong> {onboarding.remoteConfig.lang}</div>
-                  <div><strong>Config Data:</strong> {onboarding.remoteConfig.dataString}</div>
+                  <div>
+                    <strong>Config Locale:</strong> {onboarding.remoteConfig.lang}
+                  </div>
+                  <div>
+                    <strong>Config Data:</strong> {onboarding.remoteConfig.dataString}
+                  </div>
                 </div>
               )}
               {onboarding.onboardingBuilder && (
-                <div><strong>Builder Locale:</strong> {onboarding.onboardingBuilder.lang}</div>
+                <div>
+                  <strong>Builder Locale:</strong> {onboarding.onboardingBuilder.lang}
+                </div>
               )}
             </div>
           ) : (
@@ -1007,7 +1072,6 @@ const App: React.FC = () => {
           >
             Present Onboarding
           </button>
-
         </div>
       </div>
     );
@@ -1021,7 +1085,9 @@ const App: React.FC = () => {
       await adapty.presentCodeRedemptionSheet();
       setResult('Code redemption sheet presented successfully (iOS only)');
     } catch (error) {
-      log('error', 'Error presenting code redemption sheet', 'presentCodeRedemptionSheet', false, { error: String(error) });
+      log('error', 'Error presenting code redemption sheet', 'presentCodeRedemptionSheet', false, {
+        error: String(error),
+      });
       setResult(`Error presenting code redemption sheet: ${error}`);
     }
   };
@@ -1052,7 +1118,13 @@ const App: React.FC = () => {
 
     setIsLoadingOnboarding(true);
     try {
-      log('info', 'Fetching onboarding', forDefaultAudience ? 'getOnboardingForDefaultAudience' : 'getOnboarding', false, { onboardingPlacementId, forDefaultAudience });
+      log(
+        'info',
+        'Fetching onboarding',
+        forDefaultAudience ? 'getOnboardingForDefaultAudience' : 'getOnboarding',
+        false,
+        { onboardingPlacementId, forDefaultAudience },
+      );
       const fetchPolicy = fetchPolicies[fetchPolicyIndex];
 
       let onboardingResult: AdaptyOnboarding;
@@ -1087,7 +1159,13 @@ const App: React.FC = () => {
       const audienceType = forDefaultAudience ? 'for default audience' : '';
       setResult(`Onboarding loaded ${audienceType}: ${onboardingResult.name}`);
     } catch (error) {
-      log('error', 'Error fetching onboarding', forDefaultAudience ? 'getOnboardingForDefaultAudience' : 'getOnboarding', false, { error: String(error), onboardingPlacementId, forDefaultAudience });
+      log(
+        'error',
+        'Error fetching onboarding',
+        forDefaultAudience ? 'getOnboardingForDefaultAudience' : 'getOnboarding',
+        false,
+        { error: String(error), onboardingPlacementId, forDefaultAudience },
+      );
       setResult(`Error fetching onboarding: ${error}`);
     } finally {
       setIsLoadingOnboarding(false);
@@ -1111,11 +1189,18 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Setting integration identifier', 'setIntegrationIdentifier', false, { key: integrationIdKey, value: integrationIdValue });
+      log('info', 'Setting integration identifier', 'setIntegrationIdentifier', false, {
+        key: integrationIdKey,
+        value: integrationIdValue,
+      });
       await adapty.setIntegrationIdentifier({ key: integrationIdKey, value: integrationIdValue });
       setResult(`Integration identifier set successfully: ${integrationIdKey} = ${integrationIdValue}`);
     } catch (error) {
-      log('error', 'Error setting integration identifier', 'setIntegrationIdentifier', false, { error: String(error), key: integrationIdKey, value: integrationIdValue });
+      log('error', 'Error setting integration identifier', 'setIntegrationIdentifier', false, {
+        error: String(error),
+        key: integrationIdKey,
+        value: integrationIdValue,
+      });
       setResult(`Error setting integration identifier: ${error}`);
     }
   };
@@ -1124,11 +1209,16 @@ const App: React.FC = () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Updating collecting refund data consent', 'updateCollectingRefundDataConsent', false, { consent: collectingRefundDataConsent });
+      log('info', 'Updating collecting refund data consent', 'updateCollectingRefundDataConsent', false, {
+        consent: collectingRefundDataConsent,
+      });
       await adapty.updateCollectingRefundDataConsent({ consent: collectingRefundDataConsent });
       setResult(`Collecting refund data consent updated successfully: ${collectingRefundDataConsent}`);
     } catch (error) {
-      log('error', 'Error updating collecting refund data consent', 'updateCollectingRefundDataConsent', false, { error: String(error), consent: collectingRefundDataConsent });
+      log('error', 'Error updating collecting refund data consent', 'updateCollectingRefundDataConsent', false, {
+        error: String(error),
+        consent: collectingRefundDataConsent,
+      });
       setResult(`Error updating collecting refund data consent: ${error}`);
     }
   };
@@ -1142,7 +1232,10 @@ const App: React.FC = () => {
       await adapty.updateRefundPreference({ refundPreference });
       setResult(`Refund preference updated successfully: ${refundPreference}`);
     } catch (error) {
-      log('error', 'Error updating refund preference', 'updateRefundPreference', false, { error: String(error), preference: refundPreferences });
+      log('error', 'Error updating refund preference', 'updateRefundPreference', false, {
+        error: String(error),
+        preference: refundPreferences,
+      });
       setResult(`Error updating refund preference: ${error}`);
     }
   };
@@ -1155,11 +1248,11 @@ const App: React.FC = () => {
 
       const fileLocation: FileLocation = {
         ios: {
-          fileName: 'ios_fallback.json'
+          fileName: 'ios_fallback.json',
         },
         android: {
-          relativeAssetPath: 'android_fallback.json'
-        }
+          relativeAssetPath: 'android_fallback.json',
+        },
       };
 
       await adapty.setFallback({ fileLocation });
@@ -1239,7 +1332,6 @@ const App: React.FC = () => {
           >
             Set Log Level
           </button>
-
         </div>
         <div className={styles.ButtonGroup}>
           <button
@@ -1258,11 +1350,7 @@ const App: React.FC = () => {
           </button>
         </div>
         <div className={styles.ButtonGroup}>
-          <button
-            onClick={logout}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonDanger}`}
-          >
+          <button onClick={logout} disabled={!isActivated} className={`${styles.Button} ${styles.ButtonDanger}`}>
             Logout
           </button>
         </div>
@@ -1284,7 +1372,11 @@ const App: React.FC = () => {
       });
       setResult(`Transaction reported successfully: ${transactionId.trim()}`);
     } catch (error) {
-      log('error', 'Error reporting transaction', 'reportTransaction', false, { error: String(error), transactionId, variationId });
+      log('error', 'Error reporting transaction', 'reportTransaction', false, {
+        error: String(error),
+        transactionId,
+        variationId,
+      });
       setResult(`Error reporting transaction: ${error}`);
     }
   };
@@ -1297,12 +1389,14 @@ const App: React.FC = () => {
       const installationStatus = await adapty.getCurrentInstallationStatus();
       log('info', 'Installation status updated', 'getCurrentInstallationStatus', false, { installationStatus });
       setResult(`Installation status: ${JSON.stringify(installationStatus, null, 2)}`);
-      
+
       await showSuccessToast('Installation status updated successfully!');
     } catch (error) {
-      log('error', 'Error getting installation status', 'getCurrentInstallationStatus', false, { error: String(error) });
+      log('error', 'Error getting installation status', 'getCurrentInstallationStatus', false, {
+        error: String(error),
+      });
       setResult(`Error getting installation status: ${error}`);
-      
+
       await showErrorToast('Failed to get installation status');
     }
   };
@@ -1311,9 +1405,7 @@ const App: React.FC = () => {
     <div className={styles.AppContainer}>
       <main>
         <h1 className={styles.Title}>Adapty Capacitor Devtools</h1>
-        <p className={styles.Description}>
-          Devtools app for adapty plugin API.
-        </p>
+        <p className={styles.Description}>Devtools app for adapty plugin API.</p>
 
         {/* Credentials Info */}
         <div className={styles.Section}>
@@ -1353,16 +1445,18 @@ const App: React.FC = () => {
 
         {/* Result Display */}
         {result && (
-          <div className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}>
+          <div
+            className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}
+          >
             {result}
           </div>
         )}
-        
+
         {/* Events Section */}
         {isActivated && (
           <div className={styles.Section}>
             <h3 className={styles.SectionTitle}>Event Listeners</h3>
-              <p>Events will appear in Logs tab</p>
+            <p>Events will appear in Logs tab</p>
           </div>
         )}
 
