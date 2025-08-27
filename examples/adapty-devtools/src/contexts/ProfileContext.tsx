@@ -51,7 +51,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
   const [lastName, setLastName] = useState<string>(defaultState.lastName);
   const [gender, setGender] = useState<Gender>(defaultState.gender);
   const [birthday, setBirthday] = useState<string>(defaultState.birthday);
-  
+
   // Utility function to reset profile data
   const resetProfile = () => {
     setEmail(defaultState.email);
@@ -61,7 +61,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
     setGender(defaultState.gender);
     setBirthday(defaultState.birthday);
   };
-  
+
   const value: ProfileContextType = {
     // State
     email,
@@ -70,7 +70,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
     lastName,
     gender,
     birthday,
-    
+
     // Actions
     setEmail,
     setPhoneNumber,
@@ -81,11 +81,7 @@ export const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) =>
     resetProfile,
   };
 
-  return (
-    <ProfileContext.Provider value={value}>
-      {children}
-    </ProfileContext.Provider>
-  );
+  return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 };
 
 // Custom hook to use the profile context

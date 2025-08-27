@@ -1,6 +1,14 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { createHashRouter, RouterProvider, NavLink, useNavigate, Navigate, ScrollRestoration, Outlet } from 'react-router-dom';
+import {
+  createHashRouter,
+  RouterProvider,
+  NavLink,
+  useNavigate,
+  Navigate,
+  ScrollRestoration,
+  Outlet,
+} from 'react-router-dom';
 import { App as CapacitorApp } from '@capacitor/app';
 import type { PluginListenerHandle } from '@capacitor/core';
 import App from './screens/app/App';
@@ -44,9 +52,7 @@ function Tabs() {
         <NavLink
           key={t.to}
           to={t.to}
-          className={({ isActive }) =>
-            `${styles.TabLink}${isActive ? ' ' + styles.TabLinkActive : ''}`
-          }
+          className={({ isActive }) => `${styles.TabLink}${isActive ? ' ' + styles.TabLinkActive : ''}`}
         >
           {t.label}
         </NavLink>
@@ -79,7 +85,7 @@ function Layout() {
   return (
     <>
       <BackHandler />
-      <ScrollRestoration 
+      <ScrollRestoration
         getKey={(location) => {
           if (location.pathname.startsWith('/logs/') || location.pathname === '/profile') {
             return Math.random().toString();
@@ -97,35 +103,35 @@ function Layout() {
 
 const router = createHashRouter([
   {
-    path: "/",
+    path: '/',
     element: <Layout />,
     children: [
       {
         index: true,
-        element: <Navigate to="/app" replace />
+        element: <Navigate to="/app" replace />,
       },
       {
-        path: "app",
-        element: <AppRoute />
+        path: 'app',
+        element: <AppRoute />,
       },
       {
-        path: "logs",
-        element: <LogsRoute />
+        path: 'logs',
+        element: <LogsRoute />,
       },
       {
-        path: "logs/:id",
-        element: <LogPayloadRoute />
+        path: 'logs/:id',
+        element: <LogPayloadRoute />,
       },
       {
-        path: "profile",
-        element: <Profile />
+        path: 'profile',
+        element: <Profile />,
       },
       {
-        path: "*",
-        element: <Navigate to="/app" replace />
-      }
-    ]
-  }
+        path: '*',
+        element: <Navigate to="/app" replace />,
+      },
+    ],
+  },
 ]);
 
 function RouterApp() {

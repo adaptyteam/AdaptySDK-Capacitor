@@ -24,7 +24,6 @@ function Profile() {
   const [isActivated, setIsActivated] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
 
-
   useEffect(() => {
     let isMounted = true;
     adapty
@@ -63,16 +62,40 @@ function Profile() {
       </div>
       <div className={styles.Section}>
         <div className={styles.InputGroup}>
-          <input className={styles.Input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email" />
+          <input
+            className={styles.Input}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="email"
+          />
         </div>
         <div className={styles.InputGroup}>
-          <input className={styles.Input} type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="phone number" />
+          <input
+            className={styles.Input}
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            placeholder="phone number"
+          />
         </div>
         <div className={styles.InputGroup}>
-          <input className={styles.Input} type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="first name" />
+          <input
+            className={styles.Input}
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="first name"
+          />
         </div>
         <div className={styles.InputGroup}>
-          <input className={styles.Input} type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="last name" />
+          <input
+            className={styles.Input}
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="last name"
+          />
         </div>
         <div className={styles.InputGroup}>
           <select className={styles.Input} value={gender} onChange={(e) => setGender(e.target.value as Gender)}>
@@ -82,22 +105,32 @@ function Profile() {
           </select>
         </div>
         <div className={styles.InputGroup}>
-          <input className={styles.Input} type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} placeholder="birthday" />
+          <input
+            className={styles.Input}
+            type="date"
+            value={birthday}
+            onChange={(e) => setBirthday(e.target.value)}
+            placeholder="birthday"
+          />
         </div>
         <div className={styles.ButtonGroup}>
-          <button className={`${styles.Button} ${styles.ButtonPrimary}`} onClick={updateProfile} disabled={!isActivated}>
+          <button
+            className={`${styles.Button} ${styles.ButtonPrimary}`}
+            onClick={updateProfile}
+            disabled={!isActivated}
+          >
             Update Profile
           </button>
         </div>
         {result ? (
-          <div className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}>
+          <div
+            className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}
+          >
             {result}
           </div>
         ) : null}
         {!isActivated ? (
-          <div className={styles.MutedNote}>
-            Activate SDK on the main screen before updating profile
-          </div>
+          <div className={styles.MutedNote}>Activate SDK on the main screen before updating profile</div>
         ) : null}
       </div>
     </div>

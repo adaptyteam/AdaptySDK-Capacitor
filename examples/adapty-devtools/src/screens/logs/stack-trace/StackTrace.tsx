@@ -4,13 +4,7 @@ import { parseStackTrace, showStackTraceInConsole } from './utils';
 import StackFrame from './StackFrame';
 import styles from './StackTrace.module.css';
 
-const StackTrace: React.FC<StackTraceProps> = ({
-  stackTrace,
-  funcName,
-  message,
-  logLevel,
-  timestamp
-}) => {
+const StackTrace: React.FC<StackTraceProps> = ({ stackTrace, funcName, message, logLevel, timestamp }) => {
   const parsedStack = useMemo(() => parseStackTrace(stackTrace), [stackTrace]);
 
   const handleShowInConsole = () => {
@@ -21,11 +15,7 @@ const StackTrace: React.FC<StackTraceProps> = ({
     <div>
       <div className={styles.SectionHeader}>
         <h3>Stack Trace</h3>
-        <button
-          className={styles.ConsoleButton}
-          onClick={handleShowInConsole}
-          title="Show in console with source maps"
-        >
+        <button className={styles.ConsoleButton} onClick={handleShowInConsole} title="Show in console with source maps">
           Log trace in devtools
         </button>
       </div>

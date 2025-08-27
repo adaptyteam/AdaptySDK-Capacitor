@@ -1,0 +1,35 @@
+name: 🤔 Question
+description: Ask a question about anything that is unclear about Adapty Capacitor SDK
+labels: ["question"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Have we missed something? Does documentation lack something?
+- type: textarea
+  id: question
+  attributes:
+    label: Description
+    description: |
+      Write down your question. Include screenshots and logs if needed
+    placeholder: Provide your question
+    value: "How high the moon?"
+  validations:
+    required: true
+- type: input
+  id: version
+  attributes:
+    label: Version
+    description: What version of `@adapty/capacitor` are you using?
+    placeholder: v3.0.0
+  validations:
+    required: true
+- type: textarea
+  id: context
+  attributes:
+    label: Additional context
+    description: |
+      If relevant, please provide your Capacitor setup info: `npx cap doctor`
+    render: yml
+  validations:
+    required: false

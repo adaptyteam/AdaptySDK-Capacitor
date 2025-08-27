@@ -1,0 +1,17 @@
+name: 💫 Feature request
+description: Request a new feature
+labels: ["enhancement"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Want even more? Request a feature, that you think would benefit this Capacitor SDK
+- type: textarea
+  id: feature-description
+  attributes:
+    label: Description
+    description: |
+      Provide a clear description of a feature. Add expected usage scenarios
+    placeholder: What is it you desire?
+  validations:
+    required: true
