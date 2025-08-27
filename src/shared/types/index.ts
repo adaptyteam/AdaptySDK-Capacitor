@@ -232,24 +232,6 @@ export interface AdaptyProfile {
   readonly profileId: string;
 
   /**
-   * Segment hash for this profile.
-   * @readonly
-   */
-  readonly segmentHash: string;
-
-  /**
-   * Whether this is a test user.
-   * @readonly
-   */
-  readonly isTestUser: boolean;
-
-  /**
-   * Timestamp when profile was updated.
-   * @readonly
-   */
-  readonly timestamp: number;
-
-  /**
    * Object that maps product ids from a store to
    * information about the user's subscriptions.
    * The value can be `null` if the user does not have any subscriptions.
