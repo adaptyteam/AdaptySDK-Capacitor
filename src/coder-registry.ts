@@ -8,7 +8,6 @@ import { createArrayCoder } from './shared/coders/array';
 import type { AdaptyPaywallProduct } from './shared/types';
 import type { MethodName } from './shared/types/method-types';
 
-// Coder registry for different method responses
 const coderRegistry = {
   get_profile: AdaptyProfileCoder,
   restore_purchases: AdaptyProfileCoder,
