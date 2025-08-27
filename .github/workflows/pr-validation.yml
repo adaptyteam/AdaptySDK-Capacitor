@@ -94,9 +94,9 @@ jobs:
       if: matrix.check-type == 'js-checks'
       run: yarn eslint
 
-    # - name: Run unit tests
-    #   if: matrix.check-type == 'js-checks'
-    #   run: yarn test
+    - name: Run unit tests
+      if: matrix.check-type == 'js-checks'
+      run: yarn test
 
     - name: Run build verification
       if: matrix.check-type == 'js-checks'
