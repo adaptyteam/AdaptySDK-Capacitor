@@ -130,9 +130,9 @@ export class OnboardingViewController {
    * @param {Partial<OnboardingEventHandlers> | undefined} [eventHandlers] - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public registerEventHandlers(
+  public async registerEventHandlers(
     eventHandlers: Partial<OnboardingEventHandlers> = DEFAULT_ONBOARDING_EVENT_HANDLERS,
-  ): () => void {
+  ): Promise<() => void> {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'registerEventHandlers' });
     log.start(() => ({ _id: this.id }));
@@ -167,10 +167,10 @@ export class OnboardingViewController {
       }
     };
 
-    Object.entries(finalEventHandlers).forEach(([eventName, handler]) => {
+    for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
       if (handler && typeof handler === 'function') {
         try {
-          viewEmitter.addListener(eventName as keyof OnboardingEventHandlers, handler, onRequestClose);
+          await viewEmitter.addListener(eventName as keyof OnboardingEventHandlers, handler, onRequestClose);
           Log.verbose(
             'registerEventHandlers',
             () => 'Registered onboarding handler',
@@ -184,7 +184,7 @@ export class OnboardingViewController {
           );
         }
       }
-    });
+    }
 
     const unsubscribe = () => {
       Log.info(

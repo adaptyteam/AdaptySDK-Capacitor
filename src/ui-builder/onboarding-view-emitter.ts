@@ -28,11 +28,11 @@ export class OnboardingViewEmitter {
     this.viewId = viewId;
   }
 
-  public addListener(
+  public async addListener(
     event: EventName,
     callback: OnboardingEventHandlers[EventName],
     onRequestClose: () => Promise<void>,
-  ): PluginListenerHandle {
+  ): Promise<PluginListenerHandle> {
     const viewId = this.viewId;
     const config = HANDLER_TO_EVENT_CONFIG[event];
 
@@ -46,7 +46,7 @@ export class OnboardingViewEmitter {
 
     if (!this.eventListeners.has(config.nativeEvent)) {
       const handlers = this.handlers;
-      const subscription = (AdaptyCapacitorPlugin as any).addListener(
+      const subscription = await AdaptyCapacitorPlugin.addListener(
         config.nativeEvent,
         function (arg: CapacitorEventArg) {
           const ctx = new LogContext();

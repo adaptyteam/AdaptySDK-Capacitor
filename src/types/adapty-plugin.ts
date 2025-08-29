@@ -1,5 +1,6 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
+import type { AdaptyError } from '../shared/adapty-error';
 import type { LoggerConfig } from '../shared/logger';
 import type {
   AdaptyPaywall,
@@ -168,31 +169,39 @@ export interface AdaptyPlugin {
   getCurrentInstallationStatus(): Promise<AdaptyInstallationStatus>;
 
   /**
-   * Adds a listener for profile updates.
+   * Adds a strongly-typed event listener.
+   *
+   * Supported events:
+   * - onLatestProfileLoad → { profile: AdaptyProfile }
+   * - onInstallationDetailsSuccess → { details: AdaptyInstallationDetails }
+   * - onInstallationDetailsFail → { error: AdaptyError }
    */
-  addListener(
-    eventName: 'onLatestProfileLoad',
-    listenerFunc: (data: { profile: AdaptyProfile }) => void,
-  ): Promise<PluginListenerHandle>;
-
-  /**
-   * Adds a listener for installation details success events.
-   */
-  addListener(
-    eventName: 'onInstallationDetailsSuccess',
-    listenerFunc: (data: { details: AdaptyInstallationDetails }) => void,
-  ): Promise<PluginListenerHandle>;
-
-  /**
-   * Adds a listener for installation details failure events.
-   */
-  addListener(
-    eventName: 'onInstallationDetailsFail',
-    listenerFunc: (data: { error: any }) => void,
-  ): Promise<PluginListenerHandle>;
+  addListener: AddListenerFn;
 
   /**
    * Removes all listeners.
    */
   removeAllListeners(): Promise<void>;
 }
+
+/**
+ * Supported event names.
+ */
+export type AdaptyEventName = 'onLatestProfileLoad' | 'onInstallationDetailsSuccess' | 'onInstallationDetailsFail';
+
+/**
+ * Mapping between event names and their payload types.
+ */
+export type EventPayloadMap = {
+  onLatestProfileLoad: { profile: AdaptyProfile };
+  onInstallationDetailsSuccess: { details: AdaptyInstallationDetails };
+  onInstallationDetailsFail: { error: AdaptyError };
+};
+
+/**
+ * Strongly-typed event listener function using mapped types.
+ */
+export type AddListenerFn = <T extends keyof EventPayloadMap>(
+  eventName: T,
+  listenerFunc: (data: EventPayloadMap[T]) => void,
+) => Promise<PluginListenerHandle>;
