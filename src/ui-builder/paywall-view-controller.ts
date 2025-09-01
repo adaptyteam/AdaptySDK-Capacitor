@@ -231,7 +231,9 @@ export class PaywallViewController {
    * @param {Partial<EventHandlers> | undefined} [eventHandlers] - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public registerEventHandlers(eventHandlers: Partial<EventHandlers> = DEFAULT_EVENT_HANDLERS): () => void {
+  public async registerEventHandlers(
+    eventHandlers: Partial<EventHandlers> = DEFAULT_EVENT_HANDLERS,
+  ): Promise<() => void> {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'registerEventHandlers' });
     log.start(() => ({ _id: this.id }));
@@ -275,10 +277,10 @@ export class PaywallViewController {
     };
 
     // Register all event handlers
-    Object.entries(finalEventHandlers).forEach(([eventName, handler]) => {
+    for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
       if (handler && typeof handler === 'function') {
         try {
-          const subscription = viewEmitter.addListener(eventName as keyof EventHandlers, handler, onRequestClose);
+          const subscription = await viewEmitter.addListener(eventName as keyof EventHandlers, handler, onRequestClose);
           subscriptions.push(subscription);
           Log.verbose(
             'registerEventHandlers',
@@ -293,7 +295,7 @@ export class PaywallViewController {
           );
         }
       }
-    });
+    }
 
     // Return unsubscribe function
     const unsubscribe = () => {

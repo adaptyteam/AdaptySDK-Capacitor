@@ -1,7 +1,5 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
-import type { AdaptyProfile, AdaptyInstallationDetails } from '../shared/types';
-
 export interface AdaptyCapacitorPlugin {
   /**
    * Handles crossplatform method calls
@@ -11,18 +9,5 @@ export interface AdaptyCapacitorPlugin {
   /**
    * Adds event listener
    */
-  addListener(
-    eventName: 'onLatestProfileLoad',
-    listenerFunc: (data: { profile: AdaptyProfile }) => void,
-  ): Promise<PluginListenerHandle>;
-
-  addListener(
-    eventName: 'onInstallationDetailsSuccess',
-    listenerFunc: (data: { details: AdaptyInstallationDetails }) => void,
-  ): Promise<PluginListenerHandle>;
-
-  addListener(
-    eventName: 'onInstallationDetailsFail',
-    listenerFunc: (data: { error: any }) => void,
-  ): Promise<PluginListenerHandle>;
+  addListener(eventName: string, listenerFunc: (data: { data: string }) => void): Promise<PluginListenerHandle>;
 }
