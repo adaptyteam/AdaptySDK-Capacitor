@@ -1,11 +1,13 @@
 import { WebPlugin } from '@capacitor/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
-
 import type { AdaptyCapacitorPlugin } from './definitions';
 
 export class AdaptyCapacitorPluginWeb extends WebPlugin implements AdaptyCapacitorPlugin {
-  override addListener(eventName: string, listenerFunc: (data: { data: string }) => void): Promise<PluginListenerHandle> {
+  override addListener(
+    eventName: string,
+    listenerFunc: (data: { data: string }) => void,
+  ): Promise<PluginListenerHandle> {
     return super.addListener(eventName, listenerFunc);
   }
 

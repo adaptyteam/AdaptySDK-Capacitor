@@ -88,7 +88,7 @@ function LogPayload({ onBack }: LogPayloadProps) {
     if (log?.params) {
       const serializedParams = JSON.stringify(log.params, null, 2);
       await Clipboard.write({
-        string: serializedParams
+        string: serializedParams,
       });
     }
   };
