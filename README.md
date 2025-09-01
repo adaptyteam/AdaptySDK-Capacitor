@@ -13,7 +13,7 @@ npx cap sync
 
 <docgen-index>
 
-* [`handleMethodCall(...)`](#handlemethodcall)
+* [`activate(...)`](#activate)
 * [`getPaywall(...)`](#getpaywall)
 * [`getPaywallForDefaultAudience(...)`](#getpaywallfordefaultaudience)
 * [`getPaywallProducts(...)`](#getpaywallproducts)
@@ -24,21 +24,21 @@ npx cap sync
 * [`logShowPaywall(...)`](#logshowpaywall)
 * [`openWebPaywall(...)`](#openwebpaywall)
 * [`createWebPaywallUrl(...)`](#createwebpaywallurl)
-* [`logShowOnboarding(...)`](#logshowonboarding)
 * [`logout()`](#logout)
 * [`makePurchase(...)`](#makepurchase)
 * [`presentCodeRedemptionSheet()`](#presentcoderedemptionsheet)
 * [`reportTransaction(...)`](#reporttransaction)
 * [`restorePurchases()`](#restorepurchases)
 * [`setFallback(...)`](#setfallback)
-* [`setFallbackPaywalls(...)`](#setfallbackpaywalls)
 * [`setIntegrationIdentifier(...)`](#setintegrationidentifier)
 * [`setLogLevel(...)`](#setloglevel)
 * [`updateAttribution(...)`](#updateattribution)
 * [`updateCollectingRefundDataConsent(...)`](#updatecollectingrefunddataconsent)
 * [`updateRefundPreference(...)`](#updaterefundpreference)
 * [`updateProfile(...)`](#updateprofile)
-* [`addListener('onLatestProfileLoad', ...)`](#addlisteneronlatestprofileload-)
+* [`isActivated()`](#isactivated)
+* [`getCurrentInstallationStatus()`](#getcurrentinstallationstatus)
+* [`addListener(...)`](#addlistener)
 * [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
@@ -48,19 +48,17 @@ npx cap sync
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-### handleMethodCall(...)
+### activate(...)
 
 ```typescript
-handleMethodCall(options: { methodName: string; args: string; }) => Promise<any>
+activate(options: { apiKey: string; params?: ActivateParamsInput; }) => Promise<void>
 ```
 
-Handles crossplatform method calls
+Initializes the Adapty SDK. This method must be called in order for the SDK to work.
 
-| Param         | Type                                               |
-| ------------- | -------------------------------------------------- |
-| **`options`** | <code>{ methodName: string; args: string; }</code> |
-
-**Returns:** <code>Promise&lt;any&gt;</code>
+| Param         | Type                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ apiKey: string; params?: <a href="#activateparamsinput">ActivateParamsInput</a>; }</code> |
 
 --------------------
 
@@ -71,7 +69,7 @@ Handles crossplatform method calls
 getPaywall(options: { placementId: string; locale?: string; params?: GetPlacementParamsInput; }) => Promise<AdaptyPaywall>
 ```
 
-Fetches the paywall by the specified placement
+Gets a paywall by placement ID
 
 | Param         | Type                                                                                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -88,7 +86,7 @@ Fetches the paywall by the specified placement
 getPaywallForDefaultAudience(options: { placementId: string; locale?: string; params?: GetPlacementForDefaultAudienceParamsInput; }) => Promise<AdaptyPaywall>
 ```
 
-Fetches the paywall for the default audience
+Gets a paywall for default audience by placement ID
 
 | Param         | Type                                                                                                                                                                |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -105,7 +103,7 @@ Fetches the paywall for the default audience
 getPaywallProducts(options: { paywall: AdaptyPaywall; }) => Promise<AdaptyPaywallProduct[]>
 ```
 
-Fetches products for a paywall
+Gets products for a specific paywall
 
 | Param         | Type                                                                  |
 | ------------- | --------------------------------------------------------------------- |
@@ -122,7 +120,7 @@ Fetches products for a paywall
 getOnboarding(options: { placementId: string; locale?: string; params?: GetPlacementParamsInput; }) => Promise<AdaptyOnboarding>
 ```
 
-Fetches an onboarding by the specified placement
+Gets an onboarding by placement ID
 
 | Param         | Type                                                                                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -139,7 +137,7 @@ Fetches an onboarding by the specified placement
 getOnboardingForDefaultAudience(options: { placementId: string; locale?: string; params?: GetPlacementForDefaultAudienceParamsInput; }) => Promise<AdaptyOnboarding>
 ```
 
-Fetches an onboarding for the default audience
+Gets an onboarding for default audience by placement ID
 
 | Param         | Type                                                                                                                                                                |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -156,7 +154,7 @@ Fetches an onboarding for the default audience
 getProfile() => Promise<AdaptyProfile>
 ```
 
-Fetches user profile
+Gets the current user profile
 
 **Returns:** <code>Promise&lt;<a href="#adaptyprofile">AdaptyProfile</a>&gt;</code>
 
@@ -169,7 +167,7 @@ Fetches user profile
 identify(options: { customerUserId: string; }) => Promise<void>
 ```
 
-Identifies user with customer ID
+Identifies the user with a customer user ID
 
 | Param         | Type                                     |
 | ------------- | ---------------------------------------- |
@@ -184,7 +182,7 @@ Identifies user with customer ID
 logShowPaywall(options: { paywall: AdaptyPaywall; }) => Promise<void>
 ```
 
-Logs paywall view event
+Logs that a paywall was shown to the user
 
 | Param         | Type                                                                  |
 | ------------- | --------------------------------------------------------------------- |
@@ -199,7 +197,7 @@ Logs paywall view event
 openWebPaywall(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct; }) => Promise<void>
 ```
 
-Opens web paywall
+Opens a web paywall
 
 | Param         | Type                                                                                                                                       |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -214,7 +212,7 @@ Opens web paywall
 createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct; }) => Promise<string>
 ```
 
-Creates web paywall URL
+Creates a URL for web paywall
 
 | Param         | Type                                                                                                                                       |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -225,19 +223,6 @@ Creates web paywall URL
 --------------------
 
 
-### logShowOnboarding(...)
-
-```typescript
-logShowOnboarding(options: { screenOrder: number; onboardingName?: string; screenName?: string; }) => Promise<void>
-```
-
-Logs onboarding view event
-
-| Param         | Type                                                                                |
-| ------------- | ----------------------------------------------------------------------------------- |
-| **`options`** | <code>{ screenOrder: number; onboardingName?: string; screenName?: string; }</code> |
-
---------------------
 
 
 ### logout()
@@ -246,7 +231,7 @@ Logs onboarding view event
 logout() => Promise<void>
 ```
 
-Logs out current user
+Logs out the current user
 
 --------------------
 
@@ -257,7 +242,7 @@ Logs out current user
 makePurchase(options: { product: AdaptyPaywallProduct; params?: MakePurchaseParamsInput; }) => Promise<AdaptyPurchaseResult>
 ```
 
-Makes a purchase
+Makes a purchase of a product
 
 | Param         | Type                                                                                                                                                         |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -285,7 +270,7 @@ Presents code redemption sheet (iOS only)
 reportTransaction(options: { transactionId: string; variationId?: string; }) => Promise<void>
 ```
 
-Reports transaction
+Reports a transaction to Adapty
 
 | Param         | Type                                                          |
 | ------------- | ------------------------------------------------------------- |
@@ -300,7 +285,7 @@ Reports transaction
 restorePurchases() => Promise<AdaptyProfile>
 ```
 
-Restores purchases
+Restores user purchases
 
 **Returns:** <code>Promise&lt;<a href="#adaptyprofile">AdaptyProfile</a>&gt;</code>
 
@@ -313,7 +298,7 @@ Restores purchases
 setFallback(options: { fileLocation: FileLocation; }) => Promise<void>
 ```
 
-Sets fallback placements
+Sets fallback paywalls from a file
 
 | Param         | Type                                                                     |
 | ------------- | ------------------------------------------------------------------------ |
@@ -322,19 +307,6 @@ Sets fallback placements
 --------------------
 
 
-### setFallbackPaywalls(...)
-
-```typescript
-setFallbackPaywalls(options: { paywallsLocation: FileLocation; }) => Promise<void>
-```
-
-Sets fallback paywalls (deprecated)
-
-| Param         | Type                                                                         |
-| ------------- | ---------------------------------------------------------------------------- |
-| **`options`** | <code>{ paywallsLocation: <a href="#filelocation">FileLocation</a>; }</code> |
-
---------------------
 
 
 ### setIntegrationIdentifier(...)
@@ -343,7 +315,7 @@ Sets fallback paywalls (deprecated)
 setIntegrationIdentifier(options: { key: string; value: string; }) => Promise<void>
 ```
 
-Sets integration identifier
+Sets an integration identifier
 
 | Param         | Type                                         |
 | ------------- | -------------------------------------------- |
@@ -355,14 +327,14 @@ Sets integration identifier
 ### setLogLevel(...)
 
 ```typescript
-setLogLevel(options: { logLevel: LogLevel; }) => Promise<void>
+setLogLevel(options: { logLevel?: LogLevel; logger?: LoggerConfig; }) => Promise<void>
 ```
 
-Sets log level
+Sets the log level for the SDK or configures JS logger sinks
 
-| Param         | Type                               |
-| ------------- | ---------------------------------- |
-| **`options`** | <code>{ logLevel: string; }</code> |
+| Param         | Type                                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ logLevel?: <a href="#loglevel">LogLevel</a>; logger?: <a href="#loggerconfig">LoggerConfig</a>; }</code> |
 
 --------------------
 
@@ -373,7 +345,7 @@ Sets log level
 updateAttribution(options: { attribution: Record<string, any>; source: string; }) => Promise<void>
 ```
 
-Updates attribution data
+Updates attribution data for the current user
 
 | Param         | Type                                                                                           |
 | ------------- | ---------------------------------------------------------------------------------------------- |
@@ -418,7 +390,7 @@ Updates refund preference (iOS only)
 updateProfile(options: { params: Partial<AdaptyProfileParameters>; }) => Promise<void>
 ```
 
-Updates user profile
+Updates the user profile
 
 | Param         | Type                                                                                                                           |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -427,20 +399,51 @@ Updates user profile
 --------------------
 
 
-### addListener('onLatestProfileLoad', ...)
+### isActivated()
 
 ```typescript
-addListener(eventName: 'onLatestProfileLoad', listenerFunc: (data: { profile: AdaptyProfile; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+isActivated() => Promise<boolean>
 ```
 
-Adds event listener
+Checks if the SDK is activated
 
-| Param              | Type                                                                                     |
-| ------------------ | ---------------------------------------------------------------------------------------- |
-| **`eventName`**    | <code>'onLatestProfileLoad'</code>                                                       |
-| **`listenerFunc`** | <code>(data: { profile: <a href="#adaptyprofile">AdaptyProfile</a>; }) =&gt; void</code> |
+**Returns:** <code>Promise&lt;boolean&gt;</code>
 
-**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+--------------------
+
+
+### getCurrentInstallationStatus()
+
+```typescript
+getCurrentInstallationStatus() => Promise<AdaptyInstallationStatus>
+```
+
+Gets the current installation status
+
+**Returns:** <code>Promise&lt;<a href="#adaptyinstallationstatus">AdaptyInstallationStatus</a>&gt;</code>
+
+--------------------
+
+
+### addListener(...)
+
+```typescript
+addListener<T extends keyof EventPayloadMap>(eventName: T, listenerFunc: (data: EventPayloadMap[T]) => void) => Promise<PluginListenerHandle>
+```
+
+Adds a strongly-typed event listener
+
+Supported events:
+- onLatestProfileLoad → { profile: AdaptyProfile }
+- onInstallationDetailsSuccess → { details: AdaptyInstallationDetails }
+- onInstallationDetailsFail → { error: AdaptyError }
+
+| Param              | Type                                                     |
+| ------------------ | -------------------------------------------------------- |
+| **`eventName`**    | <code>T extends keyof EventPayloadMap</code>            |
+| **`listenerFunc`** | <code>(data: EventPayloadMap[T]) =&gt; void</code>      |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
 --------------------
 
@@ -451,7 +454,7 @@ Adds event listener
 removeAllListeners() => Promise<void>
 ```
 
-Removes all event listeners
+Removes all listeners
 
 --------------------
 
@@ -790,6 +793,60 @@ Interface representing details about a user's subscription.
 | **`phoneNumber`**                   | <code>string</code>                                                                     |
 
 
+#### AdaptyInstallationStatus
+
+Status of the installation details retrieval.
+
+| Prop          | Type                                                                                                  |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| **`status`**  | <code>'not_available' \| 'not_determined' \| 'determined'</code>                                     |
+| **`details`** | <code><a href="#adaptyinstallationdetails">AdaptyInstallationDetails</a></code> (only when status is 'determined') |
+
+
+#### AdaptyInstallationDetails
+
+Information about the app installation.
+
+| Prop                    | Type                             | Description                                                 |
+| ----------------------- | -------------------------------- | ----------------------------------------------------------- |
+| **`installId`**         | <code>string</code>              | A unique identifier for this installation                   |
+| **`installTime`**       | <code><a href="#date">Date</a></code>          | The date and time when the app was installed              |
+| **`appLaunchCount`**    | <code>number</code>              | The total number of times the app has been launched       |
+| **`payload`**           | <code>string</code>              | Custom payload data associated with the installation      |
+
+
+#### LoggerConfig
+
+Configuration for JS logger sinks.
+
+| Prop              | Type                                      | Description                            |
+| ----------------- | ----------------------------------------- | -------------------------------------- |
+| **`sinks`**       | <code>LogSink[]</code>                    | Array of log sinks to handle events   |
+| **`defaultMeta`** | <code>Record&lt;string, unknown&gt;</code> | Default metadata to include in logs   |
+
+
+#### AdaptyUiMediaCache
+
+Configuration for AdaptyUI media cache.
+
+| Prop                              | Type                | Description                                  |
+| --------------------------------- | ------------------- | -------------------------------------------- |
+| **`memoryStorageTotalCostLimit`** | <code>number</code> | Total cost limit for memory storage         |
+| **`memoryStorageCountLimit`**     | <code>number</code> | Count limit for memory storage              |
+| **`diskStorageSizeLimit`**        | <code>number</code> | Size limit for disk storage                 |
+
+
+#### EventPayloadMap
+
+Mapping between event names and their payload types.
+
+| Event Name                         | Payload Type                                                                           |
+| ---------------------------------- | -------------------------------------------------------------------------------------- |
+| **`onLatestProfileLoad`**          | <code>{ profile: <a href="#adaptyprofile">AdaptyProfile</a>; }</code>                 |
+| **`onInstallationDetailsSuccess`** | <code>{ details: <a href="#adaptyinstallationdetails">AdaptyInstallationDetails</a>; }</code> |
+| **`onInstallationDetailsFail`**    | <code>{ error: AdaptyError; }</code>                                                  |
+
+
 #### PluginListenerHandle
 
 | Prop         | Type                                      |
@@ -800,21 +857,62 @@ Interface representing details about a user's subscription.
 ### Type Aliases
 
 
+#### ActivateParamsInput
+
+Describes optional parameters for the activate method.
+
+| Prop                            | Type                                         | Description                                                                                       |
+| ------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **`observerMode`**              | <code>boolean</code>                         | Turn it on if you handle purchases and subscription status yourself and use Adapty for sending subscription events and analytics. Default: false |
+| **`customerUserId`**            | <code>string</code>                          | User identifier in your system. If none of the parameters are passed, the SDK will generate an ID and use it for a current device. |
+| **`logLevel`**                  | <code><a href="#loglevel">LogLevel</a></code> | Log level for the SDK. Logging is performed on a native side.                                   |
+| **`serverCluster`**             | <code>'default' \| 'eu' \| 'cn'</code>       | Server cluster                                                                                   |
+| **`backendBaseUrl`**            | <code>string</code>                          | Backend base URL                                                                                 |
+| **`backendFallbackBaseUrl`**    | <code>string</code>                          | Backend fallback base URL                                                                        |
+| **`backendConfigsBaseUrl`**     | <code>string</code>                          | Backend configs base URL                                                                         |
+| **`backendUABaseUrl`**          | <code>string</code>                          | Backend UA base URL                                                                              |
+| **`backendProxyHost`**          | <code>string</code>                          | Backend proxy host                                                                               |
+| **`backendProxyPort`**          | <code>number</code>                          | Backend proxy port                                                                               |
+| **`activateUi`**                | <code>boolean</code>                         | Activate UI                                                                                      |
+| **`mediaCache`**                | <code><a href="#adaptyuimediacache">AdaptyUiMediaCache</a></code>              | Media cache configuration                                                                        |
+| **`ipAddressCollectionDisabled`** | <code>boolean</code>                       | Disables IP address collection. Default: false                                                  |
+| **`ios`**                       | <code>{ idfaCollectionDisabled?: boolean; }</code> | iOS-specific options. idfaCollectionDisabled: Disables IDFA collection. Default: false |
+| **`android`**                   | <code>{ adIdCollectionDisabled?: boolean; }</code> | Android-specific options. adIdCollectionDisabled: Disables Google AdvertisingID collection. Default: false |
+
+
 #### Record
 
 Construct a type with a set of properties K of type T
 
-<code>{ [P in K]: T; }</code>
+<code>{
+ [P in K]: T;
+ }</code>
 
 
 #### GetPlacementParamsInput
 
-<code><a href="#getplacementfordefaultaudienceparamsinput">GetPlacementForDefaultAudienceParamsInput</a> & { /** * This value limits the timeout (in milliseconds) for this method. * * @remarks * If the timeout is reached, cached data or local fallback will be returned. */ loadTimeoutMs?: number; }</code>
+Parameters for getting placements with additional timeout option.
+
+| Prop               | Type                                                                                                                       | Description                                                                                        |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **`...`**          | <code><a href="#getplacementfordefaultaudienceparamsinput">GetPlacementForDefaultAudienceParamsInput</a></code>         | All properties from GetPlacementForDefaultAudienceParamsInput                                     |
+| **`loadTimeoutMs`** | <code>number</code>                                                                                                       | Timeout in milliseconds. If reached, cached data or local fallback will be returned             |
 
 
 #### GetPlacementForDefaultAudienceParamsInput
 
-<code>{ /** * Fetch policy * * @remarks * By default SDK will try to load data from server and will return cached data in case of failure. * Otherwise use `'return_cache_data_else_load'` to return cached data if it exists. */ fetchPolicy?: <a href="#exclude">Exclude</a>&lt; <a href="#fetchpolicy">FetchPolicy</a>, 'return_cache_data_if_not_expired_else_load' &gt;; } | { /** * Fetch policy * * @remarks * By default SDK will try to load data from server and will return cached data in case of failure. * Otherwise use `'return_cache_data_else_load'` to return cached data if it exists. */ fetchPolicy: <a href="#extract">Extract</a>&lt; <a href="#fetchpolicy">FetchPolicy</a>, 'return_cache_data_if_not_expired_else_load' &gt;; /** * Max age for cached data. * * @remarks * Max time (in seconds) the cache is valid in case of `'return_cache_data_if_not_expired_else_load'` fetch policy. */ maxAgeSeconds: number; }</code>
+Parameters for getting placements for default audience with fetch policy options.
+
+**Option 1: Standard fetch policy**
+| Prop             | Type                                                                                                   | Description                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| **`fetchPolicy`** | <code><a href="#exclude">Exclude</a>&lt;<a href="#fetchpolicy">FetchPolicy</a>, 'return_cache_data_if_not_expired_else_load'&gt;</code> | Fetch policy. By default tries to load from server, returns cached data on failure |
+
+**Option 2: Cache with expiration**
+| Prop             | Type                                                                                                   | Description                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| **`fetchPolicy`** | <code>'return_cache_data_if_not_expired_else_load'</code>                                             | Fetch policy for cached data with expiration                                                      |
+| **`maxAgeSeconds`** | <code>number</code>                                                                                 | Max time (in seconds) the cache is valid for the specified fetch policy                          |
 
 
 #### Exclude
@@ -843,7 +941,12 @@ Construct a type with a set of properties K of type T
 
 #### AdaptySubscriptionOfferId
 
-<code>{ id?: string; type: 'introductory' } | { id: string; type: 'promotional' | 'win_back' }</code>
+Identifier for subscription offers.
+
+| Type                     | Properties                                                      | Description                                          |
+| ------------------------ | --------------------------------------------------------------- | ---------------------------------------------------- |
+| **Introductory**         | <code>{ id?: string; type: 'introductory'; }</code>           | Introductory offer, id is optional                  |
+| **Promotional/Win-back** | <code>{ id: string; type: 'promotional' \| 'win_back'; }</code> | Promotional or win-back offer, id is required       |
 
 
 #### OfferType
@@ -863,7 +966,12 @@ Construct a type with a set of properties K of type T
 
 #### AdaptyPurchaseResult
 
-<code>{ type: 'pending' | 'user_cancelled'; } | { type: 'success'; profile: <a href="#adaptyprofile">AdaptyProfile</a>; }</code>
+Result of a purchase operation.
+
+| Type                     | Properties                                                         | Description                                          |
+| ------------------------ | ------------------------------------------------------------------ | ---------------------------------------------------- |
+| **Pending/Cancelled**    | <code>{ type: 'pending' \| 'user_cancelled'; }</code>            | Purchase is pending or was cancelled by the user    |
+| **Success**              | <code>{ type: 'success'; profile: <a href="#adaptyprofile">AdaptyProfile</a>; }</code> | Purchase was successful, includes updated profile   |
 
 
 #### AdaptyAndroidSubscriptionUpdateReplacementMode
@@ -873,7 +981,12 @@ Construct a type with a set of properties K of type T
 
 #### FileLocation
 
-<code>{ ios: { fileName: string; }; android: | { relativeAssetPath: string; } | { rawResName: string; }; }</code>
+Configuration for file locations on different platforms.
+
+| Prop          | Type                                                                                    | Description                                                    |
+| ------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **`ios`**     | <code>{ fileName: string; }</code>                                                     | iOS file location. fileName: Name of the file in iOS bundle   |
+| **`android`** | <code>{ relativeAssetPath: string; } \| { rawResName: string; }</code>                 | Android file location. Either relative asset path or raw resource name |
 
 
 #### LogLevel
@@ -892,7 +1005,9 @@ Log levels for the SDK
 
 Make all properties in T optional
 
-<code>{ [P in keyof T]?: T[P]; }</code>
+<code>{
+ [P in keyof T]?: T[P];
+ }</code>
 
 
 #### AppTrackingTransparencyStatus
