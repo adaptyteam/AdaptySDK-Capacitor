@@ -218,8 +218,7 @@ export class PaywallViewController {
    *
    * @remarks
    * It registers only requested set of event handlers.
-   * Your config is assigned into four event listeners {@link DEFAULT_EVENT_HANDLERS},
-   * that handle default closing behavior.
+   * Your config is merged with {@link DEFAULT_EVENT_HANDLERS} that provide default closing behavior.
    * - `onCloseButtonPress`
    * - `onAndroidSystemBack`
    * - `onRestoreCompleted`
@@ -228,12 +227,10 @@ export class PaywallViewController {
    * If you want to override these listeners, we strongly recommend to return `true` (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
    * from your custom listener to retain default closing behavior.
    *
-   * @param {Partial<EventHandlers> | undefined} [eventHandlers] - set of event handling callbacks
+   * @param {Partial<EventHandlers>} [eventHandlers] - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public async registerEventHandlers(
-    eventHandlers: Partial<EventHandlers> = DEFAULT_EVENT_HANDLERS,
-  ): Promise<() => void> {
+  public async registerEventHandlers(eventHandlers?: Partial<EventHandlers>): Promise<() => void> {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'registerEventHandlers' });
     log.start(() => ({ _id: this.id }));
@@ -257,7 +254,7 @@ export class PaywallViewController {
 
     const finalEventHandlers: EventHandlers = {
       ...DEFAULT_EVENT_HANDLERS,
-      ...eventHandlers,
+      ...(eventHandlers || {}),
     };
 
     // Register each event handler with ViewEmitter

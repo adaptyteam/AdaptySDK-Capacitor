@@ -123,16 +123,14 @@ export class OnboardingViewController {
    *
    * @remarks
    * It registers only requested set of event handlers.
-   * Your config is assigned into event listener defaults,
+   * Your config is merged with {@link DEFAULT_ONBOARDING_EVENT_HANDLERS}
    * that handle default closing behavior.
    * - `onClose`
    *
-   * @param {Partial<OnboardingEventHandlers> | undefined} [eventHandlers] - set of event handling callbacks
+   * @param {Partial<OnboardingEventHandlers>} [eventHandlers] - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public async registerEventHandlers(
-    eventHandlers: Partial<OnboardingEventHandlers> = DEFAULT_ONBOARDING_EVENT_HANDLERS,
-  ): Promise<() => void> {
+  public async registerEventHandlers(eventHandlers?: Partial<OnboardingEventHandlers>): Promise<() => void> {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'registerEventHandlers' });
     log.start(() => ({ _id: this.id }));
@@ -152,7 +150,7 @@ export class OnboardingViewController {
 
     const finalEventHandlers: OnboardingEventHandlers = {
       ...DEFAULT_ONBOARDING_EVENT_HANDLERS,
-      ...eventHandlers,
+      ...(eventHandlers || {}),
     } as OnboardingEventHandlers;
 
     const onRequestClose = async () => {

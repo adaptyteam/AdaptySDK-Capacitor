@@ -430,11 +430,15 @@ const App: React.FC = () => {
           setResult('⬅️ User pressed back button');
           return true; // Allow the paywall to close
         },
-        onUrlPress: (url: string) => {
-          log('info', 'User pressed URL', 'paywall.onUrlPress', false, { url });
-          setResult(`🔗 User opened URL: ${url}`);
-          return false; // Don't close the paywall
-        },
+        // onUrlPress: (url: string) => {
+        //   log('info', 'User pressed URL', 'paywall.onUrlPress', false, { url });
+        //   setResult(`🔗 User opened URL: ${url}`);
+        //   // Open URL in browser
+        //   if (typeof window !== 'undefined') {
+        //     window.open(url, '_blank');
+        //   }
+        //   return false; // Don't close the paywall
+        // },
         onCustomAction: (action: any) => {
           log('info', 'User performed custom action', 'paywall.onCustomAction', false, { action });
           setResult(`⚡ Custom action: ${JSON.stringify(action)}`);
