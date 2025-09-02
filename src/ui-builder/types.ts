@@ -158,7 +158,12 @@ export interface EventHandlers {
 export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
   onCloseButtonPress: () => true,
   onAndroidSystemBack: () => true,
-  onUrlPress: () => false,
+  onUrlPress: (url: string) => {
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank');
+    }
+    return false;
+  },
   onCustomAction: () => false,
   onProductSelected: () => false,
   onPurchaseStarted: () => false,
