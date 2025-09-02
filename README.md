@@ -387,7 +387,7 @@ Updates refund preference (iOS only)
 ### updateProfile(...)
 
 ```typescript
-updateProfile(options: { params: Partial<AdaptyProfileParameters>; }) => Promise<void>
+updateProfile(options: Partial<AdaptyProfileParameters>) => Promise<void>
 ```
 
 Updates the user profile

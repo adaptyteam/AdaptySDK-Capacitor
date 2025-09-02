@@ -46,9 +46,7 @@ function Profile() {
     }
 
     try {
-      await adapty.updateProfile({
-        params: { email, phoneNumber, firstName, lastName, gender, birthday },
-      });
+      await adapty.updateProfile({ email, phoneNumber, firstName, lastName, gender, birthday });
       setResult('Profile updated successfully');
     } catch (error) {
       setResult(`Error updating profile: ${error}`);

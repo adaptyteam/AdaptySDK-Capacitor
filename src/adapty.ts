@@ -752,7 +752,7 @@ export class Adapty implements AdaptyPlugin {
     await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
-  async updateProfile(options: { params: Partial<AdaptyProfileParameters> }): Promise<void> {
+  async updateProfile(options: Partial<AdaptyProfileParameters>): Promise<void> {
     const method = 'update_profile';
 
     const ctx = new LogContext();
@@ -763,7 +763,7 @@ export class Adapty implements AdaptyPlugin {
 
     const argsWithUndefined: Req['UpdateProfile.Request'] = {
       method,
-      params: this.encodeWithLogging(profileParametersCoder, options.params, 'AdaptyProfileParameters', ctx),
+      params: this.encodeWithLogging(profileParametersCoder, options, 'AdaptyProfileParameters', ctx),
     };
 
     const args = filterUndefined(argsWithUndefined);
