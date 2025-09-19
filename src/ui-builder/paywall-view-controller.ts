@@ -238,7 +238,6 @@ export class PaywallViewController {
    * - `onRestoreCompleted`
    * - `onPurchaseCompleted`
    *
-   * This method does NOT merge with defaults. It only registers the handlers you pass, replacing defaults per event.
    *
    * If you want to override these listeners, we strongly recommend to return `true` (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
    * from your custom listener to retain default closing behavior.
@@ -269,7 +268,13 @@ export class PaywallViewController {
     const viewEmitter = this.viewEmitter ?? new PaywallViewEmitter(this.id);
     this.viewEmitter = viewEmitter;
 
-    for (const [eventName, handler] of Object.entries(eventHandlers)) {
+    // Merge with defaults to ensure default behavior is preserved after unsubscribe/resubscribe cycles
+    const finalEventHandlers: EventHandlers = {
+      ...DEFAULT_EVENT_HANDLERS,
+      ...eventHandlers,
+    };
+
+    for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
       if (handler && typeof handler === 'function') {
         try {
           await viewEmitter.addListener(eventName as keyof EventHandlers, handler, this.onRequestClose);

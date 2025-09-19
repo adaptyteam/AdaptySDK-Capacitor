@@ -135,7 +135,6 @@ export class OnboardingViewController {
    * Default handlers are registered in {@link OnboardingViewController.create} and provide standard closing behavior:
    * - `onClose`
    *
-   * This method does NOT merge with defaults. It only registers the handlers you pass, replacing defaults per event.
    *
    * Calling this method multiple times will replace previously registered handlers for provided events.
    *
@@ -160,8 +159,13 @@ export class OnboardingViewController {
     const viewEmitter = this.viewEmitter ?? new OnboardingViewEmitter(this.id);
     this.viewEmitter = viewEmitter;
 
-    // Register provided event handlers
-    for (const [eventName, handler] of Object.entries(eventHandlers)) {
+    // Merge with defaults to ensure default behavior is preserved after unsubscribe/resubscribe cycles
+    const finalEventHandlers: Partial<OnboardingEventHandlers> = {
+      ...DEFAULT_ONBOARDING_EVENT_HANDLERS,
+      ...eventHandlers,
+    };
+
+    for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
       if (handler && typeof handler === 'function') {
         try {
           await viewEmitter.addListener(eventName as keyof OnboardingEventHandlers, handler, this.onRequestClose);
