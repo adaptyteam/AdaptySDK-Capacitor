@@ -98,7 +98,7 @@ export class PaywallViewController {
     )) as AdaptyUiView;
     controller.id = result.id;
 
-    await controller.registerEventHandlers(DEFAULT_EVENT_HANDLERS);
+    await controller.setEventHandlers(DEFAULT_EVENT_HANDLERS);
 
     return controller;
   }
@@ -218,7 +218,7 @@ export class PaywallViewController {
       await this.dismiss();
     } catch (error) {
       Log.warn(
-        'registerEventHandlers',
+        'setEventHandlers',
         () => 'Failed to dismiss paywall',
         () => ({ error }),
       );
@@ -247,9 +247,9 @@ export class PaywallViewController {
    * @param {Partial<EventHandlers>} eventHandlers - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public async registerEventHandlers(eventHandlers: Partial<EventHandlers> = {}): Promise<() => void> {
+  public async setEventHandlers(eventHandlers: Partial<EventHandlers> = {}): Promise<() => void> {
     const ctx = new LogContext();
-    const log = ctx.call({ methodName: 'registerEventHandlers' });
+    const log = ctx.call({ methodName: 'setEventHandlers' });
     log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
@@ -260,7 +260,7 @@ export class PaywallViewController {
     }
 
     Log.verbose(
-      'registerEventHandlers',
+      'setEventHandlers',
       () => 'Registering event handlers for view',
       () => ({ id: this.id }),
     );
@@ -279,13 +279,13 @@ export class PaywallViewController {
         try {
           await viewEmitter.addListener(eventName as keyof EventHandlers, handler, this.onRequestClose);
           Log.verbose(
-            'registerEventHandlers',
+            'setEventHandlers',
             () => 'Registered handler for',
             () => ({ eventName }),
           );
         } catch (error) {
           Log.error(
-            'registerEventHandlers',
+            'setEventHandlers',
             () => `Failed to register handler for ${eventName}`,
             () => ({ error }),
           );
@@ -296,7 +296,7 @@ export class PaywallViewController {
     // Return unsubscribe function
     const unsubscribe = () => {
       Log.info(
-        'registerEventHandlers',
+        'setEventHandlers',
         () => 'Unsubscribing event handlers for view',
         () => ({ id: this.id }),
       );

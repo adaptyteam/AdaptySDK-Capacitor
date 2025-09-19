@@ -48,7 +48,7 @@ export class OnboardingViewController {
     )) as AdaptyUiView;
     controller.id = result.id;
 
-    await controller.registerEventHandlers(DEFAULT_ONBOARDING_EVENT_HANDLERS);
+    await controller.setEventHandlers(DEFAULT_ONBOARDING_EVENT_HANDLERS);
 
     return controller;
   }
@@ -120,7 +120,7 @@ export class OnboardingViewController {
       await this.dismiss();
     } catch (error) {
       Log.warn(
-        'registerEventHandlers',
+        'setEventHandlers',
         () => 'Failed to dismiss onboarding',
         () => ({ error }),
       );
@@ -141,9 +141,9 @@ export class OnboardingViewController {
    * @param {Partial<OnboardingEventHandlers>} eventHandlers - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public async registerEventHandlers(eventHandlers: Partial<OnboardingEventHandlers> = {}): Promise<() => void> {
+  public async setEventHandlers(eventHandlers: Partial<OnboardingEventHandlers> = {}): Promise<() => void> {
     const ctx = new LogContext();
-    const log = ctx.call({ methodName: 'registerEventHandlers' });
+    const log = ctx.call({ methodName: 'setEventHandlers' });
     log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
@@ -151,7 +151,7 @@ export class OnboardingViewController {
     }
 
     Log.verbose(
-      'registerEventHandlers',
+      'setEventHandlers',
       () => 'Registering onboarding event handlers for view',
       () => ({ id: this.id }),
     );
@@ -170,13 +170,13 @@ export class OnboardingViewController {
         try {
           await viewEmitter.addListener(eventName as keyof OnboardingEventHandlers, handler, this.onRequestClose);
           Log.verbose(
-            'registerEventHandlers',
+            'setEventHandlers',
             () => 'Registered onboarding handler',
             () => ({ eventName }),
           );
         } catch (error) {
           Log.error(
-            'registerEventHandlers',
+            'setEventHandlers',
             () => `Failed to register onboarding handler for ${eventName}`,
             () => ({ error }),
           );
@@ -186,7 +186,7 @@ export class OnboardingViewController {
 
     const unsubscribe = () => {
       Log.info(
-        'registerEventHandlers',
+        'setEventHandlers',
         () => 'Unsubscribing onboarding event handlers for view',
         () => ({ id: this.id }),
       );

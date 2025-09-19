@@ -424,7 +424,7 @@ const App: React.FC = () => {
       setPaywallView(view);
 
       // Register event handlers for paywall view
-      await view.registerEventHandlers({
+      await view.setEventHandlers({
         onCloseButtonPress: () => {
           log('info', 'User pressed close button', 'paywall.onCloseButtonPress');
           setResult('❌ User closed paywall');
@@ -560,7 +560,7 @@ const App: React.FC = () => {
 
       const view = await createOnboardingView(onboarding);
 
-      await view.registerEventHandlers({
+      await view.setEventHandlers({
         onClose: (actionId, meta) => {
           log('info', 'Onboarding closed', 'onboarding.onClose', false, { actionId, meta });
           setResult('👋 Onboarding closed');
