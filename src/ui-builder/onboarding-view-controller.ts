@@ -113,11 +113,6 @@ export class OnboardingViewController {
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
-
-    if (this.viewEmitter) {
-      this.viewEmitter.removeAllListeners();
-      this.viewEmitter = null;
-    }
   }
 
   private onRequestClose = async () => {
