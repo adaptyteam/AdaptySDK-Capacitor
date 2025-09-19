@@ -98,6 +98,8 @@ export class PaywallViewController {
     )) as AdaptyUiView;
     controller.id = result.id;
 
+    await controller.registerEventHandlers(DEFAULT_EVENT_HANDLERS);
+
     return controller;
   }
 
@@ -211,28 +213,42 @@ export class PaywallViewController {
     return await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
   }
 
+  private onRequestClose = async () => {
+    try {
+      await this.dismiss();
+    } catch (error) {
+      Log.warn(
+        'registerEventHandlers',
+        () => 'Failed to dismiss paywall',
+        () => ({ error }),
+      );
+    }
+  };
+
   /**
    * Register event handlers for UI events
    *
    * @see {@link https://docs.adapty.io/docs/react-native-handling-events-1 | [DOC] Handling View Events}
    *
    * @remarks
-   * Each event type can have only one handler - new handlers replace existing ones.
-   * Your config is merged with {@link DEFAULT_EVENT_HANDLERS} that provide default closing behavior:
+   * Each event type can have only one handler — new handlers replace existing ones.
+   * Default handlers are registered in {@link PaywallViewController.create} and provide standard closing behavior:
    * - `onCloseButtonPress`
    * - `onAndroidSystemBack`
    * - `onRestoreCompleted`
    * - `onPurchaseCompleted`
    *
+   * This method does NOT merge with defaults. It only registers the handlers you pass, replacing defaults per event.
+   *
    * If you want to override these listeners, we strongly recommend to return `true` (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
    * from your custom listener to retain default closing behavior.
    *
-   * Calling this method multiple times will replace all previously registered handlers with the new set.
+   * Calling this method multiple times will replace previously registered handlers for provided events.
    *
-   * @param {Partial<EventHandlers>} [eventHandlers] - set of event handling callbacks
+   * @param {Partial<EventHandlers>} eventHandlers - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public async registerEventHandlers(eventHandlers?: Partial<EventHandlers>): Promise<() => void> {
+  public async registerEventHandlers(eventHandlers: Partial<EventHandlers> = {}): Promise<() => void> {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'registerEventHandlers' });
     log.start(() => ({ _id: this.id }));
@@ -250,34 +266,13 @@ export class PaywallViewController {
       () => ({ id: this.id }),
     );
 
-    // Create ViewEmitter if not exists and capture local reference
     const viewEmitter = this.viewEmitter ?? new PaywallViewEmitter(this.id);
     this.viewEmitter = viewEmitter;
 
-    const finalEventHandlers: EventHandlers = {
-      ...DEFAULT_EVENT_HANDLERS,
-      ...(eventHandlers || {}),
-    };
-
-    // onRequestClose function to dismiss the paywall
-    const onRequestClose = async () => {
-      try {
-        await this.dismiss();
-      } catch (error) {
-        Log.warn(
-          'registerEventHandlers',
-          () => 'Failed to dismiss paywall',
-          () => ({ error }),
-        );
-      }
-    };
-
-    // Register all event handlers
-    // Note: Each event type can only have one handler - new handlers replace existing ones
-    for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
+    for (const [eventName, handler] of Object.entries(eventHandlers)) {
       if (handler && typeof handler === 'function') {
         try {
-          await viewEmitter.addListener(eventName as keyof EventHandlers, handler, onRequestClose);
+          await viewEmitter.addListener(eventName as keyof EventHandlers, handler, this.onRequestClose);
           Log.verbose(
             'registerEventHandlers',
             () => 'Registered handler for',
