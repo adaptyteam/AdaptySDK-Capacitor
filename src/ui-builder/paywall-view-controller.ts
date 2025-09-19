@@ -217,8 +217,8 @@ export class PaywallViewController {
    * @see {@link https://docs.adapty.io/docs/react-native-handling-events-1 | [DOC] Handling View Events}
    *
    * @remarks
-   * It registers only requested set of event handlers.
-   * Your config is merged with {@link DEFAULT_EVENT_HANDLERS} that provide default closing behavior.
+   * Each event type can have only one handler - new handlers replace existing ones.
+   * Your config is merged with {@link DEFAULT_EVENT_HANDLERS} that provide default closing behavior:
    * - `onCloseButtonPress`
    * - `onAndroidSystemBack`
    * - `onRestoreCompleted`
@@ -226,6 +226,8 @@ export class PaywallViewController {
    *
    * If you want to override these listeners, we strongly recommend to return `true` (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
    * from your custom listener to retain default closing behavior.
+   *
+   * Calling this method multiple times will replace all previously registered handlers with the new set.
    *
    * @param {Partial<EventHandlers>} [eventHandlers] - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
@@ -257,9 +259,6 @@ export class PaywallViewController {
       ...(eventHandlers || {}),
     };
 
-    // Register each event handler with ViewEmitter
-    const subscriptions: { remove: () => Promise<void> }[] = [];
-
     // onRequestClose function to dismiss the paywall
     const onRequestClose = async () => {
       try {
@@ -274,15 +273,15 @@ export class PaywallViewController {
     };
 
     // Register all event handlers
+    // Note: Each event type can only have one handler - new handlers replace existing ones
     for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
       if (handler && typeof handler === 'function') {
         try {
-          const subscription = await viewEmitter.addListener(eventName as keyof EventHandlers, handler, onRequestClose);
-          subscriptions.push(subscription);
+          await viewEmitter.addListener(eventName as keyof EventHandlers, handler, onRequestClose);
           Log.verbose(
             'registerEventHandlers',
             () => 'Registered handler for',
-            () => ({ eventName, handler }),
+            () => ({ eventName }),
           );
         } catch (error) {
           Log.error(
