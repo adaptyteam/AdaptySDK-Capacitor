@@ -1,141 +1,47 @@
-import type { PluginListenerHandle } from '@capacitor/core';
-
-import { AdaptyCapacitorPlugin } from '../bridge/plugin';
 import { parseOnboardingEvent } from '../shared/coders/parse';
-import { LogContext } from '../shared/logger';
+import type { LogContext } from '../shared/logger';
 
+import { BaseViewEmitter, type BaseEventConfig } from './base-view-emitter';
 import type { OnboardingEventHandlers } from './types';
 
 type EventName = keyof OnboardingEventHandlers;
-
-interface CapacitorEventArg {
-  data: string; // JSON string from native
-}
 
 /**
  * OnboardingViewEmitter manages event handlers for onboarding view events.
  * Each event type can have only one handler - new handlers replace existing ones.
  */
-export class OnboardingViewEmitter {
-  private viewId: string;
-  private eventListeners: Map<string, PluginListenerHandle> = new Map();
-  private handlers: Map<
-    EventName,
-    {
-      handler: OnboardingEventHandlers[EventName];
-      config: (typeof HANDLER_TO_EVENT_CONFIG)[EventName];
-      onRequestClose: () => Promise<void>;
-    }
-  > = new Map();
-
-  constructor(viewId: string) {
-    this.viewId = viewId;
+export class OnboardingViewEmitter extends BaseViewEmitter<OnboardingEventHandlers, Record<string, any>> {
+  protected getEventConfig(event: keyof OnboardingEventHandlers): BaseEventConfig | undefined {
+    return HANDLER_TO_EVENT_CONFIG[event as EventName];
   }
 
-  public async addListener(
-    event: EventName,
-    callback: OnboardingEventHandlers[EventName],
-    onRequestClose: () => Promise<void>,
-  ): Promise<PluginListenerHandle> {
-    const viewId = this.viewId;
-    const config = HANDLER_TO_EVENT_CONFIG[event];
-
-    if (!config) {
-      throw new Error(`No event config found for handler: ${event}`);
-    }
-
-    // Replace existing handler for this event type
-    this.handlers.set(event, {
-      handler: callback,
-      config,
-      onRequestClose,
-    });
-
-    if (!this.eventListeners.has(config.nativeEvent)) {
-      const handlers = this.handlers;
-      const subscription = await AdaptyCapacitorPlugin.addListener(
-        config.nativeEvent,
-        function (arg: CapacitorEventArg) {
-          const ctx = new LogContext();
-          const log = ctx.event({ methodName: config.nativeEvent });
-          log.start(() => ({ raw: arg }));
-
-          if (!arg || typeof arg !== 'object' || !arg.data) {
-            const error = new Error(
-              `[OnboardingViewEmitter] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(
-                arg,
-              )}`,
-            );
-            log.failed(() => ({ error }));
-            throw error;
-          }
-
-          const rawEventData: string = arg.data;
-          let eventData: Record<string, any>;
-          if (typeof rawEventData === 'string') {
-            try {
-              eventData = parseOnboardingEvent(rawEventData, ctx) as Record<string, any>;
-            } catch (error) {
-              log.failed(() => ({ error }));
-              throw error;
-            }
-          } else {
-            const err = new Error(
-              `[OnboardingViewEmitter] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
-            );
-            log.failed(() => ({ error: err }));
-            throw err;
-          }
-
-          const eventViewId = (eventData as any)?.view?.id ?? null;
-          if (viewId !== eventViewId) {
-            return;
-          }
-
-          // Get all possible handler names for this native event
-          const possibleHandlers = NATIVE_EVENT_TO_HANDLERS[config.nativeEvent] || [];
-
-          for (const handlerName of possibleHandlers) {
-            const handlerData = handlers.get(handlerName);
-            if (!handlerData) {
-              continue; // Handler not registered for this view
-            }
-
-            const { handler, onRequestClose } = handlerData;
-            const callbackArgs = extractCallbackArgs(handlerName, eventData);
-
-            const cb = handler as (...args: typeof callbackArgs) => boolean;
-            try {
-              const shouldClose = cb(...callbackArgs);
-              if (shouldClose) {
-                onRequestClose().catch((error) => {
-                  log.failed(() => ({ error }));
-                });
-              }
-            } catch (error) {
-              log.failed(() => ({ error }));
-            }
-          }
-        },
-      );
-      this.eventListeners.set(config.nativeEvent, subscription);
-    }
-
-    const ensured = this.eventListeners.get(config.nativeEvent);
-    if (!ensured) {
-      throw new Error(`Failed to register listener for ${config.nativeEvent}`);
-    }
-    return ensured;
+  protected parseEventData(rawEventData: string, ctx: LogContext): Record<string, any> {
+    return parseOnboardingEvent(rawEventData, ctx) as Record<string, any>;
   }
 
-  public removeAllListeners(): void {
-    this.eventListeners.forEach((subscription) => {
-      subscription.remove().catch(() => {
-        // intentionally ignore errors during cleanup
-      });
-    });
-    this.eventListeners.clear();
-    this.handlers.clear();
+  protected getPossibleHandlers(nativeEvent: string): (keyof OnboardingEventHandlers)[] {
+    return NATIVE_EVENT_TO_HANDLERS[nativeEvent] || [];
+  }
+
+  protected extractCallbackArgs(handlerName: keyof OnboardingEventHandlers, eventData: Record<string, any>): any[] {
+    return extractCallbackArgs(handlerName as EventName, eventData);
+  }
+
+  protected getEventViewId(eventData: Record<string, any>): string | null {
+    return eventData?.view?.id ?? null;
+  }
+
+  protected shouldCallHandler(
+    _handlerName: keyof OnboardingEventHandlers,
+    _config: BaseEventConfig,
+    _eventData: Record<string, any>,
+  ): boolean {
+    // Onboarding events don't use propertyMap filtering
+    return true;
+  }
+
+  protected getEmitterName(): string {
+    return 'OnboardingViewEmitter';
   }
 }
 
