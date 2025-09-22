@@ -198,4 +198,25 @@ export class OnboardingViewController {
 
     return unsubscribe;
   }
+
+  /**
+   * Clears all registered event handlers
+   *
+   * @remarks
+   * This method removes all previously registered event handlers.
+   * After calling this method, no event handlers will be active
+   * until you call `setEventHandlers` again.
+   */
+  public clearEventHandlers(): void {
+    Log.info(
+      'clearEventHandlers',
+      () => 'Clearing all onboarding event handlers for view',
+      () => ({ id: this.id }),
+    );
+
+    if (this.viewEmitter) {
+      this.viewEmitter.removeAllListeners();
+      this.viewEmitter = null;
+    }
+  }
 }
