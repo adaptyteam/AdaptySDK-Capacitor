@@ -165,7 +165,7 @@ export class PaywallViewController {
     const data: Req['AdaptyUIDismissPaywallView.Request'] = {
       method: methodKey,
       id: this.id,
-      destroy: false,
+      destroy: true,
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);

@@ -955,7 +955,7 @@ const App: React.FC = () => {
             disabled={!paywallView}
             className={`${styles.Button} ${styles.ButtonSecondary}`}
           >
-            Present Existing View
+            Present Existing (not supported)
           </button>
 
           <button onClick={openWebPaywall} disabled={!paywall} className={`${styles.Button} ${styles.ButtonSecondary}`}>
