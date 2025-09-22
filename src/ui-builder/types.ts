@@ -35,7 +35,7 @@ export type AdaptyUiOnboardingStateParams = {
  */
 export interface EventHandlers {
   /**
-   * Called when a user taps the close button in the paywall view
+   * Called when a user taps the close button on the paywall view
    *
    * If you return `true`, the paywall view will be closed.
    * We strongly recommend to return `true` in this case.
@@ -67,52 +67,61 @@ export interface EventHandlers {
   /**
    * Called when a user selects a product in the paywall view
    *
-   * If you return `true`, the paywall view will be closed.
+   * If you return `true` from this callback, the paywall view will be closed.
    * @default false
    */
   onProductSelected: (productId: string) => EventHandlerResult;
   /**
    * Called when a purchase process starts
    *
-   * If you return `true`, the paywall view will be closed.
+   * If you return `true` from this callback, the paywall view will be closed.
    * @default false
    */
   onPurchaseStarted: (product: any) => EventHandlerResult;
   /**
-   * Called when a purchase process has been completed
+   * Called when the purchase succeeds, the user cancels their purchase, or the purchase appears to be pending
    *
-   * If you return `true`, the paywall view will be closed.
-   * We strongly recommend to return `purchaseResult.type !== 'user_cancelled'` in this case.
-   * @default purchaseResult.type !== 'user_cancelled'
+   * If you return `true` from this callback, the paywall view will be closed.
+   * We strongly recommend returning `purchaseResult.type !== 'user_cancelled'` in this case.
+   * @default `purchaseResult.type !== 'user_cancelled'`
+   *
+   * @param purchaseResult - object, which provides details about the purchase.
+   * If the result is `'success'`, it also includes the updated user's profile.
    */
   onPurchaseCompleted: (purchaseResult: any, product: any) => EventHandlerResult;
   /**
-   * Called when a purchase process has failed
+   * Called if a purchase fails after a user taps the purchase button
    *
-   * If you return `true`, the paywall view will be closed.
+   * If you return `true` from this callback, the paywall view will be closed.
    * @default false
+   *
+   * @param error - AdaptyError object with error code and message
    */
   onPurchaseFailed: (error: any, product: any) => EventHandlerResult;
   /**
-   * Called when a restore process starts
+   * Called when a user taps the restore button in the paywall view
    *
-   * If you return `true`, the paywall view will be closed.
+   * If you return `true` from this callback, the paywall view will be closed.
    * @default false
    */
   onRestoreStarted: () => EventHandlerResult;
   /**
-   * Called when a restore process has been completed
+   * Called when a purchase is completed
    *
-   * If you return `true`, the paywall view will be closed.
+   * If you return `true` from this callback, the paywall view will be closed.
    * We strongly recommend to return `true` in this case.
    * @default true
+   *
+   * @param profile - updated user profile
    */
   onRestoreCompleted: (profile: any) => EventHandlerResult;
   /**
-   * Called when a restore process has failed
+   * Called if a restore fails after a user taps the restore button
    *
-   * If you return `true`, the paywall view will be closed.
+   * If you return `true` from this callback, the paywall view will be closed.
    * @default false
+   *
+   * @param error - AdaptyError object with error code and message
    */
   onRestoreFailed: (error: any) => EventHandlerResult;
   /**
@@ -130,17 +139,23 @@ export interface EventHandlers {
    */
   onPaywallClosed: () => EventHandlerResult;
   /**
-   * Called when paywall rendering fails
+   * Called if a paywall view fails to render.
+   * This should not ever happen, but if it does, feel free to report it to us.
    *
-   * If you return `true`, the paywall view will be closed.
+   * If you return `true` from this callback, the paywall view will be closed.
    * @default false
+   *
+   * @param error - AdaptyError object with error code and message
    */
   onRenderingFailed: (error: any) => EventHandlerResult;
   /**
-   * Called when loading products fails
+   * Called if a product list fails to load on a presented view,
+   * for example, if there is no internet connection
    *
-   * If you return `true`, the paywall view will be closed.
+   * If you return `true` from this callback, the paywall view will be closed.
    * @default false
+   *
+   * @param error - AdaptyError object with error code and message
    */
   onLoadingProductsFailed: (error: any) => EventHandlerResult;
   /**

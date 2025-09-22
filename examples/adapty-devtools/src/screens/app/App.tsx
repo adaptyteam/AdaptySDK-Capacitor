@@ -538,7 +538,7 @@ const App: React.FC = () => {
       setResult('✅ Existing paywall presented successfully!');
     } catch (error: any) {
       log('error', 'Failed to present existing paywall', 'presentExistingPaywall', false, {
-        error: error.message || error.toString()
+        error: error.message || error.toString(),
       });
       setResult(`❌ Failed to present existing paywall: ${error.message}`);
     }
