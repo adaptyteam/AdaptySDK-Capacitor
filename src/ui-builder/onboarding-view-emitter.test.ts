@@ -461,7 +461,7 @@ describe('OnboardingViewEmitter', () => {
       expect(mockBridgeAddListener).toHaveBeenCalledTimes(expectedNativeEvents);
     });
 
-    it('should handle multiple handlers for same event with different outcomes', async () => {
+    it('should replace handlers for same event type (new replaces old)', async () => {
       const handler1 = jest.fn().mockReturnValue(false);
       const handler2 = jest.fn().mockReturnValue(true);
       const onRequestClose1 = jest.fn().mockResolvedValue(undefined);
@@ -472,15 +472,17 @@ describe('OnboardingViewEmitter', () => {
         view: { id: TEST_VIEW_ID },
       });
 
+      // Add first handler
       await await emitter.addListener('onError', handler1, onRequestClose1);
+      // Add second handler - should replace first
       await await emitter.addListener('onError', handler2, onRequestClose2);
 
       const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
       nativeCallback({ data: TEST_EVENT_DATA.error });
 
-      expect(handler1).toHaveBeenCalledWith({ message: 'Test error' });
-      expect(handler2).toHaveBeenCalledWith({ message: 'Test error' });
-      expect(onRequestClose1).not.toHaveBeenCalled(); // handler1 returned false
+      expect(handler1).not.toHaveBeenCalled(); // handler1 was replaced
+      expect(handler2).toHaveBeenCalledWith({ message: 'Test error' }); // only handler2 should be called
+      expect(onRequestClose1).not.toHaveBeenCalled(); // handler1 was not called
       expect(onRequestClose2).toHaveBeenCalled(); // handler2 returned true
     });
 
@@ -554,6 +556,7 @@ describe('OnboardingViewEmitter', () => {
     it('should handle concurrent add/remove operations without memory leaks', async () => {
       const listeners: (() => boolean)[] = [];
 
+      // Add 5 concurrent handlers for the same event type - only the last should remain
       const addPromises = Array.from({ length: 5 }, async () => {
         const listener = jest.fn().mockReturnValue(false);
         listeners.push(listener);
@@ -562,13 +565,15 @@ describe('OnboardingViewEmitter', () => {
 
       await Promise.all(addPromises);
 
-      const handlersForEvent = (emitter as any).handlers.get(NATIVE_EVENT_NAMES.error) || [];
-      expect(handlersForEvent).toHaveLength(5);
+      // Should have only 1 handler (the last one added replaces previous ones)
+      const handlerData = (emitter as any).handlers.get('onError');
+      expect(handlerData).toBeDefined();
+      expect((emitter as any).handlers.size).toBe(1);
 
       emitter.removeAllListeners();
 
       expect((emitter as any).eventListeners.has(NATIVE_EVENT_NAMES.error)).toBe(false);
-      expect((emitter as any).handlers.has(NATIVE_EVENT_NAMES.error)).toBe(false);
+      expect((emitter as any).handlers.has('onError')).toBe(false);
     });
 
     it('should cleanup handlers even when some subscription removals fail', async () => {

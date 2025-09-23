@@ -12,6 +12,7 @@ interface AppState {
   paywall: AdaptyPaywall | null;
   products: AdaptyPaywallProduct[];
   onboarding: AdaptyOnboarding | null;
+  paywallView: any | null;
 
   // User data
   customerUserId: string;
@@ -47,6 +48,7 @@ interface AppActions {
   setPaywall: (value: AdaptyPaywall | null) => void;
   setProducts: (value: AdaptyPaywallProduct[]) => void;
   setOnboarding: (value: AdaptyOnboarding | null) => void;
+  setPaywallView: (value: any | null) => void;
 
   // User data
   setCustomerUserId: (value: string) => void;
@@ -88,6 +90,7 @@ const defaultState: AppState = {
   paywall: null,
   products: [],
   onboarding: null,
+  paywallView: null,
 
   // User data
   customerUserId: '',
@@ -131,6 +134,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [paywall, setPaywall] = useState<AdaptyPaywall | null>(defaultState.paywall);
   const [products, setProducts] = useState<AdaptyPaywallProduct[]>(defaultState.products);
   const [onboarding, setOnboarding] = useState<AdaptyOnboarding | null>(defaultState.onboarding);
+  const [paywallView, setPaywallView] = useState<any | null>(defaultState.paywallView);
 
   // User data
   const [customerUserId, setCustomerUserId] = useState<string>(defaultState.customerUserId);
@@ -164,6 +168,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setPaywall(defaultState.paywall);
     setProducts(defaultState.products);
     setOnboarding(defaultState.onboarding);
+    setPaywallView(defaultState.paywallView);
     setCustomerUserId(defaultState.customerUserId);
     setTransactionId(defaultState.transactionId);
     setVariationId(defaultState.variationId);
@@ -188,6 +193,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     paywall,
     products,
     onboarding,
+    paywallView,
     customerUserId,
     transactionId,
     variationId,
@@ -210,6 +216,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setPaywall,
     setProducts,
     setOnboarding,
+    setPaywallView,
     setCustomerUserId,
     setTransactionId,
     setVariationId,

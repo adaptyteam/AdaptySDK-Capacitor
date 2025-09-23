@@ -25,6 +25,7 @@ const App: React.FC = () => {
     paywall,
     products,
     onboarding,
+    paywallView,
     customerUserId,
     transactionId,
     variationId,
@@ -47,6 +48,7 @@ const App: React.FC = () => {
     setPaywall,
     setProducts,
     setOnboarding,
+    setPaywallView,
     setCustomerUserId,
     setTransactionId,
     setVariationId,
@@ -418,8 +420,11 @@ const App: React.FC = () => {
         customTags,
       });
 
+      // Save view to context for reuse
+      setPaywallView(view);
+
       // Register event handlers for paywall view
-      await view.registerEventHandlers({
+      await view.setEventHandlers({
         onCloseButtonPress: () => {
           log('info', 'User pressed close button', 'paywall.onCloseButtonPress');
           setResult('❌ User closed paywall');
@@ -521,6 +526,24 @@ const App: React.FC = () => {
     }
   };
 
+  const presentExistingPaywall = async () => {
+    if (!paywallView) {
+      setResult('❌ No paywall view created. Please create paywall first.');
+      return;
+    }
+
+    try {
+      setResult('Presenting existing paywall view...');
+      await paywallView.present();
+      setResult('✅ Existing paywall presented successfully!');
+    } catch (error: any) {
+      log('error', 'Failed to present existing paywall', 'presentExistingPaywall', false, {
+        error: error.message || error.toString(),
+      });
+      setResult(`❌ Failed to present existing paywall: ${error.message}`);
+    }
+  };
+
   const presentOnboarding = async () => {
     if (!onboarding) {
       setResult('❌ No onboarding loaded. Please load onboarding first.');
@@ -537,7 +560,7 @@ const App: React.FC = () => {
 
       const view = await createOnboardingView(onboarding);
 
-      await view.registerEventHandlers({
+      await view.setEventHandlers({
         onClose: (actionId, meta) => {
           log('info', 'Onboarding closed', 'onboarding.onClose', false, { actionId, meta });
           setResult('👋 Onboarding closed');
@@ -925,6 +948,14 @@ const App: React.FC = () => {
             className={`${styles.Button} ${styles.ButtonPrimary}`}
           >
             Present Paywall
+          </button>
+
+          <button
+            onClick={presentExistingPaywall}
+            disabled={!paywallView}
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
+          >
+            Present Existing (not supported)
           </button>
 
           <button onClick={openWebPaywall} disabled={!paywall} className={`${styles.Button} ${styles.ButtonSecondary}`}>

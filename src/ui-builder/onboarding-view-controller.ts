@@ -48,6 +48,8 @@ export class OnboardingViewController {
     )) as AdaptyUiView;
     controller.id = result.id;
 
+    await controller.setEventHandlers(DEFAULT_ONBOARDING_EVENT_HANDLERS);
+
     return controller;
   }
 
@@ -107,32 +109,41 @@ export class OnboardingViewController {
     const data: Req['AdaptyUIDismissOnboardingView.Request'] = {
       method: methodKey,
       id: this.id,
-      destroy: false,
+      destroy: true,
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
-
-    if (this.viewEmitter) {
-      this.viewEmitter.removeAllListeners();
-      this.viewEmitter = null;
-    }
   }
+
+  private onRequestClose = async () => {
+    try {
+      await this.dismiss();
+    } catch (error) {
+      Log.warn(
+        'setEventHandlers',
+        () => 'Failed to dismiss onboarding',
+        () => ({ error }),
+      );
+    }
+  };
 
   /**
    * Register event handlers for UI events
    *
    * @remarks
-   * It registers only requested set of event handlers.
-   * Your config is merged with {@link DEFAULT_ONBOARDING_EVENT_HANDLERS}
-   * that handle default closing behavior.
+   * Each event type can have only one handler — new handlers replace existing ones.
+   * Default handlers are registered in {@link OnboardingViewController.create} and provide standard closing behavior:
    * - `onClose`
    *
-   * @param {Partial<OnboardingEventHandlers>} [eventHandlers] - set of event handling callbacks
+   *
+   * Calling this method multiple times will replace previously registered handlers for provided events.
+   *
+   * @param {Partial<OnboardingEventHandlers>} eventHandlers - set of event handling callbacks
    * @returns {() => void} unsubscribe - function to unsubscribe all listeners
    */
-  public async registerEventHandlers(eventHandlers?: Partial<OnboardingEventHandlers>): Promise<() => void> {
+  public async setEventHandlers(eventHandlers: Partial<OnboardingEventHandlers> = {}): Promise<() => void> {
     const ctx = new LogContext();
-    const log = ctx.call({ methodName: 'registerEventHandlers' });
+    const log = ctx.call({ methodName: 'setEventHandlers' });
     log.start(() => ({ _id: this.id }));
 
     if (this.id === null) {
@@ -140,7 +151,7 @@ export class OnboardingViewController {
     }
 
     Log.verbose(
-      'registerEventHandlers',
+      'setEventHandlers',
       () => 'Registering onboarding event handlers for view',
       () => ({ id: this.id }),
     );
@@ -148,35 +159,24 @@ export class OnboardingViewController {
     const viewEmitter = this.viewEmitter ?? new OnboardingViewEmitter(this.id);
     this.viewEmitter = viewEmitter;
 
-    const finalEventHandlers: OnboardingEventHandlers = {
+    // Merge with defaults to ensure default behavior is preserved after unsubscribe/resubscribe cycles
+    const finalEventHandlers: Partial<OnboardingEventHandlers> = {
       ...DEFAULT_ONBOARDING_EVENT_HANDLERS,
-      ...(eventHandlers || {}),
-    } as OnboardingEventHandlers;
-
-    const onRequestClose = async () => {
-      try {
-        await this.dismiss();
-      } catch (error) {
-        Log.warn(
-          'registerEventHandlers',
-          () => 'Failed to dismiss onboarding',
-          () => ({ error }),
-        );
-      }
+      ...eventHandlers,
     };
 
     for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
       if (handler && typeof handler === 'function') {
         try {
-          await viewEmitter.addListener(eventName as keyof OnboardingEventHandlers, handler, onRequestClose);
+          await viewEmitter.addListener(eventName as keyof OnboardingEventHandlers, handler, this.onRequestClose);
           Log.verbose(
-            'registerEventHandlers',
+            'setEventHandlers',
             () => 'Registered onboarding handler',
-            () => ({ eventName, handler }),
+            () => ({ eventName }),
           );
         } catch (error) {
           Log.error(
-            'registerEventHandlers',
+            'setEventHandlers',
             () => `Failed to register onboarding handler for ${eventName}`,
             () => ({ error }),
           );
@@ -186,7 +186,7 @@ export class OnboardingViewController {
 
     const unsubscribe = () => {
       Log.info(
-        'registerEventHandlers',
+        'setEventHandlers',
         () => 'Unsubscribing onboarding event handlers for view',
         () => ({ id: this.id }),
       );
@@ -197,5 +197,26 @@ export class OnboardingViewController {
     };
 
     return unsubscribe;
+  }
+
+  /**
+   * Clears all registered event handlers
+   *
+   * @remarks
+   * This method removes all previously registered event handlers.
+   * After calling this method, no event handlers will be active
+   * until you call `setEventHandlers` again.
+   */
+  public clearEventHandlers(): void {
+    Log.info(
+      'clearEventHandlers',
+      () => 'Clearing all onboarding event handlers for view',
+      () => ({ id: this.id }),
+    );
+
+    if (this.viewEmitter) {
+      this.viewEmitter.removeAllListeners();
+      this.viewEmitter = null;
+    }
   }
 }

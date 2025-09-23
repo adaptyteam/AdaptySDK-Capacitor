@@ -1,16 +1,10 @@
-import type { PluginListenerHandle } from '@capacitor/core';
-
-import { AdaptyCapacitorPlugin } from '../bridge/plugin';
 import { parsePaywallEvent } from '../shared/coders/parse';
-import { LogContext } from '../shared/logger';
+import type { LogContext } from '../shared/logger';
 
+import { BaseViewEmitter, type BaseEventConfig } from './base-view-emitter';
 import type { EventHandlers } from './types';
 
 type EventName = keyof EventHandlers;
-
-interface CapacitorEventArg {
-  data: string; // JSON string from native
-}
 
 interface ParsedEventData {
   view?: {
@@ -30,124 +24,44 @@ interface ParsedEventData {
   id: string;
 }
 
-export class PaywallViewEmitter {
-  private viewId: string;
-  private eventListeners: Map<string, PluginListenerHandle> = new Map();
-  private handlers: Map<
-    string,
-    {
-      handler: EventHandlers[keyof EventHandlers];
-      config: (typeof HANDLER_TO_EVENT_CONFIG)[keyof typeof HANDLER_TO_EVENT_CONFIG];
-      onRequestClose: () => Promise<void>;
-    }[]
-  > = new Map();
-
-  constructor(viewId: string) {
-    this.viewId = viewId;
+/**
+ * PaywallViewEmitter manages event handlers for paywall view events.
+ * Each event type can have only one handler - new handlers replace existing ones.
+ */
+export class PaywallViewEmitter extends BaseViewEmitter<EventHandlers, ParsedEventData> {
+  protected getEventConfig(event: keyof EventHandlers): BaseEventConfig | undefined {
+    return HANDLER_TO_EVENT_CONFIG[event as EventName];
   }
 
-  public async addListener(
-    event: EventName,
-    callback: EventHandlers[EventName],
-    onRequestClose: () => Promise<void>,
-  ): Promise<PluginListenerHandle> {
-    const viewId = this.viewId;
-    const config = HANDLER_TO_EVENT_CONFIG[event];
-
-    if (!config) {
-      throw new Error(`No event config found for handler: ${event}`);
-    }
-
-    const handlersForEvent = this.handlers.get(config.nativeEvent) ?? [];
-    handlersForEvent.push({
-      handler: callback,
-      config,
-      onRequestClose,
-    });
-    this.handlers.set(config.nativeEvent, handlersForEvent);
-
-    if (!this.eventListeners.has(config.nativeEvent)) {
-      const handlers = this.handlers;
-      const subscription = await AdaptyCapacitorPlugin.addListener(
-        config.nativeEvent,
-        function (arg: CapacitorEventArg) {
-          const ctx = new LogContext();
-          const log = ctx.event({ methodName: config.nativeEvent });
-          log.start(() => ({ raw: arg }));
-
-          // Strict validation: events must come in {data: "json_string"} format
-          if (!arg || typeof arg !== 'object' || !arg.data) {
-            const error = new Error(
-              `[ViewEmitter] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`,
-            );
-            log.failed(() => ({ error }));
-            throw error;
-          }
-
-          const rawEventData: string = arg.data;
-
-          // Parse JSON string using shared parser with decode logging
-          let eventData: ParsedEventData;
-          if (typeof rawEventData === 'string') {
-            try {
-              eventData = parsePaywallEvent(rawEventData, ctx) as ParsedEventData;
-            } catch (error) {
-              log.failed(() => ({ error }));
-              throw error;
-            }
-          } else {
-            const err = new Error(
-              `[ViewEmitter] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
-            );
-            log.failed(() => ({ error: err }));
-            throw err;
-          }
-
-          const eventViewId = eventData?.view?.id ?? null;
-          if (viewId !== eventViewId) {
-            return;
-          }
-
-          const eventHandlers = handlers.get(config.nativeEvent) ?? [];
-          for (const { handler, config, onRequestClose } of eventHandlers) {
-            if (config.propertyMap && eventData?.action?.type !== config.propertyMap['action']) {
-              continue;
-            }
-
-            const callbackArgs = extractCallbackArgs(config.handlerName, eventData);
-
-            const cb = handler as (...args: typeof callbackArgs) => boolean;
-            try {
-              const shouldClose = cb(...callbackArgs);
-              if (shouldClose) {
-                onRequestClose().catch((error) => {
-                  log.failed(() => ({ error }));
-                });
-              }
-            } catch (error) {
-              log.failed(() => ({ error }));
-            }
-          }
-        },
-      );
-      this.eventListeners.set(config.nativeEvent, subscription);
-    }
-
-    const ensured = this.eventListeners.get(config.nativeEvent);
-    if (!ensured) {
-      throw new Error(`Failed to register listener for ${config.nativeEvent}`);
-    }
-    return ensured;
+  protected parseEventData(rawEventData: string, ctx: LogContext): ParsedEventData {
+    return parsePaywallEvent(rawEventData, ctx) as ParsedEventData;
   }
 
-  public removeAllListeners(): void {
-    this.eventListeners.forEach((subscription) => {
-      subscription.remove().catch(() => {
-        // intentionally ignore errors during cleanup
-      });
-    });
-    this.eventListeners.clear();
-    this.handlers.clear();
+  protected getPossibleHandlers(nativeEvent: string): (keyof EventHandlers)[] {
+    return NATIVE_EVENT_TO_HANDLERS[nativeEvent] || [];
+  }
+
+  protected extractCallbackArgs(handlerName: keyof EventHandlers, eventData: ParsedEventData): any[] {
+    return extractCallbackArgs(handlerName as EventName, eventData);
+  }
+
+  protected getEventViewId(eventData: ParsedEventData): string | null {
+    return eventData?.view?.id ?? null;
+  }
+
+  protected shouldCallHandler(
+    _handlerName: keyof EventHandlers,
+    config: BaseEventConfig,
+    eventData: ParsedEventData,
+  ): boolean {
+    if (config.propertyMap && eventData?.action?.type !== config.propertyMap['action']) {
+      return false;
+    }
+    return true;
+  }
+
+  protected getEmitterName(): string {
+    return 'PaywallViewEmitter';
   }
 }
 
@@ -253,6 +167,18 @@ const HANDLER_TO_EVENT_CONFIG: Record<
       handlerName: EventName;
     }
   >,
+);
+
+// Reverse mapping: nativeEvent -> EventName[]
+const NATIVE_EVENT_TO_HANDLERS: Record<string, EventName[]> = Object.entries(HANDLER_TO_EVENT_CONFIG).reduce(
+  (acc, [handlerName, config]) => {
+    if (!acc[config.nativeEvent]) {
+      acc[config.nativeEvent] = [];
+    }
+    acc[config.nativeEvent].push(handlerName as EventName);
+    return acc;
+  },
+  {} as Record<string, EventName[]>,
 );
 
 function extractCallbackArgs(handlerName: EventName, eventArg: ParsedEventData) {
