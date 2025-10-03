@@ -63,7 +63,7 @@ export interface EventHandlers {
    * If you return `true`, the paywall view will be closed.
    * @default false
    */
-  onCustomAction: (action: any) => EventHandlerResult;
+  onCustomAction: (actionId: string) => EventHandlerResult;
   /**
    * Called when a user selects a product in the paywall view
    *
