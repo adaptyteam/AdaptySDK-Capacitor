@@ -6,7 +6,9 @@ export type * from './shared/logger';
 export { consoleLogSink } from './shared/logger';
 export * from './shared/constants';
 export { AdaptyError } from './shared/adapty-error';
+export { ErrorCodeName } from './shared/types/error';
 export type * from './types/configs';
+//export * from './shared/types';
 
 export {
   createPaywallView,

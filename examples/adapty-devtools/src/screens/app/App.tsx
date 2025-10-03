@@ -9,6 +9,8 @@ import {
   createOnboardingView,
   FileLocation,
   RefundPreference,
+  ErrorCodeName,
+  AdaptyError,
 } from '@adapty/capacitor';
 import { getApiKey, getIosBundle, getAndroidApplicationId, createLog } from '../../helpers';
 import { useAppContext } from '../../contexts/AppContext';
@@ -217,7 +219,27 @@ const App: React.FC = () => {
         false,
         { error: String(error), forDefaultAudience },
       );
-      setResult(`Error fetching paywall: ${error}`);
+      
+      if (error instanceof AdaptyError) {
+        switch (error.adaptyCode) {
+          case ErrorCodeName.notActivated:
+            setResult('SDK not activated. Please activate first');
+            break;
+          case ErrorCodeName.networkFailed:
+            setResult('Network error. Check your connection and try again');
+            break;
+          case ErrorCodeName.fetchTimeoutError:
+            setResult('Request timeout. Please try again');
+            break;
+          case ErrorCodeName.serverError:
+            setResult('Server error. Please try again later');
+            break;
+          default:
+            setResult(`Error fetching paywall: ${error.localizedDescription}`);
+        }
+      } else {
+        setResult(`Error fetching paywall: ${error}`);
+      }
     } finally {
       setIsLoadingPaywall(false);
     }
@@ -233,7 +255,24 @@ const App: React.FC = () => {
       setResult('Purchases restored successfully');
     } catch (error) {
       log('error', 'Error restoring purchases', 'restorePurchases', false, { error: String(error) });
-      setResult(`Error restoring purchases: ${error}`);
+      
+      if (error instanceof AdaptyError) {
+        switch (error.adaptyCode) {
+          case ErrorCodeName.noPurchasesToRestore:
+            setResult('No purchases found to restore');
+            break;
+          case ErrorCodeName.notActivated:
+            setResult('SDK not activated. Please activate first');
+            break;
+          case ErrorCodeName.networkFailed:
+            setResult('Network error. Check your connection and try again');
+            break;
+          default:
+            setResult(`Error restoring purchases: ${error.localizedDescription}`);
+        }
+      } else {
+        setResult(`Error restoring purchases: ${error}`);
+      }
     }
   };
 
@@ -362,7 +401,27 @@ const App: React.FC = () => {
       }
     } catch (error) {
       log('error', 'Error making purchase', 'makePurchase', false, { error: String(error) });
-      setResult(`Error making purchase: ${error}`);
+      
+      if (error instanceof AdaptyError) {
+        switch (error.adaptyCode) {
+          case ErrorCodeName.cantMakePayments:
+            setResult('In-app purchases not allowed on this device');
+            break;
+          case ErrorCodeName.productPurchaseFailed:
+            setResult(`Purchase failed: ${error.localizedDescription}`);
+            break;
+          case ErrorCodeName.itemAlreadyOwned:
+            setResult('You already own this product');
+            break;
+          case ErrorCodeName.paymentNotAllowed:
+            setResult('Payment not allowed for this account');
+            break;
+          default:
+            setResult(`Error making purchase: ${error.localizedDescription}`);
+        }
+      } else {
+        setResult(`Error making purchase: ${error}`);
+      }
     }
   };
 
