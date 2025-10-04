@@ -44,7 +44,7 @@
     "prettier-check": "prettier \"**/*.{css,html,ts,js,tsx}\" --check",
     "prettier": "prettier \"**/*.{css,html,ts,js,tsx}\" --write",
     "swiftlint": "node-swiftlint",
-    "docgen": "docgen --api AdaptyCapacitorPlugin --output-readme README.md --output-json dist/docs.json",
+    "docgen": "docgen --api AdaptyCapacitorPlugin --output-json dist/docs.json",
     "build": "yarn clean && yarn docgen && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
     "tsc": "tsc --noEmit",
