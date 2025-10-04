@@ -180,9 +180,9 @@ const ErrorCodeNameMapping = Object.freeze({
 } as const);
 
 export type ErrorCode = keyof typeof ErrorCodeMapping;
-export type ErrorCodeName = keyof typeof ErrorCodeNameMapping;
 
 export const ErrorCodeName = ErrorCodeNameMapping;
+export type ErrorCodeName = keyof typeof ErrorCodeNameMapping;
 
 export function getErrorCode(name: ErrorCodeName): ErrorCode | undefined {
   return ErrorCodeName[name] ?? undefined;

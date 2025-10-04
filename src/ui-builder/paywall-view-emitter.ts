@@ -1,5 +1,7 @@
 import { parsePaywallEvent } from '../shared/coders/parse';
 import type { LogContext } from '../shared/logger';
+import type { AdaptyPaywallProduct, AdaptyProfile, AdaptyPurchaseResult } from '../shared/types';
+import type { AdaptyError } from '../shared/types/method-types';
 
 import { BaseViewEmitter, type BaseEventConfig } from './base-view-emitter';
 import type { EventHandlers } from './types';
@@ -14,13 +16,13 @@ interface ParsedEventData {
   };
   action?: {
     type: string;
-    value?: any;
+    value?: unknown;
   };
-  product?: any;
+  product?: AdaptyPaywallProduct;
   product_id?: string;
-  purchased_result?: any;
-  error?: any;
-  profile?: any;
+  purchased_result?: AdaptyPurchaseResult;
+  error?: AdaptyError;
+  profile?: AdaptyProfile;
   id: string;
 }
 
@@ -41,7 +43,7 @@ export class PaywallViewEmitter extends BaseViewEmitter<EventHandlers, ParsedEve
     return NATIVE_EVENT_TO_HANDLERS[nativeEvent] || [];
   }
 
-  protected extractCallbackArgs(handlerName: keyof EventHandlers, eventData: ParsedEventData): any[] {
+  protected extractCallbackArgs(handlerName: keyof EventHandlers, eventData: ParsedEventData): unknown[] {
     return extractCallbackArgs(handlerName as EventName, eventData);
   }
 
@@ -181,7 +183,7 @@ const NATIVE_EVENT_TO_HANDLERS: Record<string, EventName[]> = Object.entries(HAN
   {} as Record<string, EventName[]>,
 );
 
-function extractCallbackArgs(handlerName: EventName, eventArg: ParsedEventData) {
+function extractCallbackArgs(handlerName: EventName, eventArg: ParsedEventData): unknown[] {
   switch (handlerName) {
     case 'onProductSelected':
       return [eventArg.product_id];

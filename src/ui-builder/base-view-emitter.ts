@@ -50,7 +50,7 @@ export abstract class BaseViewEmitter<TEventHandlers extends Record<string, any>
   /**
    * Abstract method to extract callback arguments for a specific handler
    */
-  protected abstract extractCallbackArgs(handlerName: keyof TEventHandlers, eventData: TEventData): any[];
+  protected abstract extractCallbackArgs(handlerName: keyof TEventHandlers, eventData: TEventData): unknown[];
 
   /**
    * Abstract method to get view ID from parsed event data

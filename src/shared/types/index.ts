@@ -1,6 +1,3 @@
-// import SDK type to link to methods in docs.
-// import type { Adapty } from '../adapty-handler'; // TODO: uncomment when adapty-handler is copied
-
 import {
   VendorStore,
   OfferType,

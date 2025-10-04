@@ -219,7 +219,7 @@ const App: React.FC = () => {
         false,
         { error: String(error), forDefaultAudience },
       );
-      
+
       if (error instanceof AdaptyError) {
         switch (error.adaptyCode) {
           case ErrorCodeName.notActivated:
@@ -255,7 +255,7 @@ const App: React.FC = () => {
       setResult('Purchases restored successfully');
     } catch (error) {
       log('error', 'Error restoring purchases', 'restorePurchases', false, { error: String(error) });
-      
+
       if (error instanceof AdaptyError) {
         switch (error.adaptyCode) {
           case ErrorCodeName.noPurchasesToRestore:
@@ -401,7 +401,7 @@ const App: React.FC = () => {
       }
     } catch (error) {
       log('error', 'Error making purchase', 'makePurchase', false, { error: String(error) });
-      
+
       if (error instanceof AdaptyError) {
         switch (error.adaptyCode) {
           case ErrorCodeName.cantMakePayments:
