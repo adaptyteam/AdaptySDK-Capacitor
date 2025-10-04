@@ -228,7 +228,7 @@ export class PaywallViewController {
   /**
    * Register event handlers for UI events
    *
-   * @see {@link https://docs.adapty.io/docs/react-native-handling-events-1 | [DOC] Handling View Events}
+   * @see {@link https://adapty.io/docs/capacitor-handling-events | [DOC] Handling View Events}
    *
    * @remarks
    * Each event type can have only one handler — new handlers replace existing ones.

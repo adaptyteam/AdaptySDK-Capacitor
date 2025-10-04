@@ -17,7 +17,7 @@ export type { OnboardingEventHandlers } from './types';
  * Creates a paywall view controller.
  * You can use it to further configure a view or present it.
  *
- * @see {@link https://docs.adapty.io/docs/paywall-builder-fetching | [DOC] Creating a paywall view}
+ * @see {@link https://adapty.io/docs/capacitor-present-paywalls | [DOC] Creating a paywall view}
  *
  * @param {AdaptyPaywall} paywall - paywall that you want to present.
  * @param {CreatePaywallViewParamsInput | undefined} [params] - additional params.

@@ -626,7 +626,7 @@ export interface AdaptySubscriptionDetails {
 
 /**
  * Subscription offer model to products
- * @see {@link https://doc.adapty.io/docs/rn-api-reference#adaptysubscriptionoffer}
+ * @see {@link https://adapty.io/docs/capacitor-sdk-models | [DOC] SDK Models}
  */
 export interface AdaptySubscriptionOffer {
   readonly identifier: AdaptySubscriptionOfferId;
@@ -644,7 +644,7 @@ export type AdaptySubscriptionOfferId =
 
 /**
  * Discount model to products
- * @see {@link https://doc.adapty.io/docs/rn-api-reference#adaptyproductdiscount}
+ * @see {@link https://adapty.io/docs/capacitor-sdk-models | [DOC] SDK Models}
  */
 export interface AdaptyDiscountPhase {
   /**

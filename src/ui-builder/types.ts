@@ -30,7 +30,7 @@ export type AdaptyUiOnboardingStateParams = {
 /**
  * Paywall event handlers configuration
  *
- * @see {@link https://docs.adapty.io/docs/react-native-handling-events-1 | [DOC] Handling View Events}
+ * @see {@link https://adapty.io/docs/capacitor-handling-events | [DOC] Handling View Events}
  */
 export interface EventHandlers {
   /**
@@ -259,7 +259,7 @@ export type AdaptyUiDialogActionType = (typeof AdaptyUiDialogActionType)[keyof t
 /**
  * Additional options for creating a paywall view
  *
- * @see {@link https://docs.adapty.io/docs/paywall-builder-fetching | [DOC] Creating Paywall View}
+ * @see {@link https://adapty.io/docs/capacitor-present-paywalls | [DOC] Creating Paywall View}
  */
 export interface CreatePaywallViewParamsInput {
   /**
