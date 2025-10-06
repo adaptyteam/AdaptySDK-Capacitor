@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "files": ["src/__docs__.ts"],
+  "typedocOptions": {
+    "entryPoints": ["src/__docs__.ts"],
+    "out": "docs",
+    "excludeInternal": true,
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "includeVersion": true
+  }
+}
+
