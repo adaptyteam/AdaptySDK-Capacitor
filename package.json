@@ -52,7 +52,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "update-versions": "node ./scripts/update_versions.cjs",
-    "prepublishOnly": "yarn build",
+    "prepublishOnly": "yarn prettier-check && yarn lint && yarn tsc && yarn test && yarn update-versions && yarn build",
     "dev-sync-all-files": "./scripts/sync-plugin-files.sh",
     "dev-example-js": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap copy",
     "dev-example": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap sync --deployment",
