@@ -71,3 +71,6 @@ captures
 .cursor
 .vscode
 coverage
+
+# Version files
+src/version.ts
