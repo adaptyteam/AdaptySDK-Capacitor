@@ -1,6 +1,5 @@
-// import { AdaptyError } from '../adapty-error';
-// import { AdaptyPaywallProduct, AdaptyProfile, AdaptyPurchaseResult } from '../types';
-// import { FileLocation } from '../types/inputs'; // TODO: check if this type exists
+import type { AdaptyPaywallProduct, AdaptyProfile, AdaptyPurchaseResult } from '../shared/types';
+import type { AdaptyError } from '../shared/types/method-types';
 
 /**
  * @internal
@@ -31,7 +30,7 @@ export type AdaptyUiOnboardingStateParams = {
 /**
  * Paywall event handlers configuration
  *
- * @see {@link https://docs.adapty.io/docs/react-native-handling-events-1 | [DOC] Handling View Events}
+ * @see {@link https://adapty.io/docs/capacitor-handling-events | [DOC] Handling View Events}
  */
 export interface EventHandlers {
   /**
@@ -63,7 +62,7 @@ export interface EventHandlers {
    * If you return `true`, the paywall view will be closed.
    * @default false
    */
-  onCustomAction: (action: any) => EventHandlerResult;
+  onCustomAction: (actionId: string) => EventHandlerResult;
   /**
    * Called when a user selects a product in the paywall view
    *
@@ -77,7 +76,7 @@ export interface EventHandlers {
    * If you return `true` from this callback, the paywall view will be closed.
    * @default false
    */
-  onPurchaseStarted: (product: any) => EventHandlerResult;
+  onPurchaseStarted: (product: AdaptyPaywallProduct) => EventHandlerResult;
   /**
    * Called when the purchase succeeds, the user cancels their purchase, or the purchase appears to be pending
    *
@@ -88,7 +87,7 @@ export interface EventHandlers {
    * @param purchaseResult - object, which provides details about the purchase.
    * If the result is `'success'`, it also includes the updated user's profile.
    */
-  onPurchaseCompleted: (purchaseResult: any, product: any) => EventHandlerResult;
+  onPurchaseCompleted: (purchaseResult: AdaptyPurchaseResult, product: AdaptyPaywallProduct) => EventHandlerResult;
   /**
    * Called if a purchase fails after a user taps the purchase button
    *
@@ -97,7 +96,7 @@ export interface EventHandlers {
    *
    * @param error - AdaptyError object with error code and message
    */
-  onPurchaseFailed: (error: any, product: any) => EventHandlerResult;
+  onPurchaseFailed: (error: AdaptyError, product: AdaptyPaywallProduct) => EventHandlerResult;
   /**
    * Called when a user taps the restore button in the paywall view
    *
@@ -114,7 +113,7 @@ export interface EventHandlers {
    *
    * @param profile - updated user profile
    */
-  onRestoreCompleted: (profile: any) => EventHandlerResult;
+  onRestoreCompleted: (profile: AdaptyProfile) => EventHandlerResult;
   /**
    * Called if a restore fails after a user taps the restore button
    *
@@ -123,7 +122,7 @@ export interface EventHandlers {
    *
    * @param error - AdaptyError object with error code and message
    */
-  onRestoreFailed: (error: any) => EventHandlerResult;
+  onRestoreFailed: (error: AdaptyError) => EventHandlerResult;
   /**
    * Called when the paywall view appears
    *
@@ -147,7 +146,7 @@ export interface EventHandlers {
    *
    * @param error - AdaptyError object with error code and message
    */
-  onRenderingFailed: (error: any) => EventHandlerResult;
+  onRenderingFailed: (error: AdaptyError) => EventHandlerResult;
   /**
    * Called if a product list fails to load on a presented view,
    * for example, if there is no internet connection
@@ -157,14 +156,14 @@ export interface EventHandlers {
    *
    * @param error - AdaptyError object with error code and message
    */
-  onLoadingProductsFailed: (error: any) => EventHandlerResult;
+  onLoadingProductsFailed: (error: AdaptyError) => EventHandlerResult;
   /**
    * Called when web payment navigation finishes
    *
    * If you return `true`, the paywall view will be closed.
    * @default false
    */
-  onWebPaymentNavigationFinished: (product: any, error: any) => EventHandlerResult;
+  onWebPaymentNavigationFinished: (product?: AdaptyPaywallProduct, error?: AdaptyError) => EventHandlerResult;
 }
 
 /**
@@ -182,7 +181,7 @@ export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
   onCustomAction: () => false,
   onProductSelected: () => false,
   onPurchaseStarted: () => false,
-  onPurchaseCompleted: (purchaseResult: any) => purchaseResult?.type !== 'user_cancelled',
+  onPurchaseCompleted: (purchaseResult: AdaptyPurchaseResult) => purchaseResult?.type !== 'user_cancelled',
   onPurchaseFailed: () => false,
   onRestoreStarted: () => false,
   onRestoreCompleted: () => true,
@@ -260,7 +259,7 @@ export type AdaptyUiDialogActionType = (typeof AdaptyUiDialogActionType)[keyof t
 /**
  * Additional options for creating a paywall view
  *
- * @see {@link https://docs.adapty.io/docs/paywall-builder-fetching | [DOC] Creating Paywall View}
+ * @see {@link https://adapty.io/docs/capacitor-present-paywalls | [DOC] Creating Paywall View}
  */
 export interface CreatePaywallViewParamsInput {
   /**
@@ -304,7 +303,7 @@ export interface OnboardingEventHandlers {
     },
     meta: AdaptyUiOnboardingMeta,
   ) => EventHandlerResult;
-  onError: (error: any) => EventHandlerResult;
+  onError: (error: AdaptyError) => EventHandlerResult;
 }
 
 export const DEFAULT_ONBOARDING_EVENT_HANDLERS: Partial<OnboardingEventHandlers> = {

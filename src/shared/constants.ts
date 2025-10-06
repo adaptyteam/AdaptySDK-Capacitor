@@ -46,12 +46,4 @@ export const ProductPeriod = Object.freeze({
   Month: 'month',
   Year: 'year',
 });
-export type ProductPeriod = (typeof ProductPeriod)[keyof typeof ProductPeriod];
-
-export const RefundPreference = Object.freeze({
-  NoPreference: 'no_preference',
-  Grant: 'grant',
-  Decline: 'decline',
-});
-export type RefundPreference =
-  (typeof RefundPreference)[keyof typeof RefundPreference]; 
+export type ProductPeriod = (typeof ProductPeriod)[keyof typeof ProductPeriod]; 
