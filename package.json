@@ -15,7 +15,7 @@
     "Package.swift",
     "AdaptyCapacitor.podspec"
   ],
-  "author": "",
+  "author": "Adapty team <support@adapty.io>",
   "license": "MIT",
   "repository": {
     "type": "git",
