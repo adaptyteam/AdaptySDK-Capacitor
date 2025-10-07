@@ -2,7 +2,7 @@ name: PR Validation
 
 on:
   pull_request:
-    branches: [ main, dev ]
+    branches: [ master, dev ]
     types: [opened, synchronize, reopened]
 
 jobs:
@@ -69,6 +69,9 @@ jobs:
         key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
         restore-keys: |
           node-modules-${{ runner.os }}-
+
+    - name: Generate version file
+      run: yarn update-versions
 
     - name: Cache Gradle dependencies
       if: matrix.check-type == 'android'
@@ -137,6 +140,9 @@ jobs:
     - name: Install dependencies
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile --prefer-offline
+
+    - name: Generate version file
+      run: yarn update-versions
 
     - name: Get Xcode version
       run: |

@@ -1,6 +1,6 @@
 {
   "name": "@adapty/capacitor",
-  "version": "3.10.0",
+  "version": "3.10.0-beta.0",
   "description": "Official Adapty SDK for Capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -15,7 +15,7 @@
     "Package.swift",
     "AdaptyCapacitor.podspec"
   ],
-  "author": "",
+  "author": "Adapty team <support@adapty.io>",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -44,19 +44,21 @@
     "prettier-check": "prettier \"**/*.{css,html,ts,js,tsx}\" --check",
     "prettier": "prettier \"**/*.{css,html,ts,js,tsx}\" --write",
     "swiftlint": "node-swiftlint",
-    "docgen": "docgen --api AdaptyCapacitorPlugin --output-json dist/docs.json",
-    "build": "yarn clean && yarn docgen && tsc && rollup -c rollup.config.mjs",
+    "doc-gen": "typedoc --tsconfig tsconfig.typedoc.json",
+    "build": "yarn clean && yarn update-versions && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
     "tsc": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepublishOnly": "yarn build",
+    "update-versions": "node ./scripts/update_versions.cjs",
+    "prepublishOnly": "yarn update-versions && yarn prettier-check && yarn lint && yarn tsc && yarn test && yarn doc-gen && yarn build",
     "dev-sync-all-files": "./scripts/sync-plugin-files.sh",
     "dev-example-js": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap copy",
     "dev-example": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap sync --deployment",
     "dev-example-full": "yarn build && cd ./examples/adapty-devtools && yarn --force &&  yarn build && yarn cap sync",
     "patch-adaptyui-webview": "git apply --directory=examples/adapty-devtools/ios/App/Pods/AdaptyUI patches/adaptyui-inspectable-webview.patch",
+    "postinstall": "yarn update-versions",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -79,6 +81,7 @@
     "rollup": "^4.30.1",
     "swiftlint": "^2.0.0",
     "ts-jest": "29.4.0",
+    "typedoc": "^0.28.13",
     "typescript": "5.2.2"
   },
   "peerDependencies": {
