@@ -1,6 +1,6 @@
 PODS:
   - Adapty (3.10.1)
-  - AdaptyCapacitor (3.8.2):
+  - AdaptyCapacitor (3.10.0-beta.1):
     - Adapty (= 3.10.1)
     - AdaptyPlugin (= 3.10.1)
     - AdaptyUI (= 3.10.1)
@@ -68,7 +68,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Adapty: 0f442bc6513aa2d83d719fd76491df193ad39fca
-  AdaptyCapacitor: 13a1f0ae3c380192f901065a43f0c8f6538981ad
+  AdaptyCapacitor: a04d0a5bbf94adb92a9996bf6f7efd395c083473
   AdaptyPlugin: d703eded378d715887ed4e3b6d7272f5ca82e0ac
   AdaptyUI: 86bb1aaa8be6172c1841acb11cd82601192b7266
   Capacitor: fcbee427ff437f414bbb3bc2d39364ad9bd2b8a5

@@ -2,8 +2,10 @@
 # yarn lockfile v1
 
 
-"@adapty/capacitor@file:../..":
-  version "3.8.2"
+"@adapty/capacitor@^3.10.0-beta.1":
+  version "3.10.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@adapty/capacitor/-/capacitor-3.10.0-beta.1.tgz#0ae379c9e18dcd2c10a75666f7f86c5b72f33e55"
+  integrity sha512-oKVsuLngLDVGkWE/FPnL0GKnpD9JgOD9DRjKYteRqfFuRL6X9BcKQYM9i7p9otx7ilLpQHJPuuNYgxzkkm5wWw==
 
 "@ampproject/remapping@^2.2.0":
   version "2.3.0"
