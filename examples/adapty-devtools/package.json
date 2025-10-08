@@ -27,7 +27,7 @@
     "capacitor:sync:before": "ruby scripts/copy-adapty-assets.rb"
   },
   "dependencies": {
-    "@adapty/capacitor": "file:../..",
+    "@adapty/capacitor": "^3.10.0-beta.1",
     "@capacitor/android": "7.0.0",
     "@capacitor/app": "^7.0.2",
     "@capacitor/clipboard": "^7.0.2",
