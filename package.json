@@ -58,7 +58,6 @@
     "dev-example": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap sync --deployment",
     "dev-example-full": "yarn build && cd ./examples/adapty-devtools && yarn --force &&  yarn build && yarn cap sync",
     "patch-adaptyui-webview": "git apply --directory=examples/adapty-devtools/ios/App/Pods/AdaptyUI patches/adaptyui-inspectable-webview.patch",
-    "postinstall": "yarn update-versions",
     "prepare": "husky"
   },
   "devDependencies": {
