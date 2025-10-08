@@ -851,8 +851,8 @@ const App: React.FC = () => {
           <input
             type="text"
             value={locale}
-            onChange={(e) => setLocale(e.target.value)}
-            placeholder="Locale (optional)"
+            onChange={(e) => setLocale(e.target.value.toLowerCase())}
+            placeholder="Request Locale (optional)"
             className={styles.Input}
             disabled={!isActivated}
           />
@@ -942,6 +942,9 @@ const App: React.FC = () => {
               </div>
               <div>
                 <strong>Products Count:</strong> {products.length}
+              </div>
+              <div>
+                <strong>Request Locale:</strong> {paywall.requestLocale}
               </div>
               {paywall.remoteConfig && (
                 <div>
@@ -1058,8 +1061,8 @@ const App: React.FC = () => {
           <input
             type="text"
             value={locale}
-            onChange={(e) => setLocale(e.target.value)}
-            placeholder="Locale (optional)"
+            onChange={(e) => setLocale(e.target.value.toLowerCase())}
+            placeholder="Request Locale (optional)"
             className={styles.Input}
             disabled={!isActivated}
           />
@@ -1136,6 +1139,9 @@ const App: React.FC = () => {
               <div>
                 <strong>Has Onboarding Builder:</strong> {onboarding.onboardingBuilder ? '✅ Yes' : '❌ No'}
               </div>
+              <div>
+                <strong>Request Locale:</strong> {onboarding.requestLocale}
+              </div>
               {onboarding.remoteConfig && (
                 <div>
                   <div>
@@ -1144,11 +1150,6 @@ const App: React.FC = () => {
                   <div>
                     <strong>Config Data:</strong> {onboarding.remoteConfig.dataString}
                   </div>
-                </div>
-              )}
-              {onboarding.onboardingBuilder && (
-                <div>
-                  <strong>Builder Locale:</strong> {onboarding.onboardingBuilder.lang}
                 </div>
               )}
             </div>
