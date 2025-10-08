@@ -52,7 +52,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "update-versions": "node ./scripts/update_versions.cjs",
-    "prepublishOnly": "yarn update-versions && yarn prettier-check && yarn lint && yarn tsc && yarn test && yarn doc-gen && yarn build",
+    "prepublishOnly": "yarn install --force && yarn update-versions && yarn prettier-check && yarn lint && yarn tsc && yarn test && yarn doc-gen && yarn build",
     "dev-sync-all-files": "./scripts/sync-plugin-files.sh",
     "dev-example-js": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap copy",
     "dev-example": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap sync --deployment",
@@ -86,6 +86,9 @@
   },
   "peerDependencies": {
     "@capacitor/core": ">=7.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "prettier": "@ionic/prettier-config",
   "swiftlint": "@ionic/swiftlint-config",
