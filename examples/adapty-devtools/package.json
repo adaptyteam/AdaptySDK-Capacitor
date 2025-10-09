@@ -12,6 +12,7 @@
   "scripts": {
     "credentials": "node scripts/credentials.js",
     "credentials-force": "node scripts/credentials.js --force-bundle",
+    "preinstall": "cd ../../ && yarn install && yarn build",
     "postinstall": "yarn credentials",
     "start": "vite",
     "build": "vite build",
@@ -27,7 +28,7 @@
     "capacitor:sync:before": "ruby scripts/copy-adapty-assets.rb"
   },
   "dependencies": {
-    "@adapty/capacitor": "^3.10.0-beta.1",
+    "@adapty/capacitor": "file:../..",
     "@capacitor/android": "7.0.0",
     "@capacitor/app": "^7.0.2",
     "@capacitor/clipboard": "^7.0.2",
