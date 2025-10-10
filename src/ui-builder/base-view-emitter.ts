@@ -160,6 +160,7 @@ export abstract class BaseViewEmitter<TEventHandlers extends Record<string, any>
             log.failed(() => ({ error }));
           }
         }
+        log.success(() => ({ message: 'Event handled successfully' }));
       });
       this.eventListeners.set(config.nativeEvent, subscription);
     }

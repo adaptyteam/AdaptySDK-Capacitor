@@ -4,6 +4,8 @@ import { AdaptyOnboardingCoder } from '../shared/coders/adapty-onboarding';
 import { LogContext, Log } from '../shared/logger';
 import type { AdaptyOnboarding } from '../shared/types';
 import type { components } from '../shared/types/api';
+import { mapValues } from '../shared/utils/map-values';
+import { withErrorContext } from '../shared/utils/with-error-context';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 import { DEFAULT_ONBOARDING_EVENT_HANDLERS } from './types';
@@ -159,10 +161,16 @@ export class OnboardingViewController {
     const viewEmitter = this.viewEmitter ?? new OnboardingViewEmitter(this.id);
     this.viewEmitter = viewEmitter;
 
+    const wrappedErrorLogEventHandlers = mapValues(eventHandlers, (handler, eventName) =>
+      handler && typeof handler === 'function'
+        ? withErrorContext(handler, eventName as string, 'OnboardingViewController')
+        : undefined,
+    );
+
     // Merge with defaults to ensure default behavior is preserved after unsubscribe/resubscribe cycles
     const finalEventHandlers: Partial<OnboardingEventHandlers> = {
       ...DEFAULT_ONBOARDING_EVENT_HANDLERS,
-      ...eventHandlers,
+      ...wrappedErrorLogEventHandlers,
     };
 
     for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
