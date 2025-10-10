@@ -4,6 +4,8 @@ import { AdaptyPaywallCoder } from '../shared/coders/adapty-paywall';
 import { LogContext, Log } from '../shared/logger';
 import type { AdaptyPaywall } from '../shared/types';
 import type { components } from '../shared/types/api';
+import { mapValues } from '../shared/utils/map-values';
+import { withErrorContext } from '../shared/utils/with-error-context';
 
 import { PaywallViewEmitter } from './paywall-view-emitter';
 import type {
@@ -268,10 +270,16 @@ export class PaywallViewController {
     const viewEmitter = this.viewEmitter ?? new PaywallViewEmitter(this.id);
     this.viewEmitter = viewEmitter;
 
+    const wrappedErrorLogEventHandlers = mapValues(eventHandlers, (handler, eventName) =>
+      handler && typeof handler === 'function'
+        ? withErrorContext(handler, eventName as string, 'PaywallViewController')
+        : undefined,
+    );
+
     // Merge with defaults to ensure default behavior is preserved after unsubscribe/resubscribe cycles
     const finalEventHandlers: EventHandlers = {
       ...DEFAULT_EVENT_HANDLERS,
-      ...eventHandlers,
+      ...wrappedErrorLogEventHandlers,
     };
 
     for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
