@@ -84,6 +84,9 @@ export interface AdaptyPaywall {
   version?: number;
   webPurchaseUrl?: string;
   payloadData?: string;
+  /**
+   * @internal Used internally by the SDK
+   */
   requestLocale: string;
   paywallBuilder?: AdaptyPaywallBuilder;
 }
@@ -117,6 +120,9 @@ export interface AdaptyOnboarding {
   id: string;
   version?: number;
   payloadData?: string;
+  /**
+   * @internal Used internally by the SDK
+   */
   requestLocale: string;
   onboardingBuilder?: AdaptyOnboardingBuilder;
 }
