@@ -1,0 +1,26 @@
+# Netlify Configuration for TypeScript Documentation Build
+# This project uses Swift/Kotlin for native mobile platforms,
+# but documentation is built using TypeDoc (Node.js only)
+
+[build]
+  # Base directory defaults to root (/)
+  # Build command should be configured in Netlify UI or here
+  command = "yarn install --ignore-optional && yarn doc-gen"
+  
+  # Publish directory should be configured in Netlify UI or here
+  publish = "docs"
+
+[build.environment]
+  # Explicitly set Node.js version
+  # NODE_VERSION = "18"
+  
+  # Prevent Netlify from auto-detecting and installing Swift
+  # Swift is only needed for iOS development, not for docs generation
+  SWIFT_VERSION = ""
+  
+  # Ensure we're in production mode for Node
+  #NODE_ENV = "production"
+  
+  # Use Yarn 1.x (classic)
+  #YARN_VERSION = "1.22.19"
+
