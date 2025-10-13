@@ -12,6 +12,7 @@
   "scripts": {
     "credentials": "node scripts/credentials.js",
     "credentials-force": "node scripts/credentials.js --force-bundle",
+    "preinstall": "cd ../../ && yarn install && yarn build",
     "postinstall": "yarn credentials",
     "start": "vite",
     "build": "vite build",

@@ -153,12 +153,15 @@ export abstract class BaseViewEmitter<TEventHandlers extends Record<string, any>
             const shouldClose = cb(...callbackArgs);
             if (shouldClose) {
               onRequestClose().catch((error) => {
-                log.failed(() => ({ error }));
+                log.failed(() => ({ error, handlerName }));
               });
             }
+            log.success(() => ({ message: 'Event handled successfully', handlerName }));
           } catch (error) {
-            log.failed(() => ({ error }));
+            log.failed(() => ({ error, handlerName }));
           }
+
+          break; // Only one handler can match per event
         }
       });
       this.eventListeners.set(config.nativeEvent, subscription);

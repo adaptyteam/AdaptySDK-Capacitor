@@ -33,6 +33,7 @@ import {
 } from './shared/types/method-types';
 import { filterUndefined } from './shared/utils/compact-object';
 import { mergeOptions } from './shared/utils/merge-options';
+import { withErrorContext } from './shared/utils/with-error-context';
 import type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 import type {
   AdaptyDefaultOptions,
@@ -774,7 +775,10 @@ export class Adapty implements AdaptyPlugin {
   public addListener: AddListenerFn = <T extends keyof EventPayloadMap>(
     eventName: T,
     listenerFunc: (data: EventPayloadMap[T]) => void,
-  ) => this.emitter.addListener(eventName, listenerFunc);
+  ) => {
+    const wrappedListener = withErrorContext(listenerFunc, eventName, 'Adapty');
+    return this.emitter.addListener(eventName, wrappedListener);
+  };
 
   async removeAllListeners(): Promise<void> {
     await this.emitter.removeAllListeners();
