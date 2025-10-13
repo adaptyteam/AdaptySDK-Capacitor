@@ -114,9 +114,9 @@ export class AdaptyEmitter {
 
           try {
             listener(payload);
-            eventLog.success(() => ({ delivered: true, handlerName }));
+            eventLog.success(() => ({ message: 'Event handled successfully', handlerName }));
           } catch (handlerError) {
-            eventLog.failed(() => ({ handlerError, handlerName }));
+            eventLog.failed(() => ({ handlerName, handlerError }));
           }
         }
       });
