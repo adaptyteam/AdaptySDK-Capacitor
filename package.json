@@ -76,12 +76,14 @@
     "lint-staged": "^15.2.11",
     "prettier": "^3.4.2",
     "prettier-plugin-java": "^2.6.6",
+    "prompt-sync": "^4.2.0",
     "rimraf": "^6.0.1",
     "rollup": "^4.30.1",
     "swiftlint": "^2.0.0",
     "ts-jest": "29.4.0",
     "typedoc": "^0.28.13",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "xcode": "^3.0.1"
   },
   "peerDependencies": {
     "@capacitor/core": ">=7.0.0"

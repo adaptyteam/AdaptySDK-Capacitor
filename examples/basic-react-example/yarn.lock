@@ -2,8 +2,10 @@
 # yarn lockfile v1
 
 
-"@adapty/capacitor@file:../..":
+"@adapty/capacitor@3.11.0-beta.0":
   version "3.11.0-beta.0"
+  resolved "https://registry.yarnpkg.com/@adapty/capacitor/-/capacitor-3.11.0-beta.0.tgz#5e954abe7eae2042adb5c4c85b9b2f44d08d4b2a"
+  integrity sha512-78AG+enimrzUsiymxdCFZYvGkFhfa/TGuW38R6ejgPyIazqT3QE+MgXjwsbeOWbwRrEGplHQrRU99mPFpvuglg==
 
 "@ampproject/remapping@^2.2.0":
   version "2.3.0"
@@ -176,12 +178,7 @@
   resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-7.0.0.tgz#232439e19c037301fa0a49a20675325d4929469a"
   integrity sha512-T7WMJPGlzEzNFI3s3lA8F2H6XyYzQM8OwgIfPKOAbawc6Fq669ABKIpfNPzsQHR1kVxH3cMHYSkDaPMgJyDdXQ==
 
-"@capacitor/app@^7.0.2":
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/@capacitor/app/-/app-7.0.2.tgz#63cdcc097b137e8605ffe7b97144f68c014b7db9"
-  integrity sha512-kRWBF6Wc6OQxhL+N6rsegyfJY37Lj9/VJhtrmgmH+y+rdxQLQwUOpMyxXStym7cF+QzGeVpItyVxyUT9fE5ByQ==
-
-"@capacitor/cli@latest":
+"@capacitor/cli@7.4.0":
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/@capacitor/cli/-/cli-7.4.0.tgz#1ff769d3ccb2298635eac6814d1a226c9afd07be"
   integrity sha512-RXmsW067r9sz7K1qtXGNB12w2aJtt86J3Jc4vOvmvpA+GyVYkVY1UhAMRnuVrXHjGZEVlwBORHunwrmv30HoZg==
@@ -204,49 +201,17 @@
     tslib "^2.8.1"
     xml2js "^0.6.2"
 
-"@capacitor/clipboard@^7.0.2":
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/@capacitor/clipboard/-/clipboard-7.0.2.tgz#fe9ea01032581f68feda79c19304c5f82e1995f1"
-  integrity sha512-Cm37cNPvSzuao3HlcrQT18py5WUfKdaNWBHFuQcubBzBuKhqtAC9P6xZ2d0ucPFdxvsEOgO7mjs2BWIpaKqpgg==
-
-"@capacitor/core@latest":
+"@capacitor/core@7.4.0":
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/@capacitor/core/-/core-7.4.0.tgz#19524c8a741e73dd247aa66329e446f211e95fd4"
   integrity sha512-P6NnjoHyobZgTjynlZSn27d0SUj6j38inlNxFnKZr9qwU7/r6+0Sg2nWkGkIH/pMmXHsvGD8zVe6KUq1UncIjA==
   dependencies:
     tslib "^2.1.0"
 
-"@capacitor/filesystem@^7.1.4":
-  version "7.1.4"
-  resolved "https://registry.yarnpkg.com/@capacitor/filesystem/-/filesystem-7.1.4.tgz#b728831f15af00d7d5c0779c683da142cba3b366"
-  integrity sha512-BdUnOVulHAtruW2GeC9o7e9LO5aFcVYqNn3dLypJSOck/WipUFNfI0QWoUS0FVGeqBbDJgFGi3zjXJx0lzbDkA==
-  dependencies:
-    "@capacitor/synapse" "^1.0.3"
-
 "@capacitor/ios@7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@capacitor/ios/-/ios-7.0.0.tgz#ecc8944fab99c4f8574d467b319586c6547b3346"
   integrity sha512-FuCoTx2HRYPhIUOT+J87rHkjT4m1yNLsIaG5/qkt9JG5k3KIYATKbp8EHjtLAMqyJWJKBmjkjpFExNesr/t6kA==
-
-"@capacitor/share@^7.0.2":
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/@capacitor/share/-/share-7.0.2.tgz#74aab38dde1eae6d6889b71f1d09c02fe358da47"
-  integrity sha512-VyNPo/9831xnL17IMDeft5yNdBjoKNb451P95sRcr69hulRDqHc+kndqOVaMXnaA6IyBdWnnFv/n1HUf4cXpGw==
-
-"@capacitor/status-bar@^7.0.2":
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/@capacitor/status-bar/-/status-bar-7.0.2.tgz#e48d0b7d41f24efb0781c25aa25b1f94f6f224fc"
-  integrity sha512-fYYkkdzCbQV+MjZVnaQTFl5I4bddnFW8ZrPVxDjNoGVPTUG7H58Ij1+NcuNxHLXjJvZOoZeYJ3w3I16Wb2zssw==
-
-"@capacitor/synapse@^1.0.3":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@capacitor/synapse/-/synapse-1.0.4.tgz#c6beb33119d9656b1f04cb7783989fb78933ef6d"
-  integrity sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==
-
-"@capacitor/toast@^7.0.2":
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/@capacitor/toast/-/toast-7.0.2.tgz#231e26e819cec270563f84bc24554dd992423fd8"
-  integrity sha512-BPzxZNI1Qg58/yZzx8Y/iz1m6hBudx+vlbMkfWvcg3Z2Ph62xoSnQXE/28y54yE+c6JzAqH37NZeA8R8p9NW9A==
 
 "@esbuild/aix-ppc64@0.21.5":
   version "0.21.5"
@@ -790,11 +755,6 @@ convert-source-map@^2.0.0:
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-2.0.0.tgz#4b560f649fc4e918dd0ab75cf4961e8bc882d82a"
   integrity sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==
 
-cookie@^1.0.1:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/cookie/-/cookie-1.0.2.tgz#27360701532116bd3f1f9416929d176afe1e4610"
-  integrity sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==
-
 cross-spawn@^7.0.3, cross-spawn@^7.0.6:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.6.tgz#8a58fe78f00dcd70c370451759dfbfaf03e8ee9f"
@@ -1192,21 +1152,6 @@ react-refresh@^0.17.0:
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.17.0.tgz#b7e579c3657f23d04eccbe4ad2e58a8ed51e7e53"
   integrity sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==
 
-react-router-dom@^7.8.0:
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-7.8.0.tgz#8c5e6f86e6c1f82037586124130df5926fdab10c"
-  integrity sha512-ntInsnDVnVRdtSu6ODmTQ41cbluak/ENeTif7GBce0L6eztFg6/e1hXAysFQI8X25C8ipKmT9cClbJwxx3Kaqw==
-  dependencies:
-    react-router "7.8.0"
-
-react-router@7.8.0:
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/react-router/-/react-router-7.8.0.tgz#2bc07e0a9ff74d88ee38c2f27897e968b8f59170"
-  integrity sha512-r15M3+LHKgM4SOapNmsH3smAizWds1vJ0Z9C4mWaKnT9/wD7+d/0jYcj6LmOvonkrO4Rgdyp4KQ/29gWN2i1eg==
-  dependencies:
-    cookie "^1.0.1"
-    set-cookie-parser "^2.6.0"
-
 react@^18.2.0:
   version "18.3.1"
   resolved "https://registry.yarnpkg.com/react/-/react-18.3.1.tgz#49ab892009c53933625bd16b2533fc754cab2891"
@@ -1291,11 +1236,6 @@ semver@^7.6.3:
   version "7.7.2"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.2.tgz#67d99fdcd35cec21e6f8b87a7fd515a33f982b58"
   integrity sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==
-
-set-cookie-parser@^2.6.0:
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/set-cookie-parser/-/set-cookie-parser-2.7.1.tgz#3016f150072202dfbe90fadee053573cc89d2943"
-  integrity sha512-IOc8uWeOZgnb3ptbCURJWNjWUPcO3ZnTTdzsurqERrP6nPyv+paC55vJM0LpOlT2ne+Ix+9+CRG1MNLlyZ4GjQ==
 
 shebang-command@^2.0.0:
   version "2.0.0"
