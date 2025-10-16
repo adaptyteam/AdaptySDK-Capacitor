@@ -17,7 +17,6 @@
 
 <p align="center">
     <a href="https://adapty.io/?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor"><b>Website</b></a> •
-    <a href="https://go.adapty.io/subhub-community-capacitor-rep"><b>Discord</b></a> •
     <a href="https://x.com/AdaptyTeam"><b>Follow us on X</b></a>
 </p>
 

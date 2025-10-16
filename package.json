@@ -17,6 +17,7 @@
   ],
   "author": "Adapty team <support@adapty.io>",
   "license": "MIT",
+  "homepage": "https://adapty.io/docs/capacitor-sdk-overview",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adaptyteam/AdaptySDK-Capacitor.git"
