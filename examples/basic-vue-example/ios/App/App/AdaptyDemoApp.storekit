@@ -1,0 +1,207 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "ECB43458",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : false,
+      "internalID" : "6474671808",
+      "localizations" : [
+        {
+          "description" : "Description",
+          "displayName" : "Name",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "test_consumable",
+      "referenceName" : "test_consumable",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "1564759934",
+    "_developerTeamID" : "KGK5UKQJ46",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 775381176.81464303,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "20770576",
+      "localizations" : [
+
+      ],
+      "name" : "Demo Group",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1564759952",
+          "introductoryOffer" : {
+            "displayPrice" : "1.99",
+            "internalID" : "05B52E3E",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "payAsYouGo",
+            "subscriptionPeriod" : "P1M"
+          },
+          "localizations" : [
+            {
+              "description" : "1 Month Premium Description",
+              "displayName" : "1 Month Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "monthly.premium.999",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Premium",
+          "subscriptionGroupID" : "20770576",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+            {
+              "displayPrice" : "1.99",
+              "internalID" : "DDA6CBC6",
+              "numberOfPeriods" : 1,
+              "offerID" : "promo_pay_up_front",
+              "paymentMode" : "payUpFront",
+              "referenceName" : "Promo pay up front",
+              "subscriptionPeriod" : "P1M"
+            }
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "6453161968",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Three Month Premium Description",
+              "displayName" : "Three Month Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "threemonth.premium.99",
+          "recurringSubscriptionPeriod" : "P3M",
+          "referenceName" : "Three Month Premium",
+          "subscriptionGroupID" : "20770576",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "5.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1564765343",
+          "introductoryOffer" : {
+            "displayPrice" : "1.99",
+            "internalID" : "91D8F9B5",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "payUpFront",
+            "subscriptionPeriod" : "P1M"
+          },
+          "localizations" : [
+            {
+              "description" : "1 Month Premium Description",
+              "displayName" : "1 Week Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "weekly.premium.599",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Weekly Premium",
+          "subscriptionGroupID" : "20770576",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
