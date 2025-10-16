@@ -1,0 +1,16 @@
+.idea/
+node_modules/
+.vscode/
+*.map
+.DS_Store
+.sourcemaps
+dist/
+
+# Angular
+.angular/
+out-tsc/
+
+# Adapty credentials
+.adapty-credentials.json
+
+!Podfile.lock

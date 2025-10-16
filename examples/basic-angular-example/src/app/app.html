@@ -1,0 +1,62 @@
+<!-- Loading state -->
+@if (isLoading) {
+<div class="container">
+  <div class="loading">Loading Adapty SDK...</div>
+</div>
+}
+
+<!-- Detail view for selected recipe -->
+@if (!isLoading && selectedRecipe) {
+<div class="container">
+  <div class="detailView">
+    <h2>{{ selectedRecipe.title }}</h2>
+    <p>{{ selectedRecipe.description }}</p>
+    <button class="backButton" (click)="handleBack()">← Back to Recipes</button>
+  </div>
+</div>
+}
+
+<!-- Main recipe list view -->
+@if (!isLoading && !selectedRecipe) {
+<div class="container">
+  <header class="header">
+    <h1>Adapty Recipes (Angular)</h1>
+  </header>
+
+  <!-- Error display -->
+  @if (error) {
+  <div class="error">{{ error }}</div>
+  }
+
+  <!-- Premium status bar -->
+  <div class="statusBar" [class.statusPremium]="isPremiumActive" [class.statusFree]="!isPremiumActive">
+    {{ isPremiumActive ? '✓ Premium Active' : 'Free Plan' }}
+  </div>
+
+  <!-- Basic Recipes Section -->
+  <section class="section">
+    <h2 class="sectionTitle">Basic Recipes (Free)</h2>
+    @for (recipe of freeRecipes; track recipe.id) {
+    <div class="recipeCard" (click)="handleRecipeClick(recipe)">
+      <div class="recipeTitle">{{ recipe.title }}</div>
+      <div class="recipeDescription">{{ recipe.description }}</div>
+    </div>
+    }
+  </section>
+
+  <!-- Premium Recipes Section -->
+  <section class="section">
+    <h2 class="sectionTitle">Premium Recipes</h2>
+    @for (recipe of premiumRecipes; track recipe.id) {
+    <div class="recipeCard" [class.recipeCardLocked]="!isPremiumActive" (click)="handleRecipeClick(recipe)">
+      <div class="recipeTitle">
+        @if (!isPremiumActive) {
+        <span class="lockIcon">🔒</span>
+        } {{ recipe.title }}
+      </div>
+      <div class="recipeDescription">{{ recipe.description }}</div>
+    </div>
+    }
+  </section>
+</div>
+}
