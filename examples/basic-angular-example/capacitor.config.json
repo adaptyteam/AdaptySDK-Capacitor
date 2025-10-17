@@ -1,0 +1,14 @@
+{
+  "appId": "com.adaptytest",
+  "appName": "Adapty capacitor",
+  "webDir": "dist/browser",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    },
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "LIGHT"
+    }
+  }
+}

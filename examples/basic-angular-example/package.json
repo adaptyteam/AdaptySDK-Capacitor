@@ -1,0 +1,48 @@
+{
+  "name": "adapty-basic-angular-example",
+  "version": "1.0.0",
+  "description": "Adapty capacitor angular example",
+  "keywords": [
+    "capacitor",
+    "mobile",
+    "adapty",
+    "angular"
+  ],
+  "scripts": {
+    "ng": "ng",
+    "credentials": "node ../../scripts/credentials.mjs --skip-onboarding",
+    "credentials-force": "node ../../scripts/credentials.mjs --force-bundle --skip-onboarding",
+    "postinstall": "yarn credentials",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "tsc": "tsc --noEmit",
+    "update-cap-config": "yarn cap copy && yarn cap sync",
+    "android": "yarn build && yarn cap run android",
+    "ios": "yarn build && yarn cap run ios"
+  },
+  "private": true,
+  "dependencies": {
+    "@capacitor/core": "7.4.0",
+    "@adapty/capacitor": "3.11.0-beta.0",
+    "@capacitor/ios": "7.0.0",
+    "@capacitor/android": "7.0.0",
+    "@angular/common": "^20.3.0",
+    "@angular/compiler": "^20.3.0",
+    "@angular/core": "^20.3.0",
+    "@angular/platform-browser": "^20.3.0",
+    "@angular/router": "^20.3.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.4.0",
+    "@angular/build": "^20.3.5",
+    "@angular/cli": "^20.3.5",
+    "@angular/compiler-cli": "^20.3.0",
+    "typescript": "~5.9.2"
+  },
+  "author": "",
+  "license": "MIT"
+}

@@ -17,7 +17,6 @@
 
 <p align="center">
     <a href="https://adapty.io/?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor"><b>Website</b></a> •
-    <a href="https://go.adapty.io/subhub-community-capacitor-rep"><b>Discord</b></a> •
     <a href="https://x.com/AdaptyTeam"><b>Follow us on X</b></a>
 </p>
 
@@ -91,7 +90,11 @@ Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms
 
 ## Examples
 
-Check out our [example applications](https://github.com/adaptyteam/AdaptySDK-Capacitor/tree/master/examples) to see Adapty SDK in action.
+We provide example applications demonstrating Adapty SDK integration:
+
+- **Basic Examples** (**React**, **Angular**, **Vue**) - Minimal applications showing core SDK functionality (activation, paywalls, purchases). Perfect for getting started and understanding the basic integration flow.
+
+- **Adapty Devtools** - Advanced development tool for bug reports and SDK testing. This comprehensive example includes detailed logging, debug panels, and testing utilities for developers working on SDK integration or reporting issues.
 
 ## Contributing
 
