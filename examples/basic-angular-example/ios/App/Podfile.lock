@@ -1,0 +1,46 @@
+PODS:
+  - Adapty (3.11.0)
+  - AdaptyCapacitor (3.11.0-beta.0):
+    - Adapty (= 3.11.0)
+    - AdaptyPlugin (= 3.11.0)
+    - AdaptyUI (= 3.11.0)
+    - Capacitor
+  - AdaptyPlugin (3.11.0):
+    - Adapty (= 3.11.0)
+    - AdaptyUI (= 3.11.0)
+  - AdaptyUI (3.11.0):
+    - Adapty (= 3.11.0)
+  - Capacitor (7.0.0):
+    - CapacitorCordova
+  - CapacitorCordova (7.0.0)
+
+DEPENDENCIES:
+  - "AdaptyCapacitor (from `../../node_modules/@adapty/capacitor`)"
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+
+SPEC REPOS:
+  trunk:
+    - Adapty
+    - AdaptyPlugin
+    - AdaptyUI
+
+EXTERNAL SOURCES:
+  AdaptyCapacitor:
+    :path: "../../node_modules/@adapty/capacitor"
+  Capacitor:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorCordova:
+    :path: "../../node_modules/@capacitor/ios"
+
+SPEC CHECKSUMS:
+  Adapty: ad14ab563dd945a1b0f64e1c7cddf713969c39b5
+  AdaptyCapacitor: a87506607559f6e4162e47e940dde10d71f3e86c
+  AdaptyPlugin: cf709bf358013e1390eabd91dae2ac99b7ee4825
+  AdaptyUI: 60f719fc79bc44dbdbe88974290669dc14dc89e0
+  Capacitor: fcbee427ff437f414bbb3bc2d39364ad9bd2b8a5
+  CapacitorCordova: 345f93b7edd121db98e4ec20ac94d6d7bcaf7e48
+
+PODFILE CHECKSUM: e353fd2e78f7aba63ab50abad1fbd4e6d879574b
+
+COCOAPODS: 1.15.2
