@@ -9,7 +9,7 @@ on:
       dry-run:
         description: 'Perform a dry run (no actual publish)'
         required: false
-        default: 'true'
+        default: 'false'
         type: choice
         options:
           - 'true'
@@ -77,7 +77,7 @@ jobs:
 
       - name: Publish to npm
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry-run != 'true')
-        run: npm publish --provenance --tag latest --dry-run --ignore-scripts
+        run: npm publish --provenance --tag latest --ignore-scripts
 
       - name: Output published version
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.dry-run != 'true')
