@@ -20,6 +20,8 @@ export type {
   AdaptyUiView,
   AdaptyUiDialogConfig,
   AdaptyUiDialogActionType,
+  AdaptyIOSPresentationStyle,
   EventHandlers,
   OnboardingEventHandlers,
 } from './ui-builder/index';
+export type { IdentifyParamsInput } from './shared/types/inputs';

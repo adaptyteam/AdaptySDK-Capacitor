@@ -1,6 +1,7 @@
 import * as Input from '../types/inputs';
 import type { Def } from '../types/schema';
 import { AdaptyUiMediaCacheCoder } from './adapty-ui-media-cache';
+import { getPlatform } from '../utils/platform';
 import version from '../../version';
 
 type Model = Input.ActivateParamsInput;
@@ -65,12 +66,31 @@ export class AdaptyConfigurationCoder {
 
     // For Capacitor, we need to handle platform-specific settings differently
     // These will be handled at runtime by the native layer
+    const platform = getPlatform();
+
     if (params.ios?.idfaCollectionDisabled !== undefined) {
       config['apple_idfa_collection_disabled'] = params.ios.idfaCollectionDisabled;
     }
 
+    if (platform === 'ios' && params.ios?.appAccountToken) {
+      (config as any)['customer_identity_parameters'] = {
+        app_account_token: params.ios.appAccountToken,
+      };
+    }
+
     if (params.android?.adIdCollectionDisabled !== undefined) {
       config['google_adid_collection_disabled'] = params.android.adIdCollectionDisabled;
+    }
+
+    if (params.android?.pendingPrepaidPlansEnabled !== undefined) {
+      (config as any)['google_enable_pending_prepaid_plans'] =
+        params.android.pendingPrepaidPlansEnabled;
+    }
+
+    if (platform === 'android' && params.android?.obfuscatedAccountId) {
+      (config as any)['customer_identity_parameters'] = {
+        obfuscated_account_id: params.android.obfuscatedAccountId,
+      };
     }
 
     return config;

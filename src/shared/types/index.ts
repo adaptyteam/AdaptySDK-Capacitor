@@ -193,6 +193,12 @@ export type AdaptyPurchaseResult =
   | {
       type: 'success';
       profile: AdaptyProfile;
+      ios?: {
+        jwsTransaction?: string;
+      };
+      android?: {
+        purchaseToken?: string;
+      };
     };
 
 /**
@@ -575,6 +581,8 @@ export interface AdaptyPaywallProduct {
    */
   readonly price?: AdaptyPrice;
   readonly adaptyId: string;
+  readonly accessLevelId: string;
+  readonly productType: string;
   /**
    * Same as `variationId` property of the parent {@link AdaptyPaywall}.
    */
@@ -719,6 +727,8 @@ export interface AdaptyProfileParameters {
 export interface ProductReference {
   vendorId: string;
   adaptyId: string;
+  accessLevelId: string;
+  productType: string;
 
   ios?: {
     promotionalOfferId?: string;

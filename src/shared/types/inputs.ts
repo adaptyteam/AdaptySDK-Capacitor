@@ -154,6 +154,11 @@ export interface ActivateParamsInput {
      * @default false
      */
     idfaCollectionDisabled?: boolean;
+    /**
+     * App account token for iOS
+     * @platform ios
+     */
+    appAccountToken?: string;
   };
   android?: {
     /**
@@ -161,6 +166,37 @@ export interface ActivateParamsInput {
      * @default false
      */
     adIdCollectionDisabled?: boolean;
+    /**
+     * Enable pending prepaid plans for Android
+     * @platform android
+     * @default false
+     */
+    pendingPrepaidPlansEnabled?: boolean;
+    /**
+     * Obfuscated account ID
+     * @platform android
+     */
+    obfuscatedAccountId?: string;
+  };
+}
+
+/**
+ * Describes optional parameters for the {@link identify} method.
+ */
+export interface IdentifyParamsInput {
+  ios?: {
+    /**
+     * App account token for iOS
+     * @platform ios
+     */
+    appAccountToken?: string;
+  };
+  android?: {
+    /**
+     * Obfuscated account ID
+     * @platform android
+     */
+    obfuscatedAccountId?: string;
   };
 }
 
@@ -201,16 +237,6 @@ export interface AdaptyAndroidPurchaseParams {
    * @see {@link https://developer.android.com/google/play/billing/integrate#personalized-price}
    */
   isOfferPersonalized?: boolean;
-  /**
-   * Obfuscated account ID
-   * @platform android
-   */
-  obfuscatedAccountId?: string;
-  /**
-   * Obfuscated profile ID
-   * @platform android
-   */
-  obfuscatedProfileId?: string;
 }
 
 export type MakePurchaseParamsInput = {

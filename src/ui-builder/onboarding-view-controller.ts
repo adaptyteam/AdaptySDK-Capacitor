@@ -9,7 +9,7 @@ import { withErrorContext } from '../shared/utils/with-error-context';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 import { DEFAULT_ONBOARDING_EVENT_HANDLERS } from './types';
-import type { AdaptyUiView, OnboardingEventHandlers } from './types';
+import type { AdaptyUiView, OnboardingEventHandlers, AdaptyIOSPresentationStyle } from './types';
 
 type Req = components['requests'];
 
@@ -67,7 +67,12 @@ export class OnboardingViewController {
   }
 
   /**
-   * Presents an onboarding view as a full-screen modal
+   * Presents an onboarding view as a modal
+   *
+   * @param {Object} [options] - Presentation options
+   * @param {AdaptyIOSPresentationStyle} [options.iosPresentationStyle='full_screen'] - iOS presentation style.
+   * Available options: 'full_screen' (default) or 'page_sheet'.
+   * Only affects iOS platform.
    *
    * @remarks
    * Calling `present` upon already visible onboarding view
@@ -75,19 +80,20 @@ export class OnboardingViewController {
    *
    * @throws {AdaptyError}
    */
-  public async present(): Promise<void> {
+  public async present(options: { iosPresentationStyle?: AdaptyIOSPresentationStyle } = {}): Promise<void> {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_present_onboarding_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start(() => ({ _id: this.id }));
+    log.start(() => ({ _id: this.id, iosPresentationStyle: options.iosPresentationStyle }));
 
     if (this.id === null) {
       throw new AdaptyError({ adaptyCode: 2002, message: 'No view reference' });
     }
 
-    const data: Req['AdaptyUIPresentOnboardingView.Request'] = {
+    const data: any = {
       method: methodKey,
       id: this.id,
+      ios_presentation_style: options.iosPresentationStyle ?? 'full_screen',
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);

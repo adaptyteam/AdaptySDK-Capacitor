@@ -14,6 +14,7 @@ import type {
   AdaptyUiDialogConfig,
   AdaptyUiDialogActionType,
   EventHandlers,
+  AdaptyIOSPresentationStyle,
 } from './types';
 import { DEFAULT_EVENT_HANDLERS } from './types';
 
@@ -117,7 +118,12 @@ export class PaywallViewController {
   }
 
   /**
-   * Presents a paywall view as a full-screen modal
+   * Presents a paywall view as a modal
+   *
+   * @param {Object} [options] - Presentation options
+   * @param {AdaptyIOSPresentationStyle} [options.iosPresentationStyle='full_screen'] - iOS presentation style.
+   * Available options: 'full_screen' (default) or 'page_sheet'.
+   * Only affects iOS platform.
    *
    * @remarks
    * Calling `present` upon already visible paywall view
@@ -125,11 +131,11 @@ export class PaywallViewController {
    *
    * @throws {AdaptyError}
    */
-  public async present(): Promise<void> {
+  public async present(options: { iosPresentationStyle?: AdaptyIOSPresentationStyle } = {}): Promise<void> {
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_present_paywall_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start(() => ({ _id: this.id }));
+    log.start(() => ({ _id: this.id, iosPresentationStyle: options.iosPresentationStyle }));
 
     if (this.id === null) {
       throw new AdaptyError({
@@ -138,9 +144,10 @@ export class PaywallViewController {
       });
     }
 
-    const data: Req['AdaptyUIPresentPaywallView.Request'] = {
+    const data: any = {
       method: methodKey,
       id: this.id,
+      ios_presentation_style: options.iosPresentationStyle ?? 'full_screen',
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
