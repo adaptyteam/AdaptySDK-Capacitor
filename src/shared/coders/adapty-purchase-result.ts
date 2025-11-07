@@ -33,8 +33,8 @@ export class AdaptyPurchaseResultCoder extends SimpleCoder<
       return {
         ...baseResult,
         profile: new AdaptyProfileCoder().decode(data.profile),
-        ...(platform === 'ios' && anyData.apple_jws_transaction
-          ? { ios: { jwsTransaction: anyData.apple_jws_transaction } }
+        ...(platform === 'ios' && anyData.jws_transaction
+          ? { ios: { jwsTransaction: anyData.jws_transaction } }
           : {}),
         ...(platform === 'android' && anyData.google_purchase_token
           ? { android: { purchaseToken: anyData.google_purchase_token } }
@@ -60,7 +60,7 @@ export class AdaptyPurchaseResultCoder extends SimpleCoder<
         profile: new AdaptyProfileCoder().encode(data.profile),
       };
       if (platform === 'ios' && data.ios?.jwsTransaction) {
-        result.apple_jws_transaction = data.ios.jwsTransaction;
+        result.jws_transaction = data.ios.jwsTransaction;
       }
       if (platform === 'android' && data.android?.purchaseToken) {
         result.google_purchase_token = data.android.purchaseToken;
