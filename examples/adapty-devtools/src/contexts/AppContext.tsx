@@ -68,7 +68,7 @@ interface AppActions {
   setPlacementId: (value: string) => void;
   setOnboardingPlacementId: (value: string) => void;
   setLocale: (value: string) => void;
-  setTimeout: (value: string) => void;
+  setLoadTimeout: (value: string) => void;
   setMaxAge: (value: string) => void;
   setCustomTagsJson: (value: string) => void;
   setFetchPolicyIndex: (value: number) => void;
@@ -156,7 +156,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [placementId, setPlacementId] = useState<string>(defaultState.placementId);
   const [onboardingPlacementId, setOnboardingPlacementId] = useState<string>(defaultState.onboardingPlacementId);
   const [locale, setLocale] = useState<string>(defaultState.locale);
-  const [timeout, setTimeout] = useState<string>(defaultState.timeout);
+  const [timeout, setLoadTimeout] = useState<string>(defaultState.timeout);
   const [maxAge, setMaxAge] = useState<string>(defaultState.maxAge);
   const [customTagsJson, setCustomTagsJson] = useState<string>(defaultState.customTagsJson);
   const [fetchPolicyIndex, setFetchPolicyIndex] = useState<number>(defaultState.fetchPolicyIndex);
@@ -180,7 +180,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setPlacementId(getPlacementId());
     setOnboardingPlacementId(getOnboardingPlacementId());
     setLocale(defaultState.locale);
-    setTimeout(defaultState.timeout);
+    setLoadTimeout(defaultState.timeout);
     setMaxAge(defaultState.maxAge);
     setCustomTagsJson(defaultState.customTagsJson);
     setFetchPolicyIndex(defaultState.fetchPolicyIndex);
@@ -228,7 +228,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setPlacementId,
     setOnboardingPlacementId,
     setLocale,
-    setTimeout,
+    setLoadTimeout,
     setMaxAge,
     setCustomTagsJson,
     setFetchPolicyIndex,

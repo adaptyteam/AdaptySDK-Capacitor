@@ -18,6 +18,16 @@ export class ProductReferenceCoder extends SimpleCoder<Model, Serializable> {
       required: true,
       type: 'string',
     },
+    accessLevelId: {
+      key: 'access_level_id' as any,
+      required: true,
+      type: 'string',
+    },
+    productType: {
+      key: 'product_type' as any,
+      required: true,
+      type: 'string',
+    },
     ios: {
       promotionalOfferId: {
         key: 'promotional_offer_id',

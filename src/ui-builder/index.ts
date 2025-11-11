@@ -10,7 +10,13 @@ const adaptyPlugin = new Adapty();
 // Export UI types and classes for convenience
 export { PaywallViewController, OnboardingViewController };
 export type { CreatePaywallViewParamsInput };
-export type { AdaptyUiView, AdaptyUiDialogConfig, AdaptyUiDialogActionType, EventHandlers } from './types';
+export type {
+  AdaptyUiView,
+  AdaptyUiDialogConfig,
+  AdaptyUiDialogActionType,
+  AdaptyIOSPresentationStyle,
+  EventHandlers,
+} from './types';
 export type { OnboardingEventHandlers } from './types';
 
 /**

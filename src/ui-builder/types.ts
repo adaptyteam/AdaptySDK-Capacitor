@@ -309,3 +309,9 @@ export interface OnboardingEventHandlers {
 export const DEFAULT_ONBOARDING_EVENT_HANDLERS: Partial<OnboardingEventHandlers> = {
   onClose: () => true,
 };
+
+/**
+ * iOS presentation style for paywall and onboarding views
+ * @platform ios
+ */
+export type AdaptyIOSPresentationStyle = 'full_screen' | 'page_sheet';

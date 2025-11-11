@@ -6,6 +6,7 @@ import { AdaptyCapacitorPlugin } from './bridge/plugin';
 import { getCoder } from './coder-registry';
 import { defaultAdaptyOptions } from './default-configs';
 import { AdaptyConfigurationCoder } from './shared/coders/adapty-configuration';
+import { AdaptyIdentifyParamsCoder } from './shared/coders/adapty-identify-params';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
 import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
 import { AdaptyProfileParametersCoder } from './shared/coders/adapty-profile-parameters';
@@ -23,7 +24,7 @@ import type {
   AdaptyInstallationStatus,
 } from './shared/types';
 import type { components } from './shared/types/api';
-import type { ActivateParamsInput, FileLocation, LogLevel } from './shared/types/inputs';
+import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './shared/types/inputs';
 import {
   isErrorResponse,
   isSuccessResponse,
@@ -442,16 +443,20 @@ export class Adapty implements AdaptyPlugin {
     return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
-  async identify(options: { customerUserId: string }): Promise<void> {
+  async identify(options: { customerUserId: string; params?: IdentifyParamsInput }): Promise<void> {
     const method = 'identify';
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
+    const identifyParamsCoder = new AdaptyIdentifyParamsCoder();
+    const parameters = identifyParamsCoder.encode(options.params);
+
     const argsWithUndefined: Req['Identify.Request'] = {
       method,
       customer_user_id: options.customerUserId,
+      parameters,
     };
 
     const args = filterUndefined(argsWithUndefined);
@@ -556,8 +561,7 @@ export class Adapty implements AdaptyPlugin {
     const argsWithUndefined: Req['MakePurchase.Request'] = {
       method,
       product: productInput,
-      subscription_update_params: purchaseParams.subscription_update_params,
-      is_offer_personalized: purchaseParams.is_offer_personalized,
+      parameters: purchaseParams,
     };
 
     const args = filterUndefined(argsWithUndefined);

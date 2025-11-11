@@ -62,7 +62,7 @@ const App: React.FC = () => {
     setPlacementId,
     setOnboardingPlacementId,
     setLocale,
-    setTimeout,
+    setLoadTimeout,
     setMaxAge,
     setCustomTagsJson,
     setFetchPolicyIndex,
@@ -390,7 +390,26 @@ const App: React.FC = () => {
       const purchaseResult = result;
 
       if (purchaseResult.type === 'success') {
-        setResult(`Purchase successful: ${product.vendorProductId}`);
+        const transactionData: any = {};
+
+        if (purchaseResult.ios?.jwsTransaction) {
+          transactionData.iosJwsTransaction = purchaseResult.ios.jwsTransaction;
+          log('info', 'iOS JWS Transaction received', 'makePurchase', false, {
+            jwsTransaction: purchaseResult.ios.jwsTransaction,
+          });
+        }
+
+        if (purchaseResult.android?.purchaseToken) {
+          transactionData.androidPurchaseToken = purchaseResult.android.purchaseToken;
+          log('info', 'Android Purchase Token received', 'makePurchase', false, {
+            purchaseToken: purchaseResult.android.purchaseToken,
+          });
+        }
+
+        log('info', 'Purchase completed successfully', 'makePurchase', false, {
+          productId: product.vendorProductId,
+          ...transactionData,
+        });
         setProfile(purchaseResult.profile);
       } else if (purchaseResult.type === 'user_cancelled') {
         setResult('Purchase cancelled by user');
@@ -575,6 +594,8 @@ const App: React.FC = () => {
 
       setResult('✅ Paywall view created. Presenting...');
 
+      // You can customize iOS presentation style:
+      // await view.present({ iosPresentationStyle: 'page_sheet' }); // or 'full_screen'
       await view.present();
 
       // setTimeout(() => view.dismiss(),5000)
@@ -654,6 +675,8 @@ const App: React.FC = () => {
 
       setResult('✅ Onboarding view created. Presenting...');
 
+      // You can customize iOS presentation style:
+      // await view.present({ iosPresentationStyle: 'page_sheet' }); // or 'full_screen' (default)
       await view.present();
 
       setResult('✅ Onboarding presented successfully!');
@@ -862,7 +885,7 @@ const App: React.FC = () => {
           <input
             type="text"
             value={timeout}
-            onChange={(e) => setTimeout(e.target.value)}
+            onChange={(e) => setLoadTimeout(e.target.value)}
             placeholder="Timeout (ms)"
             className={styles.Input}
             disabled={!isActivated}
@@ -970,6 +993,8 @@ const App: React.FC = () => {
                       <div className={styles.ProductTitle}>{product.localizedTitle}</div>
                       <div className={styles.ProductPrice}>Price: {product.price?.localizedString || 'N/A'}</div>
                       <div className={styles.ProductId}>ID: {product.vendorProductId}</div>
+                      <div className={styles.ProductId}>Access Level: {product.accessLevelId || 'N/A'}</div>
+                      <div className={styles.ProductId}>Product Type: {product.productType || 'N/A'}</div>
                       <div className={styles.ProductActionsComment}>Actions for this specific product:</div>
 
                       <div className={styles.ProductButtons}>
@@ -1072,7 +1097,7 @@ const App: React.FC = () => {
           <input
             type="text"
             value={timeout}
-            onChange={(e) => setTimeout(e.target.value)}
+            onChange={(e) => setLoadTimeout(e.target.value)}
             placeholder="Timeout (ms)"
             className={styles.Input}
             disabled={!isActivated}
@@ -1196,6 +1221,18 @@ const App: React.FC = () => {
     try {
       log('info', 'Identifying user', 'identify', false, { customerUserId });
       if (isActivated) {
+        // You can optionally pass identity parameters:
+        // await adapty.identify({
+        //   customerUserId: customerUserId.trim(),
+        //   params: {
+        //     ios: {
+        //       appAccountToken: '550e8400-e29b-41d4-a716-446655440000' // Test UUID matching activate
+        //     },
+        //     android: {
+        //       obfuscatedAccountId: 'test-obfuscated-account-id-12345' // Test obfuscated ID matching activate
+        //     }
+        //   }
+        // });
         await adapty.identify({ customerUserId: customerUserId.trim() });
         setResult(`User identified successfully with ID: ${customerUserId.trim()}`);
         await fetchProfile();

@@ -1,15 +1,15 @@
 PODS:
-  - Adapty (3.11.0)
-  - AdaptyCapacitor (3.10.0-beta.1):
-    - Adapty (= 3.11.0)
-    - AdaptyPlugin (= 3.11.0)
-    - AdaptyUI (= 3.11.0)
+  - Adapty (3.12.0)
+  - AdaptyCapacitor (3.12.0-beta.1):
+    - Adapty (= 3.12.0)
+    - AdaptyPlugin (= 3.12.0)
+    - AdaptyUI (= 3.12.0)
     - Capacitor
-  - AdaptyPlugin (3.11.0):
-    - Adapty (= 3.11.0)
-    - AdaptyUI (= 3.11.0)
-  - AdaptyUI (3.11.0):
-    - Adapty (= 3.11.0)
+  - AdaptyPlugin (3.12.0):
+    - Adapty (= 3.12.0)
+    - AdaptyUI (= 3.12.0)
+  - AdaptyUI (3.12.0):
+    - Adapty (= 3.12.0)
   - Capacitor (7.0.0):
     - CapacitorCordova
   - CapacitorApp (7.0.2):
@@ -67,10 +67,10 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/toast"
 
 SPEC CHECKSUMS:
-  Adapty: ad14ab563dd945a1b0f64e1c7cddf713969c39b5
-  AdaptyCapacitor: 1715b481d69741f06200d92b99c9c80d9797d5cd
-  AdaptyPlugin: cf709bf358013e1390eabd91dae2ac99b7ee4825
-  AdaptyUI: 60f719fc79bc44dbdbe88974290669dc14dc89e0
+  Adapty: 93144ce2aa735e10bdb2b1012b9dea923a82543f
+  AdaptyCapacitor: 558bb004f7ce0b728c1065f97a8e7f0f06fcafd0
+  AdaptyPlugin: 22451b2141a877bd39fdab1f5e2d78140447e73e
+  AdaptyUI: a9fff903ead19ccf09861bc65a72e9a8eb012017
   Capacitor: fcbee427ff437f414bbb3bc2d39364ad9bd2b8a5
   CapacitorApp: efc1e9748a8ea5d3e789cd82a4f451341cc7ac93
   CapacitorClipboard: e8b3578b2fce3c4795a5bdf2990b3b7dcef83f65
