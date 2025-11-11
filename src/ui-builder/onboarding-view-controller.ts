@@ -14,7 +14,13 @@ import type { AdaptyUiView, OnboardingEventHandlers, AdaptyIOSPresentationStyle 
 type Req = components['requests'];
 
 /**
- * Provides methods to control created onboarding view
+ * Controller for managing onboarding views.
+ *
+ * @remarks
+ * This class provides methods to present, dismiss, and handle events for onboarding views
+ * created with the Onboarding Builder. Create instances using the {@link createOnboardingView} function
+ * rather than directly constructing this class.
+ *
  * @public
  */
 export class OnboardingViewController {
@@ -67,18 +73,33 @@ export class OnboardingViewController {
   }
 
   /**
-   * Presents an onboarding view as a modal
-   *
-   * @param {Object} [options] - Presentation options
-   * @param {AdaptyIOSPresentationStyle} [options.iosPresentationStyle='full_screen'] - iOS presentation style.
-   * Available options: 'full_screen' (default) or 'page_sheet'.
-   * Only affects iOS platform.
+   * Presents the onboarding view as a modal screen.
    *
    * @remarks
-   * Calling `present` upon already visible onboarding view
-   * would result in an error
+   * Calling `present` on an already visible onboarding view will result in an error.
+   * The onboarding will be displayed with the configured presentation style on iOS.
+   * On Android, the onboarding is always presented as a full-screen activity.
    *
-   * @throws {AdaptyError}
+   * @param options - Optional presentation options
+   * @param options.iosPresentationStyle - iOS presentation style. Available options: `'full_screen'` (default) or `'page_sheet'`. Only affects iOS platform.
+   * @returns A promise that resolves when the onboarding is presented.
+   * @throws {@link AdaptyError} if the view reference is invalid or the view is already presented.
+   *
+   * @example
+   * Present with default full-screen style
+   * ```typescript
+   * import { adapty, createOnboardingView } from '@adapty/capacitor';
+   *
+   * const onboarding = await adapty.getOnboarding({ placementId: 'YOUR_PLACEMENT_ID' });
+   * const view = await createOnboardingView(onboarding);
+   * await view.present();
+   * ```
+   *
+   * @example
+   * Present with page sheet style on iOS
+   * ```typescript
+   * await view.present({ iosPresentationStyle: 'page_sheet' });
+   * ```
    */
   public async present(options: { iosPresentationStyle?: AdaptyIOSPresentationStyle } = {}): Promise<void> {
     const ctx = new LogContext();
@@ -100,9 +121,24 @@ export class OnboardingViewController {
   }
 
   /**
-   * Dismisses an onboarding view
+   * Dismisses the onboarding view.
    *
-   * @throws {AdaptyError}
+   * @remarks
+   * This method closes the onboarding and cleans up associated resources.
+   * After dismissing, the view controller instance cannot be reused.
+   *
+   * @returns A promise that resolves when the onboarding is dismissed.
+   * @throws {@link AdaptyError} if the view reference is invalid.
+   *
+   * @example
+   * ```typescript
+   * import { createOnboardingView } from '@adapty/capacitor';
+   *
+   * const view = await createOnboardingView(onboarding);
+   * await view.present();
+   * // ... later
+   * await view.dismiss();
+   * ```
    */
   public async dismiss(): Promise<void> {
     const ctx = new LogContext();
@@ -136,18 +172,49 @@ export class OnboardingViewController {
   };
 
   /**
-   * Register event handlers for UI events
+   * Registers event handlers for onboarding UI events.
    *
    * @remarks
    * Each event type can have only one handler — new handlers replace existing ones.
-   * Default handlers are registered in {@link OnboardingViewController.create} and provide standard closing behavior:
-   * - `onClose`
+   * Default handlers are registered automatically in {@link createOnboardingView} and provide standard closing behavior:
+   * - `onClose` - closes the onboarding when the close button is pressed or system back is used
    *
+   * If you want to override the `onClose` listener, we strongly recommend returning `true`
+   * from your custom listener to retain default closing behavior.
    *
    * Calling this method multiple times will replace previously registered handlers for provided events.
    *
-   * @param {Partial<OnboardingEventHandlers>} eventHandlers - set of event handling callbacks
-   * @returns {() => void} unsubscribe - function to unsubscribe all listeners
+   * @see {@link https://adapty.io/docs/capacitor-handling-onboarding-events | Handling Onboarding Events}
+   *
+   * @param eventHandlers - Set of event handling callbacks. Only provided handlers will be registered or updated.
+   * @returns A promise that resolves to an unsubscribe function that removes all registered listeners.
+   *
+   * @example
+   * Register custom event handlers
+   * ```typescript
+   * import { createOnboardingView } from '@adapty/capacitor';
+   *
+   * const view = await createOnboardingView(onboarding);
+   *
+   * const unsubscribe = await view.setEventHandlers({
+   *   onClose: () => {
+   *     console.log('Onboarding closed');
+   *     // Return true to keep default closing behavior
+   *     return true;
+   *   },
+   *   onActionPerformed: (action) => {
+   *     console.log('Action performed:', action.name);
+   *   },
+   *   onProductSelected: (product) => {
+   *     console.log('Product selected:', product.vendorProductId);
+   *   }
+   * });
+   *
+   * await view.present();
+   *
+   * // Later, unsubscribe all handlers
+   * unsubscribe();
+   * ```
    */
   public async setEventHandlers(eventHandlers: Partial<OnboardingEventHandlers> = {}): Promise<() => void> {
     const ctx = new LogContext();
@@ -214,12 +281,23 @@ export class OnboardingViewController {
   }
 
   /**
-   * Clears all registered event handlers
+   * Clears all registered event handlers.
    *
    * @remarks
    * This method removes all previously registered event handlers.
    * After calling this method, no event handlers will be active
-   * until you call `setEventHandlers` again.
+   * until you call {@link setEventHandlers} again.
+   *
+   * Use this after dismiss to remove all event handlers.
+   *
+   * @example
+   * ```typescript
+   * const view = await createOnboardingView(onboarding);
+   * await view.setEventHandlers({ onClose: handleClose });
+   *
+   * // Later, clear all handlers
+   * view.clearEventHandlers();
+   * ```
    */
   public clearEventHandlers(): void {
     Log.info(
