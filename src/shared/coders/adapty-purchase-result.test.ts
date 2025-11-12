@@ -3,6 +3,13 @@ import type { Def } from '../types/schema';
 import { AdaptyPurchaseResultCoder } from './adapty-purchase-result';
 import { AdaptyProfileCoder } from './adapty-profile';
 
+// Mock Capacitor.getPlatform() for tests
+jest.mock('@capacitor/core', () => ({
+  Capacitor: {
+    getPlatform: jest.fn(() => 'ios'),
+  },
+}));
+
 type Model = AdaptyPurchaseResult;
 type TestAdaptyPurchaseResultDef =
   | Exclude<Def['AdaptyPurchaseResult'], { type: 'success' }>

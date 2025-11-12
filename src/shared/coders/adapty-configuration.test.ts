@@ -1,10 +1,23 @@
 import { AdaptyConfigurationCoder } from './adapty-configuration';
 import { LogLevel } from '../types/inputs';
 import version from '../../version';
+import * as platformModule from '../utils/platform';
+
+jest.mock('../utils/platform');
+
+const mockGetPlatform = platformModule.getPlatform as jest.MockedFunction<typeof platformModule.getPlatform>;
 
 describe('AdaptyConfigurationCoder', () => {
   const coder = new AdaptyConfigurationCoder();
   const apiKey = 'test-api-key';
+
+  beforeEach(() => {
+    mockGetPlatform.mockReturnValue('ios');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should encode minimal configuration', () => {
     const params = {};
@@ -139,5 +152,65 @@ describe('AdaptyConfigurationCoder', () => {
       memory_storage_count_limit: 500,
       disk_storage_size_limit: 75 * 1024 * 1024,
     });
+  });
+
+  it('should encode customer_identity_parameters with app_account_token on iOS', () => {
+    mockGetPlatform.mockReturnValue('ios');
+
+    const params = {
+      ios: {
+        appAccountToken: 'ios-token-123',
+      },
+    };
+
+    const result = coder.encode(apiKey, params);
+
+    expect(result.customer_identity_parameters).toEqual({
+      app_account_token: 'ios-token-123',
+    });
+  });
+
+  it('should encode customer_identity_parameters with obfuscated_account_id on Android', () => {
+    mockGetPlatform.mockReturnValue('android');
+
+    const params = {
+      android: {
+        obfuscatedAccountId: 'android-id-456',
+      },
+    };
+
+    const result = coder.encode(apiKey, params);
+
+    expect(result.customer_identity_parameters).toEqual({
+      obfuscated_account_id: 'android-id-456',
+    });
+  });
+
+  it('should encode google_enable_pending_prepaid_plans on Android', () => {
+    mockGetPlatform.mockReturnValue('android');
+
+    const params = {
+      android: {
+        pendingPrepaidPlansEnabled: true,
+      },
+    };
+
+    const result = coder.encode(apiKey, params);
+
+    expect(result.google_enable_pending_prepaid_plans).toBe(true);
+  });
+
+  it('should not encode identity params for different platform', () => {
+    mockGetPlatform.mockReturnValue('android');
+
+    const params = {
+      ios: {
+        appAccountToken: 'ios-token-123',
+      },
+    };
+
+    const result = coder.encode(apiKey, params);
+
+    expect(result.customer_identity_parameters).toBeUndefined();
   });
 });
