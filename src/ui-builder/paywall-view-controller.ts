@@ -21,7 +21,13 @@ import { DEFAULT_EVENT_HANDLERS } from './types';
 type Req = components['requests'];
 
 /**
- * Provides methods to control created paywall view
+ * Controller for managing paywall views.
+ *
+ * @remarks
+ * This class provides methods to present, dismiss, and handle events for paywall views
+ * created with the Paywall Builder. Create instances using the {@link createPaywallView} function
+ * rather than directly constructing this class.
+ *
  * @public
  */
 export class PaywallViewController {
@@ -118,18 +124,33 @@ export class PaywallViewController {
   }
 
   /**
-   * Presents a paywall view as a modal
-   *
-   * @param {Object} [options] - Presentation options
-   * @param {AdaptyIOSPresentationStyle} [options.iosPresentationStyle='full_screen'] - iOS presentation style.
-   * Available options: 'full_screen' (default) or 'page_sheet'.
-   * Only affects iOS platform.
+   * Presents the paywall view as a modal screen.
    *
    * @remarks
-   * Calling `present` upon already visible paywall view
-   * would result in an error
+   * Calling `present` on an already visible paywall view will result in an error.
+   * The paywall will be displayed with the configured presentation style on iOS.
+   * On Android, the paywall is always presented as a full-screen activity.
    *
-   * @throws {AdaptyError}
+   * @param options - Optional presentation options
+   * @param options.iosPresentationStyle - iOS presentation style. Available options: `'full_screen'` (default) or `'page_sheet'`. Only affects iOS platform.
+   * @returns A promise that resolves when the paywall is presented.
+   * @throws {@link AdaptyError} if the view reference is invalid or the view is already presented.
+   *
+   * @example
+   * Present with default full-screen style
+   * ```typescript
+   * import { adapty, createPaywallView } from '@adapty/capacitor';
+   *
+   * const paywall = await adapty.getPaywall({ placementId: 'YOUR_PLACEMENT_ID' });
+   * const view = await createPaywallView(paywall);
+   * await view.present();
+   * ```
+   *
+   * @example
+   * Present with page sheet style on iOS
+   * ```typescript
+   * await view.present({ iosPresentationStyle: 'page_sheet' });
+   * ```
    */
   public async present(options: { iosPresentationStyle?: AdaptyIOSPresentationStyle } = {}): Promise<void> {
     const ctx = new LogContext();
@@ -154,9 +175,24 @@ export class PaywallViewController {
   }
 
   /**
-   * Dismisses a paywall view
+   * Dismisses the paywall view.
    *
-   * @throws {AdaptyError}
+   * @remarks
+   * This method closes the paywall and cleans up associated resources.
+   * After dismissing, the view controller instance cannot be reused.
+   *
+   * @returns A promise that resolves when the paywall is dismissed.
+   * @throws {@link AdaptyError} if the view reference is invalid.
+   *
+   * @example
+   * ```typescript
+   * import { createPaywallView } from '@adapty/capacitor';
+   *
+   * const view = await createPaywallView(paywall);
+   * await view.present();
+   * // ... later
+   * await view.dismiss();
+   * ```
    */
   public async dismiss(): Promise<void> {
     const ctx = new LogContext();
@@ -181,17 +217,35 @@ export class PaywallViewController {
   }
 
   /**
-   * Presents the dialog
-   *
-   * @param {AdaptyUiDialogConfig} config - A config for showing the dialog.
+   * Displays a dialog to the user.
    *
    * @remarks
-   * If you provide two actions in the config, be sure `primaryAction` cancels the operation
-   * and leaves things unchanged.
+   * Use this method to show custom dialogs within the paywall flow.
+   * If you provide two actions in the config, the primary action should cancel the operation
+   * and leave things unchanged, while the secondary action should confirm the operation.
    *
-   * @returns {Promise<AdaptyUiDialogActionType>} A Promise that resolves to the {@link AdaptyUiDialogActionType} object
+   * @param config - Configuration for the dialog.
+   * @param config.title - The dialog title.
+   * @param config.content - The dialog message content.
+   * @param config.primaryActionTitle - The title for the primary (default) action button.
+   * @param config.secondaryActionTitle - Optional. The title for the secondary action button.
+   * @returns A promise that resolves to the action type that the user selected: `'primary'` or `'secondary'`.
+   * @throws {@link AdaptyError} if the view reference is invalid.
    *
-   * @throws {AdaptyError}
+   * @example
+   * Show confirmation dialog
+   * ```typescript
+   * const action = await view.showDialog({
+   *   title: 'Confirm Purchase',
+   *   content: 'Are you sure you want to proceed with this purchase?',
+   *   primaryActionTitle: 'Cancel',
+   *   secondaryActionTitle: 'Continue'
+   * });
+   *
+   * if (action === 'secondary') {
+   *   console.log('User confirmed');
+   * }
+   * ```
    */
   public async showDialog(config: AdaptyUiDialogConfig): Promise<AdaptyUiDialogActionType> {
     const ctx = new LogContext();
@@ -235,26 +289,53 @@ export class PaywallViewController {
   };
 
   /**
-   * Register event handlers for UI events
-   *
-   * @see {@link https://adapty.io/docs/capacitor-handling-events | [DOC] Handling View Events}
+   * Registers event handlers for paywall UI events.
    *
    * @remarks
    * Each event type can have only one handler — new handlers replace existing ones.
-   * Default handlers are registered in {@link PaywallViewController.create} and provide standard closing behavior:
-   * - `onCloseButtonPress`
-   * - `onAndroidSystemBack`
-   * - `onRestoreCompleted`
-   * - `onPurchaseCompleted`
+   * Default handlers are registered automatically in {@link createPaywallView} and provide standard closing behavior:
+   * - `onCloseButtonPress` - closes the paywall
+   * - `onAndroidSystemBack` - closes the paywall (Android only)
+   * - `onRestoreCompleted` - closes the paywall after successful restore
+   * - `onPurchaseCompleted` - closes the paywall after successful purchase
    *
-   *
-   * If you want to override these listeners, we strongly recommend to return `true` (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
+   * If you want to override these listeners, we strongly recommend returning `true`
+   * (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
    * from your custom listener to retain default closing behavior.
    *
    * Calling this method multiple times will replace previously registered handlers for provided events.
    *
-   * @param {Partial<EventHandlers>} eventHandlers - set of event handling callbacks
-   * @returns {() => void} unsubscribe - function to unsubscribe all listeners
+   * @see {@link https://adapty.io/docs/capacitor-handling-events | Handling View Events}
+   *
+   * @param eventHandlers - Set of event handling callbacks. Only provided handlers will be registered or updated.
+   * @returns A promise that resolves to an unsubscribe function that removes all registered listeners.
+   *
+   * @example
+   * Register custom event handlers
+   * ```typescript
+   * import { createPaywallView } from '@adapty/capacitor';
+   *
+   * const view = await createPaywallView(paywall);
+   *
+   * const unsubscribe = await view.setEventHandlers({
+   *   onPurchaseStarted: (product) => {
+   *     console.log('Purchase started:', product.vendorProductId);
+   *   },
+   *   onPurchaseCompleted: (result) => {
+   *     console.log('Purchase completed:', result.type);
+   *     // Return true to keep default closing behavior
+   *     return result.type !== 'user_cancelled';
+   *   },
+   *   onPurchaseFailed: (error) => {
+   *     console.error('Purchase failed:', error);
+   *   }
+   * });
+   *
+   * await view.present();
+   *
+   * // Later, unsubscribe all handlers
+   * unsubscribe();
+   * ```
    */
   public async setEventHandlers(eventHandlers: Partial<EventHandlers> = {}): Promise<() => void> {
     const ctx = new LogContext();
@@ -325,12 +406,23 @@ export class PaywallViewController {
   }
 
   /**
-   * Clears all registered event handlers
+   * Clears all registered event handlers.
    *
    * @remarks
    * This method removes all previously registered event handlers.
    * After calling this method, no event handlers will be active
-   * until you call `setEventHandlers` again.
+   * until you call {@link setEventHandlers} again.
+   *
+   * Use this after dismiss to remove all event handlers
+   *
+   * @example
+   * ```typescript
+   * const view = await createPaywallView(paywall);
+   * await view.setEventHandlers({ onPurchaseCompleted: handlePurchase });
+   *
+   * // Later, clear all handlers
+   * view.clearEventHandlers();
+   * ```
    */
   public clearEventHandlers(): void {
     Log.info(
