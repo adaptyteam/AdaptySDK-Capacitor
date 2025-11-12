@@ -12,8 +12,8 @@ Pod::Spec.new do |s|
   s.source = { :git => package['repository']['url'], :tag => s.version.to_s }
   s.source_files = 'ios/Sources/**/*.{swift,h,m,c,cc,mm,cpp}'
   s.dependency 'Capacitor'
-  s.dependency 'Adapty', '3.12.0'
-  s.dependency 'AdaptyUI', '3.12.0'
-  s.dependency 'AdaptyPlugin', '3.12.0'
+  s.dependency 'Adapty', '3.12.1'
+  s.dependency 'AdaptyUI', '3.12.1'
+  s.dependency 'AdaptyPlugin', '3.12.1'
   s.swift_version = '5.1'
 end
