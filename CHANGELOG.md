@@ -36,7 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- **Native iOS SDK**: Updated to version 3.12.0
+- **Native iOS SDK**: Updated to version 3.12.1
 - **Native Android SDK**: Updated to version 3.12.1
 
 - **identify() method signature**: Now accepts an options object with optional identity parameters
