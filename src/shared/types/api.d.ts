@@ -901,7 +901,7 @@ export interface components {
         {
           type: 'success';
           profile: components['defs']['AdaptyProfile'];
-          jws_transaction?: string;
+          apple_jws_transaction?: string;
           google_purchase_token?: string;
         },
       ]
