@@ -12,6 +12,7 @@ import type {
   RefundPreference,
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
+  WebPresentation,
 } from '../shared/types';
 import type {
   ActivateParamsInput,
@@ -88,7 +89,10 @@ export interface AdaptyPlugin {
   /**
    * Opens a web paywall.
    */
-  openWebPaywall(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void>;
+  openWebPaywall(options: {
+    paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
+    openIn?: WebPresentation;
+  }): Promise<void>;
 
   /**
    * Creates a URL for web paywall.
