@@ -46,10 +46,6 @@ describe('AdaptyConfigurationCoder', () => {
       ipAddressCollectionDisabled: true,
       logLevel: LogLevel.VERBOSE,
       serverCluster: 'eu' as const,
-      backendBaseUrl: 'https://api.example.com',
-      backendFallbackBaseUrl: 'https://fallback.example.com',
-      backendConfigsBaseUrl: 'https://configs.example.com',
-      backendUABaseUrl: 'https://ua.example.com',
       backendProxyHost: 'proxy.example.com',
       backendProxyPort: 8080,
       activateUi: false,
@@ -63,6 +59,7 @@ describe('AdaptyConfigurationCoder', () => {
       },
       android: {
         adIdCollectionDisabled: true,
+        localAccessLevelAllowed: true,
       },
     };
 
@@ -77,10 +74,6 @@ describe('AdaptyConfigurationCoder', () => {
       ip_address_collection_disabled: true,
       log_level: 'verbose',
       server_cluster: 'eu',
-      backend_base_url: 'https://api.example.com',
-      backend_fallback_base_url: 'https://fallback.example.com',
-      backend_configs_base_url: 'https://configs.example.com',
-      backend_ua_base_url: 'https://ua.example.com',
       backend_proxy_host: 'proxy.example.com',
       backend_proxy_port: 8080,
       activate_ui: false,
@@ -89,6 +82,7 @@ describe('AdaptyConfigurationCoder', () => {
         memory_storage_count_limit: 1000,
         disk_storage_size_limit: 200 * 1024 * 1024,
       },
+      google_local_access_level_allowed: true,
     });
   });
 
@@ -97,7 +91,6 @@ describe('AdaptyConfigurationCoder', () => {
       customerUserId: 'user456',
       logLevel: LogLevel.WARN,
       serverCluster: 'cn' as const,
-      backendBaseUrl: 'https://custom.api.com',
       ios: {
         idfaCollectionDisabled: false,
       },
@@ -114,7 +107,6 @@ describe('AdaptyConfigurationCoder', () => {
       ip_address_collection_disabled: false,
       log_level: 'warn',
       server_cluster: 'cn',
-      backend_base_url: 'https://custom.api.com',
       activate_ui: true,
       media_cache: {
         memory_storage_total_cost_limit: 100 * 1024 * 1024,
@@ -198,6 +190,20 @@ describe('AdaptyConfigurationCoder', () => {
     const result = coder.encode(apiKey, params);
 
     expect(result.google_enable_pending_prepaid_plans).toBe(true);
+  });
+
+  it('should encode google_local_access_level_allowed on Android', () => {
+    mockGetPlatform.mockReturnValue('android');
+
+    const params = {
+      android: {
+        localAccessLevelAllowed: true,
+      },
+    };
+
+    const result = coder.encode(apiKey, params);
+
+    expect(result.google_local_access_level_allowed).toBe(true);
   });
 
   it('should not encode identity params for different platform', () => {
