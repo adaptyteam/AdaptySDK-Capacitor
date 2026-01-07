@@ -242,15 +242,6 @@ export interface components {
       [{ error: components['defs']['AdaptyError'] }, { success: true }]
     >;
 
-    'LogShowOnboarding.Request': {
-      method: 'log_show_onboarding';
-      params: components['defs']['AdaptyOnboardingScreenParameters'];
-    };
-
-    'LogShowOnboarding.Response': OneOf<
-      [{ error: components['defs']['AdaptyError'] }, { success: true }]
-    >;
-
     'LogShowPaywall.Request': {
       method: 'log_show_paywall';
       paywall: components['defs']['AdaptyPaywall'];
@@ -608,12 +599,9 @@ export interface components {
       apple_idfa_collection_disabled?: boolean;
       google_adid_collection_disabled?: boolean;
       google_enable_pending_prepaid_plans?: boolean;
+      google_local_access_level_allowed?: boolean;
       ip_address_collection_disabled?: boolean;
       server_cluster?: 'default' | 'eu' | 'cn';
-      backend_base_url?: string;
-      backend_fallback_base_url?: string;
-      backend_configs_base_url?: string;
-      backend_ua_base_url?: string;
       backend_proxy_host?: string;
       backend_proxy_port?: number;
       log_level?: components['defs']['AdaptyLog.Level'];
@@ -689,12 +677,6 @@ export interface components {
       payment_mode: components['defs']['AdaptySubscriptionOffer.PaymentMode'];
       localized_subscription_period?: string;
       localized_number_of_periods?: string;
-    };
-
-    AdaptyOnboardingScreenParameters: {
-      onboarding_screen_order: number;
-      onboarding_name?: string;
-      onboarding_screen_name?: string;
     };
 
     AdaptyPlacement: {

@@ -118,10 +118,6 @@ export interface ActivateParamsInput {
   logLevel?: LogLevel;
 
   serverCluster?: 'default' | 'eu' | 'cn';
-  backendBaseUrl?: string;
-  backendFallbackBaseUrl?: string;
-  backendConfigsBaseUrl?: string;
-  backendUABaseUrl?: string;
   backendProxyHost?: string;
   backendProxyPort?: number;
   activateUi?: boolean;
@@ -172,6 +168,12 @@ export interface ActivateParamsInput {
      * @default false
      */
     pendingPrepaidPlansEnabled?: boolean;
+    /**
+     * Allows using local access level data on Android when available
+     * @platform android
+     * @default false
+     */
+    localAccessLevelAllowed?: boolean;
     /**
      * Obfuscated account ID
      * @platform android
