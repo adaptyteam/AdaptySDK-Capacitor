@@ -1,4 +1,4 @@
-import type { AdaptyPaywallProduct, AdaptyProfile, AdaptyPurchaseResult } from '../shared/types';
+import type { AdaptyPaywallProduct, AdaptyProfile, AdaptyPurchaseResult, WebPresentation } from '../shared/types';
 import type { AdaptyError } from '../shared/types/method-types';
 
 /**
@@ -287,6 +287,20 @@ export interface CreatePaywallViewParamsInput {
   customTimers?: Record<string, Date>;
 
   // customAssets?: Record<string, AdaptyCustomAsset>; // TODO: implement custom assets
+}
+
+/**
+ * Additional options for creating an onboarding view
+ *
+ * @see {@link https://adapty.io/docs/capacitor-get-onboardings | [DOC] Creating Onboarding View}
+ */
+export interface CreateOnboardingViewParamsInput {
+  /**
+   * If you want to change the presentation behavior of external URLs, pass a preferred value.
+   *
+   * @default {@link WebPresentation.BrowserInApp}
+   */
+  externalUrlsPresentation?: WebPresentation;
 }
 
 export interface OnboardingEventHandlers {
