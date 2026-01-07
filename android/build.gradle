@@ -63,7 +63,7 @@ dependencies {
     // Adapty SDK dependencies
     implementation 'io.adapty:android-sdk:3.14.0'
     implementation 'io.adapty:android-ui:3.14.0'
-    implementation 'io.adapty.internal:crossplatform:3.14.0'
+    implementation 'io.adapty.internal:crossplatform:3.14.1'
 
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
