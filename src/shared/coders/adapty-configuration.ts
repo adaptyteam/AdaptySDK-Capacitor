@@ -56,6 +56,10 @@ export class AdaptyConfigurationCoder {
       config['apple_idfa_collection_disabled'] = params.ios.idfaCollectionDisabled;
     }
 
+    if (params.ios?.clearDataOnBackup !== undefined) {
+      config['clear_data_on_backup'] = params.ios.clearDataOnBackup;
+    }
+
     if (platform === 'ios' && params.ios?.appAccountToken) {
       (config as any)['customer_identity_parameters'] = {
         app_account_token: params.ios.appAccountToken,

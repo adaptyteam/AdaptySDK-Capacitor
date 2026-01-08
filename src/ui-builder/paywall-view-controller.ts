@@ -297,6 +297,7 @@ export class PaywallViewController {
    * - `onCloseButtonPress` - closes the paywall
    * - `onAndroidSystemBack` - closes the paywall (Android only)
    * - `onRestoreCompleted` - closes the paywall after successful restore
+   * - `onRenderingFailed` - closes the paywall when rendering fails
    * - `onPurchaseCompleted` - closes the paywall after successful purchase
    *
    * If you want to override these listeners, we strongly recommend returning `true`

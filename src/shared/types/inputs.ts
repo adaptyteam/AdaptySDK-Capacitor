@@ -155,6 +155,12 @@ export interface ActivateParamsInput {
      * @platform ios
      */
     appAccountToken?: string;
+    /**
+     * Controls whether the SDK will create a new profile when the app is restored from an iCloud backup
+     * @defaultValue `false`
+     * @platform ios
+     */
+    clearDataOnBackup?: boolean;
   };
   android?: {
     /**
