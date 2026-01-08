@@ -142,7 +142,7 @@ export interface EventHandlers {
    * This should not ever happen, but if it does, feel free to report it to us.
    *
    * If you return `true` from this callback, the paywall view will be closed.
-   * @default false
+   * @default true
    *
    * @param error - AdaptyError object with error code and message
    */
@@ -188,7 +188,7 @@ export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
   onRestoreFailed: () => false,
   onPaywallShown: () => false,
   onPaywallClosed: () => false,
-  onRenderingFailed: () => false,
+  onRenderingFailed: () => true,
   onLoadingProductsFailed: () => false,
   onWebPaymentNavigationFinished: () => false,
 };

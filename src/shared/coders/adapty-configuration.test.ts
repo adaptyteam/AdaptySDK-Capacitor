@@ -219,4 +219,18 @@ describe('AdaptyConfigurationCoder', () => {
 
     expect(result.customer_identity_parameters).toBeUndefined();
   });
+
+  it('should handle clearDataOnBackup parameter conditionally', () => {
+    const paramsWithout = {};
+    const resultWithout = coder.encode(apiKey, paramsWithout);
+    expect(resultWithout.clear_data_on_backup).toBeUndefined();
+
+    const paramsWithFalse = { ios: { clearDataOnBackup: false } };
+    const resultWithFalse = coder.encode(apiKey, paramsWithFalse);
+    expect(resultWithFalse.clear_data_on_backup).toBe(false);
+
+    const paramsWithTrue = { ios: { clearDataOnBackup: true } };
+    const resultWithTrue = coder.encode(apiKey, paramsWithTrue);
+    expect(resultWithTrue.clear_data_on_backup).toBe(true);
+  });
 });
