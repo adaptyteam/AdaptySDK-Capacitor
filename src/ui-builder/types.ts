@@ -312,7 +312,11 @@ export interface OnboardingEventHandlers {
   onAnalytics: (
     event: {
       name: string;
+      /**
+       * @deprecated Use `elementId` instead
+       */
       element_id?: string;
+      elementId?: string;
       reply?: string;
     },
     meta: AdaptyUiOnboardingMeta,
