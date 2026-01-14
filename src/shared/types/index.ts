@@ -10,6 +10,7 @@ import {
 export * from './error';
 export * from './inputs';
 export * from '../constants';
+export * from './paywall-events';
 
 export interface AdaptyPrice {
   /**

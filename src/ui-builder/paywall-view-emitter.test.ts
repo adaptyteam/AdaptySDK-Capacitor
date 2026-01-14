@@ -1,8 +1,9 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
-import { parsePaywallEvent } from '../shared/coders/parse';
+import { parsePaywallEvent } from '../shared/coders/parse-paywall';
 import { LogContext } from '../shared/logger';
+import type { AdaptyPaywallProduct, AdaptyPurchaseResult } from '../shared/types';
 
 import { PaywallViewEmitter } from './paywall-view-emitter';
 
@@ -47,7 +48,7 @@ const TEST_EVENT_DATA = {
 
 jest.mock('../bridge/plugin', () => require('../bridge/plugin.mock').mockAdaptyCapacitorPlugin);
 jest.mock('../shared/logger', () => require('../shared/logger/logger.mock').mockLogger);
-jest.mock('../shared/coders/parse', () => require('../shared/coders/parse.mock').mockParse);
+jest.mock('../shared/coders/parse-paywall', () => require('../shared/coders/parse-paywall.mock').mockParsePaywall);
 
 describe('PaywallViewEmitter', () => {
   let emitter: PaywallViewEmitter;
@@ -242,7 +243,7 @@ describe('PaywallViewEmitter', () => {
       mockParsePaywallEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.selectProduct,
         view: { id: TEST_VIEW_ID },
-        product_id: 'com.example.premium',
+        productId: 'com.example.premium',
       });
 
       await emitter.addListener('onProductSelected', productSelectedListener, mockOnRequestClose);
@@ -267,12 +268,24 @@ describe('PaywallViewEmitter', () => {
       expect(urlPressListener).toHaveBeenCalledWith('https://example.com');
 
       // Test onPurchaseCompleted
-      const mockPurchaseResult = { type: 'success' };
-      const mockProduct = { id: 'com.example.premium' };
+      const mockPurchaseResult: AdaptyPurchaseResult = { type: 'pending' };
+      const mockProduct: AdaptyPaywallProduct = {
+        localizedDescription: 'desc',
+        localizedTitle: 'title',
+        paywallABTestName: 'ab',
+        paywallName: 'pw',
+        price: undefined,
+        adaptyId: 'adapty-id',
+        accessLevelId: 'access',
+        productType: 'type',
+        variationId: 'variation',
+        vendorProductId: 'com.example.premium',
+        paywallProductIndex: 0,
+      };
       mockParsePaywallEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.finishPurchase,
         view: { id: TEST_VIEW_ID },
-        purchased_result: mockPurchaseResult,
+        purchaseResult: mockPurchaseResult,
         product: mockProduct,
       });
 
