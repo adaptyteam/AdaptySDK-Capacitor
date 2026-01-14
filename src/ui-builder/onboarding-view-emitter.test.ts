@@ -129,7 +129,7 @@ describe('OnboardingViewEmitter', () => {
       const mockListener = jest.fn();
 
       await expect(emitter.addListener('invalidEvent' as any, mockListener, mockOnRequestClose)).rejects.toThrow(
-        'No event config found for handler: invalidEvent',
+        'No native event mapping found for handler: invalidEvent',
       );
     });
 
@@ -535,6 +535,127 @@ describe('OnboardingViewEmitter', () => {
 
       expect(listener1).not.toHaveBeenCalled();
       expect(listener2).toHaveBeenCalled();
+    });
+
+    it('should resolve native events to correct handlers', async () => {
+      const meta = {
+        onboardingId: 'test',
+        screenClientId: 'screen1',
+        screenIndex: 0,
+        totalScreens: 3,
+      };
+
+      const cases = [
+        {
+          nativeEvent: NATIVE_EVENT_NAMES.error,
+          handlerName: 'onError' as const,
+          event: {
+            id: OnboardingEventId.Error,
+            error: { message: 'Test error', adaptyCode: 0 },
+            view: { id: TEST_VIEW_ID },
+          },
+          raw: TEST_EVENT_DATA.error,
+          expectedArgs: [{ message: 'Test error', adaptyCode: 0 }],
+        },
+        {
+          nativeEvent: NATIVE_EVENT_NAMES.analytics,
+          handlerName: 'onAnalytics' as const,
+          event: {
+            id: OnboardingEventId.Analytics,
+            event: { name: 'screen_view', elementId: 'btn1', element_id: 'btn1' },
+            meta,
+            view: { id: TEST_VIEW_ID },
+          },
+          raw: TEST_EVENT_DATA.analytics,
+          expectedArgs: [{ name: 'screen_view', elementId: 'btn1', element_id: 'btn1' }, meta],
+        },
+        {
+          nativeEvent: NATIVE_EVENT_NAMES.finishedLoading,
+          handlerName: 'onFinishedLoading' as const,
+          event: {
+            id: OnboardingEventId.FinishedLoading,
+            meta,
+            view: { id: TEST_VIEW_ID },
+          },
+          raw: TEST_EVENT_DATA.finishedLoading,
+          expectedArgs: [meta],
+        },
+        {
+          nativeEvent: NATIVE_EVENT_NAMES.close,
+          handlerName: 'onClose' as const,
+          event: {
+            id: OnboardingEventId.Close,
+            actionId: 'close_action',
+            meta,
+            view: { id: TEST_VIEW_ID },
+          },
+          raw: TEST_EVENT_DATA.close,
+          expectedArgs: ['close_action', meta],
+        },
+        {
+          nativeEvent: NATIVE_EVENT_NAMES.custom,
+          handlerName: 'onCustom' as const,
+          event: {
+            id: OnboardingEventId.Custom,
+            actionId: 'custom_action',
+            meta,
+            view: { id: TEST_VIEW_ID },
+          },
+          raw: TEST_EVENT_DATA.custom,
+          expectedArgs: ['custom_action', meta],
+        },
+        {
+          nativeEvent: NATIVE_EVENT_NAMES.paywall,
+          handlerName: 'onPaywall' as const,
+          event: {
+            id: OnboardingEventId.Paywall,
+            actionId: 'paywall_action',
+            meta,
+            view: { id: TEST_VIEW_ID },
+          },
+          raw: TEST_EVENT_DATA.paywall,
+          expectedArgs: ['paywall_action', meta],
+        },
+        {
+          nativeEvent: NATIVE_EVENT_NAMES.stateUpdated,
+          handlerName: 'onStateUpdated' as const,
+          event: {
+            id: OnboardingEventId.StateUpdated,
+            action: {
+              elementId: 'input1',
+              elementType: 'input' as const,
+              value: { type: 'text' as const, value: 'test' },
+            },
+            meta,
+            view: { id: TEST_VIEW_ID },
+          },
+          raw: TEST_EVENT_DATA.stateUpdated,
+          expectedArgs: [
+            {
+              elementId: 'input1',
+              elementType: 'input',
+              value: { type: 'text', value: 'test' },
+            },
+            meta,
+          ],
+        },
+      ];
+
+      for (const testCase of cases) {
+        const handler = jest.fn();
+        const requestClose = jest.fn().mockResolvedValue(undefined);
+        mockBridgeAddListener.mockClear();
+        mockParseOnboardingEvent.mockReturnValue(testCase.event as any);
+
+        const localEmitter = new OnboardingViewEmitter(TEST_VIEW_ID);
+        await localEmitter.addListener(testCase.handlerName as any, handler as any, requestClose);
+
+        const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+        nativeCallback({ data: testCase.raw });
+
+        expect(handler).toHaveBeenCalledWith(...testCase.expectedArgs);
+        expect(requestClose).not.toHaveBeenCalled();
+      }
     });
   });
 
