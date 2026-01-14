@@ -176,6 +176,7 @@ export class OnboardingViewController {
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
+    this.clearEventHandlers();
   }
 
   private onRequestClose = async () => {
