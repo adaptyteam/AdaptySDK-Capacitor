@@ -564,6 +564,47 @@ describe('PaywallViewEmitter', () => {
     });
   });
 
+  describe('addInternalListener', () => {
+    it('should subscribe natively even without client handlers', async () => {
+      mockParsePaywallEvent.mockReturnValue({
+        id: NATIVE_EVENT_NAMES.disappear,
+        view: { id: TEST_VIEW_ID },
+      });
+
+      await emitter.addInternalListener('onPaywallClosed', jest.fn());
+
+      expect(mockBridgeAddListener).toHaveBeenCalledTimes(1);
+      expect(mockBridgeAddListener).toHaveBeenCalledWith(NATIVE_EVENT_NAMES.disappear, expect.any(Function));
+    });
+
+    it('should call internal handler after client handler for same event', async () => {
+      const callOrder: string[] = [];
+
+      mockParsePaywallEvent.mockReturnValue({
+        id: NATIVE_EVENT_NAMES.disappear,
+        view: { id: TEST_VIEW_ID },
+      });
+
+      const clientHandler = jest.fn(() => {
+        callOrder.push('client');
+        return false;
+      });
+      const internalHandler = jest.fn(() => {
+        callOrder.push('internal');
+      });
+
+      await emitter.addListener('onPaywallClosed', clientHandler, mockOnRequestClose);
+      await emitter.addInternalListener('onPaywallClosed', internalHandler);
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.paywallClosed });
+
+      expect(callOrder).toEqual(['client', 'internal']);
+      expect(clientHandler).toHaveBeenCalledTimes(1);
+      expect(internalHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('logging', () => {
     it('should log native event processing', async () => {
       const mockListener = jest.fn();
@@ -591,6 +632,7 @@ describe('PaywallViewEmitter', () => {
       for (let i = 0; i < 10; i++) {
         const mockListener = jest.fn();
         await emitter.addListener('onCloseButtonPress', mockListener, mockOnRequestClose);
+        await emitter.addInternalListener('onPaywallClosed', jest.fn());
         emitter.removeAllListeners();
       }
 
@@ -619,6 +661,7 @@ describe('PaywallViewEmitter', () => {
 
       expect((emitter as any).eventListeners.has(NATIVE_EVENT_NAMES.action)).toBe(false);
       expect((emitter as any).handlers.has('onCloseButtonPress')).toBe(false);
+      expect((emitter as any).internalHandlers.has('onCloseButtonPress')).toBe(false);
     });
 
     it('should cleanup handlers even when some subscription removals fail', async () => {
@@ -631,6 +674,7 @@ describe('PaywallViewEmitter', () => {
 
       expect((emitter as any).eventListeners.size).toBe(0);
       expect((emitter as any).handlers.size).toBe(0);
+      expect((emitter as any).internalHandlers.size).toBe(0);
     });
   });
 });
