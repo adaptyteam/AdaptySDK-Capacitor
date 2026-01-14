@@ -27,6 +27,10 @@ export abstract class BaseViewEmitter<TEventHandlers extends Record<string, any>
   protected viewId: string;
   protected eventListeners: Map<string, PluginListenerHandle> = new Map();
   protected handlers: Map<keyof TEventHandlers, HandlerData<TEventHandlers[keyof TEventHandlers]>> = new Map();
+  protected internalHandlers: Map<
+    keyof TEventHandlers,
+    { handler: (event: TEventData) => void; config: BaseEventConfig }
+  > = new Map();
 
   constructor(viewId: string) {
     this.viewId = viewId;
@@ -76,7 +80,6 @@ export abstract class BaseViewEmitter<TEventHandlers extends Record<string, any>
     callback: TEventHandlers[keyof TEventHandlers],
     onRequestClose: () => Promise<void>,
   ): Promise<PluginListenerHandle> {
-    const viewId = this.viewId;
     const config = this.getEventConfig(event);
 
     if (!config) {
@@ -90,86 +93,32 @@ export abstract class BaseViewEmitter<TEventHandlers extends Record<string, any>
       onRequestClose,
     });
 
-    if (!this.eventListeners.has(config.nativeEvent)) {
-      const handlers = this.handlers;
-      const emitterName = this.getEmitterName();
-      const subscription = await AdaptyCapacitorPlugin.addListener(config.nativeEvent, (arg: CapacitorEventArg) => {
-        const ctx = new LogContext();
-        const log = ctx.event({ methodName: config.nativeEvent });
-        log.start(() => ({ raw: arg }));
-
-        // Strict validation: events must come in {data: "json_string"} format
-        if (!arg || typeof arg !== 'object' || !arg.data) {
-          const error = new Error(
-            `[${emitterName}] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`,
-          );
-          log.failed(() => ({ error }));
-          throw error;
-        }
-
-        const rawEventData: string = arg.data;
-
-        // Parse JSON string using specific parser with decode logging
-        let eventData: TEventData;
-        if (typeof rawEventData === 'string') {
-          try {
-            eventData = this.parseEventData(rawEventData, ctx);
-          } catch (error) {
-            log.failed(() => ({ error }));
-            throw error;
-          }
-        } else {
-          const err = new Error(
-            `[${emitterName}] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
-          );
-          log.failed(() => ({ error: err }));
-          throw err;
-        }
-
-        const eventViewId = this.getEventViewId(eventData);
-        if (viewId !== eventViewId) {
-          return;
-        }
-
-        // Get all possible handler names for this native event
-        const possibleHandlers = this.getPossibleHandlers(config.nativeEvent);
-
-        for (const handlerName of possibleHandlers) {
-          const handlerData = handlers.get(handlerName);
-          if (!handlerData) {
-            continue; // Handler not registered for this view
-          }
-
-          const { handler, config: handlerConfig, onRequestClose } = handlerData;
-
-          if (!this.shouldCallHandler(handlerName, handlerConfig, eventData)) {
-            continue;
-          }
-
-          const callbackArgs = this.extractCallbackArgs(handlerName, eventData);
-
-          const cb = handler as (...args: typeof callbackArgs) => boolean;
-          try {
-            const shouldClose = cb(...callbackArgs);
-            if (shouldClose) {
-              onRequestClose().catch((error) => {
-                log.failed(() => ({ error, handlerName }));
-              });
-            }
-            log.success(() => ({ message: 'Event handled successfully', handlerName }));
-          } catch (error) {
-            log.failed(() => ({ error, handlerName }));
-          }
-
-          break; // Only one handler can match per event
-        }
-      });
-      this.eventListeners.set(config.nativeEvent, subscription);
-    }
+    await this.ensureNativeListener(config);
 
     const ensured = this.eventListeners.get(config.nativeEvent);
     if (!ensured) {
       throw new Error(`Failed to register listener for ${config.nativeEvent}`);
+    }
+    return ensured;
+  }
+
+  public async addInternalListener(
+    event: keyof TEventHandlers,
+    callback: (event: TEventData) => void,
+  ): Promise<PluginListenerHandle> {
+    const config = this.getEventConfig(event);
+
+    if (!config) {
+      throw new Error(`No event config found for handler: ${String(event)}`);
+    }
+
+    this.internalHandlers.set(event, { handler: callback, config });
+
+    await this.ensureNativeListener(config);
+
+    const ensured = this.eventListeners.get(config.nativeEvent);
+    if (!ensured) {
+      throw new Error(`Failed to register internal listener for ${config.nativeEvent}`);
     }
     return ensured;
   }
@@ -182,5 +131,112 @@ export abstract class BaseViewEmitter<TEventHandlers extends Record<string, any>
     });
     this.eventListeners.clear();
     this.handlers.clear();
+    this.internalHandlers.clear();
+  }
+
+  private async ensureNativeListener(config: BaseEventConfig): Promise<void> {
+    if (this.eventListeners.has(config.nativeEvent)) {
+      return;
+    }
+
+    const handlers = this.handlers;
+    const internalHandlers = this.internalHandlers;
+    const emitterName = this.getEmitterName();
+    const viewId = this.viewId;
+
+    const subscription = await AdaptyCapacitorPlugin.addListener(config.nativeEvent, (arg: CapacitorEventArg) => {
+      const ctx = new LogContext();
+      const log = ctx.event({ methodName: config.nativeEvent });
+      log.start(() => ({ raw: arg }));
+
+      // Strict validation: events must come in {data: "json_string"} format
+      if (!arg || typeof arg !== 'object' || !arg.data) {
+        const error = new Error(
+          `[${emitterName}] Invalid event format received. Expected {data: "json_string"}, got: ${JSON.stringify(arg)}`,
+        );
+        log.failed(() => ({ error }));
+        throw error;
+      }
+
+      const rawEventData: string = arg.data;
+
+      // Parse JSON string using specific parser with decode logging
+      let eventData: TEventData;
+      if (typeof rawEventData === 'string') {
+        try {
+          eventData = this.parseEventData(rawEventData, ctx);
+        } catch (error) {
+          log.failed(() => ({ error }));
+          throw error;
+        }
+      } else {
+        const err = new Error(
+          `[${emitterName}] Expected event data to be JSON string, got ${typeof rawEventData}: ${rawEventData}`,
+        );
+        log.failed(() => ({ error: err }));
+        throw err;
+      }
+
+      const eventViewId = this.getEventViewId(eventData);
+      if (viewId !== eventViewId) {
+        return;
+      }
+
+      // Get all possible handler names for this native event
+      const possibleHandlers = this.getPossibleHandlers(config.nativeEvent);
+
+      // 1. Client handlers
+      for (const handlerName of possibleHandlers) {
+        const handlerData = handlers.get(handlerName);
+        if (!handlerData) {
+          continue; // Handler not registered for this view
+        }
+
+        const { handler, config: handlerConfig, onRequestClose } = handlerData;
+
+        if (!this.shouldCallHandler(handlerName, handlerConfig, eventData)) {
+          continue;
+        }
+
+        const callbackArgs = this.extractCallbackArgs(handlerName, eventData);
+
+        const cb = handler as (...args: typeof callbackArgs) => boolean;
+        try {
+          const shouldClose = cb(...callbackArgs);
+          if (shouldClose) {
+            onRequestClose().catch((error) => {
+              log.failed(() => ({ error, handlerName }));
+            });
+          }
+          log.success(() => ({ message: 'Event handled successfully', handlerName }));
+        } catch (error) {
+          log.failed(() => ({ error, handlerName }));
+        }
+
+        break; // Only one client handler can match per event
+      }
+
+      // 2. Internal handlers (do not short-circuit)
+      for (const handlerName of possibleHandlers) {
+        const internalHandlerData = internalHandlers.get(handlerName);
+        if (!internalHandlerData) {
+          continue;
+        }
+
+        const { handler, config: handlerConfig } = internalHandlerData;
+
+        if (!this.shouldCallHandler(handlerName, handlerConfig, eventData)) {
+          continue;
+        }
+
+        try {
+          handler(eventData);
+        } catch (error) {
+          log.failed(() => ({ error, handlerName: `internal:${String(handlerName)}` }));
+        }
+      }
+    });
+
+    this.eventListeners.set(config.nativeEvent, subscription);
   }
 }

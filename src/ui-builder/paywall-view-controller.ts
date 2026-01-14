@@ -106,8 +106,16 @@ export class PaywallViewController {
       log,
     )) as AdaptyUiView;
     controller.id = result.id;
+    controller.viewEmitter = new PaywallViewEmitter(controller.id);
 
     await controller.setEventHandlers(DEFAULT_EVENT_HANDLERS);
+
+    await controller.viewEmitter.addInternalListener('onPaywallClosed', () => {
+      if (controller.viewEmitter) {
+        controller.viewEmitter.removeAllListeners();
+        controller.viewEmitter = null;
+      }
+    });
 
     return controller;
   }
