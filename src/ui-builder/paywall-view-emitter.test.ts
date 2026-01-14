@@ -145,7 +145,7 @@ describe('PaywallViewEmitter', () => {
       const mockListener = jest.fn();
 
       await expect(emitter.addListener('invalidEvent' as any, mockListener, mockOnRequestClose)).rejects.toThrow(
-        'No event config found for handler: invalidEvent',
+        'No native event mapping found for handler: invalidEvent',
       );
     });
 
@@ -214,7 +214,7 @@ describe('PaywallViewEmitter', () => {
       expect(mockOnRequestClose).toHaveBeenCalledTimes(1);
     });
 
-    it('should filter by action type for events with propertyMap', async () => {
+    it('should route action-specific handlers based on action.type', async () => {
       const closeListener = jest.fn();
       const backListener = jest.fn();
 

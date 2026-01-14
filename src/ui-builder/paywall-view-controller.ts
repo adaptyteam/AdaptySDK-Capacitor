@@ -111,10 +111,7 @@ export class PaywallViewController {
     await controller.setEventHandlers(DEFAULT_EVENT_HANDLERS);
 
     await controller.viewEmitter.addInternalListener('onPaywallClosed', () => {
-      if (controller.viewEmitter) {
-        controller.viewEmitter.removeAllListeners();
-        controller.viewEmitter = null;
-      }
+      controller.clearEventHandlers();
     });
 
     return controller;
