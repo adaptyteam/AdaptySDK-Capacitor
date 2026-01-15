@@ -202,9 +202,6 @@ const App: React.FC = () => {
       });
       setPaywall(paywall);
 
-      // Log show paywall
-      await adapty.logShowPaywall({ paywall });
-
       // Fetch products
       const productsResult = await adapty.getPaywallProducts({ paywall });
       setProducts(productsResult);
@@ -326,6 +323,22 @@ const App: React.FC = () => {
       log('error', 'Error creating web paywall URL', 'createWebPaywallUrl', false, { error: String(error) });
       setResult(`Error creating web paywall URL: ${error}`);
       setWebPaywallUrl('');
+    }
+  };
+
+  const logPaywallShown = async () => {
+    if (!paywall) {
+      setResult('Error: Paywall not loaded. Please load paywall first.');
+      return;
+    }
+
+    try {
+      log('info', 'Logging custom paywall shown', 'logShowPaywall', true, { paywallId: paywall.name });
+      await adapty.logShowPaywall({ paywall });
+      setResult('Paywall shown event logged');
+    } catch (error) {
+      log('error', 'Error logging paywall shown', 'logShowPaywall', false, { error: String(error) });
+      setResult(`Error logging paywall shown: ${error}`);
     }
   };
 
@@ -1045,15 +1058,19 @@ const App: React.FC = () => {
             Present Existing (not supported)
           </button>
 
-          <button onClick={openWebPaywall} disabled={!paywall} className={`${styles.Button} ${styles.ButtonSecondary}`}>
-            Open Web Paywall (iOS)
+          <button onClick={logPaywallShown} disabled={!paywall} className={`${styles.Button} ${styles.ButtonPrimary}`}>
+            Log Custom Paywall Shown
+          </button>
+
+          <button onClick={openWebPaywall} disabled={!paywall} className={`${styles.Button} ${styles.ButtonPrimary}`}>
+            Open Web Paywall
           </button>
         </div>
 
         {/* Combined Create Web URL Button + Input */}
         <div className={styles.WebUrlContainer}>
           <button onClick={createWebPaywallUrl} disabled={!paywall} className={styles.WebUrlButton}>
-            Create Web URL (iOS)
+            Create Web URL
           </button>
           <input
             type="text"
