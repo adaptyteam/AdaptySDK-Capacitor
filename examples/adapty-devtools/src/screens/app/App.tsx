@@ -7,6 +7,7 @@ import {
   AdaptyOnboarding,
   createPaywallView,
   createOnboardingView,
+  CreatePaywallViewParamsInput,
   FileLocation,
   RefundPreference,
   ErrorCodeName,
@@ -17,6 +18,17 @@ import { useAppContext } from '../../contexts/AppContext';
 import { useLogs } from '../../contexts/LogsContext';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import styles from './App.module.css';
+import { APPLE_ICON_IMAGE_BASE64 } from './base64-data.ts';
+
+type CustomAsset = {
+  type: 'image' | 'video';
+  relativeAssetPath?: string;
+  base64?: string;
+};
+
+type CreatePaywallViewParamsWithAssets = CreatePaywallViewParamsInput & {
+  customAssets?: Record<string, CustomAsset>;
+};
 
 const App: React.FC = () => {
   // Get context state and actions
@@ -518,9 +530,21 @@ const App: React.FC = () => {
         });
       }
 
-      const view = await createPaywallView(paywall, {
+      const customAssets: Record<string, CustomAsset> = {
+        custom_image_walter_white: { type: 'image', relativeAssetPath: 'Walter_White.png' },
+        hero_image: { type: 'image', relativeAssetPath: 'landscape.png' },
+        custom_image_landscape: { type: 'image', relativeAssetPath: 'landscape.png' },
+        custom_video_mp4: { type: 'video', relativeAssetPath: 'demo_video.mp4' },
+        hero_video: { type: 'video', relativeAssetPath: 'demo_video.mp4' },
+        apple_icon_image: { type: 'image', base64: APPLE_ICON_IMAGE_BASE64 },
+      };
+
+      const params: CreatePaywallViewParamsWithAssets = {
         customTags,
-      });
+        customAssets,
+      };
+
+      const view = await createPaywallView(paywall, params);
 
       // Save view to context for reuse
       setPaywallView(view);
