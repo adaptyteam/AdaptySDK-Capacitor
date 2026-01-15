@@ -32,6 +32,7 @@ export interface components {
       custom_tags?: components['defs']['AdaptyUI.CustomTagsValues'];
       custom_timers?: components['defs']['AdaptyUI.CustomTimersValues'];
       custom_assets?: components['defs']['AdaptyUI.CustomAssets'];
+      product_purchase_parameters?: components['defs']['AdaptyUI.ProductPurchaseParameters'];
       android_personalized_offers?: components['defs']['AdaptyUI.AndroidPersonalizedOffers'];
     };
 
@@ -943,6 +944,10 @@ export interface components {
 
     'AdaptyUI.CustomTimersValues': {
       [key: string]: components['defs']['Date'];
+    };
+
+    'AdaptyUI.ProductPurchaseParameters': {
+      [key: string]: components['defs']['AdaptyPurchaseParameters'];
     };
 
     'AdaptyUI.AndroidPersonalizedOffers': {
