@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		03D680B993AE5A2F120DF263 /* demo_video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = C280AA658D53499D917B35B4 /* demo_video.mp4 */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -15,11 +16,14 @@
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		5B8AE089558FD3FD9385AC3C /* ios_fallback.json in Resources */ = {isa = PBXBuildFile; fileRef = 922FE2610A74AA5897FF034B /* ios_fallback.json */; };
+		67C3D33009CF4928F4C50085 /* Walter_White.png in Resources */ = {isa = PBXBuildFile; fileRef = 240365767E54AB69BDD21848 /* Walter_White.png */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
+		A79417CCF37C6E085F058A45 /* landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = CC297F78C3A62B114A566535 /* landscape.png */; };
 		E1B9AC282E3760B10061BA8F /* AdaptyDemoApp.storekit in Resources */ = {isa = PBXBuildFile; fileRef = E1B9AC272E3760B10061BA8F /* AdaptyDemoApp.storekit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		240365767E54AB69BDD21848 /* Walter_White.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = Walter_White.png; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -32,6 +36,8 @@
 		922FE2610A74AA5897FF034B /* ios_fallback.json */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.json; path = ios_fallback.json; sourceTree = "<group>"; };
 		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
+		C280AA658D53499D917B35B4 /* demo_video.mp4 */ = {isa = PBXFileReference; includeInIndex = 1; path = demo_video.mp4; sourceTree = "<group>"; };
+		CC297F78C3A62B114A566535 /* landscape.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; path = landscape.png; sourceTree = "<group>"; };
 		E1B9AC272E3760B10061BA8F /* AdaptyDemoApp.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = AdaptyDemoApp.storekit; sourceTree = "<group>"; };
 		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -87,6 +93,9 @@
 				50B271D01FEDC1A000F3C39B /* public */,
 				E1B9AC272E3760B10061BA8F /* AdaptyDemoApp.storekit */,
 				922FE2610A74AA5897FF034B /* ios_fallback.json */,
+				240365767E54AB69BDD21848 /* Walter_White.png */,
+				CC297F78C3A62B114A566535 /* landscape.png */,
+				C280AA658D53499D917B35B4 /* demo_video.mp4 */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -169,6 +178,9 @@
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 				5B8AE089558FD3FD9385AC3C /* ios_fallback.json in Resources */,
+				67C3D33009CF4928F4C50085 /* Walter_White.png in Resources */,
+				A79417CCF37C6E085F058A45 /* landscape.png in Resources */,
+				03D680B993AE5A2F120DF263 /* demo_video.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -5,19 +5,20 @@
 
 require 'fileutils'
 require 'xcodeproj'
+require 'pathname'
 
 # Script to automatically copy Adapty fallback JSON files to native projects
 # and link them in iOS Xcode project using the Xcodeproj gem
 
 ADAPTY_ASSETS = {
   android: {
-    source: './assets/android/android_fallback.json',
-    target: './android/app/src/main/assets/android_fallback.json',
+    source_dir: './assets/android',
+    target_dir: './android/app/src/main/assets',
     description: 'Android assets folder'
   },
   ios: {
-    source: './assets/ios/ios_fallback.json',
-    target: './ios/App/App/ios_fallback.json',
+    source_dir: './assets/ios',
+    target_dir: './ios/App/App',
     description: 'iOS app bundle',
     needs_xcode_link: true
   }
@@ -47,7 +48,24 @@ rescue
   false
 end
 
-def update_ios_project
+def copy_files_from_dir(source_dir, target_dir, description)
+  unless Dir.exist?(source_dir)
+    puts "⚠️  Source directory not found: #{source_dir}"
+    return []
+  end
+
+  ensure_directory_exists(target_dir)
+
+  Dir.children(source_dir).filter_map do |entry|
+    source_path = File.join(source_dir, entry)
+    next unless File.file?(source_path)
+
+    target_path = File.join(target_dir, entry)
+    copy_file(source_path, target_path, description) ? target_path : nil
+  end
+end
+
+def update_ios_project(target_dir, target_files)
   pbxproj_path = './ios/App/App.xcodeproj'
   
   unless Dir.exist?(pbxproj_path)
@@ -55,13 +73,15 @@ def update_ios_project
     return false
   end
 
+  if target_files.empty?
+    puts 'ℹ️  No iOS files to link'
+    return false
+  end
+
   begin
     puts '🔍 Parsing Xcode project...'
     project = Xcodeproj::Project.open(pbxproj_path)
     
-    file_name = 'ios_fallback.json'
-    
-    # Get the main app target
     target = project.targets.first
     unless target
       puts '❌ No targets found in Xcode project'
@@ -70,29 +90,42 @@ def update_ios_project
     
     puts "🔍 Target: #{target.name}"
 
-    # Check if file is already added to the project
-    existing_file = project.files.find { |file| file.display_name == file_name }
-    if existing_file
-      puts '📱 iOS fallback.json already linked in Xcode project'
-      return true
+    resources_build_phase = target.resources_build_phase
+    app_group = project.main_group.find_subpath('App') || project.main_group.new_group('App')
+
+    linked_any = false
+
+    target_files.each do |file_path|
+      file_name = File.basename(file_path)
+      desired_path = file_name
+      existing_file = project.files.find { |file| file.display_name == file_name || file.path == desired_path }
+
+      if existing_file
+        existing_file.path = desired_path if existing_file.path != desired_path
+        existing_file.source_tree = '<group>'
+        app_group.children << existing_file unless app_group.children.include?(existing_file)
+        file_ref = existing_file
+      else
+        file_ref = app_group.new_reference(desired_path)
+        file_ref.source_tree = '<group>'
+      end
+
+      already_linked = resources_build_phase.files.any? { |f| f.file_ref == file_ref }
+      next if already_linked
+
+      resources_build_phase.add_file_reference(file_ref)
+      linked_any = true
+      puts "🔗 Linked iOS asset: #{file_name}"
     end
 
-    puts "🔍 Adding resource file: #{file_name}"
-    
-    # Find or create the App group
-    app_group = project.main_group.find_subpath('App') || project.main_group.new_group('App')
-    
-    # Add the file to the App group
-    file_ref = app_group.new_reference(file_name)
-    
-    # Add the file to the target's resources build phase (NOT sources!)
-    resources_build_phase = target.resources_build_phase
-    resources_build_phase.add_file_reference(file_ref)
-    
-    # Save the project
-    project.save
-    puts '🔗 Successfully linked ios_fallback.json in Xcode project using Xcodeproj gem'
-    true
+    if linked_any
+      project.save
+      puts '📱 iOS assets linked in Xcode project'
+    else
+      puts 'ℹ️  iOS assets already linked'
+    end
+
+    linked_any
     
   rescue => error
     puts "❌ Error updating iOS project with Xcodeproj gem: #{error.message}"
@@ -110,16 +143,22 @@ platform = ENV['CAPACITOR_PLATFORM_NAME']
 total_copied = 0
 
 if platform == 'ios' || platform.nil?
-  if copy_file(ADAPTY_ASSETS[:ios][:source], ADAPTY_ASSETS[:ios][:target], ADAPTY_ASSETS[:ios][:description])
-    total_copied += 1
-    update_ios_project
-  end
+  ios_files = copy_files_from_dir(
+    ADAPTY_ASSETS[:ios][:source_dir],
+    ADAPTY_ASSETS[:ios][:target_dir],
+    ADAPTY_ASSETS[:ios][:description]
+  )
+  total_copied += ios_files.size
+  update_ios_project(ADAPTY_ASSETS[:ios][:target_dir], ios_files) if ADAPTY_ASSETS[:ios][:needs_xcode_link]
 end
 
 if platform == 'android' || platform.nil?
-  if copy_file(ADAPTY_ASSETS[:android][:source], ADAPTY_ASSETS[:android][:target], ADAPTY_ASSETS[:android][:description])
-    total_copied += 1
-  end
+  android_files = copy_files_from_dir(
+    ADAPTY_ASSETS[:android][:source_dir],
+    ADAPTY_ASSETS[:android][:target_dir],
+    ADAPTY_ASSETS[:android][:description]
+  )
+  total_copied += android_files.size
 end
 
 puts
