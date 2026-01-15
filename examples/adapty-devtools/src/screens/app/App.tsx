@@ -202,9 +202,6 @@ const App: React.FC = () => {
       });
       setPaywall(paywall);
 
-      // Log show paywall
-      await adapty.logShowPaywall({ paywall });
-
       // Fetch products
       const productsResult = await adapty.getPaywallProducts({ paywall });
       setProducts(productsResult);
