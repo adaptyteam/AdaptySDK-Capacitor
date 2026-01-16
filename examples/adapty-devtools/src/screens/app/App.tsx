@@ -20,14 +20,10 @@ import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import styles from './App.module.css';
 import { APPLE_ICON_IMAGE_BASE64 } from './base64-data.ts';
 
-type CustomAsset = {
-  type: 'image' | 'video';
-  relativeAssetPath?: string;
-  base64?: string;
-};
+type CustomAssets = NonNullable<CreatePaywallViewParamsInput['customAssets']>;
 
 type CreatePaywallViewParamsWithAssets = CreatePaywallViewParamsInput & {
-  customAssets?: Record<string, CustomAsset>;
+  customAssets?: CustomAssets;
 };
 
 const App: React.FC = () => {
@@ -530,7 +526,7 @@ const App: React.FC = () => {
         });
       }
 
-      const customAssets: Record<string, CustomAsset> = {
+      const customAssets: CustomAssets = {
         custom_image_walter_white: { type: 'image', relativeAssetPath: 'Walter_White.png' },
         hero_image: { type: 'image', relativeAssetPath: 'landscape.png' },
         custom_image_landscape: { type: 'image', relativeAssetPath: 'landscape.png' },
