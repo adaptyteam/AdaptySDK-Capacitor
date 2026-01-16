@@ -9,6 +9,7 @@ require 'pathname'
 
 # Script to automatically copy Adapty fallback JSON files to native projects
 # and link them in iOS Xcode project using the Xcodeproj gem
+# ruby 2.7+ is required
 
 ADAPTY_ASSETS = {
   android: {
@@ -33,7 +34,7 @@ end
 
 def copy_file(source, target, description)
   return false unless File.exist?(source)
-  
+
   begin
     ensure_directory_exists(File.dirname(target))
     FileUtils.cp(source, target)
@@ -67,7 +68,7 @@ end
 
 def update_ios_project(target_dir, target_files)
   pbxproj_path = './ios/App/App.xcodeproj'
-  
+
   unless Dir.exist?(pbxproj_path)
     puts '⚠️  iOS project not found, skipping Xcode linking'
     return false
@@ -81,13 +82,13 @@ def update_ios_project(target_dir, target_files)
   begin
     puts '🔍 Parsing Xcode project...'
     project = Xcodeproj::Project.open(pbxproj_path)
-    
+
     target = project.targets.first
     unless target
       puts '❌ No targets found in Xcode project'
       return false
     end
-    
+
     puts "🔍 Target: #{target.name}"
 
     resources_build_phase = target.resources_build_phase
@@ -126,7 +127,7 @@ def update_ios_project(target_dir, target_files)
     end
 
     linked_any
-    
+
   rescue => error
     puts "❌ Error updating iOS project with Xcodeproj gem: #{error.message}"
     puts "❌ Error backtrace: #{error.backtrace.first(3).join("\n")}"
