@@ -112,7 +112,7 @@ const defaultState: AppState = {
   locale: '',
   timeout: '6000',
   maxAge: '120',
-  customTagsJson: '{"USERNAME":"TestUser","CITY":"Capacitor"}',
+  customTagsJson: '{"USER":"Bruce","CITY":"Philadelphia"}',
   fetchPolicyIndex: 0,
 };
 

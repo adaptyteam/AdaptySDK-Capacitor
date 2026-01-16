@@ -407,7 +407,10 @@ const App: React.FC = () => {
   const openWebPaywallForProduct = async (product: AdaptyPaywallProduct) => {
     try {
       const openIn = webPresentations[webPaywallOpenInIdx];
-      log('info', 'Opening web paywall for product', 'openWebPaywall', false, { productId: product.vendorProductId, openIn });
+      log('info', 'Opening web paywall for product', 'openWebPaywall', false, {
+        productId: product.vendorProductId,
+        openIn,
+      });
       await adapty.openWebPaywall({ paywallOrProduct: product, openIn });
       setResult(`Web paywall opened for: ${product.vendorProductId}`);
     } catch (error) {
