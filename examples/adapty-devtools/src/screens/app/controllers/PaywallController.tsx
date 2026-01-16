@@ -1,8 +1,6 @@
 import { forwardRef, useImperativeHandle } from 'react';
-import { createPaywallView, AdaptyError, CreatePaywallViewParamsInput, ErrorCodeName } from '@adapty/capacitor';
+import { createPaywallView, AdaptyCustomAsset, AdaptyError, ErrorCodeName } from '@adapty/capacitor';
 import { APPLE_ICON_IMAGE_BASE64 } from '../base64-data';
-
-type CustomAssets = NonNullable<CreatePaywallViewParamsInput['customAssets']>;
 
 export type PaywallControllerRef = {
   presentPaywall: () => Promise<void>;
@@ -51,14 +49,14 @@ export const PaywallController = forwardRef<PaywallControllerRef, Props>(functio
         });
       }
 
-      const customAssets: CustomAssets = {
+      const customAssets = {
         custom_image_walter_white: { type: 'image' as const, relativeAssetPath: 'Walter_White.png' },
         hero_image: { type: 'image' as const, relativeAssetPath: 'landscape.png' },
         custom_image_landscape: { type: 'image' as const, relativeAssetPath: 'landscape.png' },
         custom_video_mp4: { type: 'video' as const, relativeAssetPath: 'demo_video.mp4' },
         hero_video: { type: 'video' as const, relativeAssetPath: 'demo_video.mp4' },
         apple_icon_image: { type: 'image' as const, base64: APPLE_ICON_IMAGE_BASE64 },
-      };
+      } satisfies Record<string, AdaptyCustomAsset>;
 
       const view = await createPaywallView(paywall, { customTags, customAssets });
       setPaywallView(view);

@@ -17,6 +17,7 @@ export {
 } from './ui-builder/index';
 export type {
   CreatePaywallViewParamsInput,
+  AdaptyCustomAsset,
   AdaptyUiView,
   AdaptyUiDialogConfig,
   AdaptyUiDialogActionType,
