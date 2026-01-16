@@ -1,0 +1,1 @@
+export { ResultBanner } from './ResultBanner';

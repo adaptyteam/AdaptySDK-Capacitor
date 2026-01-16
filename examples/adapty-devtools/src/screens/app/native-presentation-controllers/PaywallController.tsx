@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle } from 'react';
 import { createPaywallView, AdaptyCustomAsset, AdaptyError, ErrorCodeName } from '@adapty/capacitor';
-import { APPLE_ICON_IMAGE_BASE64 } from '../base64-data';
+import { APPLE_ICON_IMAGE_BASE64 } from '../../../assets/base64-data.ts';
 
 export type PaywallControllerRef = {
   presentPaywall: () => Promise<void>;
@@ -160,4 +160,3 @@ export const PaywallController = forwardRef<PaywallControllerRef, Props>(functio
 
   return null;
 });
-

@@ -187,4 +187,3 @@ export const OnboardingSection: React.FC<Props> = ({
     </div>
   );
 };
-

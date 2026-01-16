@@ -88,7 +88,9 @@ export const OnboardingController = forwardRef<OnboardingControllerRef, Props>(f
       await view.present();
       setResult('✅ Onboarding presented successfully!');
     } catch (error: any) {
-      log('error', 'Failed to present onboarding', 'presentOnboarding', false, { error: error?.message || String(error) });
+      log('error', 'Failed to present onboarding', 'presentOnboarding', false, {
+        error: error?.message || String(error),
+      });
       if (error instanceof AdaptyError) {
         setResult(`❌ Failed to present onboarding: ${error.localizedDescription}`);
       } else {
@@ -97,8 +99,12 @@ export const OnboardingController = forwardRef<OnboardingControllerRef, Props>(f
     }
   };
 
-  useImperativeHandle(ref, () => ({ presentOnboarding }), [onboarding, externalUrlsPresentation, canShowPaywall, showPaywall]);
+  useImperativeHandle(ref, () => ({ presentOnboarding }), [
+    onboarding,
+    externalUrlsPresentation,
+    canShowPaywall,
+    showPaywall,
+  ]);
 
   return null;
 });
-
