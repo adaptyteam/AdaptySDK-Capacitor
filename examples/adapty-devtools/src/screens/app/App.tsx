@@ -10,6 +10,7 @@ import {
   CreatePaywallViewParamsInput,
   FileLocation,
   RefundPreference,
+  WebPresentation,
   ErrorCodeName,
   AdaptyError,
 } from '@adapty/capacitor';
@@ -98,6 +99,10 @@ const App: React.FC = () => {
   const refundPreferences = [RefundPreference.NoPreference, RefundPreference.Grant, RefundPreference.Decline];
 
   const refundPreferenceLabels = ['No Preference', 'Grant', 'Decline'];
+
+  const webPresentations = [WebPresentation.BrowserInApp, WebPresentation.BrowserOutApp] as const;
+  const [webPaywallOpenInIdx, setWebPaywallOpenInIdx] = useState(0);
+  const [onboardingExternalUrlsPresentationIdx, setOnboardingExternalUrlsPresentationIdx] = useState(0);
 
   const fetchPolicies = [
     'reload_revalidating_cache_data',
@@ -368,8 +373,9 @@ const App: React.FC = () => {
     }
 
     try {
-      log('info', 'Opening web paywall', 'openWebPaywall');
-      await adapty.openWebPaywall({ paywallOrProduct: paywall });
+      const openIn = webPresentations[webPaywallOpenInIdx];
+      log('info', 'Opening web paywall', 'openWebPaywall', false, { openIn });
+      await adapty.openWebPaywall({ paywallOrProduct: paywall, openIn });
       setResult('Web paywall opened successfully');
     } catch (error) {
       log('error', 'Error opening web paywall', 'openWebPaywall', false, { error: String(error) });
@@ -400,8 +406,9 @@ const App: React.FC = () => {
 
   const openWebPaywallForProduct = async (product: AdaptyPaywallProduct) => {
     try {
-      log('info', 'Opening web paywall for product', 'openWebPaywall', false, { productId: product.vendorProductId });
-      await adapty.openWebPaywall({ paywallOrProduct: product });
+      const openIn = webPresentations[webPaywallOpenInIdx];
+      log('info', 'Opening web paywall for product', 'openWebPaywall', false, { productId: product.vendorProductId, openIn });
+      await adapty.openWebPaywall({ paywallOrProduct: product, openIn });
       setResult(`Web paywall opened for: ${product.vendorProductId}`);
     } catch (error) {
       log('error', 'Error opening web paywall for product', 'openWebPaywall', false, {
@@ -682,7 +689,8 @@ const App: React.FC = () => {
     try {
       setResult('Creating onboarding view...');
 
-      const view = await createOnboardingView(onboarding);
+      const externalUrlsPresentation = webPresentations[onboardingExternalUrlsPresentationIdx];
+      const view = await createOnboardingView(onboarding, { externalUrlsPresentation });
 
       await view.setEventHandlers({
         onClose: (actionId, meta) => {
@@ -960,6 +968,21 @@ const App: React.FC = () => {
         </div>
 
         <div className={styles.InputGroup}>
+          <select
+            value={webPaywallOpenInIdx}
+            onChange={(e) => setWebPaywallOpenInIdx(parseInt(e.target.value))}
+            className={styles.Input}
+            disabled={!isActivated}
+          >
+            {webPresentations.map((presentation, index) => (
+              <option key={presentation} value={index}>
+                {presentation.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className={styles.InputGroup}>
           <textarea
             value={customTagsJson}
             onChange={(e) => setCustomTagsJson(e.target.value)}
@@ -1170,6 +1193,21 @@ const App: React.FC = () => {
             {fetchPolicies.map((policy, index) => (
               <option key={policy} value={index}>
                 {policy.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className={styles.InputGroup}>
+          <select
+            value={onboardingExternalUrlsPresentationIdx}
+            onChange={(e) => setOnboardingExternalUrlsPresentationIdx(parseInt(e.target.value))}
+            className={styles.Input}
+            disabled={!isActivated}
+          >
+            {webPresentations.map((presentation, index) => (
+              <option key={presentation} value={index}>
+                {presentation.replace(/_/g, ' ')}
               </option>
             ))}
           </select>
