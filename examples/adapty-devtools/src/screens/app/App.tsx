@@ -1,5 +1,4 @@
 import React, { useRef, useState } from 'react';
-import { Capacitor } from '@capacitor/core';
 import {
   adapty,
   AdaptyPaywall,
@@ -16,10 +15,18 @@ import { useAppContext } from '../../contexts/AppContext';
 import { useLogs } from '../../contexts/LogsContext';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import styles from './App.module.css';
-import { OnboardingController, OnboardingControllerRef } from './controllers/OnboardingController';
-import { PaywallController, PaywallControllerRef } from './controllers/PaywallController';
+import { OnboardingController, OnboardingControllerRef } from './native-presentation-controllers/OnboardingController';
+import { PaywallController, PaywallControllerRef } from './native-presentation-controllers/PaywallController';
 import { PaywallSection } from './sections/PaywallSection';
 import { OnboardingSection } from './sections/OnboardingSection';
+import { ResultBanner } from './components/ResultBanner';
+import { CredentialsInfoSection } from './sections/CredentialsInfoSection';
+import { ProfileSection } from './sections/ProfileSection';
+import { SdkStatusSection } from './sections/SdkStatusSection';
+import { OtherActionsSection } from './sections/OtherActionsSection';
+import { RefundSection } from './sections/RefundSection';
+import { IntegrationSection } from './sections/IntegrationSection';
+import { ReportTransactionSection } from './sections/ReportTransactionSection';
 
 const App: React.FC = () => {
   // Get context state and actions
@@ -498,16 +505,6 @@ const App: React.FC = () => {
     }
   };
 
-  const formatDate = (date?: Date | string): string => {
-    if (!date) return '-';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
-  };
-
-  const getAccessLevel = () => {
-    return profile?.accessLevels?.['premium'];
-  };
-
   const presentPaywall = async () => {
     await paywallRef.current?.presentPaywall();
   };
@@ -558,149 +555,19 @@ const App: React.FC = () => {
     );
   };
 
-  const renderIntegrationSection = () => {
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Integration Identifiers</h3>
-        <div className={styles.InputGroup}>
-          <input
-            type="text"
-            value={integrationIdKey}
-            onChange={(e) => setIntegrationIdKey(e.target.value)}
-            placeholder="Integration Key (e.g., one_signal_subscription_id)"
-            className={styles.Input}
-          />
-          <input
-            type="text"
-            value={integrationIdValue}
-            onChange={(e) => setIntegrationIdValue(e.target.value)}
-            placeholder="Integration Value"
-            className={styles.Input}
-          />
-          <button
-            onClick={setIntegrationId}
-            disabled={!isActivated || !integrationIdKey.trim() || !integrationIdValue.trim()}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Set Integration ID
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderRefundDataSection = () => {
-    const platform = Capacitor.getPlatform();
-    const isIOS = platform === 'ios';
-
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Refund Saver (iOS only)</h3>
-        {!isIOS && (
-          <div className={styles.InfoBox} style={{ marginBottom: '10px' }}>
-            <div className={styles.InfoBoxItem}>
-              <strong>⚠️ Not available on {platform}</strong>
-            </div>
-          </div>
-        )}
-
-        {/* Refund Preference */}
-        {isIOS && (
-          <div className={styles.RefundItem}>
-            <label>Refund Preference:</label>
-            <div
-              className={styles.ClickableParam}
-              onClick={() => {
-                if (isIOS) {
-                  setRefundPreferenceIdx((refundPreferenceIdx + 1) % refundPreferences.length);
-                }
-              }}
-            >
-              <span>{refundPreferenceLabels[refundPreferenceIdx]}</span>
-              <span className={styles.ParamValue}>{refundPreferences[refundPreferenceIdx]}</span>
-            </div>
-            <button
-              onClick={updateRefundPreference}
-              disabled={!isActivated || !isIOS}
-              className={`${styles.Button} ${styles.ButtonSecondary} ${styles.RefundButton}`}
-            >
-              Update Refund Preference
-            </button>
-          </div>
-        )}
-
-        {/* Collecting Refund Data Consent */}
-        {isIOS && (
-          <div className={styles.RefundItem}>
-            <label>Collecting Refund Data Consent:</label>
-            <div
-              className={styles.ClickableParam}
-              onClick={() => {
-                if (isIOS) {
-                  setCollectingRefundDataConsent(!collectingRefundDataConsent);
-                }
-              }}
-            >
-              <span>Consent</span>
-              <span className={styles.ParamValue}>{collectingRefundDataConsent.toString()}</span>
-            </div>
-            <button
-              onClick={updateRefundDataConsent}
-              disabled={!isActivated || !isIOS}
-              className={`${styles.Button} ${styles.ButtonSecondary} ${styles.RefundButton}`}
-            >
-              Update Collecting Refund Data Consent
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderProfileSection = () => {
-    const accessLevel = getAccessLevel();
-
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Profile Information</h3>
-        <div className={styles.InfoBox}>
-          <div className={styles.InfoBoxItem}>
-            <strong>Profile ID:</strong> {profile?.profileId || 'Not loaded'}
-          </div>
-          {accessLevel ? (
-            <div>
-              <div>
-                <strong>Premium:</strong> {accessLevel.isActive ? '✅ Active' : '❌ Not Active'}
-              </div>
-              <div>
-                <strong>Is Lifetime:</strong> {accessLevel.isLifetime ? '✅ Yes' : '❌ No'}
-              </div>
-              <div>
-                <strong>Activated At:</strong> {formatDate(accessLevel.activatedAt)}
-              </div>
-              <div>
-                <strong>Expires At:</strong> {formatDate(accessLevel.expiresAt)}
-              </div>
-              <div>
-                <strong>Will Renew:</strong> {accessLevel.willRenew ? '✅ Yes' : '❌ No'}
-              </div>
-            </div>
-          ) : (
-            <div>
-              <strong>Status:</strong> No active subscriptions
-            </div>
-          )}
-        </div>
-        <button
-          onClick={fetchProfile}
-          disabled={isLoadingProfile}
-          className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingProfile ? styles.Loading : ''}`}
-        >
-          {isLoadingProfile ? 'Loading...' : 'Refresh Profile'}
-        </button>
-      </div>
-    );
-  };
+  const renderRefundDataSection = () => (
+    <RefundSection
+      isActivated={isActivated}
+      refundPreferenceIdx={refundPreferenceIdx}
+      refundPreferences={refundPreferences}
+      refundPreferenceLabels={refundPreferenceLabels}
+      collectingRefundDataConsent={collectingRefundDataConsent}
+      setRefundPreferenceIdx={setRefundPreferenceIdx}
+      setCollectingRefundDataConsent={setCollectingRefundDataConsent}
+      updateRefundPreference={updateRefundPreference}
+      updateRefundDataConsent={updateRefundDataConsent}
+    />
+  );
 
   const renderPaywallSection = () => (
     <PaywallSection
@@ -961,99 +828,18 @@ const App: React.FC = () => {
     }
   };
 
-  const renderReportTransactionSection = () => {
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Report Transaction</h3>
-        <div className={styles.InputGroup}>
-          <input
-            type="text"
-            value={transactionId}
-            onChange={(e) => setTransactionId(e.target.value)}
-            placeholder="Transaction ID (required)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-          <input
-            type="text"
-            value={variationId}
-            onChange={(e) => setVariationId(e.target.value)}
-            placeholder="Variation ID (optional)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-          <button
-            onClick={reportTransaction}
-            disabled={!isActivated || !transactionId.trim()}
-            className={`${styles.Button} ${styles.ButtonPrimary}`}
-          >
-            Report Transaction
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderOtherActionsSection = () => {
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Other Actions</h3>
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={restorePurchases}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonPrimary}`}
-          >
-            Restore Purchases
-          </button>
-          <button
-            onClick={updateAttribution}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Update Attribution
-          </button>
-        </div>
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={presentCodeRedemptionSheet}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Code Redemption (iOS)
-          </button>
-          <button
-            onClick={setLogLevel}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Set Log Level
-          </button>
-        </div>
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={testSetFallback}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Set Fallback Paywalls
-          </button>
-          <button
-            onClick={getCurrentInstallationStatus}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Get Installation Status
-          </button>
-        </div>
-        <div className={styles.ButtonGroup}>
-          <button onClick={logout} disabled={!isActivated} className={`${styles.Button} ${styles.ButtonDanger}`}>
-            Logout
-          </button>
-        </div>
-      </div>
-    );
-  };
+  const renderOtherActionsSection = () => (
+    <OtherActionsSection
+      isActivated={isActivated}
+      restorePurchases={restorePurchases}
+      updateAttribution={updateAttribution}
+      presentCodeRedemptionSheet={presentCodeRedemptionSheet}
+      setLogLevel={setLogLevel}
+      testSetFallback={testSetFallback}
+      getCurrentInstallationStatus={getCurrentInstallationStatus}
+      logout={logout}
+    />
+  );
 
   const reportTransaction = async () => {
     if (!isActivated || !transactionId.trim()) {
@@ -1121,21 +907,11 @@ const App: React.FC = () => {
         <h1 className={styles.Title}>Adapty Capacitor Devtools</h1>
         <p className={styles.Description}>Devtools app for adapty plugin API.</p>
 
-        {/* Credentials Info */}
-        <div className={styles.Section}>
-          <h3 className={styles.SectionTitle}>Configuration from .adapty-credentials.json file</h3>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoBoxItem}>
-              <strong>API Key:</strong> {getApiKey() ? `${getApiKey().substring(0, 20)}...` : 'Not loaded'}
-            </div>
-            <div className={styles.InfoBoxItem}>
-              <strong>iOS Bundle ID:</strong> {getIosBundle()}
-            </div>
-            <div className={styles.InfoBoxItem}>
-              <strong>Android Application ID:</strong> {getAndroidApplicationId()}
-            </div>
-          </div>
-        </div>
+        <CredentialsInfoSection
+          apiKey={getApiKey()}
+          iosBundleId={getIosBundle()}
+          androidApplicationId={getAndroidApplicationId()}
+        />
 
         {renderIdentifySection()}
 
@@ -1157,14 +933,7 @@ const App: React.FC = () => {
           </button>
         </div>
 
-        {/* Result Display */}
-        {result && (
-          <div
-            className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}
-          >
-            {result}
-          </div>
-        )}
+        <ResultBanner result={result} />
 
         {/* Events Section */}
         {isActivated && (
@@ -1175,7 +944,9 @@ const App: React.FC = () => {
         )}
 
         {/* Profile Section */}
-        {isActivated && renderProfileSection()}
+        {isActivated && (
+          <ProfileSection profile={profile} isLoadingProfile={isLoadingProfile} fetchProfile={fetchProfile} />
+        )}
 
         {/* Paywall Section */}
         {isActivated && renderPaywallSection()}
@@ -1184,10 +955,28 @@ const App: React.FC = () => {
         {isActivated && renderOnboardingSection()}
 
         {/* Report Transaction Section */}
-        {isActivated && renderReportTransactionSection()}
+        {isActivated && (
+          <ReportTransactionSection
+            isActivated={isActivated}
+            transactionId={transactionId}
+            variationId={variationId}
+            setTransactionId={setTransactionId}
+            setVariationId={setVariationId}
+            reportTransaction={reportTransaction}
+          />
+        )}
 
         {/* Integration Section */}
-        {isActivated && renderIntegrationSection()}
+        {isActivated && (
+          <IntegrationSection
+            isActivated={isActivated}
+            integrationIdKey={integrationIdKey}
+            integrationIdValue={integrationIdValue}
+            setIntegrationIdKey={setIntegrationIdKey}
+            setIntegrationIdValue={setIntegrationIdValue}
+            setIntegrationId={setIntegrationId}
+          />
+        )}
 
         {/* Refund Data Section */}
         {isActivated && renderRefundDataSection()}
@@ -1195,16 +984,7 @@ const App: React.FC = () => {
         {/* Other Actions Section */}
         {isActivated && renderOtherActionsSection()}
 
-        {/* Configuration Info */}
-        <div className={styles.ConfigSection}>
-          <h3 className={styles.ConfigTitle}>SDK Status:</h3>
-          <ul className={styles.ConfigList}>
-            <li>Status: {isActivated ? '✅ Activated' : '❌ Not activated'}</li>
-            <li>Profile Loaded: {profile ? '✅ Yes' : '❌ No'}</li>
-            <li>Paywall Loaded: {paywall ? '✅ Yes' : '❌ No'}</li>
-            <li>Onboarding Loaded: {onboarding ? '✅ Yes' : '❌ No'}</li>
-          </ul>
-        </div>
+        <SdkStatusSection isActivated={isActivated} profile={profile} paywall={paywall} onboarding={onboarding} />
       </main>
     </div>
   );

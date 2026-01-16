@@ -294,4 +294,3 @@ export const PaywallSection: React.FC<Props> = ({
     </div>
   );
 };
-
