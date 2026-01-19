@@ -8,6 +8,23 @@ and comes with a very minimal shell for building an app.
 - Node 20
 - JDK 21
 
+
+## Fallback files
+
+Native fallback JSON files are expected at:
+
+- `./ios/App/App/ios_fallback.json`
+- `./android/app/src/main/assets/android_fallback.json`
+
+### Quick update
+
+To update them faster, put your fallback files into `@AdaptySDK-Capacitor/examples/adapty-devtools/assets` and run (Ruby 2.7+ required):
+
+```bash
+yarn link-assets
+```
+
+The script will copy the files into the native directories and link them.
 ## Running this example
 
 ### Capacitor Sync
