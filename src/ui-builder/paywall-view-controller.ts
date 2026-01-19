@@ -83,10 +83,6 @@ export class PaywallViewController {
 
     await controller.setEventHandlers(DEFAULT_EVENT_HANDLERS);
 
-    await controller.viewEmitter.addInternalListener('onPaywallClosed', () => {
-      controller.clearEventHandlers();
-    });
-
     return controller;
   }
 
@@ -192,6 +188,7 @@ export class PaywallViewController {
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
+    this.clearEventHandlers();
   }
 
   /**
