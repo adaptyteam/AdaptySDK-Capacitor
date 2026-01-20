@@ -1,7 +1,9 @@
 import type { Adapty } from '../adapty';
 import { AdaptyError } from '../shared/adapty-error';
 import { AdaptyOnboardingCoder } from '../shared/coders/adapty-onboarding';
+import { AdaptyUICreateOnboardingViewParamsCoder } from '../shared/coders/adapty-ui-create-onboarding-view-params';
 import { LogContext, Log } from '../shared/logger';
+import { WebPresentation } from '../shared/types';
 import type { AdaptyOnboarding } from '../shared/types';
 import type { components } from '../shared/types/api';
 import { mapValues } from '../shared/utils/map-values';
@@ -9,9 +11,18 @@ import { withErrorContext } from '../shared/utils/with-error-context';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 import { DEFAULT_ONBOARDING_EVENT_HANDLERS } from './types';
-import type { AdaptyUiView, OnboardingEventHandlers, AdaptyIOSPresentationStyle } from './types';
+import type {
+  AdaptyUiView,
+  OnboardingEventHandlers,
+  AdaptyIOSPresentationStyle,
+  CreateOnboardingViewParamsInput,
+} from './types';
 
 type Req = components['requests'];
+
+export const DEFAULT_ONBOARDING_PARAMS: CreateOnboardingViewParamsInput = {
+  externalUrlsPresentation: WebPresentation.BrowserInApp,
+};
 
 /**
  * Controller for managing onboarding views.
@@ -34,18 +45,26 @@ export class OnboardingViewController {
    * and creates reference between native controller and JS instance
    * @internal
    */
-  static async create(onboarding: AdaptyOnboarding, adaptyPlugin: Adapty): Promise<OnboardingViewController> {
+  static async create(
+    onboarding: AdaptyOnboarding,
+    adaptyPlugin: Adapty,
+    params: CreateOnboardingViewParamsInput = {},
+  ): Promise<OnboardingViewController> {
     const controller = new OnboardingViewController(adaptyPlugin);
 
     const ctx = new LogContext();
     const methodKey = 'adapty_ui_create_onboarding_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start(() => ({ onboarding }));
+    log.start(() => ({ onboarding, params }));
 
     const coder = new AdaptyOnboardingCoder();
+    const paramsWithDefaults = { ...DEFAULT_ONBOARDING_PARAMS, ...params };
+    const encodedParams = new AdaptyUICreateOnboardingViewParamsCoder().encode(paramsWithDefaults);
+
     const data: Req['AdaptyUICreateOnboardingView.Request'] = {
       method: methodKey,
       onboarding: coder.encode(onboarding),
+      ...encodedParams,
     };
 
     const result = (await controller.adaptyPlugin.handleMethodCall(
@@ -157,6 +176,7 @@ export class OnboardingViewController {
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
+    this.clearEventHandlers();
   }
 
   private onRequestClose = async () => {

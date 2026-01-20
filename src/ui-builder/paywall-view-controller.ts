@@ -1,6 +1,7 @@
 import type { Adapty } from '../adapty';
 import { AdaptyError } from '../shared/adapty-error';
 import { AdaptyPaywallCoder } from '../shared/coders/adapty-paywall';
+import { AdaptyUICreatePaywallViewParamsCoder } from '../shared/coders/adapty-ui-create-paywall-view-params';
 import { LogContext, Log } from '../shared/logger';
 import type { AdaptyPaywall } from '../shared/types';
 import type { components } from '../shared/types/api';
@@ -19,6 +20,11 @@ import type {
 import { DEFAULT_EVENT_HANDLERS } from './types';
 
 type Req = components['requests'];
+
+const DEFAULT_PARAMS: CreatePaywallViewParamsInput = {
+  prefetchProducts: true,
+  loadTimeoutMs: 5000,
+};
 
 /**
  * Controller for managing paywall views.
@@ -53,51 +59,18 @@ export class PaywallViewController {
     const log = ctx.call({ methodName: methodKey });
     log.start(() => ({ paywall, params }));
 
-    const coder = new AdaptyPaywallCoder();
-    const data: Req['AdaptyUICreatePaywallView.Request'] = {
-      method: methodKey,
-      paywall: coder.encode(paywall),
-      preload_products: params.prefetchProducts ?? true,
-      load_timeout: (params.loadTimeoutMs ?? 5000) / 1000,
+    const paywallCoder = new AdaptyPaywallCoder();
+    const paramsCoder = new AdaptyUICreatePaywallViewParamsCoder();
+    const paramsWithDefaults: CreatePaywallViewParamsInput = {
+      ...DEFAULT_PARAMS,
+      ...params,
     };
 
-    if (params.customTags) {
-      data.custom_tags = params.customTags;
-    }
-
-    if (params.customTimers) {
-      const convertTimerInfo = (timerInfo: Record<string, Date>): Record<string, string> => {
-        const formatDate = (date: Date): string => {
-          const pad = (num: number, digits = 2): string => {
-            const str = num.toString();
-            const paddingLength = digits - str.length;
-            return paddingLength > 0 ? '0'.repeat(paddingLength) + str : str;
-          };
-
-          const year = date.getUTCFullYear();
-          const month = pad(date.getUTCMonth() + 1);
-          const day = pad(date.getUTCDate());
-          const hours = pad(date.getUTCHours());
-          const minutes = pad(date.getUTCMinutes());
-          const seconds = pad(date.getUTCSeconds());
-          const millis = pad(date.getUTCMilliseconds(), 3);
-
-          return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${millis}Z`;
-        };
-
-        const result: Record<string, string> = {};
-        for (const key in timerInfo) {
-          if (Object.prototype.hasOwnProperty.call(timerInfo, key)) {
-            const date = timerInfo[key];
-            if (date instanceof Date) {
-              result[key] = formatDate(date);
-            }
-          }
-        }
-        return result;
-      };
-      data.custom_timers = convertTimerInfo(params.customTimers);
-    }
+    const data: Req['AdaptyUICreatePaywallView.Request'] = {
+      method: methodKey,
+      paywall: paywallCoder.encode(paywall),
+      ...paramsCoder.encode(paramsWithDefaults),
+    };
 
     const result = (await controller.adaptyPlugin.handleMethodCall(
       methodKey,
@@ -106,6 +79,7 @@ export class PaywallViewController {
       log,
     )) as AdaptyUiView;
     controller.id = result.id;
+    controller.viewEmitter = new PaywallViewEmitter(controller.id);
 
     await controller.setEventHandlers(DEFAULT_EVENT_HANDLERS);
 
@@ -214,6 +188,7 @@ export class PaywallViewController {
     };
 
     await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
+    this.clearEventHandlers();
   }
 
   /**
@@ -297,6 +272,7 @@ export class PaywallViewController {
    * - `onCloseButtonPress` - closes the paywall
    * - `onAndroidSystemBack` - closes the paywall (Android only)
    * - `onRestoreCompleted` - closes the paywall after successful restore
+   * - `onRenderingFailed` - closes the paywall when rendering fails
    * - `onPurchaseCompleted` - closes the paywall after successful purchase
    *
    * If you want to override these listeners, we strongly recommend returning `true`

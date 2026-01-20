@@ -1,4 +1,11 @@
-import type { AdaptyPaywallProduct, AdaptyProfile, AdaptyPurchaseResult } from '../shared/types';
+import type {
+  AdaptyPaywallProduct,
+  AdaptyProductIdentifier,
+  AdaptyProfile,
+  AdaptyPurchaseResult,
+  WebPresentation,
+} from '../shared/types';
+import type { FileLocation, MakePurchaseParamsInput } from '../shared/types/inputs';
 import type { AdaptyError } from '../shared/types/method-types';
 
 /**
@@ -13,6 +20,40 @@ export type ArgType<T> = T extends () => any ? void : T extends (arg: infer U) =
  * We don't want to block the UI thread.
  */
 export type EventHandlerResult = boolean | void;
+
+/**
+ * Purchase parameters keyed by AdaptyProductIdentifier objects
+ */
+export type ProductPurchaseParams = {
+  productId: AdaptyProductIdentifier;
+  params: MakePurchaseParamsInput;
+}[];
+
+export type AdaptyCustomAsset =
+  | AdaptyCustomImageAsset
+  | AdaptyCustomVideoAsset
+  | AdaptyCustomColorAsset
+  | AdaptyCustomGradientAsset;
+
+export type AdaptyCustomImageAsset =
+  | { type: 'image'; base64: string }
+  | { type: 'image'; relativeAssetPath: string } // shorthand: uses same path for both iOS fileName and Android relativeAssetPath
+  | { type: 'image'; fileLocation: FileLocation }; // full control for platform-specific paths
+
+export type AdaptyCustomVideoAsset =
+  | { type: 'video'; relativeAssetPath: string } // shorthand: uses same path for both iOS fileName and Android relativeAssetPath
+  | { type: 'video'; fileLocation: FileLocation }; // full control for platform-specific paths
+
+export type AdaptyCustomColorAsset =
+  | { type: 'color'; argb: number /* e.g. 0xFFFF0000 (opaque red) */ }
+  | { type: 'color'; rgb: number /* e.g. 0xFF0000 (red) */ }
+  | { type: 'color'; rgba: number /* e.g. 0xFF0000FF (opaque red) */ };
+
+export type AdaptyCustomGradientAsset = {
+  type: 'linear-gradient';
+  values: ({ p: number; argb: number } | { p: number; rgb: number } | { p: number; rgba: number })[];
+  points?: { x0?: number; y0?: number; x1?: number; y1?: number };
+};
 
 export type AdaptyUiOnboardingMeta = {
   onboardingId: string;
@@ -129,20 +170,20 @@ export interface EventHandlers {
    * If you return `true`, the paywall view will be closed.
    * @default false
    */
-  onPaywallShown: () => EventHandlerResult;
+  onAppeared: () => EventHandlerResult;
   /**
    * Called when the paywall view disappears
    *
    * If you return `true`, the paywall view will be closed.
    * @default false
    */
-  onPaywallClosed: () => EventHandlerResult;
+  onDisappeared: () => EventHandlerResult;
   /**
    * Called if a paywall view fails to render.
    * This should not ever happen, but if it does, feel free to report it to us.
    *
    * If you return `true` from this callback, the paywall view will be closed.
-   * @default false
+   * @default true
    *
    * @param error - AdaptyError object with error code and message
    */
@@ -186,9 +227,9 @@ export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
   onRestoreStarted: () => false,
   onRestoreCompleted: () => true,
   onRestoreFailed: () => false,
-  onPaywallShown: () => false,
-  onPaywallClosed: () => false,
-  onRenderingFailed: () => false,
+  onAppeared: () => false,
+  onDisappeared: () => false,
+  onRenderingFailed: () => true,
   onLoadingProductsFailed: () => false,
   onWebPaymentNavigationFinished: () => false,
 };
@@ -285,8 +326,28 @@ export interface CreatePaywallViewParamsInput {
    * If you are going to use custom timer functionality, pass an object with timer ids and corresponding dates the timers should end at
    */
   customTimers?: Record<string, Date>;
+  /**
+   * Use this when you need to override paywall assets with your own
+   */
+  customAssets?: Record<string, AdaptyCustomAsset>;
+  /**
+   * Provide per-product purchase parameters keyed by Adapty product identifier
+   */
+  productPurchaseParams?: ProductPurchaseParams;
+}
 
-  // customAssets?: Record<string, AdaptyCustomAsset>; // TODO: implement custom assets
+/**
+ * Additional options for creating an onboarding view
+ *
+ * @see {@link https://adapty.io/docs/capacitor-get-onboardings | [DOC] Creating Onboarding View}
+ */
+export interface CreateOnboardingViewParamsInput {
+  /**
+   * If you want to change the presentation behavior of external URLs, pass a preferred value.
+   *
+   * @default {@link WebPresentation.BrowserInApp}
+   */
+  externalUrlsPresentation?: WebPresentation;
 }
 
 export interface OnboardingEventHandlers {
@@ -298,7 +359,11 @@ export interface OnboardingEventHandlers {
   onAnalytics: (
     event: {
       name: string;
+      /**
+       * @deprecated Use `elementId` instead
+       */
       element_id?: string;
+      elementId?: string;
       reply?: string;
     },
     meta: AdaptyUiOnboardingMeta,

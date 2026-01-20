@@ -1,55 +1,48 @@
-import { parseOnboardingEvent } from '../shared/coders/parse';
+import { parseOnboardingEvent } from '../shared/coders/parse-onboarding';
 import type { LogContext } from '../shared/logger';
-import type { AdaptyError } from '../shared/types/method-types';
+import { OnboardingEventId } from '../shared/types/onboarding-events';
+import type { OnboardingEventIdType, ParsedOnboardingEvent } from '../shared/types/onboarding-events';
 
-import { BaseViewEmitter, type BaseEventConfig } from './base-view-emitter';
-import type { AdaptyUiOnboardingMeta, OnboardingEventHandlers, OnboardingStateUpdatedAction } from './types';
+import { BaseViewEmitter } from './base-view-emitter';
+import type { OnboardingEventHandlers } from './types';
 
 type EventName = keyof OnboardingEventHandlers;
-
-interface OnboardingEventData {
-  id?: string;
-  meta?: AdaptyUiOnboardingMeta;
-  event?: {
-    name: string;
-    element_id?: string;
-    reply?: string;
-  };
-  action?: OnboardingStateUpdatedAction;
-  error?: AdaptyError;
-  view?: {
-    id: string;
-  };
-}
+type OnboardingNativeEvent = OnboardingEventIdType;
 
 /**
  * OnboardingViewEmitter manages event handlers for onboarding view events.
  * Each event type can have only one handler - new handlers replace existing ones.
  */
-export class OnboardingViewEmitter extends BaseViewEmitter<OnboardingEventHandlers, OnboardingEventData> {
-  protected getEventConfig(event: keyof OnboardingEventHandlers): BaseEventConfig | undefined {
-    return HANDLER_TO_EVENT_CONFIG[event as EventName];
+export class OnboardingViewEmitter extends BaseViewEmitter<
+  OnboardingEventHandlers,
+  ParsedOnboardingEvent,
+  OnboardingNativeEvent
+> {
+  protected parseEventData(rawEventData: string, ctx: LogContext): ParsedOnboardingEvent {
+    const result = parseOnboardingEvent(rawEventData, ctx);
+    if (!result) {
+      throw new Error('Failed to parse onboarding event');
+    }
+    return result;
   }
 
-  protected parseEventData(rawEventData: string, ctx: LogContext): OnboardingEventData {
-    return parseOnboardingEvent(rawEventData, ctx) as OnboardingEventData;
+  protected getNativeEventForHandler(event: keyof OnboardingEventHandlers): OnboardingNativeEvent | null {
+    return HANDLER_TO_NATIVE_EVENT[event as EventName];
   }
 
-  protected getPossibleHandlers(nativeEvent: string): (keyof OnboardingEventHandlers)[] {
-    return NATIVE_EVENT_TO_HANDLERS[nativeEvent] || [];
+  protected getHandlerForNativeEvent(nativeEvent: OnboardingNativeEvent): keyof OnboardingEventHandlers | null {
+    return NATIVE_EVENT_RESOLVER[nativeEvent] ?? null;
   }
 
-  protected extractCallbackArgs(handlerName: keyof OnboardingEventHandlers, eventData: OnboardingEventData): unknown[] {
+  protected extractCallbackArgs(
+    handlerName: keyof OnboardingEventHandlers,
+    eventData: ParsedOnboardingEvent,
+  ): unknown[] {
     return extractCallbackArgs(handlerName as EventName, eventData);
   }
 
-  protected getEventViewId(eventData: OnboardingEventData): string | null {
+  protected getEventViewId(eventData: ParsedOnboardingEvent): string | null {
     return eventData?.view?.id ?? null;
-  }
-
-  protected shouldCallHandler(): boolean {
-    // Onboarding events don't use propertyMap filtering
-    return true;
   }
 
   protected getEmitterName(): string {
@@ -57,79 +50,55 @@ export class OnboardingViewEmitter extends BaseViewEmitter<OnboardingEventHandle
   }
 }
 
-type UiEventMapping = {
-  [nativeEventId: string]: {
-    handlerName: keyof OnboardingEventHandlers;
-  }[];
+const HANDLER_TO_NATIVE_EVENT: Record<EventName, OnboardingNativeEvent> = {
+  onError: 'onboarding_did_fail_with_error',
+  onAnalytics: 'onboarding_on_analytics_action',
+  onFinishedLoading: 'onboarding_did_finish_loading',
+  onClose: 'onboarding_on_close_action',
+  onCustom: 'onboarding_on_custom_action',
+  onPaywall: 'onboarding_on_paywall_action',
+  onStateUpdated: 'onboarding_on_state_updated_action',
 };
 
-const ONBOARDING_EVENT_MAPPINGS: UiEventMapping = {
-  onboarding_did_fail_with_error: [{ handlerName: 'onError' }],
-  onboarding_on_analytics_action: [{ handlerName: 'onAnalytics' }],
-  onboarding_did_finish_loading: [{ handlerName: 'onFinishedLoading' }],
-  onboarding_on_close_action: [{ handlerName: 'onClose' }],
-  onboarding_on_custom_action: [{ handlerName: 'onCustom' }],
-  onboarding_on_paywall_action: [{ handlerName: 'onPaywall' }],
-  onboarding_on_state_updated_action: [{ handlerName: 'onStateUpdated' }],
+const NATIVE_EVENT_RESOLVER: Record<OnboardingNativeEvent, EventName> = {
+  onboarding_did_fail_with_error: 'onError',
+  onboarding_on_analytics_action: 'onAnalytics',
+  onboarding_did_finish_loading: 'onFinishedLoading',
+  onboarding_on_close_action: 'onClose',
+  onboarding_on_custom_action: 'onCustom',
+  onboarding_on_paywall_action: 'onPaywall',
+  onboarding_on_state_updated_action: 'onStateUpdated',
 };
 
-const HANDLER_TO_EVENT_CONFIG: Record<
-  keyof OnboardingEventHandlers,
-  {
-    nativeEvent: string;
-    handlerName: keyof OnboardingEventHandlers;
-  }
-> = Object.entries(ONBOARDING_EVENT_MAPPINGS).reduce(
-  (acc, [nativeEvent, mappings]) => {
-    mappings.forEach(({ handlerName }) => {
-      acc[handlerName] = {
-        nativeEvent,
-        handlerName,
-      };
-    });
-    return acc;
-  },
-  {} as Record<
-    keyof OnboardingEventHandlers,
-    {
-      nativeEvent: string;
-      handlerName: keyof OnboardingEventHandlers;
-    }
-  >,
-);
+type ExtractedArgs<T extends keyof OnboardingEventHandlers> = Parameters<OnboardingEventHandlers[T]>;
 
-// Reverse mapping: nativeEvent -> EventName[]
-const NATIVE_EVENT_TO_HANDLERS: Record<string, EventName[]> = Object.entries(HANDLER_TO_EVENT_CONFIG).reduce(
-  (acc, [handlerName, config]) => {
-    if (!acc[config.nativeEvent]) {
-      acc[config.nativeEvent] = [];
-    }
-    acc[config.nativeEvent].push(handlerName as EventName);
-    return acc;
-  },
-  {} as Record<string, EventName[]>,
-);
+function extractCallbackArgs<T extends keyof OnboardingEventHandlers>(
+  _handlerName: T,
+  event: ParsedOnboardingEvent,
+): ExtractedArgs<T> {
+  switch (event.id) {
+    case OnboardingEventId.Close:
+    case OnboardingEventId.Custom:
+    case OnboardingEventId.Paywall:
+      return [event.actionId, event.meta] as ExtractedArgs<T>;
 
-function extractCallbackArgs(handlerName: keyof OnboardingEventHandlers, eventArg: OnboardingEventData): unknown[] {
-  const actionId = eventArg.id || '';
-  const meta = eventArg.meta;
-  const event = eventArg.event;
-  const action = eventArg.action;
+    case OnboardingEventId.StateUpdated:
+      return [event.action, event.meta] as ExtractedArgs<T>;
 
-  switch (handlerName) {
-    case 'onClose':
-    case 'onCustom':
-    case 'onPaywall':
-      return [actionId, meta];
-    case 'onStateUpdated':
-      return [action, meta];
-    case 'onFinishedLoading':
-      return [meta];
-    case 'onAnalytics':
-      return [event, meta];
-    case 'onError':
-      return [eventArg.error];
-    default:
-      return [];
+    case OnboardingEventId.FinishedLoading:
+      return [event.meta] as ExtractedArgs<T>;
+
+    case OnboardingEventId.Analytics:
+      return [
+        {
+          ...event.event,
+          // Add backward compatibility: populate element_id from elementId
+          element_id: event.event.elementId,
+        },
+        event.meta,
+      ] as ExtractedArgs<T>;
+
+    case OnboardingEventId.Error:
+      return [event.error] as ExtractedArgs<T>;
   }
 }

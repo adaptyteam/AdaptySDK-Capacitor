@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
-import { Capacitor } from '@capacitor/core';
+import React, { useRef, useState } from 'react';
 import {
   adapty,
   AdaptyPaywall,
   AdaptyPaywallProduct,
   AdaptyOnboarding,
-  createPaywallView,
-  createOnboardingView,
   FileLocation,
   RefundPreference,
+  WebPresentation,
   ErrorCodeName,
   AdaptyError,
 } from '@adapty/capacitor';
@@ -17,6 +15,18 @@ import { useAppContext } from '../../contexts/AppContext';
 import { useLogs } from '../../contexts/LogsContext';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import styles from './App.module.css';
+import { OnboardingController, OnboardingControllerRef } from './native-presentation-controllers/OnboardingController';
+import { PaywallController, PaywallControllerRef } from './native-presentation-controllers/PaywallController';
+import { PaywallSection } from './sections/PaywallSection';
+import { OnboardingSection } from './sections/OnboardingSection';
+import { ResultBanner } from './components/ResultBanner';
+import { CredentialsInfoSection } from './sections/CredentialsInfoSection';
+import { ProfileSection } from './sections/ProfileSection';
+import { SdkStatusSection } from './sections/SdkStatusSection';
+import { OtherActionsSection } from './sections/OtherActionsSection';
+import { RefundSection } from './sections/RefundSection';
+import { IntegrationSection } from './sections/IntegrationSection';
+import { ReportTransactionSection } from './sections/ReportTransactionSection';
 
 const App: React.FC = () => {
   // Get context state and actions
@@ -87,9 +97,16 @@ const App: React.FC = () => {
   const [isLoadingPaywall, setIsLoadingPaywall] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
 
+  const paywallRef = useRef<PaywallControllerRef>(null);
+  const onboardingRef = useRef<OnboardingControllerRef>(null);
+
   const refundPreferences = [RefundPreference.NoPreference, RefundPreference.Grant, RefundPreference.Decline];
 
   const refundPreferenceLabels = ['No Preference', 'Grant', 'Decline'];
+
+  const webPresentations = [WebPresentation.BrowserInApp, WebPresentation.BrowserOutApp] as const;
+  const [webPaywallOpenInIdx, setWebPaywallOpenInIdx] = useState(0);
+  const [onboardingExternalUrlsPresentationIdx, setOnboardingExternalUrlsPresentationIdx] = useState(0);
 
   const fetchPolicies = [
     'reload_revalidating_cache_data',
@@ -111,6 +128,17 @@ const App: React.FC = () => {
           logLevel: 'verbose',
           observerMode: false,
           __ignoreActivationOnFastRefresh: import.meta.env.DEV,
+          // android: {
+          //   adIdCollectionDisabled: true,
+          //   pendingPrepaidPlansEnabled: false,
+          //   localAccessLevelAllowed: false,
+          //   obfuscatedAccountId: 'testObfAccId',
+          // },
+          // ios: {
+          //   idfaCollectionDisabled: true,
+          //   appAccountToken: '550e8400-e29b-41d4-a716-446655440000',
+          //   clearDataOnBackup: true,
+          // },
         },
       });
       const customerIdMessage = trimmedCustomerUserId ? ` customer user id: ${trimmedCustomerUserId}` : '';
@@ -201,9 +229,6 @@ const App: React.FC = () => {
         forDefaultAudience,
       });
       setPaywall(paywall);
-
-      // Log show paywall
-      await adapty.logShowPaywall({ paywall });
 
       // Fetch products
       const productsResult = await adapty.getPaywallProducts({ paywall });
@@ -329,6 +354,22 @@ const App: React.FC = () => {
     }
   };
 
+  const logPaywallShown = async () => {
+    if (!paywall) {
+      setResult('Error: Paywall not loaded. Please load paywall first.');
+      return;
+    }
+
+    try {
+      log('info', 'Logging custom paywall shown', 'logShowPaywall', true, { paywallId: paywall.name });
+      await adapty.logShowPaywall({ paywall });
+      setResult('Paywall shown event logged');
+    } catch (error) {
+      log('error', 'Error logging paywall shown', 'logShowPaywall', false, { error: String(error) });
+      setResult(`Error logging paywall shown: ${error}`);
+    }
+  };
+
   const openWebPaywall = async () => {
     if (!paywall) {
       setResult('Error: Paywall not loaded. Please load paywall first.');
@@ -336,8 +377,9 @@ const App: React.FC = () => {
     }
 
     try {
-      log('info', 'Opening web paywall', 'openWebPaywall');
-      await adapty.openWebPaywall({ paywallOrProduct: paywall });
+      const openIn = webPresentations[webPaywallOpenInIdx];
+      log('info', 'Opening web paywall', 'openWebPaywall', false, { openIn });
+      await adapty.openWebPaywall({ paywallOrProduct: paywall, openIn });
       setResult('Web paywall opened successfully');
     } catch (error) {
       log('error', 'Error opening web paywall', 'openWebPaywall', false, { error: String(error) });
@@ -368,8 +410,12 @@ const App: React.FC = () => {
 
   const openWebPaywallForProduct = async (product: AdaptyPaywallProduct) => {
     try {
-      log('info', 'Opening web paywall for product', 'openWebPaywall', false, { productId: product.vendorProductId });
-      await adapty.openWebPaywall({ paywallOrProduct: product });
+      const openIn = webPresentations[webPaywallOpenInIdx];
+      log('info', 'Opening web paywall for product', 'openWebPaywall', false, {
+        productId: product.vendorProductId,
+        openIn,
+      });
+      await adapty.openWebPaywall({ paywallOrProduct: product, openIn });
       setResult(`Web paywall opened for: ${product.vendorProductId}`);
     } catch (error) {
       log('error', 'Error opening web paywall for product', 'openWebPaywall', false, {
@@ -459,151 +505,8 @@ const App: React.FC = () => {
     }
   };
 
-  const formatDate = (date?: Date | string): string => {
-    if (!date) return '-';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
-  };
-
-  const getAccessLevel = () => {
-    return profile?.accessLevels?.['premium'];
-  };
-
   const presentPaywall = async () => {
-    if (!paywall) {
-      setResult('❌ No paywall loaded. Please load paywall first.');
-      return;
-    }
-
-    if (!paywall.hasViewConfiguration) {
-      setResult('❌ Paywall does not have view configuration (no Paywall Builder).');
-      return;
-    }
-
-    try {
-      setResult('Creating paywall view...');
-
-      let customTags: Record<string, string>;
-      try {
-        customTags = JSON.parse(customTagsJson);
-      } catch (error) {
-        customTags = {};
-        log('warn', 'Invalid custom tags JSON, using empty object', 'presentPaywall', false, {
-          error: String(error),
-          customTagsText: customTags,
-        });
-      }
-
-      const view = await createPaywallView(paywall, {
-        customTags,
-      });
-
-      // Save view to context for reuse
-      setPaywallView(view);
-
-      // Register event handlers for paywall view
-      await view.setEventHandlers({
-        onCloseButtonPress: () => {
-          log('info', 'User pressed close button', 'paywall.onCloseButtonPress');
-          setResult('❌ User closed paywall');
-          return true; // Allow the paywall to close
-        },
-        onAndroidSystemBack: () => {
-          log('info', 'User pressed system back button', 'paywall.onAndroidSystemBack');
-          setResult('⬅️ User pressed back button');
-          return true; // Allow the paywall to close
-        },
-        // onUrlPress: (url: string) => {
-        //   log('info', 'User pressed URL', 'paywall.onUrlPress', false, { url });
-        //   setResult(`🔗 User opened URL: ${url}`);
-        //   // Open URL in browser
-        //   if (typeof window !== 'undefined') {
-        //     window.open(url, '_blank');
-        //   }
-        //   return false; // Don't close the paywall
-        // },
-        onCustomAction: (action: any) => {
-          log('info', 'User performed custom action', 'paywall.onCustomAction', false, { action });
-          setResult(`⚡ Custom action: ${JSON.stringify(action)}`);
-          return false; // Don't close the paywall
-        },
-        onProductSelected: (productId: string) => {
-          log('info', 'User selected product', 'paywall.onProductSelected', false, { productId });
-          setResult(`📦 Product selected: ${productId}`);
-          return false; // Don't close the paywall
-        },
-        onPurchaseStarted: (product: any) => {
-          log('info', 'Purchase started for product', 'paywall.onPurchaseStarted', false, { product });
-          setResult(`🛒 Purchase started: ${product?.vendorProductId || 'unknown'}`);
-          return false; // Don't close the paywall
-        },
-        onPurchaseCompleted: (purchaseResult: any, product: any) => {
-          log('info', 'Purchase completed', 'paywall.onPurchaseCompleted', false, { purchaseResult, product });
-          setResult(`✅ Purchase completed: ${purchaseResult?.type || 'unknown'}`);
-          return purchaseResult?.type !== 'user_cancelled'; // Close if not cancelled
-        },
-        onPurchaseFailed: (error: any, product: any) => {
-          log('error', 'Purchase failed', 'paywall.onPurchaseFailed', false, { error, product });
-          setResult(`❌ Purchase failed: ${error?.message || 'unknown error'}`);
-          return false; // Don't close the paywall
-        },
-        onRestoreStarted: () => {
-          log('info', 'Restore started', 'paywall.onRestoreStarted');
-          setResult('🔄 Restore started...');
-          return false; // Don't close the paywall
-        },
-        onRestoreCompleted: (profile: any) => {
-          log('info', 'Restore completed', 'paywall.onRestoreCompleted', false, { profile });
-          setResult('✅ Restore completed successfully');
-          return true; // Close the paywall after successful restore
-        },
-        onRestoreFailed: (error: any) => {
-          log('error', 'Restore failed', 'paywall.onRestoreFailed', false, { error });
-          setResult(`❌ Restore failed: ${error?.message || 'unknown error'}`);
-          return false; // Don't close the paywall
-        },
-        onPaywallShown: () => {
-          log('info', 'Paywall shown', 'paywall.onPaywallShown');
-          setResult('👁️ Paywall appeared');
-          return false; // Don't close the paywall
-        },
-        onPaywallClosed: () => {
-          log('info', 'Paywall closed', 'paywall.onPaywallClosed');
-          setResult('👋 Paywall disappeared');
-          return false; // Already closed
-        },
-        onRenderingFailed: (error: any) => {
-          log('error', 'Rendering failed', 'paywall.onRenderingFailed', false, { error });
-          setResult(`💥 Rendering failed: ${error?.message || 'unknown error'}`);
-          return false; // Don't close the paywall
-        },
-        onLoadingProductsFailed: (error: any) => {
-          log('error', 'Loading products failed', 'paywall.onLoadingProductsFailed', false, { error });
-          setResult(`📦❌ Products loading failed: ${error?.message || 'unknown error'}`);
-          return false; // Don't close the paywall
-        },
-        onWebPaymentNavigationFinished: (product: any, error: any) => {
-          log('info', 'Web payment navigation finished', 'paywall.onWebPaymentNavigationFinished', false, {
-            product,
-            error,
-          });
-          setResult(`🌐 Web payment finished: ${error ? 'with error' : 'success'}`);
-          return false; // Don't close the paywall
-        },
-      });
-
-      setResult('✅ Paywall view created. Presenting...');
-
-      // You can customize iOS presentation style:
-      // await view.present({ iosPresentationStyle: 'page_sheet' }); // or 'full_screen'
-      await view.present();
-
-      // setTimeout(() => view.dismiss(),5000)
-      setResult('✅ Paywall presented successfully!');
-    } catch (error: any) {
-      log('error', 'Failed to present paywall', 'presentPaywall', false, { error: error.message || error.toString() });
-      setResult(`❌ Failed to present paywall: ${error.message}`);
-    }
+    await paywallRef.current?.presentPaywall();
   };
 
   const presentExistingPaywall = async () => {
@@ -625,67 +528,7 @@ const App: React.FC = () => {
   };
 
   const presentOnboarding = async () => {
-    if (!onboarding) {
-      setResult('❌ No onboarding loaded. Please load onboarding first.');
-      return;
-    }
-
-    if (!onboarding.hasViewConfiguration) {
-      setResult('❌ Onboarding does not have view configuration (no Onboarding Builder).');
-      return;
-    }
-
-    try {
-      setResult('Creating onboarding view...');
-
-      const view = await createOnboardingView(onboarding);
-
-      await view.setEventHandlers({
-        onClose: (actionId, meta) => {
-          log('info', 'Onboarding closed', 'onboarding.onClose', false, { actionId, meta });
-          setResult('👋 Onboarding closed');
-          return true;
-        },
-        onFinishedLoading: (meta) => {
-          log('info', 'Onboarding finished loading', 'onboarding.onFinishedLoading', false, { meta });
-          return false;
-        },
-        onCustom: (actionId, meta) => {
-          log('info', 'Onboarding custom action', 'onboarding.onCustom', false, { actionId, meta });
-          return false;
-        },
-        onPaywall: (actionId, meta) => {
-          log('info', 'Onboarding paywall action', 'onboarding.onPaywall', false, { actionId, meta });
-          return false;
-        },
-        onAnalytics: (event, meta) => {
-          log('info', 'Onboarding analytics', 'onboarding.onAnalytics', false, { event, meta });
-          return false;
-        },
-        onStateUpdated: (action, meta) => {
-          log('info', 'Onboarding state updated', 'onboarding.onStateUpdated', false, { action, meta });
-          return false;
-        },
-        onError: (error) => {
-          log('error', 'Onboarding error', 'onboarding.onError', false, { error });
-          setResult(`❌ Onboarding error: ${error?.message || 'unknown error'}`);
-          return false;
-        },
-      });
-
-      setResult('✅ Onboarding view created. Presenting...');
-
-      // You can customize iOS presentation style:
-      // await view.present({ iosPresentationStyle: 'page_sheet' }); // or 'full_screen' (default)
-      await view.present();
-
-      setResult('✅ Onboarding presented successfully!');
-    } catch (error: any) {
-      log('error', 'Failed to present onboarding', 'presentOnboarding', false, {
-        error: error?.message || error?.toString(),
-      });
-      setResult(`❌ Failed to present onboarding: ${error?.message || error}`);
-    }
+    await onboardingRef.current?.presentOnboarding();
   };
 
   const renderIdentifySection = () => {
@@ -712,490 +555,79 @@ const App: React.FC = () => {
     );
   };
 
-  const renderIntegrationSection = () => {
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Integration Identifiers</h3>
-        <div className={styles.InputGroup}>
-          <input
-            type="text"
-            value={integrationIdKey}
-            onChange={(e) => setIntegrationIdKey(e.target.value)}
-            placeholder="Integration Key (e.g., one_signal_subscription_id)"
-            className={styles.Input}
-          />
-          <input
-            type="text"
-            value={integrationIdValue}
-            onChange={(e) => setIntegrationIdValue(e.target.value)}
-            placeholder="Integration Value"
-            className={styles.Input}
-          />
-          <button
-            onClick={setIntegrationId}
-            disabled={!isActivated || !integrationIdKey.trim() || !integrationIdValue.trim()}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Set Integration ID
-          </button>
-        </div>
-      </div>
-    );
-  };
+  const renderRefundDataSection = () => (
+    <RefundSection
+      isActivated={isActivated}
+      refundPreferenceIdx={refundPreferenceIdx}
+      refundPreferences={refundPreferences}
+      refundPreferenceLabels={refundPreferenceLabels}
+      collectingRefundDataConsent={collectingRefundDataConsent}
+      setRefundPreferenceIdx={setRefundPreferenceIdx}
+      setCollectingRefundDataConsent={setCollectingRefundDataConsent}
+      updateRefundPreference={updateRefundPreference}
+      updateRefundDataConsent={updateRefundDataConsent}
+    />
+  );
 
-  const renderRefundDataSection = () => {
-    const platform = Capacitor.getPlatform();
-    const isIOS = platform === 'ios';
+  const renderPaywallSection = () => (
+    <PaywallSection
+      isActivated={isActivated}
+      isLoadingPaywall={isLoadingPaywall}
+      paywall={paywall}
+      products={products}
+      placementId={placementId}
+      locale={locale}
+      timeout={timeout}
+      maxAge={maxAge}
+      customTagsJson={customTagsJson}
+      fetchPolicyIndex={fetchPolicyIndex}
+      fetchPolicies={fetchPolicies}
+      webPaywallOpenInIdx={webPaywallOpenInIdx}
+      webPresentations={webPresentations}
+      paywallView={paywallView}
+      webPaywallUrl={webPaywallUrl}
+      setPlacementId={setPlacementId}
+      setLocale={setLocale}
+      setLoadTimeout={setLoadTimeout}
+      setMaxAge={setMaxAge}
+      setCustomTagsJson={setCustomTagsJson}
+      setFetchPolicyIndex={setFetchPolicyIndex}
+      setWebPaywallOpenInIdx={setWebPaywallOpenInIdx}
+      fetchPaywall={fetchPaywall}
+      presentPaywall={presentPaywall}
+      presentExistingPaywall={presentExistingPaywall}
+      logPaywallShown={logPaywallShown}
+      openWebPaywall={openWebPaywall}
+      createWebPaywallUrl={createWebPaywallUrl}
+      makePurchase={makePurchase}
+      openWebPaywallForProduct={openWebPaywallForProduct}
+      createWebPaywallUrlForProduct={createWebPaywallUrlForProduct}
+    />
+  );
 
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Refund Saver (iOS only)</h3>
-        {!isIOS && (
-          <div className={styles.InfoBox} style={{ marginBottom: '10px' }}>
-            <div className={styles.InfoBoxItem}>
-              <strong>⚠️ Not available on {platform}</strong>
-            </div>
-          </div>
-        )}
-
-        {/* Refund Preference */}
-        {isIOS && (
-          <div className={styles.RefundItem}>
-            <label>Refund Preference:</label>
-            <div
-              className={styles.ClickableParam}
-              onClick={() => {
-                if (isIOS) {
-                  setRefundPreferenceIdx((refundPreferenceIdx + 1) % refundPreferences.length);
-                }
-              }}
-            >
-              <span>{refundPreferenceLabels[refundPreferenceIdx]}</span>
-              <span className={styles.ParamValue}>{refundPreferences[refundPreferenceIdx]}</span>
-            </div>
-            <button
-              onClick={updateRefundPreference}
-              disabled={!isActivated || !isIOS}
-              className={`${styles.Button} ${styles.ButtonSecondary} ${styles.RefundButton}`}
-            >
-              Update Refund Preference
-            </button>
-          </div>
-        )}
-
-        {/* Collecting Refund Data Consent */}
-        {isIOS && (
-          <div className={styles.RefundItem}>
-            <label>Collecting Refund Data Consent:</label>
-            <div
-              className={styles.ClickableParam}
-              onClick={() => {
-                if (isIOS) {
-                  setCollectingRefundDataConsent(!collectingRefundDataConsent);
-                }
-              }}
-            >
-              <span>Consent</span>
-              <span className={styles.ParamValue}>{collectingRefundDataConsent.toString()}</span>
-            </div>
-            <button
-              onClick={updateRefundDataConsent}
-              disabled={!isActivated || !isIOS}
-              className={`${styles.Button} ${styles.ButtonSecondary} ${styles.RefundButton}`}
-            >
-              Update Collecting Refund Data Consent
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderProfileSection = () => {
-    const accessLevel = getAccessLevel();
-
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Profile Information</h3>
-        <div className={styles.InfoBox}>
-          <div className={styles.InfoBoxItem}>
-            <strong>Profile ID:</strong> {profile?.profileId || 'Not loaded'}
-          </div>
-          {accessLevel ? (
-            <div>
-              <div>
-                <strong>Premium:</strong> {accessLevel.isActive ? '✅ Active' : '❌ Not Active'}
-              </div>
-              <div>
-                <strong>Is Lifetime:</strong> {accessLevel.isLifetime ? '✅ Yes' : '❌ No'}
-              </div>
-              <div>
-                <strong>Activated At:</strong> {formatDate(accessLevel.activatedAt)}
-              </div>
-              <div>
-                <strong>Expires At:</strong> {formatDate(accessLevel.expiresAt)}
-              </div>
-              <div>
-                <strong>Will Renew:</strong> {accessLevel.willRenew ? '✅ Yes' : '❌ No'}
-              </div>
-            </div>
-          ) : (
-            <div>
-              <strong>Status:</strong> No active subscriptions
-            </div>
-          )}
-        </div>
-        <button
-          onClick={fetchProfile}
-          disabled={isLoadingProfile}
-          className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingProfile ? styles.Loading : ''}`}
-        >
-          {isLoadingProfile ? 'Loading...' : 'Refresh Profile'}
-        </button>
-      </div>
-    );
-  };
-
-  const renderPaywallSection = () => {
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Paywall Configuration</h3>
-
-        {/* Configuration inputs */}
-        <div className={styles.InputGroup}>
-          <input
-            type="text"
-            value={placementId}
-            onChange={(e) => setPlacementId(e.target.value)}
-            placeholder="Placement ID"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-          <input
-            type="text"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value.toLowerCase())}
-            placeholder="Request Locale (optional)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-        </div>
-
-        <div className={styles.InputGroup}>
-          <input
-            type="text"
-            value={timeout}
-            onChange={(e) => setLoadTimeout(e.target.value)}
-            placeholder="Timeout (ms)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-          <input
-            type="text"
-            value={maxAge}
-            onChange={(e) => setMaxAge(e.target.value)}
-            placeholder="Max age (seconds)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-        </div>
-
-        <div className={styles.InputGroup}>
-          <select
-            value={fetchPolicyIndex}
-            onChange={(e) => setFetchPolicyIndex(parseInt(e.target.value))}
-            className={styles.Input}
-            disabled={!isActivated}
-          >
-            {fetchPolicies.map((policy, index) => (
-              <option key={policy} value={index}>
-                {policy.replace(/_/g, ' ')}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className={styles.InputGroup}>
-          <textarea
-            value={customTagsJson}
-            onChange={(e) => setCustomTagsJson(e.target.value)}
-            placeholder="Custom tags (JSON)"
-            className={styles.Input}
-            rows={2}
-            disabled={!isActivated}
-          />
-        </div>
-
-        {/* Load buttons */}
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={() => fetchPaywall(false)}
-            disabled={isLoadingPaywall || !isActivated}
-            className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingPaywall || !isActivated ? styles.Loading : ''}`}
-          >
-            {isLoadingPaywall ? 'Loading...' : 'Load Paywall'}
-          </button>
-          <button
-            onClick={() => fetchPaywall(true)}
-            disabled={isLoadingPaywall || !isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingPaywall || !isActivated ? styles.Loading : ''}`}
-          >
-            {isLoadingPaywall ? 'Loading...' : 'Load (Default Audience)'}
-          </button>
-        </div>
-
-        {/* Paywall info */}
-        <div className={styles.InfoBox}>
-          {paywall ? (
-            <div>
-              <div>
-                <strong>Paywall ID:</strong> {paywall.name}
-              </div>
-              <div>
-                <strong>Variation ID:</strong> {paywall.variationId}
-              </div>
-              <div>
-                <strong>Revision:</strong> {paywall.placement.revision}
-              </div>
-              <div>
-                <strong>Has Remote Config:</strong> {paywall.remoteConfig ? '✅ Yes' : '❌ No'}
-              </div>
-              <div>
-                <strong>Has Paywall Builder:</strong> {paywall.paywallBuilder ? '✅ Yes' : '❌ No'}
-              </div>
-              <div>
-                <strong>Products Count:</strong> {products.length}
-              </div>
-              <div>
-                <strong>Request Locale:</strong> {paywall.requestLocale}
-              </div>
-              {paywall.remoteConfig && (
-                <div>
-                  <div>
-                    <strong>Config Locale:</strong> {paywall.remoteConfig.lang}
-                  </div>
-                  <div>
-                    <strong>Config Data:</strong> {paywall.remoteConfig.dataString}
-                  </div>
-                </div>
-              )}
-              {paywall.paywallBuilder && (
-                <div>
-                  <strong>Builder Locale:</strong> {paywall.paywallBuilder.lang}
-                </div>
-              )}
-
-              {products.length > 0 && (
-                <div className={styles.ProductsList}>
-                  <strong>Products:</strong>
-                  {products.map((product) => (
-                    <div key={product.vendorProductId} className={styles.ProductItem}>
-                      <div className={styles.ProductTitle}>{product.localizedTitle}</div>
-                      <div className={styles.ProductPrice}>Price: {product.price?.localizedString || 'N/A'}</div>
-                      <div className={styles.ProductId}>ID: {product.vendorProductId}</div>
-                      <div className={styles.ProductId}>Access Level: {product.accessLevelId || 'N/A'}</div>
-                      <div className={styles.ProductId}>Product Type: {product.productType || 'N/A'}</div>
-                      <div className={styles.ProductActionsComment}>Actions for this specific product:</div>
-
-                      <div className={styles.ProductButtons}>
-                        <button
-                          onClick={() => makePurchase(product)}
-                          className={`${styles.Button} ${styles.ButtonPrimary} ${styles.ButtonSmall}`}
-                        >
-                          Purchase
-                        </button>
-                        <button
-                          onClick={() => openWebPaywallForProduct(product)}
-                          className={`${styles.Button} ${styles.ButtonSecondary} ${styles.ButtonSmall}`}
-                        >
-                          Open Web Paywall for product (iOS)
-                        </button>
-                        <button
-                          onClick={() => createWebPaywallUrlForProduct(product)}
-                          className={`${styles.Button} ${styles.ButtonSecondary} ${styles.ButtonSmall}`}
-                        >
-                          Create Web URL (iOS)
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div>No paywall loaded</div>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={presentPaywall}
-            disabled={!paywall || !paywall.hasViewConfiguration}
-            className={`${styles.Button} ${styles.ButtonPrimary}`}
-          >
-            Present Paywall
-          </button>
-
-          <button
-            onClick={presentExistingPaywall}
-            disabled={!paywallView}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Present Existing (not supported)
-          </button>
-
-          <button onClick={openWebPaywall} disabled={!paywall} className={`${styles.Button} ${styles.ButtonSecondary}`}>
-            Open Web Paywall (iOS)
-          </button>
-        </div>
-
-        {/* Combined Create Web URL Button + Input */}
-        <div className={styles.WebUrlContainer}>
-          <button onClick={createWebPaywallUrl} disabled={!paywall} className={styles.WebUrlButton}>
-            Create Web URL (iOS)
-          </button>
-          <input
-            type="text"
-            value={webPaywallUrl}
-            placeholder="Generated URL will appear here..."
-            readOnly
-            className={`${styles.WebUrlInput} ${webPaywallUrl ? styles.WebUrlInputHasValue : ''}`}
-            onClick={(e) => webPaywallUrl && (e.target as HTMLInputElement).select()}
-            title={webPaywallUrl ? 'Click to select URL for copying' : 'No URL generated yet'}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const renderOnboardingSection = () => {
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Onboarding Configuration</h3>
-
-        <div className={styles.InputGroup}>
-          <input
-            type="text"
-            value={onboardingPlacementId}
-            onChange={(e) => setOnboardingPlacementId(e.target.value)}
-            placeholder="Onboarding Placement ID"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-          <input
-            type="text"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value.toLowerCase())}
-            placeholder="Request Locale (optional)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-        </div>
-
-        <div className={styles.InputGroup}>
-          <input
-            type="text"
-            value={timeout}
-            onChange={(e) => setLoadTimeout(e.target.value)}
-            placeholder="Timeout (ms)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-          <input
-            type="text"
-            value={maxAge}
-            onChange={(e) => setMaxAge(e.target.value)}
-            placeholder="Max age (seconds)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-        </div>
-
-        <div className={styles.InputGroup}>
-          <select
-            value={fetchPolicyIndex}
-            onChange={(e) => setFetchPolicyIndex(parseInt(e.target.value))}
-            className={styles.Input}
-            disabled={!isActivated}
-          >
-            {fetchPolicies.map((policy, index) => (
-              <option key={policy} value={index}>
-                {policy.replace(/_/g, ' ')}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Load buttons */}
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={() => fetchOnboarding(false)}
-            disabled={isLoadingOnboarding || !isActivated}
-            className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingOnboarding || !isActivated ? styles.Loading : ''}`}
-          >
-            {isLoadingOnboarding ? 'Loading...' : 'Load Onboarding'}
-          </button>
-          <button
-            onClick={() => fetchOnboarding(true)}
-            disabled={isLoadingOnboarding || !isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingOnboarding || !isActivated ? styles.Loading : ''}`}
-          >
-            {isLoadingOnboarding ? 'Loading...' : 'Load (Default Audience)'}
-          </button>
-        </div>
-
-        {/* Onboarding info */}
-        <div className={styles.InfoBox}>
-          {onboarding ? (
-            <div>
-              <div>
-                <strong>Onboarding Name:</strong> {onboarding.name}
-              </div>
-              <div>
-                <strong>Variation ID:</strong> {onboarding.variationId}
-              </div>
-              <div>
-                <strong>Revision:</strong> {onboarding.placement.revision}
-              </div>
-              <div>
-                <strong>Has Remote Config:</strong> {onboarding.remoteConfig ? '✅ Yes' : '❌ No'}
-              </div>
-              <div>
-                <strong>Has Onboarding Builder:</strong> {onboarding.onboardingBuilder ? '✅ Yes' : '❌ No'}
-              </div>
-              <div>
-                <strong>Request Locale:</strong> {onboarding.requestLocale}
-              </div>
-              {onboarding.remoteConfig && (
-                <div>
-                  <div>
-                    <strong>Config Locale:</strong> {onboarding.remoteConfig.lang}
-                  </div>
-                  <div>
-                    <strong>Config Data:</strong> {onboarding.remoteConfig.dataString}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div>No onboarding loaded</div>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={presentOnboarding}
-            disabled={!onboarding || !onboarding.hasViewConfiguration}
-            className={`${styles.Button} ${styles.ButtonPrimary}`}
-          >
-            Present Onboarding
-          </button>
-        </div>
-      </div>
-    );
-  };
+  const renderOnboardingSection = () => (
+    <OnboardingSection
+      isActivated={isActivated}
+      isLoadingOnboarding={isLoadingOnboarding}
+      onboarding={onboarding}
+      onboardingPlacementId={onboardingPlacementId}
+      locale={locale}
+      timeout={timeout}
+      maxAge={maxAge}
+      fetchPolicyIndex={fetchPolicyIndex}
+      fetchPolicies={fetchPolicies}
+      onboardingExternalUrlsPresentationIdx={onboardingExternalUrlsPresentationIdx}
+      webPresentations={webPresentations}
+      setOnboardingPlacementId={setOnboardingPlacementId}
+      setLocale={setLocale}
+      setLoadTimeout={setLoadTimeout}
+      setMaxAge={setMaxAge}
+      setFetchPolicyIndex={setFetchPolicyIndex}
+      setOnboardingExternalUrlsPresentationIdx={setOnboardingExternalUrlsPresentationIdx}
+      fetchOnboarding={fetchOnboarding}
+      presentOnboarding={presentOnboarding}
+    />
+  );
 
   const presentCodeRedemptionSheet = async () => {
     if (!isActivated) return;
@@ -1396,99 +828,18 @@ const App: React.FC = () => {
     }
   };
 
-  const renderReportTransactionSection = () => {
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Report Transaction</h3>
-        <div className={styles.InputGroup}>
-          <input
-            type="text"
-            value={transactionId}
-            onChange={(e) => setTransactionId(e.target.value)}
-            placeholder="Transaction ID (required)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-          <input
-            type="text"
-            value={variationId}
-            onChange={(e) => setVariationId(e.target.value)}
-            placeholder="Variation ID (optional)"
-            className={styles.Input}
-            disabled={!isActivated}
-          />
-          <button
-            onClick={reportTransaction}
-            disabled={!isActivated || !transactionId.trim()}
-            className={`${styles.Button} ${styles.ButtonPrimary}`}
-          >
-            Report Transaction
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderOtherActionsSection = () => {
-    return (
-      <div className={styles.Section}>
-        <h3 className={styles.SectionTitle}>Other Actions</h3>
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={restorePurchases}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonPrimary}`}
-          >
-            Restore Purchases
-          </button>
-          <button
-            onClick={updateAttribution}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Update Attribution
-          </button>
-        </div>
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={presentCodeRedemptionSheet}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Code Redemption (iOS)
-          </button>
-          <button
-            onClick={setLogLevel}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Set Log Level
-          </button>
-        </div>
-        <div className={styles.ButtonGroup}>
-          <button
-            onClick={testSetFallback}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Set Fallback Paywalls
-          </button>
-          <button
-            onClick={getCurrentInstallationStatus}
-            disabled={!isActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-          >
-            Get Installation Status
-          </button>
-        </div>
-        <div className={styles.ButtonGroup}>
-          <button onClick={logout} disabled={!isActivated} className={`${styles.Button} ${styles.ButtonDanger}`}>
-            Logout
-          </button>
-        </div>
-      </div>
-    );
-  };
+  const renderOtherActionsSection = () => (
+    <OtherActionsSection
+      isActivated={isActivated}
+      restorePurchases={restorePurchases}
+      updateAttribution={updateAttribution}
+      presentCodeRedemptionSheet={presentCodeRedemptionSheet}
+      setLogLevel={setLogLevel}
+      testSetFallback={testSetFallback}
+      getCurrentInstallationStatus={getCurrentInstallationStatus}
+      logout={logout}
+    />
+  );
 
   const reportTransaction = async () => {
     if (!isActivated || !transactionId.trim()) {
@@ -1535,25 +886,32 @@ const App: React.FC = () => {
 
   return (
     <div className={styles.AppContainer}>
+      <PaywallController
+        ref={paywallRef}
+        paywall={paywall}
+        customTagsJson={customTagsJson}
+        setPaywallView={setPaywallView}
+        setResult={setResult}
+        log={log}
+      />
+      <OnboardingController
+        ref={onboardingRef}
+        onboarding={onboarding}
+        externalUrlsPresentation={webPresentations[onboardingExternalUrlsPresentationIdx]}
+        canShowPaywall={() => Boolean(paywall?.hasViewConfiguration)}
+        showPaywall={presentPaywall}
+        setResult={setResult}
+        log={log}
+      />
       <main>
         <h1 className={styles.Title}>Adapty Capacitor Devtools</h1>
         <p className={styles.Description}>Devtools app for adapty plugin API.</p>
 
-        {/* Credentials Info */}
-        <div className={styles.Section}>
-          <h3 className={styles.SectionTitle}>Configuration from .adapty-credentials.json file</h3>
-          <div className={styles.InfoBox}>
-            <div className={styles.InfoBoxItem}>
-              <strong>API Key:</strong> {getApiKey() ? `${getApiKey().substring(0, 20)}...` : 'Not loaded'}
-            </div>
-            <div className={styles.InfoBoxItem}>
-              <strong>iOS Bundle ID:</strong> {getIosBundle()}
-            </div>
-            <div className={styles.InfoBoxItem}>
-              <strong>Android Application ID:</strong> {getAndroidApplicationId()}
-            </div>
-          </div>
-        </div>
+        <CredentialsInfoSection
+          apiKey={getApiKey()}
+          iosBundleId={getIosBundle()}
+          androidApplicationId={getAndroidApplicationId()}
+        />
 
         {renderIdentifySection()}
 
@@ -1575,14 +933,7 @@ const App: React.FC = () => {
           </button>
         </div>
 
-        {/* Result Display */}
-        {result && (
-          <div
-            className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}
-          >
-            {result}
-          </div>
-        )}
+        <ResultBanner result={result} />
 
         {/* Events Section */}
         {isActivated && (
@@ -1593,7 +944,9 @@ const App: React.FC = () => {
         )}
 
         {/* Profile Section */}
-        {isActivated && renderProfileSection()}
+        {isActivated && (
+          <ProfileSection profile={profile} isLoadingProfile={isLoadingProfile} fetchProfile={fetchProfile} />
+        )}
 
         {/* Paywall Section */}
         {isActivated && renderPaywallSection()}
@@ -1602,10 +955,28 @@ const App: React.FC = () => {
         {isActivated && renderOnboardingSection()}
 
         {/* Report Transaction Section */}
-        {isActivated && renderReportTransactionSection()}
+        {isActivated && (
+          <ReportTransactionSection
+            isActivated={isActivated}
+            transactionId={transactionId}
+            variationId={variationId}
+            setTransactionId={setTransactionId}
+            setVariationId={setVariationId}
+            reportTransaction={reportTransaction}
+          />
+        )}
 
         {/* Integration Section */}
-        {isActivated && renderIntegrationSection()}
+        {isActivated && (
+          <IntegrationSection
+            isActivated={isActivated}
+            integrationIdKey={integrationIdKey}
+            integrationIdValue={integrationIdValue}
+            setIntegrationIdKey={setIntegrationIdKey}
+            setIntegrationIdValue={setIntegrationIdValue}
+            setIntegrationId={setIntegrationId}
+          />
+        )}
 
         {/* Refund Data Section */}
         {isActivated && renderRefundDataSection()}
@@ -1613,16 +984,7 @@ const App: React.FC = () => {
         {/* Other Actions Section */}
         {isActivated && renderOtherActionsSection()}
 
-        {/* Configuration Info */}
-        <div className={styles.ConfigSection}>
-          <h3 className={styles.ConfigTitle}>SDK Status:</h3>
-          <ul className={styles.ConfigList}>
-            <li>Status: {isActivated ? '✅ Activated' : '❌ Not activated'}</li>
-            <li>Profile Loaded: {profile ? '✅ Yes' : '❌ No'}</li>
-            <li>Paywall Loaded: {paywall ? '✅ Yes' : '❌ No'}</li>
-            <li>Onboarding Loaded: {onboarding ? '✅ Yes' : '❌ No'}</li>
-          </ul>
-        </div>
+        <SdkStatusSection isActivated={isActivated} profile={profile} paywall={paywall} onboarding={onboarding} />
       </main>
     </div>
   );

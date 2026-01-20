@@ -32,6 +32,7 @@ export interface components {
       custom_tags?: components['defs']['AdaptyUI.CustomTagsValues'];
       custom_timers?: components['defs']['AdaptyUI.CustomTimersValues'];
       custom_assets?: components['defs']['AdaptyUI.CustomAssets'];
+      product_purchase_parameters?: components['defs']['AdaptyUI.ProductPurchaseParameters'];
       android_personalized_offers?: components['defs']['AdaptyUI.AndroidPersonalizedOffers'];
     };
 
@@ -78,6 +79,7 @@ export interface components {
     'AdaptyUICreateOnboardingView.Request': {
       method: 'adapty_ui_create_onboarding_view';
       onboarding: components['defs']['AdaptyOnboarding'];
+      external_urls_presentation?: components['defs']['AdaptyWebPresentation'];
     };
 
     'AdaptyUICreateOnboardingView.Response': OneOf<
@@ -242,15 +244,6 @@ export interface components {
       [{ error: components['defs']['AdaptyError'] }, { success: true }]
     >;
 
-    'LogShowOnboarding.Request': {
-      method: 'log_show_onboarding';
-      params: components['defs']['AdaptyOnboardingScreenParameters'];
-    };
-
-    'LogShowOnboarding.Response': OneOf<
-      [{ error: components['defs']['AdaptyError'] }, { success: true }]
-    >;
-
     'LogShowPaywall.Request': {
       method: 'log_show_paywall';
       paywall: components['defs']['AdaptyPaywall'];
@@ -278,10 +271,12 @@ export interface components {
         {
           method: 'open_web_paywall';
           product: components['defs']['AdaptyPaywallProduct.Request'];
+          open_in?: components['defs']['AdaptyWebPresentation'];
         },
         {
           method: 'open_web_paywall';
           paywall: components['defs']['AdaptyPaywall'];
+          open_in?: components['defs']['AdaptyWebPresentation'];
         },
       ]
     >;
@@ -608,12 +603,10 @@ export interface components {
       apple_idfa_collection_disabled?: boolean;
       google_adid_collection_disabled?: boolean;
       google_enable_pending_prepaid_plans?: boolean;
+      google_local_access_level_allowed?: boolean;
       ip_address_collection_disabled?: boolean;
+      clear_data_on_backup?: boolean;
       server_cluster?: 'default' | 'eu' | 'cn';
-      backend_base_url?: string;
-      backend_fallback_base_url?: string;
-      backend_configs_base_url?: string;
-      backend_ua_base_url?: string;
       backend_proxy_host?: string;
       backend_proxy_port?: number;
       log_level?: components['defs']['AdaptyLog.Level'];
@@ -689,12 +682,6 @@ export interface components {
       payment_mode: components['defs']['AdaptySubscriptionOffer.PaymentMode'];
       localized_subscription_period?: string;
       localized_number_of_periods?: string;
-    };
-
-    AdaptyOnboardingScreenParameters: {
-      onboarding_screen_order: number;
-      onboarding_name?: string;
-      onboarding_screen_name?: string;
     };
 
     AdaptyPlacement: {
@@ -901,7 +888,7 @@ export interface components {
         {
           type: 'success';
           profile: components['defs']['AdaptyProfile'];
-          jws_transaction?: string;
+          apple_jws_transaction?: string;
           google_purchase_token?: string;
         },
       ]
@@ -959,6 +946,10 @@ export interface components {
       [key: string]: components['defs']['Date'];
     };
 
+    'AdaptyUI.ProductPurchaseParameters': {
+      [key: string]: components['defs']['AdaptyPurchaseParameters'];
+    };
+
     'AdaptyUI.AndroidPersonalizedOffers': {
       [key: string]: boolean;
     };
@@ -973,6 +964,8 @@ export interface components {
     'AdaptyUI.DialogActionType': 'primary' | 'secondary';
 
     'AdaptyUI.IOSPresentationStyle': 'full_screen' | 'page_sheet';
+
+    AdaptyWebPresentation: 'browser_out_app' | 'browser_in_app';
 
     AdaptyPurchaseParameters: {
       subscription_update_params?: components['defs']['AdaptySubscriptionUpdateParameters'];

@@ -22,6 +22,7 @@ import type {
   AdaptyProfileParameters,
   RefundPreference,
   AdaptyInstallationStatus,
+  WebPresentation,
 } from './shared/types';
 import type { components } from './shared/types/api';
 import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './shared/types/inputs';
@@ -802,7 +803,10 @@ export class Adapty implements AdaptyPlugin {
    * }
    * ```
    */
-  async openWebPaywall(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<void> {
+  async openWebPaywall(options: {
+    paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
+    openIn?: WebPresentation;
+  }): Promise<void> {
     const method = 'open_web_paywall';
 
     const ctx = new LogContext();
@@ -817,6 +821,7 @@ export class Adapty implements AdaptyPlugin {
       ...(this.isPaywallProduct(options.paywallOrProduct)
         ? { product: this.encodeWithLogging(productCoder, options.paywallOrProduct, 'AdaptyPaywallProduct', ctx) }
         : { paywall: this.encodeWithLogging(paywallCoder, options.paywallOrProduct, 'AdaptyPaywall', ctx) }),
+      ...(options.openIn ? { open_in: options.openIn } : {}),
     };
 
     const args = filterUndefined(argsWithUndefined);

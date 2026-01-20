@@ -23,6 +23,8 @@ class AdaptyCapacitorImplementation {
                 this.eventCallback?.invoke(eventName, eventData ?: "")
             },
             { value -> FileLocation.extract(context, value) },
+            // Use the same activity to prevent android from stopping javascript execution in background webview
+            true
         )
 
         crossplatformHelper.setActivity {

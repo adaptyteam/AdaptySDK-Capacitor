@@ -24,8 +24,7 @@
     "ios": "yarn build && yarn cap run ios",
     "dev:ios": "yarn cap run ios --live-reload --no-sync --host 192.168.1.76 --port 5173",
     "dev:android": "yarn cap run android --live-reload --no-sync --host 192.168.1.76 --port 5173",
-    "link-assets": "ruby scripts/copy-adapty-assets.rb",
-    "capacitor:sync:before": "ruby scripts/copy-adapty-assets.rb"
+    "link-assets": "ruby scripts/copy-adapty-assets.rb"
   },
   "dependencies": {
     "@adapty/capacitor": "file:../..",
