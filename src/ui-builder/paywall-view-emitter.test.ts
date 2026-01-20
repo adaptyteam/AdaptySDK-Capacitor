@@ -39,8 +39,8 @@ const TEST_EVENT_DATA = {
   restoreStarted: `{"id":"${NATIVE_EVENT_NAMES.startRestore}","view":{"id":"${TEST_VIEW_ID}"}}`,
   restoreCompleted: `{"id":"${NATIVE_EVENT_NAMES.finishRestore}","view":{"id":"${TEST_VIEW_ID}"},"profile":{"profileId":"test-profile"}}`,
   restoreFailed: `{"id":"${NATIVE_EVENT_NAMES.failRestore}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Restore failed"}}`,
-  paywallShown: `{"id":"${NATIVE_EVENT_NAMES.appear}","view":{"id":"${TEST_VIEW_ID}"}}`,
-  paywallClosed: `{"id":"${NATIVE_EVENT_NAMES.disappear}","view":{"id":"${TEST_VIEW_ID}"}}`,
+  paywallAppeared: `{"id":"${NATIVE_EVENT_NAMES.appear}","view":{"id":"${TEST_VIEW_ID}"}}`,
+  paywallDisappeared: `{"id":"${NATIVE_EVENT_NAMES.disappear}","view":{"id":"${TEST_VIEW_ID}"}}`,
   renderingFailed: `{"id":"${NATIVE_EVENT_NAMES.failRendering}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Rendering failed"}}`,
   loadingProductsFailed: `{"id":"${NATIVE_EVENT_NAMES.failLoadingProducts}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Loading products failed"}}`,
   webPaymentFinished: `{"id":"${NATIVE_EVENT_NAMES.finishWebPaymentNavigation}","view":{"id":"${TEST_VIEW_ID}"},"product":{"id":"com.example.premium"},"error":null}`,
@@ -487,8 +487,8 @@ describe('PaywallViewEmitter', () => {
         onRestoreStarted: jest.fn(),
         onRestoreCompleted: jest.fn(),
         onRestoreFailed: jest.fn(),
-        onPaywallShown: jest.fn(),
-        onPaywallClosed: jest.fn(),
+        onAppeared: jest.fn(),
+        onDisappeared: jest.fn(),
         onRenderingFailed: jest.fn(),
         onLoadingProductsFailed: jest.fn(),
         onWebPaymentNavigationFinished: jest.fn(),
@@ -571,7 +571,7 @@ describe('PaywallViewEmitter', () => {
         view: { id: TEST_VIEW_ID },
       });
 
-      await emitter.addInternalListener('onPaywallClosed', jest.fn());
+      await emitter.addInternalListener('onDisappeared', jest.fn());
 
       expect(mockBridgeAddListener).toHaveBeenCalledTimes(1);
       expect(mockBridgeAddListener).toHaveBeenCalledWith(NATIVE_EVENT_NAMES.disappear, expect.any(Function));
@@ -593,11 +593,11 @@ describe('PaywallViewEmitter', () => {
         callOrder.push('internal');
       });
 
-      await emitter.addListener('onPaywallClosed', clientHandler, mockOnRequestClose);
-      await emitter.addInternalListener('onPaywallClosed', internalHandler);
+      await emitter.addListener('onDisappeared', clientHandler, mockOnRequestClose);
+      await emitter.addInternalListener('onDisappeared', internalHandler);
 
       const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
-      nativeCallback({ data: TEST_EVENT_DATA.paywallClosed });
+      nativeCallback({ data: TEST_EVENT_DATA.paywallDisappeared });
 
       expect(callOrder).toEqual(['client', 'internal']);
       expect(clientHandler).toHaveBeenCalledTimes(1);
@@ -632,7 +632,7 @@ describe('PaywallViewEmitter', () => {
       for (let i = 0; i < 10; i++) {
         const mockListener = jest.fn();
         await emitter.addListener('onCloseButtonPress', mockListener, mockOnRequestClose);
-        await emitter.addInternalListener('onPaywallClosed', jest.fn());
+        await emitter.addInternalListener('onDisappeared', jest.fn());
         emitter.removeAllListeners();
       }
 

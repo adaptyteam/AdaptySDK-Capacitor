@@ -112,13 +112,13 @@ export const PaywallController = forwardRef<PaywallControllerRef, Props>(functio
           setResult(`❌ Restore failed: ${error?.message || 'unknown error'}`);
           return false;
         },
-        onPaywallShown: () => {
-          log('info', 'Paywall shown', 'paywall.onPaywallShown');
+        onAppeared: () => {
+          log('info', 'Paywall appeared', 'paywall.onAppeared');
           setResult('👁️ Paywall appeared');
           return false;
         },
-        onPaywallClosed: () => {
-          log('info', 'Paywall closed', 'paywall.onPaywallClosed');
+        onDisappeared: () => {
+          log('info', 'Paywall disappeared', 'paywall.onDisappeared');
           setResult('👋 Paywall disappeared');
           return false;
         },
