@@ -23,6 +23,19 @@
 ![Adapty: CRM for mobile apps with subscriptions](https://adapty-portal-media-production.s3.amazonaws.com/github/adapty-schema.png)
 
 Adapty SDK is an open-source framework that makes implementing in-app subscriptions for Capacitor fast and easy. It's 100% open-source and lightweight.
+## Table of Contents
+- [Why Adapty?](#why-adapty)
+- [Getting Started](#getting-started)
+- [Integrate IAPs within a few hours without server coding](#integrate-iaps-within-a-few-hours-without-server-coding)
+- [Design paywalls in the no-code builder](#design-paywalls-in-the-no-code-builder)
+- [Test paywalls & prices on Capacitor without app releases](#test-paywalls--prices-on-capacitor-without-app-releases)
+- [Real-time analytics for your Capacitor app](#real-time-analytics-for-your-capacitor-app)
+- [Mobile app monetization's largest community](#mobile-app-monetizations-largest-community)
+- [Platform Support](#platform-support)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [Like Adapty SDK?](#like-adapty-sdk)
+- [License](#license)
 
 ## Why Adapty?
 
@@ -37,6 +50,15 @@ Adapty SDK is an open-source framework that makes implementing in-app subscripti
 <h3 align="center" style="border-bottom: none; margin-top: -15px; margin-bottom: -15px; font-size: 150%">
 <a href="https://adapty.io/schedule-demo?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Unity_schedule-demo">Talk to Us to Learn More</a>
 </h3>
+
+## Getting Started
+
+```sh
+npm install @adapty/capacitor
+npx cap sync
+```
+
+Follow our [quickstart guide](https://adapty.io/docs/sdk-installation-capacitor/?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor) to install and configure Adapty SDK. Set up purchases in hours instead of weeks :rocket:
 
 ## Integrate IAPs within a few hours without server coding
 
@@ -77,19 +99,10 @@ Ask questions, participate in discussions about Adapty-related topics, become a 
 
 <a href="https://discord.gg/subscriptions-hub"><img src="https://adapty-portal-media-production.s3.amazonaws.com/github/join-discord.svg" /></a>
 
-
-## Getting Started
-
-```sh
-npm install @adapty/capacitor
-npx cap sync
-```
-
-Follow our [quickstart guide](https://adapty.io/docs/sdk-installation-capacitor/?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor) to install and configure Adapty SDK. Set up purchases in hours instead of weeks :rocket:
-
-### Platform Support
+## Platform Support
 
 Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms. Web platform is not supported—the build will succeed, but SDK methods will throw `CapacitorException` instead of performing actual operations.
+
 
 ## Examples
 
