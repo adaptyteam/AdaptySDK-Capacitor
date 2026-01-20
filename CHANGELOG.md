@@ -4,6 +4,59 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [3.15.0]
+
+### Added
+
+- Added compatibility with **Google Play Billing Library 8** (internal dependency is still v7, but the SDK functions correctly with projects targeting v8).
+- **Added `clearDataOnBackup` parameter.** Controls whether the SDK creates a new profile when the app is restored from an **iCloud backup** (default: `false`). [Read more.](https://adapty.io/docs/sdk-installation-capacitor#clear-data-on-backup-restore)
+  ```typescript
+  await adapty.activate({
+    params: {
+      ios: {
+        clearDataOnBackup: true,
+      },
+    }
+  });
+  ```
+- **createOnboardingView()**: added new optional `externalUrlsPresentation` property of type `WebPresentation` to control how external URLs are opened from onboarding. Defaults to `WebPresentation.BrowserInApp`.
+  ```typescript
+  const view = await createOnboardingView(onboarding, {
+    externalUrlsPresentation: WebPresentation.BrowserOutApp
+  });
+  ```
+  Possible values:
+  - `WebPresentation.BrowserOutApp` - open in browser outside the app
+  - `WebPresentation.BrowserInApp` - open in browser inside the app
+
+- **adapty.openWebPaywall()**: added new optional `openIn` parameter of type `WebPresentation` to control how web paywalls are opened. Defaults to `WebPresentation.BrowserOutApp`.
+  ```typescript
+  await adapty.openWebPaywall({
+    paywallOrProduct: paywall,
+    openIn: WebPresentation.BrowserInApp
+  });
+  ```
+- **Paywall:** Added a default `onRenderingFailed` handler that automatically closes the paywall if rendering fails.
+- **Android**: Added support for the `onWebPaymentNavigationFinished` event.
+
+### Fixed
+
+- Fixed native usage of local fallback file.
+- **iOS**: Fixed an issue with Promotional Offers when `customerUserId` was a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
+- **Android**: Fixed an issue where JS execution in WebView stopped 60 seconds after opening a native paywall.
+- **Onboarding events rework**:
+  - **BREAKING**: `onAnalytics` and `onStateUpdated` event payloads now match TypeScript types with fields in camelCase.
+  - **DEPRECATED**: `event.element_id` in `onAnalytics`. Use `event.elementId` instead.
+  - Fixed onboarding `actionId` payload for events onPaywall, onCustom, onClose.
+
+### Breaking
+
+- Rename paywall events: 
+  - `onPaywallShown` to `onAppeared`
+  - `onPaywallClosed` to `onDisappeared`
+- Removed `adapty.logShowOnboarding` method.
+- Removed custom backend URL fields from `ActivateParamsInput` (`backendBaseUrl`, `backendFallbackBaseUrl`, `backendConfigsBaseUrl`, `backendUABaseUrl`). Use `serverCluster` instead.
+
 ## [3.12.0-beta.1]
 
 ### Added
