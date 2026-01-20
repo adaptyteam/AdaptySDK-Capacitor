@@ -170,14 +170,14 @@ export interface EventHandlers {
    * If you return `true`, the paywall view will be closed.
    * @default false
    */
-  onPaywallShown: () => EventHandlerResult;
+  onAppeared: () => EventHandlerResult;
   /**
    * Called when the paywall view disappears
    *
    * If you return `true`, the paywall view will be closed.
    * @default false
    */
-  onPaywallClosed: () => EventHandlerResult;
+  onDisappeared: () => EventHandlerResult;
   /**
    * Called if a paywall view fails to render.
    * This should not ever happen, but if it does, feel free to report it to us.
@@ -227,8 +227,8 @@ export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
   onRestoreStarted: () => false,
   onRestoreCompleted: () => true,
   onRestoreFailed: () => false,
-  onPaywallShown: () => false,
-  onPaywallClosed: () => false,
+  onAppeared: () => false,
+  onDisappeared: () => false,
   onRenderingFailed: () => true,
   onLoadingProductsFailed: () => false,
   onWebPaymentNavigationFinished: () => false,

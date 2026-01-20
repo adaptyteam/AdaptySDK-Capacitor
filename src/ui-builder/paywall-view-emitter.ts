@@ -64,8 +64,8 @@ const NATIVE_EVENT_RESOLVER: Record<PaywallEventIdType, (event: ParsedPaywallEve
 
     return actionMap[event.action.type] ?? null;
   },
-  [PaywallEventId.DidAppear]: () => 'onPaywallShown',
-  [PaywallEventId.DidDisappear]: () => 'onPaywallClosed',
+  [PaywallEventId.DidAppear]: () => 'onAppeared',
+  [PaywallEventId.DidDisappear]: () => 'onDisappeared',
   [PaywallEventId.DidSelectProduct]: () => 'onProductSelected',
   [PaywallEventId.DidStartPurchase]: () => 'onPurchaseStarted',
   [PaywallEventId.DidFinishPurchase]: () => 'onPurchaseCompleted',
@@ -90,8 +90,8 @@ const HANDLER_TO_NATIVE_EVENT: Record<EventName, PaywallEventIdType> = {
   onRestoreStarted: PaywallEventId.DidStartRestore,
   onRestoreCompleted: PaywallEventId.DidFinishRestore,
   onRestoreFailed: PaywallEventId.DidFailRestore,
-  onPaywallShown: PaywallEventId.DidAppear,
-  onPaywallClosed: PaywallEventId.DidDisappear,
+  onAppeared: PaywallEventId.DidAppear,
+  onDisappeared: PaywallEventId.DidDisappear,
   onRenderingFailed: PaywallEventId.DidFailRendering,
   onLoadingProductsFailed: PaywallEventId.DidFailLoadingProducts,
   onWebPaymentNavigationFinished: PaywallEventId.DidFinishWebPaymentNavigation,
