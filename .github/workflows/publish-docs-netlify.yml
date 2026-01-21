@@ -2,11 +2,17 @@ name: Publish docs to Netlify
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Publish to npm
+    types:
+      - completed
 
 jobs:
   publish-docs:
     runs-on: ubuntu-24.04
     name: Publish docs to Netlify
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
@@ -37,6 +43,7 @@ jobs:
         run: yarn doc-gen
 
       - name: Publish docs to Netlify
+        # No published tags in netlify/actions, master is recommended.
         uses: netlify/actions/cli@master
         with:
           args: deploy --dir=docs --prod
