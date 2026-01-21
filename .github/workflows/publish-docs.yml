@@ -1,4 +1,4 @@
-name: Publish docs to Netlify
+name: Publish docs
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ on:
 jobs:
   publish-docs:
     runs-on: ubuntu-24.04
-    name: Publish docs to Netlify
+    name: Publish docs
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
