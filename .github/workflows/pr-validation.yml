@@ -88,7 +88,7 @@ jobs:
       if: matrix.check-type == 'js-checks'
       run: |
         cd examples/adapty-devtools
-        yarn install --prefer-offline
+        yarn install --prefer-offline --ignore-scripts
 
     - name: Run adapty-devtools tsc
       if: matrix.check-type == 'js-checks'
