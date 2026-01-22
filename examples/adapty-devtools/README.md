@@ -5,7 +5,7 @@ and comes with a very minimal shell for building an app.
 
 ## Requirements
 
-- Node 20
+- Node 22
 - JDK 21
 
 
