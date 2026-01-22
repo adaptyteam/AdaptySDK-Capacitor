@@ -8,7 +8,7 @@ on:
 
 jobs:
   setup:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     name: Setup
     outputs:
       cache-hit: ${{ steps.cache-node-modules.outputs.cache-hit }}
@@ -19,7 +19,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '24'
 
     - name: Cache node_modules
       uses: actions/cache@v4
@@ -35,7 +35,7 @@ jobs:
       run: yarn install --frozen-lockfile --prefer-offline
 
   validate-pr:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     needs: setup
     strategy:
       fail-fast: false
@@ -54,7 +54,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '24'
 
     - name: Setup Java
       if: matrix.check-type == 'android'
@@ -188,7 +188,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
 
   auto-assign-reviewers:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     name: Auto-assign reviewers
     if: github.event_name == 'pull_request' && github.event.action == 'opened'
 
