@@ -59,6 +59,16 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
 
+    - name: Setup Android SDK
+      if: matrix.check-type == 'android'
+      uses: android-actions/setup-android@v3
+
+    - name: Install Android SDK packages
+      if: matrix.check-type == 'android'
+      run: |
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
     - name: Restore node_modules cache
       uses: actions/cache/restore@v4
       with:
