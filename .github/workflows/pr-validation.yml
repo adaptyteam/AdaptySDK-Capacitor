@@ -16,11 +16,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24'
-
     - name: Install Yarn
       run: npm i -g yarn@1.22.19
 
@@ -53,11 +48,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24'
 
     - name: Install Yarn
       run: npm i -g yarn@1.22.19
@@ -124,11 +114,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
 
     - name: Select Xcode
       uses: maxim-lobanov/setup-xcode@v1
