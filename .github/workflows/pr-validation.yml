@@ -53,23 +53,6 @@ jobs:
     - name: Install Yarn
       run: npm i -g yarn@1.22.19
 
-    - name: Setup Java
-      if: matrix.check-type == 'android'
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '21'
-
-    - name: Setup Android SDK
-      if: matrix.check-type == 'android'
-      uses: android-actions/setup-android@v3
-
-    - name: Install Android SDK packages
-      if: matrix.check-type == 'android'
-      run: |
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
-
     - name: Restore node_modules cache
       uses: actions/cache/restore@v4
       with:
@@ -80,18 +63,6 @@ jobs:
 
     - name: Generate version file
       run: yarn update-versions
-
-    - name: Cache Gradle dependencies
-      if: matrix.check-type == 'android'
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-          android/.gradle
-        key: gradle-${{ runner.os }}-${{ hashFiles('android/build.gradle', 'android/settings.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties') }}
-        restore-keys: |
-          gradle-${{ runner.os }}-
 
     - name: Run TypeScript check
       if: matrix.check-type == 'js-checks'
@@ -124,6 +95,35 @@ jobs:
       run: |
         cd examples/adapty-devtools
         yarn tsc
+
+    - name: Setup Java
+      if: matrix.check-type == 'android'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Setup Android SDK
+      if: matrix.check-type == 'android'
+      uses: android-actions/setup-android@v3
+
+    - name: Install Android SDK packages
+      if: matrix.check-type == 'android'
+      run: |
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+    - name: Cache Gradle dependencies
+      if: matrix.check-type == 'android'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          android/.gradle
+        key: gradle-${{ runner.os }}-${{ hashFiles('android/build.gradle', 'android/settings.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
 
     - name: Run Android verification
       if: matrix.check-type == 'android'
