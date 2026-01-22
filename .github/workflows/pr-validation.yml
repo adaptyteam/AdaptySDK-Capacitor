@@ -84,8 +84,18 @@ jobs:
       if: matrix.check-type == 'js-checks'
       run: yarn verify:web
 
-    - name: Install adapty-devtools dependencies
+    - name: Cache adapty-devtools node_modules
       if: matrix.check-type == 'js-checks'
+      uses: actions/cache@v4
+      id: cache-adapty-devtools-node-modules
+      with:
+        path: examples/adapty-devtools/node_modules
+        key: adapty-devtools-node-modules-${{ runner.os }}-${{ hashFiles('examples/adapty-devtools/yarn.lock') }}
+        restore-keys: |
+          adapty-devtools-node-modules-${{ runner.os }}-
+
+    - name: Install adapty-devtools dependencies
+      if: matrix.check-type == 'js-checks' && steps.cache-adapty-devtools-node-modules.outputs.cache-hit != 'true'
       run: |
         cd examples/adapty-devtools
         yarn install --prefer-offline --ignore-scripts
