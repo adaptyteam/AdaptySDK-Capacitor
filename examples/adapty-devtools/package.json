@@ -12,7 +12,6 @@
   "scripts": {
     "credentials": "node ../../scripts/credentials.mjs",
     "credentials-force": "node ../../scripts/credentials.mjs --force-bundle",
-    "preinstall": "cd ../../ && yarn install && yarn build",
     "postinstall": "yarn credentials",
     "start": "vite",
     "build": "vite build",
