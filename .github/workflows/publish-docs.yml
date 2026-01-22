@@ -1,0 +1,52 @@
+name: Publish docs
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Publish to npm
+    types:
+      - completed
+
+jobs:
+  publish-docs:
+    runs-on: ubuntu-24.04
+    name: Publish docs
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            node-modules-${{ runner.os }}-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile --prefer-offline
+
+      - name: Generate version file
+        run: yarn update-versions
+
+      - name: Generate documentation
+        run: yarn doc-gen
+
+      - name: Publish docs to Netlify
+        # No published tags in netlify/actions, master is recommended.
+        uses: netlify/actions/cli@master
+        with:
+          args: deploy --dir=docs --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
