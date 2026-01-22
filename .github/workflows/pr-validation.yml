@@ -21,6 +21,9 @@ jobs:
       with:
         node-version: '24'
 
+    - name: Install Yarn
+      run: npm i -g yarn@1.22.19
+
     - name: Cache node_modules
       uses: actions/cache@v4
       id: cache-node-modules
@@ -55,6 +58,9 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '24'
+
+    - name: Install Yarn
+      run: npm i -g yarn@1.22.19
 
     - name: Setup Java
       if: matrix.check-type == 'android'
