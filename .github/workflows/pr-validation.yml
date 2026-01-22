@@ -113,6 +113,18 @@ jobs:
       if: matrix.check-type == 'js-checks'
       run: yarn verify:web
 
+    - name: Install adapty-devtools dependencies
+      if: matrix.check-type == 'js-checks'
+      run: |
+        cd examples/adapty-devtools
+        yarn install --prefer-offline
+
+    - name: Run adapty-devtools tsc
+      if: matrix.check-type == 'js-checks'
+      run: |
+        cd examples/adapty-devtools
+        yarn tsc
+
     - name: Run Android verification
       if: matrix.check-type == 'android'
       run: yarn verify:android
