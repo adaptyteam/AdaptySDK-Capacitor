@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-slim
     needs: setup
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - check-type: js-checks
