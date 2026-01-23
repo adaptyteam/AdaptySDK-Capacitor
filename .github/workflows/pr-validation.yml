@@ -100,9 +100,9 @@ jobs:
         cd examples/adapty-devtools
         yarn install --prefer-offline --ignore-scripts
 
-    - name: Run dev-example-js
+    - name: Install local adapty package
       if: matrix.check-type == 'js-checks'
-      run: yarn dev-example-js
+      run: yarn dev-sync-all-files
 
     - name: Run adapty-devtools tsc
       if: matrix.check-type == 'js-checks'
