@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish-docs:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     name: Publish docs
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
@@ -18,10 +18,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Install Yarn
+        run: npm i -g yarn@1.22.19
 
       - name: Cache node_modules
         uses: actions/cache@v4
@@ -43,10 +41,7 @@ jobs:
         run: yarn doc-gen
 
       - name: Publish docs to Netlify
-        # No published tags in netlify/actions, master is recommended.
-        uses: netlify/actions/cli@master
-        with:
-          args: deploy --dir=docs --prod
+        run: npx --yes netlify-cli@latest deploy --dir=docs --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

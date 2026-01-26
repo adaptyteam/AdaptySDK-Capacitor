@@ -19,26 +19,26 @@ PODS:
     - AdaptyUIBuilder (= 3.15.3)
   - AdaptyUIBuilder (3.15.3):
     - AdaptyLogger (= 3.15.3)
-  - Capacitor (7.0.0):
+  - Capacitor (8.0.1):
     - CapacitorCordova
-  - CapacitorApp (7.0.2):
+  - CapacitorApp (8.0.0):
     - Capacitor
-  - CapacitorClipboard (7.0.2):
+  - CapacitorClipboard (8.0.0):
     - Capacitor
-  - CapacitorCordova (7.0.0)
-  - CapacitorFilesystem (7.1.4):
+  - CapacitorCordova (8.0.1)
+  - CapacitorFilesystem (8.1.0):
     - Capacitor
-    - IONFilesystemLib (~> 1.0.1)
-  - CapacitorShare (7.0.2):
+    - IONFilesystemLib (~> 1.1.0)
+  - CapacitorShare (8.0.0):
     - Capacitor
-  - CapacitorStatusBar (7.0.2):
+  - CapacitorStatusBar (8.0.0):
     - Capacitor
-  - CapacitorToast (7.0.2):
+  - CapacitorToast (8.0.0):
     - Capacitor
-  - IONFilesystemLib (1.0.1)
+  - IONFilesystemLib (1.1.0)
 
 DEPENDENCIES:
-  - "AdaptyCapacitor (from `../../node_modules/@adapty/capacitor`)"
+  - AdaptyCapacitor (from `../../../..`)
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorClipboard (from `../../node_modules/@capacitor/clipboard`)"
@@ -59,7 +59,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   AdaptyCapacitor:
-    :path: "../../node_modules/@adapty/capacitor"
+    :path: "../../../.."
   Capacitor:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
@@ -79,21 +79,21 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Adapty: 9d5c8378ddf71747e5182ae9dd3426b2a4dc274a
-  AdaptyCapacitor: c3c21753be6e66e88a64c0d0206a42f73009029a
+  AdaptyCapacitor: cecf3b7cc58e6d6397843add6a7a6baf30e6d2af
   AdaptyLogger: 8a58745fe27ac991d2b2f05de57bfa9d932383ca
   AdaptyPlugin: d832e606563b2cc3e77dbc4ca23e64725a3b21c5
   AdaptyUI: 7b8515dade06d8a046826f024940c009bedb5f00
   AdaptyUIBuilder: e94ea218d936f58f13123fda19f3c13fba5cdb7d
-  Capacitor: fcbee427ff437f414bbb3bc2d39364ad9bd2b8a5
-  CapacitorApp: efc1e9748a8ea5d3e789cd82a4f451341cc7ac93
-  CapacitorClipboard: e8b3578b2fce3c4795a5bdf2990b3b7dcef83f65
-  CapacitorCordova: 345f93b7edd121db98e4ec20ac94d6d7bcaf7e48
-  CapacitorFilesystem: ac0a386949ed6c295a3dffa129ecd26b881ae5be
-  CapacitorShare: 051c3ceee0ddf3bb54574851a622bbb317eed5bd
-  CapacitorStatusBar: 5526833b87fa9c96a2a90c1322bb1f663c04505f
-  CapacitorToast: e32c2b61a70d6fbd0633309c0807b4b9811768b4
-  IONFilesystemLib: 89258b8e3e85465da93127d25d7ce37f977e8a6f
+  Capacitor: 2d8b1a05870ddb600b0e1e32b83fcf0890c244e1
+  CapacitorApp: cfa0120a1f3a6f69d4d37d3041782aa5c5167d0b
+  CapacitorClipboard: 9a0c0a654641f93482748efb659bf95c0382b65a
+  CapacitorCordova: 0d65b9bb74e995dcecb9463f34f1af2aba6f955c
+  CapacitorFilesystem: 57c128a5ea9875aa7bb54eb7431e63d7721bedd4
+  CapacitorShare: 703a2744f755982f1a4950f5120bea9763d6dfea
+  CapacitorStatusBar: c6fa2d404083e41d145ea56698707a6986d4428b
+  CapacitorToast: 6275c84283ac9c424a20554e71b8a6263f44554c
+  IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
 
-PODFILE CHECKSUM: f18e615664dc4038906f1ed106f789bc90542d47
+PODFILE CHECKSUM: a8e7f26db86613d914c92731a4bb48ce2a57706f
 
 COCOAPODS: 1.15.2

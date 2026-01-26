@@ -8,18 +8,13 @@ on:
 
 jobs:
   setup:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     name: Setup
     outputs:
       cache-hit: ${{ steps.cache-node-modules.outputs.cache-hit }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
 
     - name: Cache node_modules
       uses: actions/cache@v4
@@ -30,15 +25,19 @@ jobs:
         restore-keys: |
           node-modules-${{ runner.os }}-
 
+    - name: Install Yarn
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: npm i -g yarn@1.22.19
+
     - name: Install dependencies
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile --prefer-offline
 
   validate-pr:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     needs: setup
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - check-type: js-checks
@@ -51,17 +50,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - name: Setup Java
-      if: matrix.check-type == 'android'
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '21'
+    - name: Install Yarn
+      run: npm i -g yarn@1.22.19
 
     - name: Restore node_modules cache
       uses: actions/cache/restore@v4
@@ -73,18 +63,6 @@ jobs:
 
     - name: Generate version file
       run: yarn update-versions
-
-    - name: Cache Gradle dependencies
-      if: matrix.check-type == 'android'
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-          android/.gradle
-        key: gradle-${{ runner.os }}-${{ hashFiles('android/build.gradle', 'android/settings.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties') }}
-        restore-keys: |
-          gradle-${{ runner.os }}-
 
     - name: Run TypeScript check
       if: matrix.check-type == 'js-checks'
@@ -106,6 +84,61 @@ jobs:
       if: matrix.check-type == 'js-checks'
       run: yarn verify:web
 
+    - name: Cache adapty-devtools node_modules
+      if: matrix.check-type == 'js-checks'
+      uses: actions/cache@v4
+      id: cache-adapty-devtools-node-modules
+      with:
+        path: examples/adapty-devtools/node_modules
+        key: adapty-devtools-node-modules-${{ runner.os }}-${{ hashFiles('examples/adapty-devtools/yarn.lock') }}
+        restore-keys: |
+          adapty-devtools-node-modules-${{ runner.os }}-
+
+    - name: Install adapty-devtools dependencies
+      if: matrix.check-type == 'js-checks' && steps.cache-adapty-devtools-node-modules.outputs.cache-hit != 'true'
+      run: |
+        cd examples/adapty-devtools
+        yarn install --prefer-offline --ignore-scripts
+
+    - name: Install local adapty package
+      if: matrix.check-type == 'js-checks'
+      run: yarn dev-sync-all-files
+
+    - name: Run adapty-devtools tsc
+      if: matrix.check-type == 'js-checks'
+      run: |
+        cd examples/adapty-devtools
+        yarn tsc
+
+    - name: Setup Java
+      if: matrix.check-type == 'android'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    - name: Setup Android SDK
+      if: matrix.check-type == 'android'
+      uses: android-actions/setup-android@v3
+
+    - name: Install Android SDK packages
+      if: matrix.check-type == 'android'
+      run: |
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+    - name: Cache Gradle dependencies
+      if: matrix.check-type == 'android'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          android/.gradle
+        key: gradle-${{ runner.os }}-${{ hashFiles('android/build.gradle', 'android/settings.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
+
     - name: Run Android verification
       if: matrix.check-type == 'android'
       run: yarn verify:android
@@ -118,11 +151,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
 
     - name: Select Xcode
       uses: maxim-lobanov/setup-xcode@v1
@@ -188,7 +216,7 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
 
   auto-assign-reviewers:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     name: Auto-assign reviewers
     if: github.event_name == 'pull_request' && github.event.action == 'opened'
 
