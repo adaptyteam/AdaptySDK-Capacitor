@@ -32,6 +32,7 @@ Adapty SDK is an open-source framework that makes implementing in-app subscripti
 - [Real-time analytics for your Capacitor app](#real-time-analytics-for-your-capacitor-app)
 - [Mobile app monetization's largest community](#mobile-app-monetizations-largest-community)
 - [Platform Support](#platform-support)
+- [Capacitor compatibility](#capacitor-compatibility)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [Like Adapty SDK?](#like-adapty-sdk)
@@ -102,6 +103,14 @@ Ask questions, participate in discussions about Adapty-related topics, become a 
 ## Platform Support
 
 Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms. Web platform is not supported—the build will succeed, but SDK methods will throw `CapacitorException` instead of performing actual operations.
+
+### Capacitor compatibility
+
+| Capacitor version | `@adapty/capacitor` version |
+| --- |-----------------------------|
+| 8.x | 3.16.0-beta.0 and newer     |
+| 7.x | 3.15.x and older            |
+| 6.x and older | Not supported               |
 
 
 ## Examples
