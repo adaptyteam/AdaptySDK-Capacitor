@@ -37,9 +37,6 @@ jobs:
       - name: Install Yarn
         run: npm i -g yarn@1.22.19
 
-      - name: Update npm to latest version
-        run: npm install -g npm@latest
-
       - name: Cache node_modules
         uses: actions/cache@v4
         id: cache-node-modules
