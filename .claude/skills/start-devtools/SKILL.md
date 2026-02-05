@@ -18,7 +18,19 @@ Platform argument: `$ARGUMENTS` (defaults to `ios` if empty)
 
 All commands run from repository root.
 
-### 1. Check credentials
+### 1. Check environment
+
+Verify required tools are installed:
+
+```bash
+node --version && yarn --version && xcodebuild -version 2>/dev/null | head -1 && java -version 2>&1 | head -1
+```
+
+Requirements: Node.js 22+, Xcode 26+, JDK 21 (for Android).
+
+If something is missing, inform user and stop.
+
+### 2. Check credentials
 
 ```bash
 cat examples/adapty-devtools/.adapty-credentials.json 2>/dev/null || echo "NO_CREDENTIALS"
@@ -31,7 +43,7 @@ If credentials don't exist or are incomplete, use AskUserQuestion to collect:
 - Placement ID (paywall placement from Adapty)
 - Onboarding placement ID (optional)
 
-### 2. Setup credentials (if needed)
+### 3. Setup credentials (if needed)
 
 Install dependencies first, then run credentials script:
 
@@ -49,7 +61,7 @@ cd examples/adapty-devtools && node ../../scripts/credentials.mjs \
   --onboarding-placement-id=YOUR_ONBOARDING_PLACEMENT
 ```
 
-### 3. Build and run
+### 4. Build and run
 
 From repository root:
 
