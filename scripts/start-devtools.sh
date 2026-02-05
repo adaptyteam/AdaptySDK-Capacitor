@@ -33,4 +33,18 @@ yarn cap sync
 
 # Step 4: Run on platform
 echo "🚀 Launching on $PLATFORM..."
-yarn "$PLATFORM"
+
+if [ "$PLATFORM" = "android" ]; then
+    # For Android, auto-select first available emulator to avoid interactive prompt
+    echo "📱 Finding Android target..."
+    TARGET_ID=$(emulator -list-avds 2>/dev/null | head -1)
+    if [ -z "$TARGET_ID" ]; then
+        echo "❌ No Android emulators found. Please create one in Android Studio."
+        echo "   Then run manually: cd examples/adapty-devtools && npx cap run android"
+        exit 1
+    fi
+    echo "📱 Using target: $TARGET_ID"
+    yarn build && npx cap run android --target "$TARGET_ID"
+else
+    yarn "$PLATFORM"
+fi
