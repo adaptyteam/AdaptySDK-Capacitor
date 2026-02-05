@@ -16,22 +16,29 @@ Platform argument: `$ARGUMENTS` (defaults to `ios` if empty)
 
 ## Steps
 
-### 1. Check credentials
+All commands run from repository root.
 
-First, check if credentials file exists:
+### 1. Check credentials
 
 ```bash
 cat examples/adapty-devtools/.adapty-credentials.json 2>/dev/null || echo "NO_CREDENTIALS"
 ```
 
 If credentials don't exist or are incomplete, use AskUserQuestion to collect:
-- **Adapty API token** (from Adapty dashboard)
-- **iOS bundle identifier** (must match App Store Connect)
-- **Android application ID** (must match Google Play Console)
-- **Placement ID** (paywall placement from Adapty)
-- **Onboarding placement ID** (optional)
+- Adapty API token (from Adapty dashboard)
+- iOS bundle identifier (must match App Store Connect)
+- Android application ID (must match Google Play Console)
+- Placement ID (paywall placement from Adapty)
+- Onboarding placement ID (optional)
 
-Then run credentials script with collected values:
+### 2. Setup credentials (if needed)
+
+Install dependencies first, then run credentials script:
+
+```bash
+yarn install
+cd examples/adapty-devtools && yarn install --ignore-scripts
+```
 
 ```bash
 cd examples/adapty-devtools && node ../../scripts/credentials.mjs \
@@ -42,7 +49,9 @@ cd examples/adapty-devtools && node ../../scripts/credentials.mjs \
   --onboarding-placement-id=YOUR_ONBOARDING_PLACEMENT
 ```
 
-### 2. Build and run
+### 3. Build and run
+
+From repository root:
 
 ```bash
 ./scripts/start-devtools.sh $ARGUMENTS
