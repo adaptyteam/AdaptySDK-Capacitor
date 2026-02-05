@@ -35,9 +35,24 @@ yarn update-cap-config      # Copy and sync Capacitor config
 yarn update-native-modules  # Update native pods and sync
 
 # Credentials and assets
-yarn credentials            # Generate credentials from parent project
+yarn credentials            # Interactive setup for Adapty credentials (see below)
 yarn link-assets            # Copy Adapty assets to native projects
 ```
+
+## Credentials Setup
+
+For in-app purchases to work, the app's bundle ID must match the one registered in App Store Connect / Google Play Console.
+
+```bash
+yarn credentials              # Interactive: prompts for token, bundle IDs, placement IDs
+```
+
+This script (`../../scripts/credentials.mjs`):
+1. Creates/updates `.adapty-credentials.json` with Adapty token and placement IDs
+2. Patches iOS `project.pbxproj` with the correct bundle identifier
+3. Patches Android `build.gradle` with the correct application ID
+
+**Note**: `.adapty-credentials.json` is gitignored. Each developer runs this once with their own test credentials.
 
 ## Architecture
 
