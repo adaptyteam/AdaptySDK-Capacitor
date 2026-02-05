@@ -10,9 +10,12 @@ This is a React + Capacitor + TypeScript devtools application for testing Adapty
 
 ## Requirements
 
-- Node.js 22
+See [Capacitor Environment Setup](https://capacitorjs.com/docs/getting-started/environment-setup) for full details.
+
+- Node.js 22+
 - JDK 21 (Android)
-- Xcode (iOS)
+- Xcode 26+ with Command Line Tools (`xcode-select --install`)
+- CocoaPods 1.12+ (or use Swift Package Manager)
 - Yarn (not npm)
 - Ruby 2.7+ (for link-assets script)
 
