@@ -28,12 +28,7 @@ export function getPlacementId(): string {
 }
 
 export function getOnboardingPlacementId(): string {
-  if (!credentials?.onboarding_placement_id) {
-    throw new Error(
-      `${ADAPTY_PREFIX} Onboarding Placement ID not found in ${CREDENTIALS_FILE} file. ${CREDENTIALS_COMMAND}`,
-    );
-  }
-  return credentials.onboarding_placement_id;
+  return credentials?.onboarding_placement_id ?? '';
 }
 
 export function getIosBundle(): string {
