@@ -3,7 +3,7 @@ name: start-devtools
 description: Start Adapty Devtools app for SDK testing. Use when need to run, launch, or test the devtools example app on iOS or Android simulator/emulator.
 argument-hint: "[ios|android]"
 disable-model-invocation: true
-allowed-tools: Bash
+allowed-tools: Bash, Read, AskUserQuestion
 ---
 
 # Start Devtools
@@ -16,28 +16,45 @@ Platform argument: `$ARGUMENTS` (defaults to `ios` if empty)
 
 ## Steps
 
-Run the start script from repository root:
+### 1. Check credentials
+
+First, check if credentials file exists:
+
+```bash
+cat examples/adapty-devtools/.adapty-credentials.json 2>/dev/null || echo "NO_CREDENTIALS"
+```
+
+If credentials don't exist or are incomplete, use AskUserQuestion to collect:
+- **Adapty API token** (from Adapty dashboard)
+- **iOS bundle identifier** (must match App Store Connect)
+- **Android application ID** (must match Google Play Console)
+- **Placement ID** (paywall placement from Adapty)
+- **Onboarding placement ID** (optional)
+
+Then run credentials script with collected values:
+
+```bash
+cd examples/adapty-devtools && node ../../scripts/credentials.mjs \
+  --token=YOUR_TOKEN \
+  --ios-bundle=YOUR_BUNDLE \
+  --android-id=YOUR_APP_ID \
+  --placement-id=YOUR_PLACEMENT \
+  --onboarding-placement-id=YOUR_ONBOARDING_PLACEMENT
+```
+
+### 2. Build and run
 
 ```bash
 ./scripts/start-devtools.sh $ARGUMENTS
 ```
 
-If the script fails, run steps manually:
+## CLI Parameters for credentials.mjs
 
-```bash
-# 1. Install root dependencies (if node_modules missing)
-yarn install
-
-# 2. Build plugin and sync to devtools
-yarn dev-example-full
-
-# 3. Run on platform
-cd examples/adapty-devtools
-yarn ios    # or: yarn android
-```
-
-## Notes
-
-- First run is slow (pod install, gradle sync)
-- Credentials auto-generated via postinstall
-- For JS-only changes use `yarn dev-example-js` (faster, skips native sync)
+Non-interactive mode (all required):
+- `--token=<adapty-api-token>`
+- `--ios-bundle=<com.example.app>`
+- `--android-id=<com.example.app>`
+- `--placement-id=<placement-id>`
+- `--onboarding-placement-id=<placement-id>` (optional)
+- `--skip-onboarding` (skip onboarding placement)
+- `--force-bundle` (force update native projects even if unchanged)
