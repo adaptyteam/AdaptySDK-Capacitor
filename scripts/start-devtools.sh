@@ -45,6 +45,18 @@ if [ "$PLATFORM" = "android" ]; then
     fi
     echo "📱 Using target: $TARGET_ID"
     yarn build && npx cap run android --target "$TARGET_ID"
+elif [ "$PLATFORM" = "ios" ]; then
+    # For iOS, auto-select first iPhone on latest iOS version
+    echo "📱 Finding iOS target..."
+    TARGET_ID=$(xcrun simctl list devices available -j | jq -r '.devices | to_entries | map(select(.key | contains("iOS"))) | sort_by(.key) | last | .value[] | select(.name | contains("iPhone")) | .udid' | head -1)
+    if [ -z "$TARGET_ID" ]; then
+        echo "❌ No iPhone simulators found. Please install one via Xcode."
+        echo "   Then run manually: cd examples/adapty-devtools && npx cap run ios"
+        exit 1
+    fi
+    TARGET_NAME=$(xcrun simctl list devices available -j | jq -r --arg udid "$TARGET_ID" '.devices[][] | select(.udid == $udid) | .name')
+    echo "📱 Using target: $TARGET_NAME ($TARGET_ID)"
+    yarn build && npx cap run ios --target "$TARGET_ID"
 else
     yarn "$PLATFORM"
 fi
