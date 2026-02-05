@@ -2,8 +2,6 @@
 import fs from 'fs';
 import promptSync from 'prompt-sync';
 
-const prompt = promptSync();
-
 var filename = '.adapty-credentials.json';
 var token_key = 'token';
 var ios_bundle_key = 'ios_bundle';
@@ -15,6 +13,28 @@ var onboarding_placement_id_key = 'onboarding_placement_id';
 var args = process.argv.slice(2);
 var forceBundleUpdate = args.includes('--force-bundle');
 var skipOnboarding = args.includes('--skip-onboarding');
+
+// Parse --key=value arguments for non-interactive mode
+var cliParams = {};
+for (var arg of args) {
+  var match = arg.match(/^--([^=]+)=(.+)$/);
+  if (match) {
+    cliParams[match[1]] = match[2];
+  }
+}
+
+// Check if running in non-interactive mode (all required params provided)
+var nonInteractive =
+  cliParams['token'] &&
+  cliParams['ios-bundle'] &&
+  cliParams['android-id'] &&
+  cliParams['placement-id'];
+
+// Only initialize prompt if in interactive mode
+var prompt = null;
+if (!nonInteractive) {
+  prompt = promptSync();
+}
 
 var exists = fs.existsSync(filename);
 
@@ -36,7 +56,9 @@ function read_credentials_sync(obj = {}) {
 
   // Adapty token
   var cache_token = obj[token_key];
-  var input_token = prompt(`Enter your Adapty token${cache_token ? ` (${cache_token})` : ''}: `);
+  var input_token = nonInteractive
+    ? cliParams['token']
+    : prompt(`Enter your Adapty token${cache_token ? ` (${cache_token})` : ''}: `);
 
   if (input_token) {
     result[token_key] = input_token;
@@ -46,7 +68,9 @@ function read_credentials_sync(obj = {}) {
 
   // iOS BundleID
   var cache_bundle = obj[ios_bundle_key];
-  var input_ios_bundle = prompt(`Enter your iOS bundle identifier${cache_bundle ? ` (${cache_bundle})` : ''}: `);
+  var input_ios_bundle = nonInteractive
+    ? cliParams['ios-bundle']
+    : prompt(`Enter your iOS bundle identifier${cache_bundle ? ` (${cache_bundle})` : ''}: `);
 
   if (input_ios_bundle) {
     result[ios_bundle_key] = input_ios_bundle;
@@ -56,9 +80,9 @@ function read_credentials_sync(obj = {}) {
 
   // Android Application ID
   var cache_android_app_id = obj[android_application_id_key];
-  var input_android_app_id = prompt(
-    `Enter your Android application ID${cache_android_app_id ? ` (${cache_android_app_id})` : ''}: `,
-  );
+  var input_android_app_id = nonInteractive
+    ? cliParams['android-id']
+    : prompt(`Enter your Android application ID${cache_android_app_id ? ` (${cache_android_app_id})` : ''}: `);
 
   if (input_android_app_id) {
     result[android_application_id_key] = input_android_app_id;
@@ -68,7 +92,9 @@ function read_credentials_sync(obj = {}) {
 
   // Placement ID
   var cache_placement = obj[placement_id_key];
-  var input_placement_id = prompt(`Enter your placement ID${cache_placement ? ` (${cache_placement})` : ''}: `);
+  var input_placement_id = nonInteractive
+    ? cliParams['placement-id']
+    : prompt(`Enter your placement ID${cache_placement ? ` (${cache_placement})` : ''}: `);
 
   if (input_placement_id) {
     result[placement_id_key] = input_placement_id;
@@ -79,9 +105,9 @@ function read_credentials_sync(obj = {}) {
   // Onboarding Placement ID (skip if --skip-onboarding flag is set)
   if (!skipOnboarding) {
     var cache_onboarding_placement = obj[onboarding_placement_id_key];
-    var input_onboarding_placement_id = prompt(
-      `Enter your onboarding placement ID${cache_onboarding_placement ? ` (${cache_onboarding_placement})` : ''}: `,
-    );
+    var input_onboarding_placement_id = nonInteractive
+      ? cliParams['onboarding-placement-id']
+      : prompt(`Enter your onboarding placement ID${cache_onboarding_placement ? ` (${cache_onboarding_placement})` : ''}: `);
 
     if (input_onboarding_placement_id) {
       result[onboarding_placement_id_key] = input_onboarding_placement_id;
