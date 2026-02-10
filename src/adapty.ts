@@ -49,6 +49,7 @@ import type {
   GetOnboardingForDefaultAudienceOptions,
   GetOnboardingForDefaultAudienceOptionsWithDefaults,
 } from './types/configs';
+import VERSION from './version';
 
 type Req = components['requests'];
 
@@ -61,6 +62,10 @@ type Req = components['requests'];
  * @public
  */
 export class Adapty implements AdaptyPlugin {
+  constructor() {
+    Log.setVersion(VERSION);
+  }
+
   private activating: Promise<void> | null = null;
   private resolveHeldActivation?: (() => Promise<void>) | null = null;
   private readonly emitter = new AdaptyEmitter();

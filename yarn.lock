@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@adapty/core@3.15.0-dev.8c9f2a00107326efdad767e22b0ca028f7d8cb6c":
+  version "3.15.0-dev.8c9f2a00107326efdad767e22b0ca028f7d8cb6c"
+  resolved "https://registry.yarnpkg.com/@adapty/core/-/core-3.15.0-dev.8c9f2a00107326efdad767e22b0ca028f7d8cb6c.tgz#72357664ebca41e2ff58cb62c46eb45650cbd5f0"
+  integrity sha512-RC5bbQ8wa1y3YoBhr3RapHxPF1phUmPnKv3S5E3LxIGr9iNYzeQMUnOn5rZ9u8R4w706MT9D4zqGYUeiJMSMwA==
+  dependencies:
+    tslib "^2.5.0"
+
 "@ampproject/remapping@^2.2.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@ampproject/remapping/-/remapping-2.3.0.tgz"

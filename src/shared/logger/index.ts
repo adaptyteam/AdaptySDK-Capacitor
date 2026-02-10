@@ -1,5 +1,2 @@
-export { LogContext } from './log-context';
-export { Log } from './log';
-export { LogScope } from './log-scope';
-export type { LogSink, LoggerConfig, LogEvent } from './types';
-export { consoleLogSink } from './console-sink';
+export { Log, LogContext, LogScope, consoleLogSink } from '@adapty/core';
+export type { LogSink, LoggerConfig, LogEvent, LogArgs } from '@adapty/core';
