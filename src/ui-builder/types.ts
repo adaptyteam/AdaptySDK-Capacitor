@@ -1,3 +1,4 @@
+import { Log } from '../shared/logger';
 import type {
   AdaptyPaywallProduct,
   AdaptyProductIdentifier,
@@ -215,7 +216,11 @@ export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
   onAndroidSystemBack: () => true,
   onUrlPress: (url: string) => {
     if (typeof window !== 'undefined') {
-      window.open(url, '_blank');
+      try {
+        window.open(new URL(url), '_blank');
+      } catch {
+        Log.warn('onUrlPress', () => `Invalid URL: ${url}`);
+      }
     }
     return false;
   },
