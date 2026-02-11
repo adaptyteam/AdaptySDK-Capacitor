@@ -18,8 +18,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Yarn
-        run: npm i -g yarn@1.22.19
+      - name: Enable Corepack
+        run: |
+          corepack enable || {
+            echo "Corepack not available, falling back to npm install"
+            npm install -g yarn@1.22.19
+          }
+
+      - name: Prepare Yarn
+        run: |
+          if command -v corepack > /dev/null 2>&1; then
+            corepack prepare yarn@1.22.19 --activate
+          fi
 
       - name: Cache node_modules
         uses: actions/cache@v4
