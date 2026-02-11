@@ -50,7 +50,7 @@ src/
 ├── ui-builder/               # Paywall & Onboarding view controllers
 │   ├── paywall-view-*.ts
 │   └── onboarding-view-*.ts
-└── shared/                   # Code from React Native SDK. Will be moved to @adapty/core
+└── shared/                   # Shared code. Will be moved to @adapty/core
     ├── coders/               # Data transformation (JSON ↔ TypeScript)
     ├── types/                # All data types (AdaptyPaywall, AdaptyProfile, etc.)
     ├── logger/               # Logging system
@@ -73,10 +73,6 @@ JSON Schema defining all method signatures and data structures. Native arguments
 
 ## Development Rules
 
-### Reference Implementation
-- **React Native SDK** (`../AdaptySDK-React-Native`) is the reference - do NOT modify it
-- Copy reusable TypeScript to `src/shared/` maintaining original file structure
-
 ### Code Standards
 - Strict TypeScript - no `any`
 - Methods return `Promise<T>`
@@ -85,12 +81,11 @@ JSON Schema defining all method signatures and data structures. Native arguments
 - Use yarn, not npm
 
 ### Method Implementation Pattern
-1. Check React Native SDK for existing implementation
-2. Define interface in `src/types/adapty-plugin.ts`
-3. Copy/adapt shared code to `src/shared/` if needed
-4. Add web fallback in `src/bridge/web.ts`
-5. Implement native iOS (Swift) and Android (Kotlin)
-6. Test in `examples/adapty-devtools` using `appendLog` (not console.log)
+1. Define interface in `src/types/adapty-plugin.ts`
+2. Copy/adapt shared code to `src/shared/` if needed
+3. Add web fallback in `src/bridge/web.ts`
+4. Implement native iOS (Swift) and Android (Kotlin)
+5. Test in `examples/adapty-devtools` using `appendLog` (not console.log)
 
 ### Documentation
 - README.md must reflect public types from `src/types/adapty-plugin.ts`
