@@ -108,7 +108,7 @@ Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms
 
 | Capacitor version | `@adapty/capacitor` version |
 | --- |-----------------------------|
-| 8.x | 3.16.0-beta.0 and newer     |
+| 8.x | 3.16.0 and newer     |
 | 7.x | 3.15.x and older            |
 | 6.x and older | Not supported               |
 
