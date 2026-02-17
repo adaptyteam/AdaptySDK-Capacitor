@@ -5,6 +5,7 @@ import { AdaptyEmitter } from './adapty-emitter';
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
 import { getCoder } from './coder-registry';
 import { defaultAdaptyOptions } from './default-configs';
+import { AdaptyError } from './shared/adapty-error';
 import { AdaptyConfigurationCoder } from './shared/coders/adapty-configuration';
 import { AdaptyIdentifyParamsCoder } from './shared/coders/adapty-identify-params';
 import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
@@ -147,8 +148,11 @@ export class Adapty implements AdaptyPlugin {
       // Check for native errors
       if (isErrorResponse(parsedResponse)) {
         const error = parsedResponse.error;
-        const errorMessage = `Native error: ${error.message} (code: ${error.adaptyCode})`;
-        const nativeError = new Error(errorMessage);
+        const nativeError = new AdaptyError({
+          adaptyCode: error.adaptyCode as any,
+          message: error.message,
+          detail: error.detail,
+        });
 
         log.failed(() => ({ error: nativeError }));
         throw nativeError;

@@ -5,7 +5,11 @@
 ### `adapty-handler/` — Bridge Protocol Tests
 Tests SDK method communication with native: JS (camelCase) → encode → snake_case JSON → Capacitor bridge → decode → JS.
 Uses `NativeModuleMock` spy to verify exact request format and response parsing.
-~14 tests covering activation. More methods to be added.
+**72 tests** across 15 test files covering all major SDK methods:
+- activation (27 tests), attribution (1), configuration (1), event-listeners (5)
+- installation (1), ios-specific (2), onboarding (3), paywall (7)
+- products (3), profile (2), purchase (2), purchase-event (1)
+- restore-purchases (1), user-management (3), web-paywall (2)
 
 ## Shared Utilities (`shared/`)
 

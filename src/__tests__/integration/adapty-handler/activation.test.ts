@@ -568,7 +568,7 @@ describe('Adapty - Activation (Bridge Integration)', () => {
         activate: errorResponse,
       });
 
-      await expect(adapty.activate({ apiKey: 'invalid_key' })).rejects.toThrow('Native error');
+      await expect(adapty.activate({ apiKey: 'invalid_key' })).rejects.toThrow('Invalid API key');
     });
 
     it('should handle unregistered method rejection', async () => {
@@ -576,9 +576,7 @@ describe('Adapty - Activation (Bridge Integration)', () => {
         // No response registered — will reject
       });
 
-      await expect(adapty.activate({ apiKey: 'test_key' })).rejects.toThrow(
-        'No mock response registered for method: activate',
-      );
+      await expect(adapty.activate({ apiKey: 'test_key' })).rejects.toThrow('No mock response configured for method');
     });
   });
 

@@ -1,7 +1,7 @@
 // Mock Capacitor core
 const mockCapacitorPlugin = {
   handleMethodCall: jest.fn(),
-  addListener: jest.fn().mockResolvedValue({ remove: jest.fn() }),
+  addListener: jest.fn().mockResolvedValue({ remove: jest.fn().mockResolvedValue(undefined) }),
 };
 
 jest.mock('@capacitor/core', () => ({
@@ -18,6 +18,5 @@ global.console = {
   // log: jest.fn(),
   // debug: jest.fn(),
   // info: jest.fn(),
-  // warn: jest.fn(),
   // error: jest.fn(),
 };

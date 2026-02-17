@@ -1,22 +1,26 @@
 /**
- * Barrel export for all bridge samples.
- * Import from here for convenience; import specific files for tree-shaking.
+ * Bridge samples barrel export
+ *
+ * This file re-exports all bridge samples for convenient importing.
+ * You can import from this barrel file or directly from specific domain files.
+ *
+ * @example
+ * // Import from barrel
+ * import { ACTIVATE_REQUEST_MINIMAL, GET_PROFILE_REQUEST } from '../shared/bridge-samples';
+ *
+ * // Import from specific file (for tree-shaking)
+ * import { ACTIVATE_REQUEST_MINIMAL } from '../shared/bridge-samples/activation';
  */
 
-export {
-  ACTIVATE_REQUEST_MINIMAL,
-  ACTIVATE_REQUEST_WITH_LOG_LEVEL,
-  ACTIVATE_REQUEST_WITH_CUSTOMER_USER_ID,
-  ACTIVATE_REQUEST_FULL,
-  ACTIVATE_REQUEST_WITH_IOS_PARAMS,
-  ACTIVATE_REQUEST_WITH_ANDROID_PARAMS,
-  ACTIVATE_REQUEST_WITH_BACKEND_PROXY,
-  ACTIVATE_REQUEST_WITH_MEDIA_CACHE,
-  ACTIVATE_REQUEST_WITH_EU_CLUSTER,
-  ACTIVATE_REQUEST_WITH_UI_DISABLED,
-  ACTIVATE_RESPONSE_SUCCESS,
-  ACTIVATE_RESPONSE_ERROR,
-  IS_ACTIVATED_REQUEST,
-  IS_ACTIVATED_RESPONSE_TRUE,
-  IS_ACTIVATED_RESPONSE_FALSE,
-} from './activation';
+export * from './activation';
+export * from './profile';
+export * from './paywall';
+export * from './purchase';
+export * from './user-management';
+export * from './onboarding';
+export * from './ui-methods';
+export * from './configuration';
+export * from './installation';
+export * from './ios-specific';
+export * from './events';
+export * from './common';

@@ -47,9 +47,18 @@ interface ResponseRegistry {
   identify?: components['requests']['Identify.Response'];
   logout?: components['requests']['Logout.Response'];
   restore_purchases?: components['requests']['RestorePurchases.Response'];
+  set_integration_identifiers?: components['requests']['SetIntegrationIdentifier.Response'];
+  report_transaction?: components['requests']['ReportTransaction.Response'];
   set_log_level?: components['requests']['SetLogLevel.Response'];
   set_fallback?: components['requests']['SetFallback.Response'];
+  update_attribution_data?: components['requests']['UpdateAttributionData.Response'];
   update_profile?: components['requests']['UpdateProfile.Response'];
+  get_current_installation_status?: components['requests']['GetCurrentInstallationStatus.Response'];
+  present_code_redemption_sheet?: components['requests']['PresentCodeRedemptionSheet.Response'];
+  update_collecting_refund_data_consent?: components['requests']['UpdateCollectingRefundDataConsent.Response'];
+  update_refund_preference?: components['requests']['UpdateRefundPreference.Response'];
+  open_web_paywall?: components['requests']['OpenWebPaywall.Response'];
+  create_web_paywall_url?: components['requests']['CreateWebPaywallUrl.Response'];
 }
 
 /**
@@ -63,7 +72,7 @@ interface ExtractNativeRequestOptions {
 /**
  * Options for expectNativeCall function
  */
-interface ExpectNativeCallOptions<T extends { method: string }> {
+interface ExpectNativeCallOptions<T> {
   nativeModule: MockNativeModule;
   method: string;
   expectedRequest: T;
@@ -71,61 +80,62 @@ interface ExpectNativeCallOptions<T extends { method: string }> {
 }
 
 /**
- * Configures the mocked AdaptyCapacitorPlugin with typed responses.
- *
- * The mock intercepts calls to AdaptyCapacitorPlugin.handleMethodCall()
- * and returns predefined responses wrapped in { crossPlatformJson } format.
- *
- * @param responses - Registry mapping method names to their typed responses
- * @returns Mocked plugin with spy capabilities
+ * Create a native module mock with pre-configured method responses
  *
  * @example
- * ```typescript
- * const nativeMock = createNativeModuleMock({
- *   activate: { success: true },
- *   is_activated: { success: true },
- * });
- *
- * await adapty.activate({ apiKey: 'test_key' });
- *
- * expect(nativeMock.handleMethodCall).toHaveBeenCalledWith({
- *   methodName: 'activate',
- *   args: expect.any(String),
+ * ```ts
+ * const mock = createNativeModuleMock({
+ *   activate: ACTIVATE_RESPONSE_SUCCESS,
+ *   get_profile: GET_PROFILE_RESPONSE,
  * });
  * ```
  */
-export function createNativeModuleMock(responses: ResponseRegistry = {}): MockNativeModule {
-  const nativeModule = AdaptyCapacitorPlugin as unknown as MockNativeModule;
-
-  nativeModule.handleMethodCall.mockImplementation(({ methodName }) => {
+export function createNativeModuleMock(responses: ResponseRegistry): MockNativeModule {
+  const mockImplementation: HandleMethodCallFn = jest.fn(({ methodName, args: _args }) => {
     const response = responses[methodName as keyof ResponseRegistry];
 
     if (!response) {
-      return Promise.reject(new Error(`No mock response registered for method: ${methodName}`));
+      return Promise.reject(
+        new Error(
+          `No mock response configured for method '${methodName}'. ` +
+            `Available methods: ${Object.keys(responses).join(', ')}`,
+        ),
+      );
     }
 
-    return Promise.resolve({
-      crossPlatformJson: JSON.stringify(response),
-    });
+    return Promise.resolve({ crossPlatformJson: JSON.stringify(response) });
   });
 
-  return nativeModule;
+  (AdaptyCapacitorPlugin.handleMethodCall as jest.MockedFunction<HandleMethodCallFn>).mockImplementation(
+    mockImplementation,
+  );
+
+  // Configure addListener to use TestEventEmitter
+  (AdaptyCapacitorPlugin.addListener as jest.MockedFunction<any>).mockImplementation(
+    (eventName: string, listenerFunc: (data: { data: string }) => void) => {
+      const emitter = getTestEmitter();
+      return Promise.resolve(emitter.addListener(eventName, listenerFunc));
+    },
+  );
+
+  return {
+    handleMethodCall: AdaptyCapacitorPlugin.handleMethodCall as jest.MockedFunction<HandleMethodCallFn>,
+    addListener: AdaptyCapacitorPlugin.addListener as jest.MockedFunction<
+      (eventName: string, listenerFunc: (data: { data: string }) => void) => Promise<{ remove: () => Promise<void> }>
+    >,
+  };
 }
 
 /**
- * Extracts and parses the request sent to the Capacitor plugin.
- *
- * @param options.nativeModule - Mocked Capacitor plugin
- * @param options.callIndex - Which call to inspect (default: 0 = first call)
- * @returns Parsed request object with type safety
+ * Extract native request from mock call for detailed assertions
  *
  * @example
- * ```typescript
- * const request = extractNativeRequest<
- *   components['requests']['Activate.Request']
- * >({ nativeModule: nativeMock });
- *
- * expect(request.configuration.api_key).toBe('test_key');
+ * ```ts
+ * const request = extractNativeRequest<components['requests']['Activate.Request']>({
+ *   nativeModule: mock,
+ *   callIndex: 0,
+ * });
+ * expect(request.configuration.log_level).toBe('error');
  * ```
  */
 export function extractNativeRequest<T>(options: ExtractNativeRequestOptions): T {
@@ -147,15 +157,16 @@ export function extractNativeRequest<T>(options: ExtractNativeRequestOptions): T
 }
 
 /**
- * Verifies that the Capacitor plugin was called with the correct request format.
+ * Assert native call matches expected request
  *
- * Uses toMatchObject for partial matching — SDK adds default fields like
- * cross_platform_sdk_name, observer_mode, media_cache, etc.
- *
- * @param options.nativeModule - Mocked Capacitor plugin
- * @param options.method - Expected method name (e.g., 'activate')
- * @param options.expectedRequest - Expected request structure
- * @param options.callIndex - Which call to verify (default: 0 = first call)
+ * @example
+ * ```ts
+ * expectNativeCall({
+ *   nativeModule: mock,
+ *   method: 'activate',
+ *   expectedRequest: ACTIVATE_REQUEST_MINIMAL,
+ * });
+ * ```
  */
 export function expectNativeCall<T extends { method: string }>(options: ExpectNativeCallOptions<T>): void {
   const { nativeModule, method: expectedMethod, expectedRequest, callIndex = 0 } = options;
@@ -179,13 +190,95 @@ export function expectNativeCall<T extends { method: string }>(options: ExpectNa
 }
 
 /**
- * Resets Capacitor plugin mock for next test.
- * Clears call history and mock implementations.
+ * Reset mock state (call history and implementation)
  */
 export function resetNativeModuleMock(mock: MockNativeModule): void {
   mock.handleMethodCall.mockReset();
   mock.addListener.mockReset();
-  mock.addListener.mockResolvedValue({
-    remove: jest.fn().mockResolvedValue(undefined),
-  });
+  resetTestEmitter();
+}
+
+/**
+ * Options for emitNativeEvent function
+ */
+interface EmitNativeEventOptions {
+  eventName: string;
+  eventData: any;
+}
+
+/**
+ * Simple event emitter for testing
+ */
+class TestEventEmitter {
+  private listeners: Map<string, ((data: any) => void)[]> = new Map();
+
+  addListener(eventName: string, listener: (data: any) => void): { remove: () => Promise<void> } {
+    const listeners = this.listeners.get(eventName) || [];
+    listeners.push(listener);
+    this.listeners.set(eventName, listeners);
+
+    return {
+      remove: async () => {
+        const currentListeners = this.listeners.get(eventName) || [];
+        const index = currentListeners.indexOf(listener);
+        if (index !== -1) {
+          currentListeners.splice(index, 1);
+        }
+      },
+    };
+  }
+
+  emit(eventName: string, data: any): void {
+    const listeners = this.listeners.get(eventName) || [];
+    listeners.forEach((listener) => listener(data));
+  }
+
+  removeAllListeners(): void {
+    this.listeners.clear();
+  }
+}
+
+let globalTestEmitter: TestEventEmitter | null = null;
+
+/**
+ * Get or create global test emitter for event testing
+ */
+export function getTestEmitter(): TestEventEmitter {
+  if (!globalTestEmitter) {
+    globalTestEmitter = new TestEventEmitter();
+  }
+  return globalTestEmitter;
+}
+
+/**
+ * Reset the global test emitter
+ * Should be called in afterEach to ensure clean state between tests
+ */
+export function resetTestEmitter(): void {
+  if (globalTestEmitter) {
+    globalTestEmitter.removeAllListeners();
+    globalTestEmitter = null;
+  }
+}
+
+/**
+ * Emit a native event for testing
+ *
+ * Simulates native → JS event flow by emitting events through the test emitter.
+ *
+ * @param options.eventName - Native event name (e.g., 'on_installation_details_success')
+ * @param options.eventData - Event data as object (will be JSON.stringified)
+ *
+ * @example
+ * ```typescript
+ * emitNativeEvent({
+ *   eventName: 'on_installation_details_success',
+ *   eventData: INSTALLATION_DETAILS_SUCCESS
+ * });
+ * ```
+ */
+export function emitNativeEvent(options: EmitNativeEventOptions): void {
+  const { eventName, eventData } = options;
+  const emitter = getTestEmitter();
+  emitter.emit(eventName, { data: JSON.stringify(eventData) });
 }
