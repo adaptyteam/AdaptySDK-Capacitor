@@ -2,7 +2,7 @@ PODS:
   - Adapty (3.15.5):
     - AdaptyLogger (= 3.15.5)
     - AdaptyUIBuilder (= 3.15.5)
-  - AdaptyCapacitor (3.15.0):
+  - AdaptyCapacitor (3.15.1):
     - Adapty (= 3.15.5)
     - AdaptyPlugin (= 3.15.5)
     - AdaptyUI (= 3.15.5)
@@ -79,7 +79,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Adapty: 42165456274ea1eb69e644e2da824e81227bb996
-  AdaptyCapacitor: 414262d4f44653c499f10f8f8c226004be4d7431
+  AdaptyCapacitor: f343428686161dbd946b66880461e18e5e141e4a
   AdaptyLogger: fbb6764f63c171c0d2209f197c9771617b09e388
   AdaptyPlugin: 9071e4a8daa7d4fe1b1fd9b449aabc6a6690ddd6
   AdaptyUI: 4a5df7479944c353d3378266e32d1f3d29786dac
