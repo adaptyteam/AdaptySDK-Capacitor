@@ -77,3 +77,6 @@ src/version.ts
 
 # Docs
 docs
+
+# Claude
+.claude/settings.local.json
