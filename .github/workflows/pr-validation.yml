@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [ master, dev ]
     types: [opened, synchronize, reopened]
+  workflow_dispatch:  # Allow manual trigger from any branch
   workflow_call:  # Allow this workflow to be called by other workflows
 
 jobs:

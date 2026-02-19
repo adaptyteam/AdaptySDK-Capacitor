@@ -13,8 +13,8 @@ Pod::Spec.new do |s|
   s.source_files = 'ios/Sources/**/*.{swift,h,m,c,cc,mm,cpp}'
   s.ios.deployment_target = '15.0'
   s.dependency 'Capacitor'
-  s.dependency 'Adapty', '3.15.3'
-  s.dependency 'AdaptyUI', '3.15.3'
-  s.dependency 'AdaptyPlugin', '3.15.3'
+  s.dependency 'Adapty', '3.15.5'
+  s.dependency 'AdaptyUI', '3.15.5'
+  s.dependency 'AdaptyPlugin', '3.15.5'
   s.swift_version = '5.1'
 end
