@@ -5,9 +5,12 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/*.config.js', '.eslintrc.js'],
+      files: ['**/*.config.js', '.eslintrc.js', 'scripts/**/*.js'],
       env: {
         node: true,
+      },
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
       },
     },
     {
