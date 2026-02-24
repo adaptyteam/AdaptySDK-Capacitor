@@ -11,6 +11,14 @@ Uses `NativeModuleMock` spy to verify exact request format and response parsing.
 - products (3), profile (2), purchase (2), purchase-event (1)
 - restore-purchases (1), user-management (3), web-paywall (2)
 
+### `ui-builder/` — UI ViewController Method Tests
+Tests SDK UI controller methods (PaywallViewController, OnboardingViewController) for bridge communication:
+JS (camelCase) → encode → snake_case JSON → Capacitor bridge → decode → JS.
+Uses `NativeModuleMock` spy to verify exact request format and response parsing.
+**11 tests** across 2 test files:
+- paywall-view-controller-methods (7 tests): createPaywallView, present, dismiss, showDialog
+- onboarding-view-controller-methods (4 tests): createOnboardingView, present, dismiss
+
 ## Shared Utilities (`shared/`)
 
 ### `bridge-samples/` — Typed Request/Response Fixtures
@@ -70,6 +78,8 @@ JS API call (camelCase)
 
 ## Running Tests
 ```bash
-npx jest src/__tests__/integration/adapty-handler    # Bridge protocol tests
+npx jest src/__tests__/integration/                   # All integration tests (83 tests)
+npx jest src/__tests__/integration/adapty-handler/    # Bridge protocol tests (72 tests)
+npx jest src/__tests__/integration/ui-builder/        # UI ViewController tests (11 tests)
 npx jest src/__tests__/integration/adapty-handler/activation.test.ts  # Just activation
 ```

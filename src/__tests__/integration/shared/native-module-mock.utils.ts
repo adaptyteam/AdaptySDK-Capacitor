@@ -59,6 +59,13 @@ interface ResponseRegistry {
   update_refund_preference?: components['requests']['UpdateRefundPreference.Response'];
   open_web_paywall?: components['requests']['OpenWebPaywall.Response'];
   create_web_paywall_url?: components['requests']['CreateWebPaywallUrl.Response'];
+  adapty_ui_create_paywall_view?: components['requests']['AdaptyUICreatePaywallView.Response'];
+  adapty_ui_present_paywall_view?: components['requests']['AdaptyUIPresentPaywallView.Response'];
+  adapty_ui_dismiss_paywall_view?: components['requests']['AdaptyUIDismissPaywallView.Response'];
+  adapty_ui_show_dialog?: components['requests']['AdaptyUIShowDialog.Response'];
+  adapty_ui_create_onboarding_view?: components['requests']['AdaptyUICreateOnboardingView.Response'];
+  adapty_ui_present_onboarding_view?: components['requests']['AdaptyUIPresentOnboardingView.Response'];
+  adapty_ui_dismiss_onboarding_view?: components['requests']['AdaptyUIDismissOnboardingView.Response'];
 }
 
 /**
