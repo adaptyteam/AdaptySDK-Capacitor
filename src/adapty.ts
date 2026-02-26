@@ -154,7 +154,6 @@ export class Adapty implements AdaptyPlugin {
           detail: error.detail,
         });
 
-        log.failed(() => ({ error: nativeError }));
         throw nativeError;
       }
 
@@ -187,15 +186,11 @@ export class Adapty implements AdaptyPlugin {
       }
 
       const formatError = new Error('Invalid response format: missing success or error field');
-      log.failed(() => ({ error: formatError }));
       throw formatError;
     } catch (error) {
       bridgeLog.failed(() => ({ error }));
-      // If it's our custom error and log wasn't called yet, log it
       if (error instanceof Error && !error.message.startsWith('{')) {
-        if (!error.message.startsWith('Native error:')) {
-          log.failed(() => ({ error }));
-        }
+        log.failed(() => ({ error }));
         throw error;
       }
 
