@@ -49,7 +49,7 @@
     "deploy-docs": "netlify deploy --dir=docs --prod",
     "build": "yarn clean && yarn update-versions && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
-    "tsc": "tsc --noEmit",
+    "tsc": "tsc --noEmit && tsc --noEmit -p tsconfig.spec.json",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:jest-coverage": "jest --coverage",

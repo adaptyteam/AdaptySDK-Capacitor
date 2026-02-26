@@ -6,7 +6,7 @@ describe('mergeOptions', () => {
       const defaults = { a: 1, b: 2 };
       const options = { b: 3, c: 4 };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({ a: 1, b: 3, c: 4 });
     });
@@ -15,7 +15,7 @@ describe('mergeOptions', () => {
       const defaults = { a: 1, b: 2 };
       const options = {};
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual(defaults);
     });
@@ -24,7 +24,7 @@ describe('mergeOptions', () => {
       const defaults = {};
       const options = { a: 1, b: 2 };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual(options);
     });
@@ -53,7 +53,7 @@ describe('mergeOptions', () => {
         endpoint: 'https://api.example.com',
       };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({
         config: {
@@ -87,7 +87,7 @@ describe('mergeOptions', () => {
         },
       };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({
         level1: {
@@ -107,7 +107,7 @@ describe('mergeOptions', () => {
       const defaults = { items: [1, 2, 3] };
       const options = { items: [4, 5] };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({ items: [4, 5] });
     });
@@ -126,7 +126,7 @@ describe('mergeOptions', () => {
         },
       };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({
         config: {
@@ -142,7 +142,7 @@ describe('mergeOptions', () => {
       const defaults = { a: 1, b: null };
       const options = { a: null, c: 3 };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({ a: null, b: null, c: 3 });
     });
@@ -151,7 +151,7 @@ describe('mergeOptions', () => {
       const defaults = { a: 1, b: undefined };
       const options = { a: undefined, c: 3 };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({ a: undefined, b: undefined, c: 3 });
     });
@@ -170,7 +170,7 @@ describe('mergeOptions', () => {
         },
       };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({
         config: {
@@ -196,7 +196,7 @@ describe('mergeOptions', () => {
         boolean: true,
       };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({
         string: 'custom',
@@ -213,7 +213,7 @@ describe('mergeOptions', () => {
       const defaults = { symbol: sym1 };
       const options = { symbol: sym2 };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result.symbol).toBe(sym2);
     });
@@ -251,7 +251,7 @@ describe('mergeOptions', () => {
         endpoints: ['/custom'],
       };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result).toEqual({
         api: {
@@ -278,7 +278,7 @@ describe('mergeOptions', () => {
       const defaults = { callback: defaultFn };
       const options = { callback: customFn };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result.callback).toBe(customFn);
       expect(result.callback()).toBe('custom');
@@ -291,7 +291,7 @@ describe('mergeOptions', () => {
       const defaults = { timestamp: defaultDate };
       const options = { timestamp: customDate };
       
-      const result = mergeOptions(options, defaults);
+      const result = mergeOptions<Record<string, any>>(options, defaults);
       
       expect(result.timestamp).toBe(customDate);
     });
@@ -321,8 +321,8 @@ describe('mergeOptions', () => {
       const maliciousOptions = JSON.parse('{"__proto__": {"polluted": true}}');
       const defaults = { safe: true };
       
-      const result = mergeOptions(maliciousOptions, defaults);
-      
+      const result = mergeOptions<Record<string, any>>(maliciousOptions, defaults);
+
       expect(result.safe).toBe(true);
       expect((result as any).__proto__.polluted).toBeUndefined();
     });
@@ -347,8 +347,8 @@ describe('mergeOptions', () => {
         }
       }
       
-      const result = mergeOptions(largeOptions, largeDefaults);
-      
+      const result = mergeOptions<Record<string, any>>(largeOptions, largeDefaults);
+
       expect(Object.keys(result)).toHaveLength(1000);
       expect(result.key0).toBe('custom0');
       expect(result.key1).toBe('default1');

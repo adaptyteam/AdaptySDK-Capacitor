@@ -1,3 +1,4 @@
+import type { AdaptyError } from '../shared/adapty-error';
 import { Log } from '../shared/logger';
 import type {
   AdaptyPaywallProduct,
@@ -7,7 +8,6 @@ import type {
   WebPresentation,
 } from '../shared/types';
 import type { FileLocation, MakePurchaseParamsInput } from '../shared/types/inputs';
-import type { AdaptyError } from '../shared/adapty-error';
 
 /**
  * @internal

@@ -4,7 +4,11 @@ export const mockParse = {
   parseOnboardingEvent: jest.fn(),
 };
 
-export function createMockParseEvents() {
+export function createMockParseEvents(): {
+  mockParseMethodResult: jest.Mock;
+  mockParseCommonEvent: jest.Mock;
+  mockParseOnboardingEvent: jest.Mock;
+} {
   const mockParseMethodResult = jest.fn();
   const mockParseCommonEvent = jest.fn();
   const mockParseOnboardingEvent = jest.fn();
