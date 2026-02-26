@@ -4,7 +4,7 @@ export const adapty = new Adapty();
 export type * from './logger';
 export { consoleLogSink } from './logger';
 export * from './types/constants';
-export { AdaptyError } from './types/adapty-error';
+export { AdaptyError } from '@adapty/core';
 export * from './types';
 export type * from './types/configs';
 

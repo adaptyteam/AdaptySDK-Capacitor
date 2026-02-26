@@ -1,3 +1,5 @@
+import type { AdaptyError } from '@adapty/core';
+
 import { Log } from '../logger';
 import type {
   AdaptyPaywallProduct,
@@ -6,7 +8,6 @@ import type {
   AdaptyPurchaseResult,
   WebPresentation,
 } from '../types';
-import type { AdaptyError } from '../types/adapty-error';
 import type { FileLocation, MakePurchaseParamsInput } from '../types/inputs';
 
 /**

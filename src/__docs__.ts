@@ -5,7 +5,7 @@
 export { Adapty } from './adapty';
 export { PaywallViewController } from './ui-builder/paywall-view-controller';
 export { OnboardingViewController } from './ui-builder/onboarding-view-controller';
-export { AdaptyError } from './types/adapty-error';
+export { AdaptyError } from '@adapty/core';
 // Error types
 export { ErrorCode } from './types/error';
 // Input types

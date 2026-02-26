@@ -1,6 +1,4 @@
-import type { AdaptyProfile, AdaptyInstallationDetails, UserEventName } from '@adapty/core';
-
-import type { AdaptyError } from './adapty-error';
+import type { AdaptyProfile, AdaptyInstallationDetails, UserEventName, AdaptyError } from '@adapty/core';
 
 // Re-export bridge types from @adapty/core
 export { MethodNames } from '@adapty/core';

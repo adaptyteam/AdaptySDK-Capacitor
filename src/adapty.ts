@@ -1,4 +1,5 @@
 // PluginListenerHandle is no longer referenced directly in this file
+import { AdaptyError } from '@adapty/core';
 import { Capacitor } from '@capacitor/core';
 
 import { AdaptyEmitter } from './adapty-emitter';
@@ -19,7 +20,6 @@ import type {
   AdaptyInstallationStatus,
   WebPresentation,
 } from './types';
-import { AdaptyError } from './types/adapty-error';
 import type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 import type { components } from './types/api';
 import type {
