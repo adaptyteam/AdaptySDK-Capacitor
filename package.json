@@ -44,7 +44,7 @@
     "eslint": "eslint . --ext ts",
     "prettier-check": "prettier \"**/*.{css,html,ts,js,tsx}\" --check",
     "prettier": "prettier \"**/*.{css,html,ts,js,tsx}\" --write",
-    "swiftlint": "node-swiftlint",
+    "swiftlint": "node-swiftlint ios/Sources",
     "doc-gen": "typedoc --tsconfig tsconfig.typedoc.json",
     "deploy-docs": "netlify deploy --dir=docs --prod",
     "build": "yarn clean && yarn update-versions && tsc && rollup -c rollup.config.mjs",
