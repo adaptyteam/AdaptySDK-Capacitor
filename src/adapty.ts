@@ -9,9 +9,6 @@ import { defaultAdaptyOptions } from './default-configs';
 import { AdaptyError } from './shared/adapty-error';
 import { Log, LogContext } from './shared/logger';
 import type { LoggerConfig, LogScope } from './shared/logger';
-import { filterUndefined } from './shared/utils/compact-object';
-import { mergeOptions } from './shared/utils/merge-options';
-import { withErrorContext } from './shared/utils/with-error-context';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -39,6 +36,9 @@ import type {
 } from './types/configs';
 import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './types/inputs';
 import type { MethodName } from './types/method-types';
+import { filterUndefined } from './utils/compact-object';
+import { mergeOptions } from './utils/merge-options';
+import { withErrorContext } from './utils/with-error-context';
 import VERSION from './version';
 
 type Req = components['requests'];

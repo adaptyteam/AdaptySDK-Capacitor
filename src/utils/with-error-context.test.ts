@@ -49,9 +49,7 @@ describe('withErrorContext', () => {
       wrapped();
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
-      expect((error as Error).message).toBe(
-        "Unhandled exception in user's handler in ErrorSource.failingHandler",
-      );
+      expect((error as Error).message).toBe("Unhandled exception in user's handler in ErrorSource.failingHandler");
       expect((error as any).originalError).toBe(originalError);
     }
   });
@@ -201,4 +199,3 @@ describe('withErrorContext', () => {
     expect(result).toBe('value');
   });
 });
-

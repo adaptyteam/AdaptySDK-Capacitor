@@ -5,33 +5,33 @@ describe('mergeOptions', () => {
     it('should merge simple objects', () => {
       const defaults = { a: 1, b: 2 };
       const options = { b: 3, c: 4 };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({ a: 1, b: 3, c: 4 });
     });
 
     it('should use defaults when options is empty', () => {
       const defaults = { a: 1, b: 2 };
       const options = {};
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual(defaults);
     });
 
     it('should use options when defaults is empty', () => {
       const defaults = {};
       const options = { a: 1, b: 2 };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual(options);
     });
 
     it('should return empty object when both are empty', () => {
       const result = mergeOptions({}, {});
-      
+
       expect(result).toEqual({});
     });
   });
@@ -45,16 +45,16 @@ describe('mergeOptions', () => {
         },
         debug: true,
       };
-      
+
       const options = {
         config: {
           timeout: 10000,
         },
         endpoint: 'https://api.example.com',
       };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({
         config: {
           timeout: 10000,
@@ -76,7 +76,7 @@ describe('mergeOptions', () => {
           },
         },
       };
-      
+
       const options = {
         level1: {
           level2: {
@@ -86,9 +86,9 @@ describe('mergeOptions', () => {
           },
         },
       };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({
         level1: {
           level2: {
@@ -106,9 +106,9 @@ describe('mergeOptions', () => {
     it('should replace arrays rather than merge them', () => {
       const defaults = { items: [1, 2, 3] };
       const options = { items: [4, 5] };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({ items: [4, 5] });
     });
 
@@ -119,15 +119,15 @@ describe('mergeOptions', () => {
           settings: { values: [1, 2] },
         },
       };
-      
+
       const options = {
         config: {
           tags: ['custom', 'new'],
         },
       };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({
         config: {
           tags: ['custom', 'new'],
@@ -141,18 +141,18 @@ describe('mergeOptions', () => {
     it('should handle null values', () => {
       const defaults = { a: 1, b: null };
       const options = { a: null, c: 3 };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({ a: null, b: null, c: 3 });
     });
 
     it('should handle undefined values', () => {
       const defaults = { a: 1, b: undefined };
       const options = { a: undefined, c: 3 };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({ a: undefined, b: undefined, c: 3 });
     });
 
@@ -163,15 +163,15 @@ describe('mergeOptions', () => {
           nullable: null,
         },
       };
-      
+
       const options = {
         config: {
           value: null,
         },
       };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({
         config: {
           value: null,
@@ -189,15 +189,15 @@ describe('mergeOptions', () => {
         boolean: false,
         bigint: BigInt(123),
       };
-      
+
       const options = {
         string: 'custom',
         number: 100,
         boolean: true,
       };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({
         string: 'custom',
         number: 100,
@@ -209,12 +209,12 @@ describe('mergeOptions', () => {
     it('should handle symbol values', () => {
       const sym1 = Symbol('default');
       const sym2 = Symbol('custom');
-      
+
       const defaults = { symbol: sym1 };
       const options = { symbol: sym2 };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result.symbol).toBe(sym2);
     });
   });
@@ -236,12 +236,12 @@ describe('mergeOptions', () => {
         },
         endpoints: ['/users', '/posts'],
       };
-      
+
       const options = {
         api: {
           baseUrl: 'https://custom.com',
           headers: {
-            'Authorization': 'Bearer token',
+            Authorization: 'Bearer token',
             'User-Agent': 'CustomAgent/2.0',
           },
         },
@@ -250,16 +250,16 @@ describe('mergeOptions', () => {
         },
         endpoints: ['/custom'],
       };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result).toEqual({
         api: {
           baseUrl: 'https://custom.com',
           timeout: 5000,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer token',
+            Authorization: 'Bearer token',
             'User-Agent': 'CustomAgent/2.0',
           },
         },
@@ -274,12 +274,12 @@ describe('mergeOptions', () => {
     it('should handle function values', () => {
       const defaultFn = () => 'default';
       const customFn = () => 'custom';
-      
+
       const defaults = { callback: defaultFn };
       const options = { callback: customFn };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result.callback).toBe(customFn);
       expect(result.callback()).toBe('custom');
     });
@@ -287,12 +287,12 @@ describe('mergeOptions', () => {
     it('should handle Date objects', () => {
       const defaultDate = new Date('2023-01-01');
       const customDate = new Date('2024-01-01');
-      
+
       const defaults = { timestamp: defaultDate };
       const options = { timestamp: customDate };
-      
+
       const result = mergeOptions<Record<string, any>>(options, defaults);
-      
+
       expect(result.timestamp).toBe(customDate);
     });
   });
@@ -307,9 +307,9 @@ describe('mergeOptions', () => {
     it('should maintain type safety with generics', () => {
       const defaults = { name: 'default', count: 0, enabled: false };
       const options = { name: 'test', count: 5 };
-      
+
       const result = mergeOptions<TestConfig>(options, defaults);
-      
+
       expect(result.name).toBe('test');
       expect(result.count).toBe(5);
       expect(result.enabled).toBe(false);
@@ -320,7 +320,7 @@ describe('mergeOptions', () => {
     it('should handle objects with prototype pollution attempts', () => {
       const maliciousOptions = JSON.parse('{"__proto__": {"polluted": true}}');
       const defaults = { safe: true };
-      
+
       const result = mergeOptions<Record<string, any>>(maliciousOptions, defaults);
 
       expect(result.safe).toBe(true);
@@ -331,7 +331,7 @@ describe('mergeOptions', () => {
       const defaults = { a: 1 };
       const options: any = { b: 2 };
       options.circular = options;
-      
+
       // Should not throw error due to circular reference
       expect(() => mergeOptions(options, defaults)).toThrow();
     });
@@ -339,14 +339,14 @@ describe('mergeOptions', () => {
     it('should handle very large objects', () => {
       const largeDefaults: any = {};
       const largeOptions: any = {};
-      
+
       for (let i = 0; i < 1000; i++) {
         largeDefaults[`key${i}`] = `default${i}`;
         if (i % 2 === 0) {
           largeOptions[`key${i}`] = `custom${i}`;
         }
       }
-      
+
       const result = mergeOptions<Record<string, any>>(largeOptions, largeDefaults);
 
       expect(Object.keys(result)).toHaveLength(1000);
