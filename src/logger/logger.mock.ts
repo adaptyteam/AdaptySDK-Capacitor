@@ -16,7 +16,10 @@ export const mockLogger = {
   consoleLogSink: jest.fn(),
 };
 
-export function createMockLogContext() {
+export function createMockLogContext(): {
+  mockLog: { start: jest.Mock; success: jest.Mock; failed: jest.Mock };
+  mockLogContext: { call: jest.Mock; event: jest.Mock };
+} {
   const mockLog = {
     start: jest.fn(),
     success: jest.fn(),

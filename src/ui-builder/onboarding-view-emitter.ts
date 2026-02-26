@@ -1,5 +1,5 @@
 import { parseOnboardingEvent } from '../coders/parse-onboarding';
-import type { LogContext } from '../shared/logger';
+import type { LogContext } from '../logger';
 import { OnboardingEventId } from '../types/onboarding-events';
 import type { OnboardingEventIdType, ParsedOnboardingEvent } from '../types/onboarding-events';
 

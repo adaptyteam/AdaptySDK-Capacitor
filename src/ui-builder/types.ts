@@ -1,5 +1,5 @@
+import { Log } from '../logger';
 import type { AdaptyError } from '../shared/adapty-error';
-import { Log } from '../shared/logger';
 import type {
   AdaptyPaywallProduct,
   AdaptyProductIdentifier,

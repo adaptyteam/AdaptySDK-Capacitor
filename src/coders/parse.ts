@@ -4,7 +4,7 @@ import {
   type AdaptyType,
 } from '@adapty/core';
 
-import type { LogContext } from '../shared/logger';
+import type { LogContext } from '../logger';
 
 import { coderFactory } from './factory';
 

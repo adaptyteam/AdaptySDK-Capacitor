@@ -1,6 +1,6 @@
 import { parseOnboardingEvent as _parseOnboardingEvent } from '@adapty/core';
 
-import type { LogContext } from '../shared/logger';
+import type { LogContext } from '../logger';
 import type { ParsedOnboardingEvent } from '../types/onboarding-events';
 
 import { coderFactory } from './factory';

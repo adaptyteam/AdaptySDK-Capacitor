@@ -1,7 +1,7 @@
 import type { Adapty } from '../adapty';
 import { coderFactory } from '../coders/factory';
+import { LogContext, Log } from '../logger';
 import { AdaptyError } from '../shared/adapty-error';
-import { LogContext, Log } from '../shared/logger';
 import type { AdaptyPaywall } from '../types';
 import type { components } from '../types/api';
 import { mapValues } from '../utils/map-values';

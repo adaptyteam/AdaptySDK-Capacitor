@@ -6,9 +6,9 @@ import { AdaptyCapacitorPlugin } from './bridge/plugin';
 import { coderFactory } from './coders/factory';
 import { parseMethodResult, type AdaptyType } from './coders/parse';
 import { defaultAdaptyOptions } from './default-configs';
+import { Log, LogContext } from './logger';
+import type { LoggerConfig, LogScope } from './logger';
 import { AdaptyError } from './shared/adapty-error';
-import { Log, LogContext } from './shared/logger';
-import type { LoggerConfig, LogScope } from './shared/logger';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
