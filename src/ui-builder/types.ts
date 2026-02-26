@@ -7,7 +7,7 @@ import type {
   WebPresentation,
 } from '../shared/types';
 import type { FileLocation, MakePurchaseParamsInput } from '../shared/types/inputs';
-import type { AdaptyError } from '../shared/types/method-types';
+import type { AdaptyError } from '../shared/adapty-error';
 
 /**
  * @internal

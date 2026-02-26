@@ -1,8 +1,8 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
+import { parseCommonEvent } from './coders/parse';
 import type { AdaptyError } from './shared/adapty-error';
-import { parseCommonEvent } from './shared/coders/parse';
 import { LogContext } from './shared/logger';
 import type { AdaptyProfile, AdaptyInstallationDetails } from './shared/types';
 import type { AddListenerFn, EventPayloadMap } from './types/adapty-plugin';

@@ -1,4 +1,4 @@
-import { parsePaywallEvent } from '../shared/coders/parse-paywall';
+import { parsePaywallEvent } from '../coders/parse-paywall';
 import type { LogContext } from '../shared/logger';
 import { PaywallEventId } from '../shared/types/paywall-events';
 import type { ParsedPaywallEvent, PaywallEventIdType } from '../shared/types/paywall-events';

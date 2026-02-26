@@ -1,7 +1,6 @@
 import type { Adapty } from '../adapty';
+import { coderFactory } from '../coders/factory';
 import { AdaptyError } from '../shared/adapty-error';
-import { AdaptyOnboardingCoder } from '../shared/coders/adapty-onboarding';
-import { AdaptyUICreateOnboardingViewParamsCoder } from '../shared/coders/adapty-ui-create-onboarding-view-params';
 import { LogContext, Log } from '../shared/logger';
 import { WebPresentation } from '../shared/types';
 import type { AdaptyOnboarding } from '../shared/types';
@@ -57,9 +56,9 @@ export class OnboardingViewController {
     const log = ctx.call({ methodName: methodKey });
     log.start(() => ({ onboarding, params }));
 
-    const coder = new AdaptyOnboardingCoder();
+    const coder = coderFactory.createOnboardingCoder();
     const paramsWithDefaults = { ...DEFAULT_ONBOARDING_PARAMS, ...params };
-    const encodedParams = new AdaptyUICreateOnboardingViewParamsCoder().encode(paramsWithDefaults);
+    const encodedParams = coderFactory.createUiCreateOnboardingViewParamsCoder().encode(paramsWithDefaults);
 
     const data: Req['AdaptyUICreateOnboardingView.Request'] = {
       method: methodKey,

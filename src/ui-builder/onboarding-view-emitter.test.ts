@@ -1,7 +1,7 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
-import { parseOnboardingEvent } from '../shared/coders/parse-onboarding';
+import { parseOnboardingEvent } from '../coders/parse-onboarding';
 import { LogContext } from '../shared/logger';
 import { OnboardingEventId } from '../shared/types/onboarding-events';
 
@@ -33,7 +33,7 @@ const TEST_EVENT_DATA = {
 
 jest.mock('../bridge/plugin', () => require('../bridge/plugin.mock').mockAdaptyCapacitorPlugin);
 jest.mock('../shared/logger', () => require('../shared/logger/logger.mock').mockLogger);
-jest.mock('../shared/coders/parse-onboarding', () => require('../shared/coders/parse.mock').mockParse);
+jest.mock('../coders/parse-onboarding', () => require('../coders/parse.mock').mockParse);
 
 describe('OnboardingViewEmitter', () => {
   let emitter: OnboardingViewEmitter;

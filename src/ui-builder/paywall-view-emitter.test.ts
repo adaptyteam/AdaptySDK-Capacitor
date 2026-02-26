@@ -1,7 +1,7 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
-import { parsePaywallEvent } from '../shared/coders/parse-paywall';
+import { parsePaywallEvent } from '../coders/parse-paywall';
 import { LogContext } from '../shared/logger';
 import type { AdaptyPaywallProduct, AdaptyPurchaseResult } from '../shared/types';
 
@@ -48,7 +48,7 @@ const TEST_EVENT_DATA = {
 
 jest.mock('../bridge/plugin', () => require('../bridge/plugin.mock').mockAdaptyCapacitorPlugin);
 jest.mock('../shared/logger', () => require('../shared/logger/logger.mock').mockLogger);
-jest.mock('../shared/coders/parse-paywall', () => require('../shared/coders/parse-paywall.mock').mockParsePaywall);
+jest.mock('../coders/parse-paywall', () => require('../coders/parse-paywall.mock').mockParsePaywall);
 
 describe('PaywallViewEmitter', () => {
   let emitter: PaywallViewEmitter;

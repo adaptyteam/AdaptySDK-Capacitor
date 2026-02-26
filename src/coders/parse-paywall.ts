@@ -1,0 +1,9 @@
+import { parsePaywallEvent as _parsePaywallEvent } from '@adapty/core';
+
+import type { LogContext } from '../shared/logger';
+import type { ParsedPaywallEvent } from '../shared/types/paywall-events';
+
+import { coderFactory } from './factory';
+
+export const parsePaywallEvent = (input: string, ctx?: LogContext): ParsedPaywallEvent | null =>
+  _parsePaywallEvent(coderFactory, input, ctx);

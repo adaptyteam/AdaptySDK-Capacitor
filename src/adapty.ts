@@ -3,15 +3,10 @@ import { Capacitor } from '@capacitor/core';
 
 import { AdaptyEmitter } from './adapty-emitter';
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
-import { getCoder } from './coder-registry';
+import { coderFactory } from './coders/factory';
+import { parseMethodResult, type AdaptyType } from './coders/parse';
 import { defaultAdaptyOptions } from './default-configs';
 import { AdaptyError } from './shared/adapty-error';
-import { AdaptyConfigurationCoder } from './shared/coders/adapty-configuration';
-import { AdaptyIdentifyParamsCoder } from './shared/coders/adapty-identify-params';
-import { AdaptyPaywallCoder } from './shared/coders/adapty-paywall';
-import { AdaptyPaywallProductCoder } from './shared/coders/adapty-paywall-product';
-import { AdaptyProfileParametersCoder } from './shared/coders/adapty-profile-parameters';
-import { AdaptyPurchaseParamsCoder } from './shared/coders/adapty-purchase-params';
 import { Log, LogContext } from './shared/logger';
 import type { LoggerConfig, LogScope } from './shared/logger';
 import type {
@@ -27,13 +22,7 @@ import type {
 } from './shared/types';
 import type { components } from './shared/types/api';
 import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './shared/types/inputs';
-import {
-  isErrorResponse,
-  isSuccessResponse,
-  type CrossPlatformResponse,
-  type MethodName,
-  type MethodResponseMap,
-} from './shared/types/method-types';
+import type { MethodName } from './shared/types/method-types';
 import { filterUndefined } from './shared/utils/compact-object';
 import { mergeOptions } from './shared/utils/merge-options';
 import { withErrorContext } from './shared/utils/with-error-context';
@@ -115,7 +104,8 @@ export class Adapty implements AdaptyPlugin {
     args: string,
     ctx: LogContext,
     log: LogScope,
-  ): Promise<MethodResponseMap[M]> {
+    resultType: AdaptyType = 'Void',
+  ): Promise<any> {
     // Hold on deferred activation first
     if (this.resolveHeldActivation && !this.nonWaitingMethods.includes(methodName)) {
       log.wait(() => ({}));
@@ -140,54 +130,18 @@ export class Adapty implements AdaptyPlugin {
         args,
       });
 
-      bridgeLog.success(() => ({ crossPlatformJson: result.crossPlatformJson }));
+      const resultJson = result.crossPlatformJson;
+      bridgeLog.success(() => ({ crossPlatformJson: resultJson }));
 
-      // Parse JSON response with type safety
-      const parsedResponse: CrossPlatformResponse = JSON.parse(result.crossPlatformJson);
-
-      // Check for native errors
-      if (isErrorResponse(parsedResponse)) {
-        const error = parsedResponse.error;
-        const nativeError = new AdaptyError({
-          adaptyCode: error.adaptyCode as any,
-          message: error.message,
-          detail: error.detail,
-        });
-
-        throw nativeError;
-      }
-
-      // Extract success data with type safety
-      if (isSuccessResponse(parsedResponse)) {
-        const successData: any = parsedResponse.success;
-
-        // Apply decoder if available for this method
-        const coder = getCoder(methodName);
-        let result: MethodResponseMap[M];
-
-        if (coder) {
-          // Create decode scope for logging decode operations
-          const decodeLog = ctx.decode({ methodName: `decode/${methodName}` });
-          decodeLog.start(() => ({ successData }));
-
-          try {
-            result = coder.decode(successData) as MethodResponseMap[M];
-            decodeLog.success(() => ({ result }));
-          } catch (error) {
-            decodeLog.failed(() => ({ error }));
-            throw error;
-          }
-        } else {
-          result = successData as MethodResponseMap[M];
-        }
-
-        log.success(() => ({ result }));
-        return result;
-      }
-
-      const formatError = new Error('Invalid response format: missing success or error field');
-      throw formatError;
+      const decoded = parseMethodResult<any>(resultJson, resultType, ctx);
+      log.success(() => ({ result: decoded }));
+      return decoded;
     } catch (error) {
+      if (error instanceof AdaptyError) {
+        log.failed(() => ({ error }));
+        throw error;
+      }
+
       bridgeLog.failed(() => ({ error }));
       if (error instanceof Error && !error.message.startsWith('{')) {
         log.failed(() => ({ error }));
@@ -291,7 +245,7 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ apiKey, params }));
 
-    const configurationCoder = new AdaptyConfigurationCoder();
+    const configurationCoder = coderFactory.createConfigurationCoder();
     const configuration = configurationCoder.encode(apiKey, params);
 
     const activateRequestWithUndefined: Req['Activate.Request'] = {
@@ -323,7 +277,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'Boolean');
   }
 
   /**
@@ -365,7 +319,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyInstallationStatus');
   }
 
   /**
@@ -422,7 +376,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyPaywall');
   }
 
   /**
@@ -486,7 +440,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyPaywall');
   }
 
   /**
@@ -517,7 +471,7 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const paywallCoder = new AdaptyPaywallCoder();
+    const paywallCoder = coderFactory.createPaywallCoder();
 
     const argsWithUndefined: Req['GetPaywallProducts.Request'] = {
       method,
@@ -526,7 +480,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'Array<AdaptyPaywallProduct>');
   }
 
   /**
@@ -585,7 +539,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyOnboarding');
   }
 
   /**
@@ -643,7 +597,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyOnboarding');
   }
 
   /**
@@ -691,7 +645,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyProfile');
   }
 
   /**
@@ -728,7 +682,7 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const identifyParamsCoder = new AdaptyIdentifyParamsCoder();
+    const identifyParamsCoder = coderFactory.createIdentifyParamsCoder();
     const parameters = identifyParamsCoder.encode(options.params);
 
     const argsWithUndefined: Req['Identify.Request'] = {
@@ -775,7 +729,7 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const paywallCoder = new AdaptyPaywallCoder();
+    const paywallCoder = coderFactory.createPaywallCoder();
 
     const argsWithUndefined: Req['LogShowPaywall.Request'] = {
       method,
@@ -817,8 +771,8 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const paywallCoder = new AdaptyPaywallCoder();
-    const productCoder = new AdaptyPaywallProductCoder();
+    const paywallCoder = coderFactory.createPaywallCoder();
+    const productCoder = coderFactory.createPaywallProductCoder();
 
     const argsWithUndefined: Req['OpenWebPaywall.Request'] = {
       method,
@@ -865,8 +819,8 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const paywallCoder = new AdaptyPaywallCoder();
-    const productCoder = new AdaptyPaywallProductCoder();
+    const paywallCoder = coderFactory.createPaywallCoder();
+    const productCoder = coderFactory.createPaywallProductCoder();
 
     const argsWithUndefined: Req['CreateWebPaywallUrl.Request'] = {
       method,
@@ -877,7 +831,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'String');
   }
 
   /**
@@ -957,8 +911,8 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const productCoder = new AdaptyPaywallProductCoder();
-    const purchaseParamsCoder = new AdaptyPurchaseParamsCoder();
+    const productCoder = coderFactory.createPaywallProductCoder();
+    const purchaseParamsCoder = coderFactory.createPurchaseParamsCoder();
 
     const encodedProduct = this.encodeWithLogging(productCoder, options.product, 'AdaptyPaywallProduct', ctx);
     const productInput = productCoder.getInput(encodedProduct);
@@ -972,7 +926,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyPurchaseResult');
   }
 
   /**
@@ -1103,7 +1057,7 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyProfile');
   }
 
   /**
@@ -1471,7 +1425,7 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const profileParametersCoder = new AdaptyProfileParametersCoder();
+    const profileParametersCoder = coderFactory.createProfileParametersCoder();
 
     const argsWithUndefined: Req['UpdateProfile.Request'] = {
       method,
