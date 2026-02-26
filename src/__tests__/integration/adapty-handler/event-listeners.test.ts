@@ -1,6 +1,6 @@
 import { Adapty } from 'adapty';
-import type { AdaptyError } from 'shared/adapty-error';
 import type { AdaptyInstallationDetails } from 'types';
+import type { AdaptyError } from 'types/adapty-error';
 
 import {
   ACTIVATE_RESPONSE_SUCCESS,

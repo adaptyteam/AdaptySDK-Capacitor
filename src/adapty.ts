@@ -8,7 +8,6 @@ import { parseMethodResult, type AdaptyType } from './coders/parse';
 import { defaultAdaptyOptions } from './default-configs';
 import { Log, LogContext } from './logger';
 import type { LoggerConfig, LogScope } from './logger';
-import { AdaptyError } from './shared/adapty-error';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -20,6 +19,7 @@ import type {
   AdaptyInstallationStatus,
   WebPresentation,
 } from './types';
+import { AdaptyError } from './types/adapty-error';
 import type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 import type { components } from './types/api';
 import type {

@@ -5,7 +5,7 @@
 export { Adapty } from './adapty';
 export { PaywallViewController } from './ui-builder/paywall-view-controller';
 export { OnboardingViewController } from './ui-builder/onboarding-view-controller';
-export { AdaptyError } from './shared/adapty-error';
+export { AdaptyError } from './types/adapty-error';
 // Error types
 export { ErrorCode } from './types/error';
 // Input types
@@ -29,7 +29,7 @@ export {
   Gender,
   AppTrackingTransparencyStatus,
   ProductPeriod,
-} from './shared/constants';
+} from './types/constants';
 // Core types
 export {
   AdaptyPrice,

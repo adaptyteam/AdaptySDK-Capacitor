@@ -1,8 +1,8 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import type { LoggerConfig } from '../logger';
-import type { AdaptyError } from '../shared/adapty-error';
 
+import type { AdaptyError } from './adapty-error';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
