@@ -5,9 +5,16 @@
 export { Adapty } from './adapty';
 export { PaywallViewController } from './ui-builder/paywall-view-controller';
 export { OnboardingViewController } from './ui-builder/onboarding-view-controller';
-export { AdaptyError } from '@adapty/core';
-// Error types
-export { ErrorCode } from './types/error';
+export {
+  AdaptyError,
+  ErrorCode,
+  VendorStore,
+  OfferType,
+  CancellationReason,
+  Gender,
+  AppTrackingTransparencyStatus,
+  ProductPeriod,
+} from '@adapty/core';
 // Input types
 export {
   LogLevel,
@@ -21,15 +28,6 @@ export {
   MakePurchaseParamsInput,
   FileLocation,
 } from './types/inputs';
-// Constants
-export {
-  VendorStore,
-  OfferType,
-  CancellationReason,
-  Gender,
-  AppTrackingTransparencyStatus,
-  ProductPeriod,
-} from './types/constants';
 // Core types
 export {
   AdaptyPrice,

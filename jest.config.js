@@ -6,6 +6,7 @@ module.exports = {
   modulePaths: ['./src'],
   setupFiles: ['<rootDir>/jest/jest.setup.js'],
   testPathIgnorePatterns: ['/dist', '/node_modules/', '/examples', '/.worktrees/'],
+  maxWorkers: 1,
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
