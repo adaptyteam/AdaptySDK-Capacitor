@@ -5,7 +5,7 @@
  * the native bridge for user management methods.
  */
 
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 /**
  * Identify request with customer_user_id

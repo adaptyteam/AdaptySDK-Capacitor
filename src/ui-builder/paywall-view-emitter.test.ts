@@ -3,7 +3,7 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
 import { parsePaywallEvent } from '../coders/parse-paywall';
 import { LogContext } from '../shared/logger';
-import type { AdaptyPaywallProduct, AdaptyPurchaseResult } from '../shared/types';
+import type { AdaptyPaywallProduct, AdaptyPurchaseResult } from '../types';
 
 import { PaywallViewEmitter } from './paywall-view-emitter';
 

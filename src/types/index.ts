@@ -30,6 +30,6 @@ export { WebPresentation, RefundPreference } from '@adapty/core';
 // Re-export local modules that are NOT in core
 export * from './error';
 export * from './inputs';
-export * from '../constants';
+export * from '../shared/constants';
 export * from './paywall-events';
 export * from './onboarding-events';

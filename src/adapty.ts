@@ -9,6 +9,9 @@ import { defaultAdaptyOptions } from './default-configs';
 import { AdaptyError } from './shared/adapty-error';
 import { Log, LogContext } from './shared/logger';
 import type { LoggerConfig, LogScope } from './shared/logger';
+import { filterUndefined } from './shared/utils/compact-object';
+import { mergeOptions } from './shared/utils/merge-options';
+import { withErrorContext } from './shared/utils/with-error-context';
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -19,14 +22,9 @@ import type {
   RefundPreference,
   AdaptyInstallationStatus,
   WebPresentation,
-} from './shared/types';
-import type { components } from './shared/types/api';
-import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './shared/types/inputs';
-import type { MethodName } from './shared/types/method-types';
-import { filterUndefined } from './shared/utils/compact-object';
-import { mergeOptions } from './shared/utils/merge-options';
-import { withErrorContext } from './shared/utils/with-error-context';
+} from './types';
 import type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
+import type { components } from './types/api';
 import type {
   AdaptyDefaultOptions,
   GetPaywallOptions,
@@ -39,6 +37,8 @@ import type {
   GetOnboardingForDefaultAudienceOptions,
   GetOnboardingForDefaultAudienceOptionsWithDefaults,
 } from './types/configs';
+import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './types/inputs';
+import type { MethodName } from './types/method-types';
 import VERSION from './version';
 
 type Req = components['requests'];

@@ -5,7 +5,7 @@
  * the native bridge for purchase methods.
  */
 
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 /**
  * MakePurchase request with product (snake_case format)

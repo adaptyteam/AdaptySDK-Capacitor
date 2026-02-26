@@ -1,5 +1,5 @@
-import { FetchPolicy } from './shared/types/inputs';
 import type { AdaptyDefaultOptions } from './types/configs';
+import { FetchPolicy } from './types/inputs';
 
 export const defaultAdaptyOptions: AdaptyDefaultOptions = {
   get_paywall: {

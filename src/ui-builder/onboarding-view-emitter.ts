@@ -1,7 +1,7 @@
 import { parseOnboardingEvent } from '../coders/parse-onboarding';
 import type { LogContext } from '../shared/logger';
-import { OnboardingEventId } from '../shared/types/onboarding-events';
-import type { OnboardingEventIdType, ParsedOnboardingEvent } from '../shared/types/onboarding-events';
+import { OnboardingEventId } from '../types/onboarding-events';
+import type { OnboardingEventIdType, ParsedOnboardingEvent } from '../types/onboarding-events';
 
 import { BaseViewEmitter } from './base-view-emitter';
 import type { OnboardingEventHandlers } from './types';

@@ -6,8 +6,8 @@ import type {
   AdaptyProfile,
   AdaptyPurchaseResult,
   WebPresentation,
-} from '../shared/types';
-import type { FileLocation, MakePurchaseParamsInput } from '../shared/types/inputs';
+} from '../types';
+import type { FileLocation, MakePurchaseParamsInput } from '../types/inputs';
 
 /**
  * @internal

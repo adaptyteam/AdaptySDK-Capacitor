@@ -1,7 +1,7 @@
 import { parsePaywallEvent as _parsePaywallEvent } from '@adapty/core';
 
 import type { LogContext } from '../shared/logger';
-import type { ParsedPaywallEvent } from '../shared/types/paywall-events';
+import type { ParsedPaywallEvent } from '../types/paywall-events';
 
 import { coderFactory } from './factory';
 

@@ -1,5 +1,5 @@
 import { Adapty } from 'adapty';
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 import { createPaywallView } from 'ui-builder/create-paywall-view';
 
 import { cleanupAdapty } from '../adapty-handler/setup.utils';

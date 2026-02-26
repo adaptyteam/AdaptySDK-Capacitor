@@ -5,7 +5,7 @@
  */
 
 import { Adapty } from 'adapty';
-import type { AdaptyPaywallProduct, AdaptyProfile } from 'shared/types';
+import type { AdaptyPaywallProduct, AdaptyProfile } from 'types';
 
 import {
   ACTIVATE_RESPONSE_SUCCESS,

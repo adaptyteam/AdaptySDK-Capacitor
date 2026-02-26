@@ -1,5 +1,5 @@
 import { Adapty } from '../adapty';
-import type { AdaptyPaywall } from '../shared/types';
+import type { AdaptyPaywall } from '../types';
 
 import { PaywallViewController } from './paywall-view-controller';
 import type { CreatePaywallViewParamsInput } from './types';

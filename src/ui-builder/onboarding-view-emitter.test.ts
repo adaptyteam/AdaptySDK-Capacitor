@@ -4,7 +4,7 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
 import { parseOnboardingEvent } from '../coders/parse-onboarding';
 import { LogContext } from '../shared/logger';
-import { OnboardingEventId } from '../shared/types/onboarding-events';
+import { OnboardingEventId } from '../types/onboarding-events';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 

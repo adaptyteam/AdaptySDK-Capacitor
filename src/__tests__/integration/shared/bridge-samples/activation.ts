@@ -7,7 +7,7 @@
  * Uses api.d.ts types for compile-time validation against cross_platform.yaml.
  */
 
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 /**
  * Minimal activate request — only required api_key.

@@ -1,3 +1,3 @@
-export * from './types';
+export * from '../types';
 export * from './adapty-error';
-export * from './constants'; 
+export * from './constants';

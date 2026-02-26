@@ -2,10 +2,10 @@ import type { Adapty } from '../adapty';
 import { coderFactory } from '../coders/factory';
 import { AdaptyError } from '../shared/adapty-error';
 import { LogContext, Log } from '../shared/logger';
-import type { AdaptyPaywall } from '../shared/types';
-import type { components } from '../shared/types/api';
 import { mapValues } from '../shared/utils/map-values';
 import { withErrorContext } from '../shared/utils/with-error-context';
+import type { AdaptyPaywall } from '../types';
+import type { components } from '../types/api';
 
 import { PaywallViewEmitter } from './paywall-view-emitter';
 import type {

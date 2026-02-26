@@ -1,6 +1,6 @@
 import { FetchPolicy } from '@adapty/core';
 import { Adapty } from 'adapty';
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 import {
   ACTIVATE_RESPONSE_SUCCESS,

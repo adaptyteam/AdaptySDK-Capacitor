@@ -1,15 +1,10 @@
 import type { AdaptyProfile, AdaptyInstallationDetails, UserEventName } from '@adapty/core';
-import type { AdaptyError } from '../adapty-error';
+
+import type { AdaptyError } from '../shared/adapty-error';
 
 // Re-export bridge types from @adapty/core
 export { MethodNames } from '@adapty/core';
-export type {
-  MethodName,
-  Serializable,
-  AdaptyNativeError,
-  AdaptyBridgeError,
-  UserEventName,
-} from '@adapty/core';
+export type { MethodName, Serializable, AdaptyNativeError, AdaptyBridgeError, UserEventName } from '@adapty/core';
 
 // Capacitor-specific: event listener types
 // (Capacitor uses its own EmitterSubscription, not React Native's)

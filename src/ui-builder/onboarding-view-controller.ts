@@ -2,11 +2,11 @@ import type { Adapty } from '../adapty';
 import { coderFactory } from '../coders/factory';
 import { AdaptyError } from '../shared/adapty-error';
 import { LogContext, Log } from '../shared/logger';
-import { WebPresentation } from '../shared/types';
-import type { AdaptyOnboarding } from '../shared/types';
-import type { components } from '../shared/types/api';
 import { mapValues } from '../shared/utils/map-values';
 import { withErrorContext } from '../shared/utils/with-error-context';
+import { WebPresentation } from '../types';
+import type { AdaptyOnboarding } from '../types';
+import type { components } from '../types/api';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 import { DEFAULT_ONBOARDING_EVENT_HANDLERS } from './types';
