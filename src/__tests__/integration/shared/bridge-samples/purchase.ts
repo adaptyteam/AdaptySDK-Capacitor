@@ -123,11 +123,5 @@ export const REPORT_TRANSACTION_REQUEST_WITH_VARIATION: components['requests']['
  * Returns updated profile after transaction
  */
 export const REPORT_TRANSACTION_RESPONSE_SUCCESS: components['requests']['ReportTransaction.Response'] = {
-  success: {
-    profile_id: 'profile_123',
-    customer_user_id: 'user_123',
-    segment_hash: 'segment_abc',
-    is_test_user: false,
-    timestamp: 1704067200000,
-  },
+  success: true,
 };
