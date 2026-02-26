@@ -80,3 +80,5 @@ docs
 
 # Claude
 .claude/settings.local.json
+
+.worktrees/
