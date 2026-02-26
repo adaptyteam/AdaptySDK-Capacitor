@@ -7,7 +7,7 @@ export { PaywallViewController } from './ui-builder/paywall-view-controller';
 export { OnboardingViewController } from './ui-builder/onboarding-view-controller';
 export { AdaptyError } from './shared/adapty-error';
 // Error types
-export { ErrorCode, ErrorCodeName } from './shared/types/error';
+export { ErrorCode } from './shared/types/error';
 // Input types
 export {
   LogLevel,
