@@ -1,4 +1,5 @@
 module.exports = {
+  root: true,
   extends: '@ionic/eslint-config/recommended',
   env: {
     node: true,

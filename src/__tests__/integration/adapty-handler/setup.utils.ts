@@ -1,5 +1,5 @@
 import type { Adapty } from 'adapty';
-import { Log } from 'shared/logger';
+import { Log } from 'logger';
 
 /**
  * Cleans up Adapty instance by removing all listeners

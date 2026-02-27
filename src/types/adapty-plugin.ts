@@ -1,7 +1,8 @@
+import type { AdaptyError } from '@adapty/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
-import type { AdaptyError } from '../shared/adapty-error';
-import type { LoggerConfig } from '../shared/logger';
+import type { LoggerConfig } from '../logger';
+
 import type {
   AdaptyPaywall,
   AdaptyPaywallProduct,
@@ -13,7 +14,7 @@ import type {
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
   WebPresentation,
-} from '../shared/types';
+} from './index';
 import type {
   ActivateParamsInput,
   GetPlacementParamsInput,
@@ -21,7 +22,7 @@ import type {
   MakePurchaseParamsInput,
   FileLocation,
   LogLevel,
-} from '../shared/types/inputs';
+} from './inputs';
 
 export interface AdaptyPlugin {
   /**

@@ -1,9 +1,10 @@
+import type { AdaptyError } from '@adapty/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
-import { parseOnboardingEvent } from '../shared/coders/parse-onboarding';
-import { LogContext } from '../shared/logger';
-import { OnboardingEventId } from '../shared/types/onboarding-events';
+import { parseOnboardingEvent } from '../coders/parse-onboarding';
+import { LogContext } from '../logger';
+import { OnboardingEventId } from '../types/onboarding-events';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 
@@ -17,6 +18,7 @@ const NATIVE_EVENT_NAMES = {
   stateUpdated: 'onboarding_on_state_updated_action',
 } as const;
 
+const TEST_ADAPTY_ERROR = { message: 'Test error', adaptyCode: 0 } as unknown as AdaptyError;
 const TEST_VIEW_ID = 'test-onboarding-view-id';
 const WRONG_VIEW_ID = 'different-view-id';
 
@@ -32,8 +34,8 @@ const TEST_EVENT_DATA = {
 } as const;
 
 jest.mock('../bridge/plugin', () => require('../bridge/plugin.mock').mockAdaptyCapacitorPlugin);
-jest.mock('../shared/logger', () => require('../shared/logger/logger.mock').mockLogger);
-jest.mock('../shared/coders/parse-onboarding', () => require('../shared/coders/parse.mock').mockParse);
+jest.mock('../logger', () => require('../logger/logger.mock').mockLogger);
+jest.mock('../coders/parse-onboarding', () => require('../coders/parse.mock').mockParse);
 
 describe('OnboardingViewEmitter', () => {
   let emitter: OnboardingViewEmitter;
@@ -92,7 +94,7 @@ describe('OnboardingViewEmitter', () => {
       const mockListener = jest.fn();
       mockParseOnboardingEvent.mockReturnValue({
         id: OnboardingEventId.Error,
-        error: { message: 'Test error', adaptyCode: 0 },
+        error: TEST_ADAPTY_ERROR,
         view: { id: TEST_VIEW_ID },
       });
 
@@ -145,7 +147,7 @@ describe('OnboardingViewEmitter', () => {
       const mockListener = jest.fn();
       mockParseOnboardingEvent.mockReturnValue({
         id: OnboardingEventId.Error,
-        error: { message: 'Test error', adaptyCode: 0 },
+        error: TEST_ADAPTY_ERROR,
         view: { id: WRONG_VIEW_ID },
       });
 
@@ -165,7 +167,7 @@ describe('OnboardingViewEmitter', () => {
       const mockListener = jest.fn().mockReturnValue(false);
       mockParseOnboardingEvent.mockReturnValue({
         id: OnboardingEventId.Error,
-        error: { message: 'Test error', adaptyCode: 0 },
+        error: TEST_ADAPTY_ERROR,
         view: { id: TEST_VIEW_ID },
       });
 
@@ -212,7 +214,7 @@ describe('OnboardingViewEmitter', () => {
       // Test onError
       mockParseOnboardingEvent.mockReturnValue({
         id: OnboardingEventId.Error,
-        error: { message: 'Test error', adaptyCode: 0 },
+        error: TEST_ADAPTY_ERROR,
         view: { id: TEST_VIEW_ID },
       });
 
@@ -330,7 +332,7 @@ describe('OnboardingViewEmitter', () => {
       });
       mockParseOnboardingEvent.mockReturnValue({
         id: OnboardingEventId.Error,
-        error: { message: 'Test error', adaptyCode: 0 },
+        error: TEST_ADAPTY_ERROR,
         view: { id: TEST_VIEW_ID },
       });
 
@@ -370,12 +372,12 @@ describe('OnboardingViewEmitter', () => {
     it('should pass parseOnboardingEvent context correctly', async () => {
       const mockListener = jest.fn();
 
-      mockParseOnboardingEvent.mockImplementation((input, ctx) => {
+      mockParseOnboardingEvent.mockImplementation((input: string, ctx: unknown) => {
         expect(typeof input).toBe('string');
         expect(ctx).toBe(mockLogContext);
         return {
           id: OnboardingEventId.Error,
-          error: { message: 'Test error', adaptyCode: 0 },
+          error: TEST_ADAPTY_ERROR,
           view: { id: TEST_VIEW_ID },
         };
       });
@@ -415,7 +417,7 @@ describe('OnboardingViewEmitter', () => {
       const mockListener = jest.fn();
       mockParseOnboardingEvent.mockReturnValue({
         id: OnboardingEventId.Error,
-        error: { message: 'Test error', adaptyCode: 0 },
+        error: TEST_ADAPTY_ERROR,
         view: { id: TEST_VIEW_ID },
       });
 
@@ -482,7 +484,7 @@ describe('OnboardingViewEmitter', () => {
 
       mockParseOnboardingEvent.mockReturnValue({
         id: OnboardingEventId.Error,
-        error: { message: 'Test error', adaptyCode: 0 },
+        error: TEST_ADAPTY_ERROR,
         view: { id: TEST_VIEW_ID },
       });
 
@@ -507,7 +509,7 @@ describe('OnboardingViewEmitter', () => {
       const listener1 = jest.fn();
       const listener2 = jest.fn();
 
-      mockParseOnboardingEvent.mockImplementation((input) => {
+      mockParseOnboardingEvent.mockImplementation((input: string) => {
         const data = JSON.parse(input);
         return {
           id: OnboardingEventId.Error,
@@ -551,7 +553,7 @@ describe('OnboardingViewEmitter', () => {
           handlerName: 'onError' as const,
           event: {
             id: OnboardingEventId.Error,
-            error: { message: 'Test error', adaptyCode: 0 },
+            error: TEST_ADAPTY_ERROR,
             view: { id: TEST_VIEW_ID },
           },
           raw: TEST_EVENT_DATA.error,
@@ -664,7 +666,7 @@ describe('OnboardingViewEmitter', () => {
       const mockListener = jest.fn();
       mockParseOnboardingEvent.mockReturnValue({
         id: OnboardingEventId.Error,
-        error: { message: 'Test error', adaptyCode: 0 },
+        error: TEST_ADAPTY_ERROR,
         view: { id: TEST_VIEW_ID },
       });
 

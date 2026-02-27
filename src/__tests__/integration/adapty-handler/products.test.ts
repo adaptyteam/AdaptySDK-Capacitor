@@ -8,8 +8,8 @@
  */
 
 import { Adapty } from 'adapty';
-import type { AdaptyPaywall } from 'shared/types';
-import type { components } from 'shared/types/api';
+import type { AdaptyPaywall } from 'types';
+import type { components } from 'types/api';
 
 import {
   ACTIVATE_RESPONSE_SUCCESS,

@@ -1,5 +1,5 @@
 import { Adapty } from 'adapty';
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 import { createOnboardingView } from 'ui-builder/create-onboarding-view';
 
 import { cleanupAdapty } from '../adapty-handler/setup.utils';

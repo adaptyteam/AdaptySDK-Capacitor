@@ -1,5 +1,5 @@
 import { Adapty } from '../adapty';
-import type { AdaptyOnboarding } from '../shared/types';
+import type { AdaptyOnboarding } from '../types';
 
 import { OnboardingViewController } from './onboarding-view-controller';
 import type { CreateOnboardingViewParamsInput } from './types';

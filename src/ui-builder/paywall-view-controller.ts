@@ -1,12 +1,11 @@
+import { AdaptyError } from '@adapty/core';
+
 import type { Adapty } from '../adapty';
-import { AdaptyError } from '../shared/adapty-error';
-import { AdaptyPaywallCoder } from '../shared/coders/adapty-paywall';
-import { AdaptyUICreatePaywallViewParamsCoder } from '../shared/coders/adapty-ui-create-paywall-view-params';
-import { LogContext, Log } from '../shared/logger';
-import type { AdaptyPaywall } from '../shared/types';
-import type { components } from '../shared/types/api';
-import { mapValues } from '../shared/utils/map-values';
-import { withErrorContext } from '../shared/utils/with-error-context';
+import { coderFactory } from '../coders/factory';
+import { LogContext, Log } from '../logger';
+import type { AdaptyPaywall } from '../types';
+import type { components } from '../types/api';
+import { mapValues, withErrorContext } from '../utils';
 
 import { PaywallViewEmitter } from './paywall-view-emitter';
 import type {
@@ -59,8 +58,8 @@ export class PaywallViewController {
     const log = ctx.call({ methodName: methodKey });
     log.start(() => ({ paywall, params }));
 
-    const paywallCoder = new AdaptyPaywallCoder();
-    const paramsCoder = new AdaptyUICreatePaywallViewParamsCoder();
+    const paywallCoder = coderFactory.createPaywallCoder();
+    const paramsCoder = coderFactory.createUiCreatePaywallViewParamsCoder();
     const paramsWithDefaults: CreatePaywallViewParamsInput = {
       ...DEFAULT_PARAMS,
       ...params,

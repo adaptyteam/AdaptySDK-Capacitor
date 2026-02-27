@@ -5,7 +5,7 @@
  * the native bridge for iOS-only methods.
  */
 
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 /**
  * PresentCodeRedemptionSheet request (iOS only)

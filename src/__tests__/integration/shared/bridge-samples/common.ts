@@ -5,7 +5,7 @@
  * such as product samples and common type exports.
  */
 
-import type { AdaptyPaywallProduct } from 'shared/types';
+import type { AdaptyPaywallProduct } from 'types';
 
 /**
  * VIP product sample in camelCase format (public API format)

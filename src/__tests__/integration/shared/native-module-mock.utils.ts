@@ -1,5 +1,5 @@
 import { AdaptyCapacitorPlugin } from 'bridge/plugin';
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 /**
  * Native Module Mock Utilities

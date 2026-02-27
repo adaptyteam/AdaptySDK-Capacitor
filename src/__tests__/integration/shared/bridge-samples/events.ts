@@ -5,7 +5,7 @@
  * the native bridge.
  */
 
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 /**
  * Event.DidLoadLatestProfile - emitted after purchase

@@ -1,13 +1,14 @@
-import { Log } from '../shared/logger';
+import type { AdaptyError } from '@adapty/core';
+
+import { Log } from '../logger';
 import type {
   AdaptyPaywallProduct,
   AdaptyProductIdentifier,
   AdaptyProfile,
   AdaptyPurchaseResult,
   WebPresentation,
-} from '../shared/types';
-import type { FileLocation, MakePurchaseParamsInput } from '../shared/types/inputs';
-import type { AdaptyError } from '../shared/types/method-types';
+} from '../types';
+import type { FileLocation, MakePurchaseParamsInput } from '../types/inputs';
 
 /**
  * @internal

@@ -1,5 +1,5 @@
 import { Adapty } from 'adapty';
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 import {
   ACTIVATE_REQUEST_MINIMAL,
@@ -227,9 +227,8 @@ describe('Adapty - Activation (Bridge Integration)', () => {
 
       const request = extractNativeRequest<components['requests']['Activate.Request']>({ nativeModule: nativeMock });
 
-      // idfaCollectionDisabled is encoded regardless of platform
-      expect(request.configuration.apple_idfa_collection_disabled).toBe(true);
-      // appAccountToken is NOT encoded on android
+      // iOS-specific fields are NOT encoded on android (core uses platform-aware encoding)
+      expect(request.configuration.apple_idfa_collection_disabled).toBeUndefined();
       expect(request.configuration.customer_identity_parameters).toBeUndefined();
     });
   });
@@ -311,9 +310,8 @@ describe('Adapty - Activation (Bridge Integration)', () => {
 
       const request = extractNativeRequest<components['requests']['Activate.Request']>({ nativeModule: nativeMock });
 
-      // adIdCollectionDisabled is encoded regardless of platform
-      expect(request.configuration.google_adid_collection_disabled).toBe(true);
-      // obfuscatedAccountId is NOT encoded on ios
+      // Android-specific fields are NOT encoded on ios (core uses platform-aware encoding)
+      expect(request.configuration.google_adid_collection_disabled).toBeUndefined();
       expect(request.configuration.customer_identity_parameters).toBeUndefined();
     });
   });

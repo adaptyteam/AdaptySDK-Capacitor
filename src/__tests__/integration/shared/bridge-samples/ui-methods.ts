@@ -5,7 +5,7 @@
  * Event samples are separate in events.ts
  */
 
-import type { components } from 'shared/types/api';
+import type { components } from 'types/api';
 
 // Paywall UI Methods
 

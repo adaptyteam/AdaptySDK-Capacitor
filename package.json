@@ -44,12 +44,12 @@
     "eslint": "eslint . --ext ts",
     "prettier-check": "prettier \"**/*.{css,html,ts,js,tsx}\" --check",
     "prettier": "prettier \"**/*.{css,html,ts,js,tsx}\" --write",
-    "swiftlint": "node-swiftlint",
+    "swiftlint": "node-swiftlint ios/Sources",
     "doc-gen": "typedoc --tsconfig tsconfig.typedoc.json",
     "deploy-docs": "netlify deploy --dir=docs --prod",
     "build": "yarn clean && yarn update-versions && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
-    "tsc": "tsc --noEmit",
+    "tsc": "tsc --noEmit && tsc --noEmit -p tsconfig.spec.json",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:jest-coverage": "jest --coverage",
@@ -86,13 +86,13 @@
     "swiftlint": "^2.0.0",
     "ts-jest": "29.4.0",
     "typedoc": "^0.28.13",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "@capacitor/core": ">=8.0.0"
   },
   "dependencies": {
-    "@adapty/core": "3.15.0-dev.8c9f2a00107326efdad767e22b0ca028f7d8cb6c",
+    "@adapty/core": "3.15.0-dev.7fc36bc18451a01a716cc0d78f83610c0b86aca6",
     "tslib": "^2.5.0"
   },
   "publishConfig": {
