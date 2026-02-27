@@ -35,6 +35,7 @@ export {
   AppTrackingTransparencyStatus,
   ProductPeriod,
   ErrorCode,
+  ErrorCodeName,
   getErrorCode,
   getErrorPrompt,
 } from '@adapty/core';
