@@ -6,8 +6,7 @@ import { LogContext, Log } from '../logger';
 import { WebPresentation } from '../types';
 import type { AdaptyOnboarding } from '../types';
 import type { components } from '../types/api';
-import { mapValues } from '../utils/map-values';
-import { withErrorContext } from '../utils/with-error-context';
+import { mapValues, withErrorContext } from '../utils';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 import { DEFAULT_ONBOARDING_EVENT_HANDLERS } from './types';

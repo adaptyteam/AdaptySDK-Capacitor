@@ -36,9 +36,7 @@ import type {
 } from './types/configs';
 import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './types/inputs';
 import type { MethodName } from './types/method-types';
-import { filterUndefined } from './utils/compact-object';
-import { mergeOptions } from './utils/merge-options';
-import { withErrorContext } from './utils/with-error-context';
+import { filterUndefined, mergeOptions, withErrorContext } from './utils';
 import VERSION from './version';
 
 type Req = components['requests'];
