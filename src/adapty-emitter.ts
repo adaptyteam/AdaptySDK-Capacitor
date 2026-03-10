@@ -1,10 +1,10 @@
+import type { AdaptyError } from '@adapty/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
-import type { AdaptyError } from './shared/adapty-error';
-import { parseCommonEvent } from './shared/coders/parse';
-import { LogContext } from './shared/logger';
-import type { AdaptyProfile, AdaptyInstallationDetails } from './shared/types';
+import { parseCommonEvent } from './coders/parse';
+import { LogContext } from './logger';
+import type { AdaptyProfile, AdaptyInstallationDetails } from './types';
 import type { AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 
 type EventConfig<K extends keyof EventPayloadMap> = {

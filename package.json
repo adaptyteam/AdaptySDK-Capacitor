@@ -1,6 +1,6 @@
 {
   "name": "@adapty/capacitor",
-  "version": "3.16.1",
+  "version": "3.16.2",
   "description": "Official Adapty SDK for Capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -44,15 +44,16 @@
     "eslint": "eslint . --ext ts",
     "prettier-check": "prettier \"**/*.{css,html,ts,js,tsx}\" --check",
     "prettier": "prettier \"**/*.{css,html,ts,js,tsx}\" --write",
-    "swiftlint": "node-swiftlint",
+    "swiftlint": "node-swiftlint ios/Sources",
     "doc-gen": "typedoc --tsconfig tsconfig.typedoc.json",
     "deploy-docs": "netlify deploy --dir=docs --prod",
     "build": "yarn clean && yarn update-versions && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
-    "tsc": "tsc --noEmit",
+    "tsc": "tsc --noEmit && tsc --noEmit -p tsconfig.spec.json",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test:jest-coverage": "jest --coverage",
+    "test:coverage": "node ./scripts/check-bridge-api-test-coverage.js",
     "update-versions": "node ./scripts/update_versions.cjs",
     "prepublishOnly": "yarn install --force && yarn update-versions && yarn prettier-check && yarn lint && yarn tsc && yarn test && yarn doc-gen && yarn build",
     "dev-sync-all-files": "./scripts/sync-plugin-files.sh",
@@ -85,10 +86,14 @@
     "swiftlint": "^2.0.0",
     "ts-jest": "29.4.0",
     "typedoc": "^0.28.13",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3"
   },
   "peerDependencies": {
     "@capacitor/core": ">=8.0.0"
+  },
+  "dependencies": {
+    "@adapty/core": "3.15.0-dev.7fc36bc18451a01a716cc0d78f83610c0b86aca6",
+    "tslib": "^2.5.0"
   },
   "publishConfig": {
     "access": "public"
@@ -114,6 +119,5 @@
     "android": {
       "src": "android"
     }
-  },
-  "dependencies": {}
+  }
 }

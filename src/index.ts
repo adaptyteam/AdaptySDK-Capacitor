@@ -1,12 +1,10 @@
 import { Adapty } from './adapty';
 
 export const adapty = new Adapty();
-export * from './shared';
-export type * from './shared/logger';
-export { consoleLogSink } from './shared/logger';
-export * from './shared/constants';
-export { AdaptyError } from './shared/adapty-error';
-export * from './shared/types';
+export type * from './logger';
+export { consoleLogSink } from './logger';
+export { AdaptyError } from '@adapty/core';
+export * from './types';
 export type * from './types/configs';
 
 export {
@@ -25,4 +23,4 @@ export type {
   EventHandlers,
   OnboardingEventHandlers,
 } from './ui-builder/index';
-export type { IdentifyParamsInput } from './shared/types/inputs';
+export type { IdentifyParamsInput } from './types/inputs';

@@ -1,8 +1,14 @@
 // Mock Capacitor core
+const mockCapacitorPlugin = {
+  handleMethodCall: jest.fn(),
+  addListener: jest.fn().mockResolvedValue({ remove: jest.fn().mockResolvedValue(undefined) }),
+};
+
 jest.mock('@capacitor/core', () => ({
-  registerPlugin: jest.fn(() => ({
-    // Mock plugin methods that will be defined in tests
-  })),
+  registerPlugin: jest.fn(() => mockCapacitorPlugin),
+  Capacitor: {
+    getPlatform: jest.fn(() => 'ios'),
+  },
 }));
 
 // Mock console methods to reduce noise in tests
@@ -12,6 +18,5 @@ global.console = {
   // log: jest.fn(),
   // debug: jest.fn(),
   // info: jest.fn(),
-  // warn: jest.fn(),
   // error: jest.fn(),
 };

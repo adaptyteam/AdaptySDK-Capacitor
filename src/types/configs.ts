@@ -1,9 +1,9 @@
-import type { AdaptyPaywallProduct } from '../shared/types';
+import type { AdaptyPaywallProduct } from './index';
 import type {
   GetPlacementParamsInput,
   GetPlacementForDefaultAudienceParamsInput,
   MakePurchaseParamsInput,
-} from '../shared/types/inputs';
+} from './inputs';
 
 /**
  * Describes the options for the `getPaywall` method.

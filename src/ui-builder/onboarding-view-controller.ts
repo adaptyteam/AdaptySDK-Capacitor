@@ -1,13 +1,12 @@
+import { AdaptyError } from '@adapty/core';
+
 import type { Adapty } from '../adapty';
-import { AdaptyError } from '../shared/adapty-error';
-import { AdaptyOnboardingCoder } from '../shared/coders/adapty-onboarding';
-import { AdaptyUICreateOnboardingViewParamsCoder } from '../shared/coders/adapty-ui-create-onboarding-view-params';
-import { LogContext, Log } from '../shared/logger';
-import { WebPresentation } from '../shared/types';
-import type { AdaptyOnboarding } from '../shared/types';
-import type { components } from '../shared/types/api';
-import { mapValues } from '../shared/utils/map-values';
-import { withErrorContext } from '../shared/utils/with-error-context';
+import { coderFactory } from '../coders/factory';
+import { LogContext, Log } from '../logger';
+import { WebPresentation } from '../types';
+import type { AdaptyOnboarding } from '../types';
+import type { components } from '../types/api';
+import { mapValues, withErrorContext } from '../utils';
 
 import { OnboardingViewEmitter } from './onboarding-view-emitter';
 import { DEFAULT_ONBOARDING_EVENT_HANDLERS } from './types';
@@ -57,9 +56,9 @@ export class OnboardingViewController {
     const log = ctx.call({ methodName: methodKey });
     log.start(() => ({ onboarding, params }));
 
-    const coder = new AdaptyOnboardingCoder();
+    const coder = coderFactory.createOnboardingCoder();
     const paramsWithDefaults = { ...DEFAULT_ONBOARDING_PARAMS, ...params };
-    const encodedParams = new AdaptyUICreateOnboardingViewParamsCoder().encode(paramsWithDefaults);
+    const encodedParams = coderFactory.createUiCreateOnboardingViewParamsCoder().encode(paramsWithDefaults);
 
     const data: Req['AdaptyUICreateOnboardingView.Request'] = {
       method: methodKey,

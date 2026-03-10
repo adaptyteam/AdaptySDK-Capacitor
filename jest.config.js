@@ -5,7 +5,8 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   modulePaths: ['./src'],
   setupFiles: ['<rootDir>/jest/jest.setup.js'],
-  testPathIgnorePatterns: ['/dist', '/node_modules/', '/examples'],
+  testPathIgnorePatterns: ['/dist', '/node_modules/', '/examples', '/.worktrees/'],
+  maxWorkers: 1,
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
@@ -14,7 +15,7 @@ module.exports = {
       },
     ],
   },
-  testMatch: ['**/__tests__/**/*.(ts|tsx|js)', '**/*.(test|spec).(ts|tsx|js)'],
+  testMatch: ['**/__tests__/**/*.(test|spec).(ts|tsx|js)', '**/*.(test|spec).(ts|tsx|js)'],
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

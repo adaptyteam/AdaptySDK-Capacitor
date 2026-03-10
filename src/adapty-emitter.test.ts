@@ -2,8 +2,8 @@ import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyEmitter } from './adapty-emitter';
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
-import { parseCommonEvent } from './shared/coders/parse';
-import { LogContext } from './shared/logger';
+import { parseCommonEvent } from './coders/parse';
+import { LogContext } from './logger';
 
 const EVENT_NAMES = {
   didLoadLatestProfile: 'did_load_latest_profile',
@@ -18,8 +18,8 @@ const TEST_EVENT_DATA = {
 } as const;
 
 jest.mock('./bridge/plugin', () => require('./bridge/plugin.mock').mockAdaptyCapacitorPlugin);
-jest.mock('./shared/logger', () => require('./shared/logger/logger.mock').mockLogger);
-jest.mock('./shared/coders/parse', () => require('./shared/coders/parse.mock').mockParse);
+jest.mock('./logger', () => require('./logger/logger.mock').mockLogger);
+jest.mock('./coders/parse', () => require('./coders/parse.mock').mockParse);
 
 describe('AdaptyEmitter', () => {
   let emitter: AdaptyEmitter;
