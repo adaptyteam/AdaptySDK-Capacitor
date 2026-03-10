@@ -3,6 +3,7 @@
  * not for the end user.
  */
 export { Adapty } from './adapty';
+export type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 export { PaywallViewController } from './ui-builder/paywall-view-controller';
 export { OnboardingViewController } from './ui-builder/onboarding-view-controller';
 export {
@@ -14,7 +15,10 @@ export {
   Gender,
   AppTrackingTransparencyStatus,
   ProductPeriod,
+  WebPresentation,
 } from '@adapty/core';
+export type { AdaptyErrorInput } from '@adapty/core';
+export type { LoggerConfig, LogSink, LogEvent } from './logger';
 // Input types
 export {
   LogLevel,
@@ -22,6 +26,7 @@ export {
   GetPlacementParamsInput,
   GetPlacementForDefaultAudienceParamsInput,
   ActivateParamsInput,
+  IdentifyParamsInput,
   AdaptyAndroidSubscriptionUpdateReplacementMode,
   AdaptyAndroidSubscriptionUpdateParameters,
   AdaptyAndroidPurchaseParams,
@@ -55,12 +60,21 @@ export {
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
 } from './types';
+// Config types
+export {
+  GetPaywallOptions,
+  GetPaywallForDefaultAudienceOptions,
+  GetOnboardingOptions,
+  GetOnboardingForDefaultAudienceOptions,
+  MakePurchaseOptions,
+} from './types/configs';
 // UI Builder types
 export {
   EventHandlers,
   EventHandlerResult,
   OnboardingEventHandlers,
   CreatePaywallViewParamsInput,
+  CreateOnboardingViewParamsInput,
   AdaptyUiView,
   AdaptyUiMediaCache,
   AdaptyUiDialogConfig,
@@ -68,4 +82,11 @@ export {
   AdaptyUiOnboardingMeta,
   AdaptyUiOnboardingStateParams,
   OnboardingStateUpdatedAction,
+  ProductPurchaseParams,
+  AdaptyCustomAsset,
+  AdaptyCustomImageAsset,
+  AdaptyCustomVideoAsset,
+  AdaptyCustomColorAsset,
+  AdaptyCustomGradientAsset,
+  AdaptyIOSPresentationStyle,
 } from './ui-builder/types';
