@@ -7,6 +7,5 @@ node_modules/
 dist/
 
 # Adapty credentials
-.adapty-credentials.json
-.adapty-credentials.old.json
+.adapty-credentials.*
 !Podfile.lock
