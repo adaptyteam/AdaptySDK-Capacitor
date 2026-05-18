@@ -1,24 +1,24 @@
 PODS:
-  - Adapty (3.15.7):
-    - AdaptyLogger (= 3.15.7)
-    - AdaptyUIBuilder (= 3.15.7)
-  - AdaptyCapacitor (3.16.3):
-    - Adapty (= 3.15.7)
-    - AdaptyPlugin (= 3.15.7)
-    - AdaptyUI (= 3.15.7)
+  - Adapty (3.17.0):
+    - AdaptyLogger (= 3.17.0)
+    - AdaptyUIBuilder (= 3.17.0)
+  - AdaptyCapacitor (3.17.0):
+    - Adapty (= 3.17.0)
+    - AdaptyPlugin (= 3.17.0)
+    - AdaptyUI (= 3.17.0)
     - Capacitor
-  - AdaptyLogger (3.15.7)
-  - AdaptyPlugin (3.15.7):
-    - Adapty (= 3.15.7)
-    - AdaptyLogger (= 3.15.7)
-    - AdaptyUI (= 3.15.7)
-    - AdaptyUIBuilder (= 3.15.7)
-  - AdaptyUI (3.15.7):
-    - Adapty (= 3.15.7)
-    - AdaptyLogger (= 3.15.7)
-    - AdaptyUIBuilder (= 3.15.7)
-  - AdaptyUIBuilder (3.15.7):
-    - AdaptyLogger (= 3.15.7)
+  - AdaptyLogger (3.17.0)
+  - AdaptyPlugin (3.17.0):
+    - Adapty (= 3.17.0)
+    - AdaptyLogger (= 3.17.0)
+    - AdaptyUI (= 3.17.0)
+    - AdaptyUIBuilder (= 3.17.0)
+  - AdaptyUI (3.17.0):
+    - Adapty (= 3.17.0)
+    - AdaptyLogger (= 3.17.0)
+    - AdaptyUIBuilder (= 3.17.0)
+  - AdaptyUIBuilder (3.17.0):
+    - AdaptyLogger (= 3.17.0)
   - Capacitor (8.0.1):
     - CapacitorCordova
   - CapacitorApp (8.0.0):
@@ -78,20 +78,20 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/toast"
 
 SPEC CHECKSUMS:
-  Adapty: abebbbc8f0b3c5bb5fee60b56370157d1eb6f0fc
-  AdaptyCapacitor: 3c7c46e0467b6c27d9b0a1d86334099d502b8c25
-  AdaptyLogger: 0aa2decd92c377035ef68bf8455ae9fb9a1896e8
-  AdaptyPlugin: 4613933dd9d1f5676bfd64d2cf413972be60513b
-  AdaptyUI: 4cde24413c1a424eda3669c1580e4622c1e55e4a
-  AdaptyUIBuilder: 50ddeffc81a5bcf3b1fe06b2a2eda24944cd3a03
-  Capacitor: 2d8b1a05870ddb600b0e1e32b83fcf0890c244e1
-  CapacitorApp: cfa0120a1f3a6f69d4d37d3041782aa5c5167d0b
-  CapacitorClipboard: 9a0c0a654641f93482748efb659bf95c0382b65a
+  Adapty: ae0038fac37a10f3916824b508578be0459d03ea
+  AdaptyCapacitor: 4626a08e80b6085dacebc299cc9802641bf73439
+  AdaptyLogger: 8de7cf207476715ef97c1f5d5b1476af21dc8691
+  AdaptyPlugin: 67b9afd1639599f808eb707341f6ce0418e02a3d
+  AdaptyUI: 6f0fd0494bed813952bd3008cbbd0ff8b961ecbb
+  AdaptyUIBuilder: c2f9e2b57383d7945ab912d9cf78ebd6ee0c3652
+  Capacitor: ff35b0f66370b84aa238251b35b91886a3207c16
+  CapacitorApp: 3963a84197280757b84f126afd1520a85ae3b092
+  CapacitorClipboard: 61832a3722adc61afed6e0191c8a0e11ba11674d
   CapacitorCordova: 0d65b9bb74e995dcecb9463f34f1af2aba6f955c
-  CapacitorFilesystem: 57c128a5ea9875aa7bb54eb7431e63d7721bedd4
-  CapacitorShare: 703a2744f755982f1a4950f5120bea9763d6dfea
-  CapacitorStatusBar: c6fa2d404083e41d145ea56698707a6986d4428b
-  CapacitorToast: 6275c84283ac9c424a20554e71b8a6263f44554c
+  CapacitorFilesystem: a957d4a4b6860844c4eba5bf441607a5166f92a7
+  CapacitorShare: 12f1d192170cbcf9f108fd675ac8e343761a4638
+  CapacitorStatusBar: 312e2e67928dfe9514c4a8916a1fd610552f5f35
+  CapacitorToast: aefebcd4cead9f44a04ace80c66a7eb4031751e7
   IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
 
 PODFILE CHECKSUM: a8e7f26db86613d914c92731a4bb48ce2a57706f
