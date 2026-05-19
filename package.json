@@ -1,6 +1,6 @@
 {
   "name": "@adapty/capacitor",
-  "version": "3.16.3",
+  "version": "3.17.0",
   "description": "Official Adapty SDK for Capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -92,7 +92,7 @@
     "@capacitor/core": ">=8.0.0"
   },
   "dependencies": {
-    "@adapty/core": "3.15.0-dev.7fc36bc18451a01a716cc0d78f83610c0b86aca6",
+    "@adapty/core": "3.17.0-dev.2cd14ddac1a5989c081883c6f0cac85780d14d4d",
     "tslib": "^2.5.0"
   },
   "publishConfig": {

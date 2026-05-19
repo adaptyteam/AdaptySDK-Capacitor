@@ -125,8 +125,11 @@ function extractCallbackArgs<T extends keyof EventHandlers>(
       return [event.error] as ExtractedArgs<T>;
 
     case PaywallEventId.DidPerformAction:
-      if (handlerName === 'onUrlPress' || handlerName === 'onCustomAction') {
-        return [event.action.value ?? ''] as ExtractedArgs<T>;
+      if (handlerName === 'onUrlPress' && event.action.type === 'open_url') {
+        return [event.action.value, event.action.openIn] as ExtractedArgs<T>;
+      }
+      if (handlerName === 'onCustomAction' && event.action.type === 'custom') {
+        return [event.action.value] as ExtractedArgs<T>;
       }
       return [] as ExtractedArgs<T>;
 
