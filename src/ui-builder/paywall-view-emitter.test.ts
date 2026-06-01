@@ -30,7 +30,7 @@ const TEST_EVENT_DATA = {
   closeAction: `{"id":"${NATIVE_EVENT_NAMES.action}","view":{"id":"${TEST_VIEW_ID}"},"action":{"type":"close"}}`,
   closeActionWrongView: `{"id":"${NATIVE_EVENT_NAMES.action}","view":{"id":"${WRONG_VIEW_ID}"},"action":{"type":"close"}}`,
   systemBackAction: `{"id":"${NATIVE_EVENT_NAMES.action}","view":{"id":"${TEST_VIEW_ID}"},"action":{"type":"system_back"}}`,
-  urlAction: `{"id":"${NATIVE_EVENT_NAMES.action}","view":{"id":"${TEST_VIEW_ID}"},"action":{"type":"open_url","value":"https://example.com"}}`,
+  urlAction: `{"id":"${NATIVE_EVENT_NAMES.action}","view":{"id":"${TEST_VIEW_ID}"},"action":{"type":"open_url","value":"https://example.com","open_in":"browser_in_app"}}`,
   customAction: `{"id":"${NATIVE_EVENT_NAMES.action}","view":{"id":"${TEST_VIEW_ID}"},"action":{"type":"custom","value":"test-action"}}`,
   productSelected: `{"id":"${NATIVE_EVENT_NAMES.selectProduct}","view":{"id":"${TEST_VIEW_ID}"},"product_id":"com.example.premium"}`,
   purchaseStarted: `{"id":"${NATIVE_EVENT_NAMES.startPurchase}","view":{"id":"${TEST_VIEW_ID}"},"product":{"id":"com.example.premium"}}`,
@@ -257,7 +257,7 @@ describe('PaywallViewEmitter', () => {
       mockParsePaywallEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
-        action: { type: 'open_url', value: 'https://example.com' },
+        action: { type: 'open_url', value: 'https://example.com', openIn: 'browser_in_app' },
       });
 
       await emitter.addListener('onUrlPress', urlPressListener, mockOnRequestClose);
@@ -265,7 +265,7 @@ describe('PaywallViewEmitter', () => {
       nativeCallback = mockBridgeAddListener.mock.calls[1][1];
       nativeCallback({ data: TEST_EVENT_DATA.urlAction });
 
-      expect(urlPressListener).toHaveBeenCalledWith('https://example.com');
+      expect(urlPressListener).toHaveBeenCalledWith('https://example.com', 'browser_in_app');
 
       // Test onPurchaseCompleted
       const mockPurchaseResult: AdaptyPurchaseResult = { type: 'pending' };

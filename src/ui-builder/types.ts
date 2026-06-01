@@ -93,12 +93,21 @@ export interface EventHandlers {
    */
   onAndroidSystemBack: () => EventHandlerResult;
   /**
-   * Called when a user taps an URL in the paywall view
+   * Called when a user taps an URL in the paywall view.
    *
    * If you return `true`, the paywall view will be closed.
    * @default false
+   *
+   * The default onUrlPress handler does not support `browser_in_app`.
+   * To support it, install an in-app browser plugin (e.g. `@capacitor/inappbrowser`)
+   * and handle the `openIn` argument in your own custom onUrlPress handler.
+   *
+   * @param url - URL to open
+   * @param openIn - How the URL was configured to open in the dashboard:
+   *                 `'browser_in_app'` — in-app browser
+   *                 `'browser_out_app'` — external/system browser
    */
-  onUrlPress: (url: string) => EventHandlerResult;
+  onUrlPress: (url: string, openIn: WebPresentation) => EventHandlerResult;
   /**
    * Called when a user performs a custom action in the paywall view
    *
@@ -215,7 +224,14 @@ export interface EventHandlers {
 export const DEFAULT_EVENT_HANDLERS: EventHandlers = {
   onCloseButtonPress: () => true,
   onAndroidSystemBack: () => true,
-  onUrlPress: (url: string) => {
+  onUrlPress: (url: string, openIn: WebPresentation) => {
+    if (openIn === 'browser_in_app') {
+      Log.warn(
+        'onUrlPress',
+        () =>
+          'open_in=browser_in_app is not supported by the default onUrlPress handler. Override onUrlPress to support an in-app browser.',
+      );
+    }
     if (typeof window !== 'undefined') {
       try {
         window.open(new URL(url), '_blank');
