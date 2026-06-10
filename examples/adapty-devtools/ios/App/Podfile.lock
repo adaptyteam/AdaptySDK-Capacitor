@@ -1,24 +1,24 @@
 PODS:
-  - Adapty (3.17.0):
-    - AdaptyLogger (= 3.17.0)
-    - AdaptyUIBuilder (= 3.17.0)
-  - AdaptyCapacitor (3.17.0):
-    - Adapty (= 3.17.0)
-    - AdaptyPlugin (= 3.17.0)
-    - AdaptyUI (= 3.17.0)
+  - Adapty (3.17.2):
+    - AdaptyLogger (= 3.17.2)
+    - AdaptyUIBuilder (= 3.17.2)
+  - AdaptyCapacitor (3.17.1):
+    - Adapty (= 3.17.2)
+    - AdaptyPlugin (= 3.17.2)
+    - AdaptyUI (= 3.17.2)
     - Capacitor
-  - AdaptyLogger (3.17.0)
-  - AdaptyPlugin (3.17.0):
-    - Adapty (= 3.17.0)
-    - AdaptyLogger (= 3.17.0)
-    - AdaptyUI (= 3.17.0)
-    - AdaptyUIBuilder (= 3.17.0)
-  - AdaptyUI (3.17.0):
-    - Adapty (= 3.17.0)
-    - AdaptyLogger (= 3.17.0)
-    - AdaptyUIBuilder (= 3.17.0)
-  - AdaptyUIBuilder (3.17.0):
-    - AdaptyLogger (= 3.17.0)
+  - AdaptyLogger (3.17.2)
+  - AdaptyPlugin (3.17.2):
+    - Adapty (= 3.17.2)
+    - AdaptyLogger (= 3.17.2)
+    - AdaptyUI (= 3.17.2)
+    - AdaptyUIBuilder (= 3.17.2)
+  - AdaptyUI (3.17.2):
+    - Adapty (= 3.17.2)
+    - AdaptyLogger (= 3.17.2)
+    - AdaptyUIBuilder (= 3.17.2)
+  - AdaptyUIBuilder (3.17.2):
+    - AdaptyLogger (= 3.17.2)
   - Capacitor (8.0.1):
     - CapacitorCordova
   - CapacitorApp (8.0.0):
@@ -78,12 +78,12 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/toast"
 
 SPEC CHECKSUMS:
-  Adapty: ae0038fac37a10f3916824b508578be0459d03ea
-  AdaptyCapacitor: 4626a08e80b6085dacebc299cc9802641bf73439
-  AdaptyLogger: 8de7cf207476715ef97c1f5d5b1476af21dc8691
-  AdaptyPlugin: 67b9afd1639599f808eb707341f6ce0418e02a3d
-  AdaptyUI: 6f0fd0494bed813952bd3008cbbd0ff8b961ecbb
-  AdaptyUIBuilder: c2f9e2b57383d7945ab912d9cf78ebd6ee0c3652
+  Adapty: fd1e8130a1298abba9bc084a69a63c80fcc5275a
+  AdaptyCapacitor: 000bce321e80eff960670b80f1ed2348088d5d58
+  AdaptyLogger: c59354e1e6b602d08eae91b79bd1492d78c46820
+  AdaptyPlugin: 87183239c885f4a251acbd354631fd2d6f281a5b
+  AdaptyUI: ecd9614d961257d4608315510e8030e40efbbcd5
+  AdaptyUIBuilder: 7425b23c8039d62f02463a4d236e86c8e08d61f8
   Capacitor: ff35b0f66370b84aa238251b35b91886a3207c16
   CapacitorApp: 3963a84197280757b84f126afd1520a85ae3b092
   CapacitorClipboard: 61832a3722adc61afed6e0191c8a0e11ba11674d
