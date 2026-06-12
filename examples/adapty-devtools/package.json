@@ -27,7 +27,8 @@
     "link-assets": "ruby scripts/copy-adapty-assets.rb"
   },
   "dependencies": {
-    "@adapty/capacitor": "link:../..",
+    "@adapty/capacitor": "3.17.1",
+    "@capacitor-community/intercom": "^8.0.0",
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",
     "@capacitor/clipboard": "^8.0.0",

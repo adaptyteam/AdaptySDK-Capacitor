@@ -2,9 +2,13 @@
 # yarn lockfile v1
 
 
-"@adapty/capacitor@link:../..":
-  version "0.0.0"
-  uid ""
+"@adapty/capacitor@3.17.1":
+  version "3.17.1"
+  resolved "https://registry.yarnpkg.com/@adapty/capacitor/-/capacitor-3.17.1.tgz#81a986916f9eb716fd5f8288dc7bc0c7ddbd2d87"
+  integrity sha512-+0QdVPcCvTej9CX0m2LfD+B4V1jGrRSdfI2kFc4tbo4LZRJyV/o+E+zNfKIOsraFXqJUyVncrv4YO1EaYX+IZg==
+  dependencies:
+    "@adapty/core" "3.17.2"
+    tslib "^2.5.0"
 
 "@adapty/core@3.17.2":
   version "3.17.2"
@@ -178,6 +182,11 @@
   dependencies:
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.27.1"
+
+"@capacitor-community/intercom@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@capacitor-community/intercom/-/intercom-8.0.0.tgz#fc6d069dcb9409d606387e5d0920165c707a2856"
+  integrity sha512-bNBFcNUCS/XvEL1gdffKmrYlPaWRFRXhFpMZHUGs/KHmHLRtyVObZBwlhpgGtfH0H+iP31sHL8kcvKkA0b7vUQ==
 
 "@capacitor/android@^8.0.0":
   version "8.0.1"

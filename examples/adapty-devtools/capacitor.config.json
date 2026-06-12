@@ -9,6 +9,12 @@
     "StatusBar": {
       "overlaysWebView": true,
       "style": "LIGHT"
+    },
+    "Intercom": {
+      "androidApiKey": "android_sdk-000000000000000000000000000000000000000000000000",
+      "androidAppId": "fake1234",
+      "iosApiKey": "ios_sdk-000000000000000000000000000000000000000000000000",
+      "iosAppId": "fake1234"
     }
   }
 }

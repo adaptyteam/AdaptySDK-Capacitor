@@ -25,6 +25,9 @@ PODS:
     - Capacitor
   - CapacitorClipboard (8.0.0):
     - Capacitor
+  - CapacitorCommunityIntercom (8.0.0):
+    - Capacitor
+    - Intercom (~> 18.0)
   - CapacitorCordova (8.0.1)
   - CapacitorFilesystem (8.1.0):
     - Capacitor
@@ -35,13 +38,15 @@ PODS:
     - Capacitor
   - CapacitorToast (8.0.0):
     - Capacitor
+  - Intercom (18.8.1)
   - IONFilesystemLib (1.1.0)
 
 DEPENDENCIES:
-  - AdaptyCapacitor (from `../../../..`)
+  - "AdaptyCapacitor (from `../../node_modules/@adapty/capacitor`)"
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorClipboard (from `../../node_modules/@capacitor/clipboard`)"
+  - "CapacitorCommunityIntercom (from `../../node_modules/@capacitor-community/intercom`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
@@ -55,17 +60,20 @@ SPEC REPOS:
     - AdaptyPlugin
     - AdaptyUI
     - AdaptyUIBuilder
+    - Intercom
     - IONFilesystemLib
 
 EXTERNAL SOURCES:
   AdaptyCapacitor:
-    :path: "../../../.."
+    :path: "../../node_modules/@adapty/capacitor"
   Capacitor:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
     :path: "../../node_modules/@capacitor/app"
   CapacitorClipboard:
     :path: "../../node_modules/@capacitor/clipboard"
+  CapacitorCommunityIntercom:
+    :path: "../../node_modules/@capacitor-community/intercom"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorFilesystem:
@@ -87,13 +95,15 @@ SPEC CHECKSUMS:
   Capacitor: ff35b0f66370b84aa238251b35b91886a3207c16
   CapacitorApp: 3963a84197280757b84f126afd1520a85ae3b092
   CapacitorClipboard: 61832a3722adc61afed6e0191c8a0e11ba11674d
+  CapacitorCommunityIntercom: fdc8148c7e790097f7dc28613dbcb50608901e23
   CapacitorCordova: 0d65b9bb74e995dcecb9463f34f1af2aba6f955c
   CapacitorFilesystem: a957d4a4b6860844c4eba5bf441607a5166f92a7
   CapacitorShare: 12f1d192170cbcf9f108fd675ac8e343761a4638
   CapacitorStatusBar: 312e2e67928dfe9514c4a8916a1fd610552f5f35
   CapacitorToast: aefebcd4cead9f44a04ace80c66a7eb4031751e7
+  Intercom: b636b0e27ab832827abdf6573c57a80cf090ff5a
   IONFilesystemLib: 50b9a0f3052a9b40b9bedb43f328a8fe222f9f87
 
-PODFILE CHECKSUM: a8e7f26db86613d914c92731a4bb48ce2a57706f
+PODFILE CHECKSUM: ef0c051a995be8228fa28f6299bd48e2386668ed
 
 COCOAPODS: 1.15.2
