@@ -3,42 +3,43 @@ import { AdaptyError } from '@adapty/core';
 import type { Adapty } from '../adapty';
 import { coderFactory } from '../coders/factory';
 import { LogContext, Log } from '../logger';
-import type { AdaptyPaywall } from '../types';
+import type { AdaptyFlow } from '../types';
 import type { components } from '../types/api';
 import { mapValues, withErrorContext } from '../utils';
 
-import { PaywallViewEmitter } from './paywall-view-emitter';
+import { FlowViewEmitter } from './flow-view-emitter';
 import type {
   AdaptyUiView,
-  CreatePaywallViewParamsInput,
+  CreateFlowViewParamsInput,
   AdaptyUiDialogConfig,
   AdaptyUiDialogActionType,
-  EventHandlers,
+  FlowEventHandlers,
   AdaptyIOSPresentationStyle,
 } from './types';
-import { DEFAULT_EVENT_HANDLERS } from './types';
+import { DEFAULT_FLOW_EVENT_HANDLERS } from './types';
 
 type Req = components['requests'];
 
-const DEFAULT_PARAMS: CreatePaywallViewParamsInput = {
+const DEFAULT_PARAMS: CreateFlowViewParamsInput = {
   prefetchProducts: true,
   loadTimeoutMs: 5000,
+  enableSafeArea: true,
 };
 
 /**
- * Controller for managing paywall views.
+ * Controller for managing flow views.
  *
  * @remarks
- * This class provides methods to present, dismiss, and handle events for paywall views
+ * This class provides methods to present, dismiss, and handle events for flow views
  * created with the Paywall Builder. Create instances using the {@link createPaywallView} function
  * rather than directly constructing this class.
  *
  * @public
  */
-export class PaywallViewController {
+export class FlowViewController {
   private id: string | null = null;
   private adaptyPlugin: Adapty;
-  private viewEmitter: PaywallViewEmitter | null = null;
+  private viewEmitter: FlowViewEmitter | null = null;
 
   /**
    * Intended way to create a ViewController instance.
@@ -47,27 +48,27 @@ export class PaywallViewController {
    * @internal
    */
   static async create(
-    paywall: AdaptyPaywall,
-    params: CreatePaywallViewParamsInput,
+    flow: AdaptyFlow,
+    params: CreateFlowViewParamsInput,
     adaptyPlugin: Adapty,
-  ): Promise<PaywallViewController> {
-    const controller = new PaywallViewController(adaptyPlugin);
+  ): Promise<FlowViewController> {
+    const controller = new FlowViewController(adaptyPlugin);
 
     const ctx = new LogContext();
-    const methodKey = 'adapty_ui_create_paywall_view';
+    const methodKey = 'adapty_ui_create_flow_view';
     const log = ctx.call({ methodName: methodKey });
-    log.start(() => ({ paywall, params }));
+    log.start(() => ({ flow, params }));
 
-    const paywallCoder = coderFactory.createPaywallCoder();
-    const paramsCoder = coderFactory.createUiCreatePaywallViewParamsCoder();
-    const paramsWithDefaults: CreatePaywallViewParamsInput = {
+    const flowCoder = coderFactory.createFlowCoder();
+    const paramsCoder = coderFactory.createUiCreateFlowViewParamsCoder();
+    const paramsWithDefaults: CreateFlowViewParamsInput = {
       ...DEFAULT_PARAMS,
       ...params,
     };
 
-    const data: Req['AdaptyUICreatePaywallView.Request'] = {
+    const data: Req['AdaptyUICreateFlowView.Request'] = {
       method: methodKey,
-      paywall: paywallCoder.encode(paywall),
+      flow: flowCoder.encode(flow),
       ...paramsCoder.encode(paramsWithDefaults),
     };
 
@@ -78,9 +79,9 @@ export class PaywallViewController {
       log,
     )) as AdaptyUiView;
     controller.id = result.id;
-    controller.viewEmitter = new PaywallViewEmitter(controller.id);
+    controller.viewEmitter = new FlowViewEmitter(controller.id, controller.adaptyPlugin);
 
-    await controller.setEventHandlers(DEFAULT_EVENT_HANDLERS);
+    await controller.setEventHandlers(DEFAULT_FLOW_EVENT_HANDLERS);
 
     return controller;
   }
@@ -97,16 +98,16 @@ export class PaywallViewController {
   }
 
   /**
-   * Presents the paywall view as a modal screen.
+   * Presents the flow view as a modal screen.
    *
    * @remarks
-   * Calling `present` on an already visible paywall view will result in an error.
-   * The paywall will be displayed with the configured presentation style on iOS.
-   * On Android, the paywall is always presented as a full-screen activity.
+   * Calling `present` on an already visible flow view will result in an error.
+   * The flow will be displayed with the configured presentation style on iOS.
+   * On Android, the flow is always presented as a full-screen activity.
    *
    * @param options - Optional presentation options
    * @param options.iosPresentationStyle - iOS presentation style. Available options: `'full_screen'` (default) or `'page_sheet'`. Only affects iOS platform.
-   * @returns A promise that resolves when the paywall is presented.
+   * @returns A promise that resolves when the flow is presented.
    * @throws {@link AdaptyError} if the view reference is invalid or the view is already presented.
    *
    * @example
@@ -127,7 +128,7 @@ export class PaywallViewController {
    */
   public async present(options: { iosPresentationStyle?: AdaptyIOSPresentationStyle } = {}): Promise<void> {
     const ctx = new LogContext();
-    const methodKey = 'adapty_ui_present_paywall_view';
+    const methodKey = 'adapty_ui_present_flow_view';
     const log = ctx.call({ methodName: methodKey });
     log.start(() => ({ _id: this.id, iosPresentationStyle: options.iosPresentationStyle }));
 
@@ -138,7 +139,7 @@ export class PaywallViewController {
       });
     }
 
-    const data: any = {
+    const data: Req['AdaptyUIPresentFlowView.Request'] = {
       method: methodKey,
       id: this.id,
       ios_presentation_style: options.iosPresentationStyle ?? 'full_screen',
@@ -148,13 +149,13 @@ export class PaywallViewController {
   }
 
   /**
-   * Dismisses the paywall view.
+   * Dismisses the flow view.
    *
    * @remarks
-   * This method closes the paywall and cleans up associated resources.
+   * This method closes the flow and cleans up associated resources.
    * After dismissing, the view controller instance cannot be reused.
    *
-   * @returns A promise that resolves when the paywall is dismissed.
+   * @returns A promise that resolves when the flow is dismissed.
    * @throws {@link AdaptyError} if the view reference is invalid.
    *
    * @example
@@ -169,7 +170,7 @@ export class PaywallViewController {
    */
   public async dismiss(): Promise<void> {
     const ctx = new LogContext();
-    const methodKey = 'adapty_ui_dismiss_paywall_view';
+    const methodKey = 'adapty_ui_dismiss_flow_view';
     const log = ctx.call({ methodName: methodKey });
     log.start(() => ({ _id: this.id }));
 
@@ -180,7 +181,7 @@ export class PaywallViewController {
       });
     }
 
-    const data: Req['AdaptyUIDismissPaywallView.Request'] = {
+    const data: Req['AdaptyUIDismissFlowView.Request'] = {
       method: methodKey,
       id: this.id,
       destroy: true,
@@ -194,7 +195,7 @@ export class PaywallViewController {
    * Displays a dialog to the user.
    *
    * @remarks
-   * Use this method to show custom dialogs within the paywall flow.
+   * Use this method to show custom dialogs within the flow.
    * If you provide two actions in the config, the primary action should cancel the operation
    * and leave things unchanged, while the secondary action should confirm the operation.
    *
@@ -256,23 +257,23 @@ export class PaywallViewController {
     } catch (error) {
       Log.warn(
         'setEventHandlers',
-        () => 'Failed to dismiss paywall',
+        () => 'Failed to dismiss flow',
         () => ({ error }),
       );
     }
   };
 
   /**
-   * Registers event handlers for paywall UI events.
+   * Registers event handlers for flow UI events.
    *
    * @remarks
    * Each event type can have only one handler — new handlers replace existing ones.
    * Default handlers are registered automatically in {@link createPaywallView} and provide standard closing behavior:
-   * - `onCloseButtonPress` - closes the paywall
-   * - `onAndroidSystemBack` - closes the paywall (Android only)
-   * - `onRestoreCompleted` - closes the paywall after successful restore
-   * - `onRenderingFailed` - closes the paywall when rendering fails
-   * - `onPurchaseCompleted` - closes the paywall after successful purchase
+   * - `onCloseButtonPress` - closes the flow
+   * - `onAndroidSystemBack` - closes the flow (Android only)
+   * - `onRestoreCompleted` - closes the flow after successful restore
+   * - `onRenderingFailed` - closes the flow when rendering fails
+   * - `onPurchaseCompleted` - closes the flow after successful purchase
    *
    * If you want to override these listeners, we strongly recommend returning `true`
    * (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
@@ -312,7 +313,7 @@ export class PaywallViewController {
    * unsubscribe();
    * ```
    */
-  public async setEventHandlers(eventHandlers: Partial<EventHandlers> = {}): Promise<() => void> {
+  public async setEventHandlers(eventHandlers: Partial<FlowEventHandlers> = {}): Promise<() => void> {
     const ctx = new LogContext();
     const log = ctx.call({ methodName: 'setEventHandlers' });
     log.start(() => ({ _id: this.id }));
@@ -330,25 +331,25 @@ export class PaywallViewController {
       () => ({ id: this.id }),
     );
 
-    const viewEmitter = this.viewEmitter ?? new PaywallViewEmitter(this.id);
+    const viewEmitter = this.viewEmitter ?? new FlowViewEmitter(this.id, this.adaptyPlugin);
     this.viewEmitter = viewEmitter;
 
     const wrappedErrorLogEventHandlers = mapValues(eventHandlers, (handler, eventName) =>
       handler && typeof handler === 'function'
-        ? withErrorContext(handler, eventName as string, 'PaywallViewController')
+        ? withErrorContext(handler, eventName as string, 'FlowViewController')
         : undefined,
     );
 
     // Merge with defaults to ensure default behavior is preserved after unsubscribe/resubscribe cycles
-    const finalEventHandlers: EventHandlers = {
-      ...DEFAULT_EVENT_HANDLERS,
+    const finalEventHandlers: FlowEventHandlers = {
+      ...DEFAULT_FLOW_EVENT_HANDLERS,
       ...wrappedErrorLogEventHandlers,
     };
 
     for (const [eventName, handler] of Object.entries(finalEventHandlers)) {
       if (handler && typeof handler === 'function') {
         try {
-          await viewEmitter.addListener(eventName as keyof EventHandlers, handler, this.onRequestClose);
+          await viewEmitter.addListener(eventName as keyof FlowEventHandlers, handler, this.onRequestClose);
           Log.verbose(
             'setEventHandlers',
             () => 'Registered handler for',
