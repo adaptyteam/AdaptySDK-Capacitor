@@ -268,16 +268,16 @@ export class FlowViewController {
    *
    * @remarks
    * Each event type can have only one handler — new handlers replace existing ones.
-   * Default handlers are registered automatically in {@link createFlowView} and provide standard closing behavior:
-   * - `onCloseButtonPress` - closes the flow
-   * - `onAndroidSystemBack` - closes the flow (Android only)
-   * - `onRestoreCompleted` - closes the flow after successful restore
-   * - `onRenderingFailed` - closes the flow when rendering fails
-   * - `onPurchaseCompleted` - closes the flow after successful purchase
+   * Default handlers are registered automatically in {@link createFlowView} (see `DEFAULT_FLOW_EVENT_HANDLERS`).
+   * Only two defaults close the view; all others keep it open:
+   * - `onCloseButtonPress` - closes the view (returns `true`)
+   * - `onError` - closes the view (returns `true`)
+   * - all other handlers keep the view open by default (return `false`),
+   *   including `onAndroidSystemBack`, `onRestoreCompleted`, and `onPurchaseCompleted`
    *
-   * If you want to override these listeners, we strongly recommend returning `true`
-   * (or `purchaseResult.type !== 'user_cancelled'` in case of `onPurchaseCompleted`)
-   * from your custom listener to retain default closing behavior.
+   * Returning `true` from a handler closes the view; returning `false` keeps it open.
+   * To retain default behavior in a custom listener, return the same value as the default
+   * implementation (only `onCloseButtonPress` and `onError` close the view by default).
    *
    * Calling this method multiple times will replace previously registered handlers for provided events.
    *
@@ -299,7 +299,7 @@ export class FlowViewController {
    *   },
    *   onPurchaseCompleted: (result) => {
    *     console.log('Purchase completed:', result.type);
-   *     // Return true to keep default closing behavior
+   *     // Return true to close the view after purchase (default keeps it open)
    *     return result.type !== 'user_cancelled';
    *   },
    *   onPurchaseFailed: (error) => {
