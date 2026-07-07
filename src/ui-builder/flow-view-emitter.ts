@@ -103,8 +103,12 @@ export class FlowViewEmitter extends BaseViewEmitter<FlowEventHandlers, ParsedFl
         const response = await handler(event.permission, event.customArgs);
         status = response.status;
         detail = response.detail;
-      } catch {
+      } catch (error) {
         status = 'denied';
+        Log.warn(
+          'flow_view_did_answer_permission',
+          () => `onRequestPermission handler threw; replying denied: ${error}`,
+        );
       }
     }
     const method = 'flow_view_did_answer_permission';
@@ -131,6 +135,7 @@ export class FlowViewEmitter extends BaseViewEmitter<FlowEventHandlers, ParsedFl
   ): void {
     const handlerData = this.handlers.get('onObserverPurchaseInitiated');
     if (!handlerData) return;
+    const { handler, onRequestClose } = handlerData;
     const send = (body: Req['ObserverPurchaseDidStart.Request'] | Req['ObserverPurchaseDidFinish.Request']) => {
       const ctx = new LogContext();
       const log = ctx.call({ methodName: body.method });
@@ -138,12 +143,31 @@ export class FlowViewEmitter extends BaseViewEmitter<FlowEventHandlers, ParsedFl
         .handleMethodCall(body.method, JSON.stringify(body), ctx, log)
         .catch((error) => Log.warn(body.method, () => `Failed observer purchase signal: ${error}`));
     };
-    const handler = handlerData.handler as FlowEventHandlers['onObserverPurchaseInitiated'];
-    handler(
-      event.product,
-      () => send({ method: 'observer_purchase_did_start', event_id: event.eventId }),
-      () => send({ method: 'observer_purchase_did_finish', event_id: event.eventId }),
-    );
+    const purchaseHandler = handler as FlowEventHandlers['onObserverPurchaseInitiated'];
+    try {
+      // The observer's documented way to close the view after driving the
+      // purchase: returning `true` requests dismissal (close-on-`true`).
+      const shouldClose = purchaseHandler(
+        event.product,
+        () => send({ method: 'observer_purchase_did_start', event_id: event.eventId }),
+        () => send({ method: 'observer_purchase_did_finish', event_id: event.eventId }),
+      );
+      if (shouldClose) {
+        onRequestClose().catch((error) =>
+          Log.warn(
+            'observer_purchase_did_initiate',
+            () => `Failed to close view after observer purchase: ${error}`,
+            () => ({ error }),
+          ),
+        );
+      }
+    } catch (error) {
+      Log.warn(
+        'observer_purchase_handler_failed',
+        () => `onObserverPurchaseInitiated handler threw: ${error}`,
+        () => ({ error }),
+      );
+    }
   }
 
   private handleObserverRestore(
@@ -151,6 +175,7 @@ export class FlowViewEmitter extends BaseViewEmitter<FlowEventHandlers, ParsedFl
   ): void {
     const handlerData = this.handlers.get('onObserverRestoreInitiated');
     if (!handlerData) return;
+    const { handler, onRequestClose } = handlerData;
     const send = (body: Req['ObserverRestoreDidStart.Request'] | Req['ObserverRestoreDidFinish.Request']) => {
       const ctx = new LogContext();
       const log = ctx.call({ methodName: body.method });
@@ -158,10 +183,29 @@ export class FlowViewEmitter extends BaseViewEmitter<FlowEventHandlers, ParsedFl
         .handleMethodCall(body.method, JSON.stringify(body), ctx, log)
         .catch((error) => Log.warn(body.method, () => `Failed observer restore signal: ${error}`));
     };
-    const handler = handlerData.handler as FlowEventHandlers['onObserverRestoreInitiated'];
-    handler(
-      () => send({ method: 'observer_restore_did_start', event_id: event.eventId }),
-      () => send({ method: 'observer_restore_did_finish', event_id: event.eventId }),
-    );
+    const restoreHandler = handler as FlowEventHandlers['onObserverRestoreInitiated'];
+    try {
+      // The observer's documented way to close the view after driving the
+      // restore: returning `true` requests dismissal (close-on-`true`).
+      const shouldClose = restoreHandler(
+        () => send({ method: 'observer_restore_did_start', event_id: event.eventId }),
+        () => send({ method: 'observer_restore_did_finish', event_id: event.eventId }),
+      );
+      if (shouldClose) {
+        onRequestClose().catch((error) =>
+          Log.warn(
+            'observer_restore_did_initiate',
+            () => `Failed to close view after observer restore: ${error}`,
+            () => ({ error }),
+          ),
+        );
+      }
+    } catch (error) {
+      Log.warn(
+        'observer_restore_handler_failed',
+        () => `onObserverRestoreInitiated handler threw: ${error}`,
+        () => ({ error }),
+      );
+    }
   }
 }
