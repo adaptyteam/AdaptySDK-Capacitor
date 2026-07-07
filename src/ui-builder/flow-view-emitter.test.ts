@@ -1,29 +1,31 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
-import { parsePaywallEvent } from '../coders/parse-paywall';
+import { parseFlowEvent } from '../coders/parse-flow';
 import { LogContext } from '../logger';
 import type { AdaptyPaywallProduct, AdaptyPurchaseResult } from '../types';
+import { FlowEventId } from '../types/flow-events';
 
-import { PaywallViewEmitter } from './paywall-view-emitter';
+import { FlowViewEmitter } from './flow-view-emitter';
+import { DEFAULT_FLOW_EVENT_HANDLERS } from './types';
 
 const NATIVE_EVENT_NAMES = {
-  action: 'paywall_view_did_perform_action',
-  selectProduct: 'paywall_view_did_select_product',
-  startPurchase: 'paywall_view_did_start_purchase',
-  finishPurchase: 'paywall_view_did_finish_purchase',
-  failPurchase: 'paywall_view_did_fail_purchase',
-  startRestore: 'paywall_view_did_start_restore',
-  finishRestore: 'paywall_view_did_finish_restore',
-  failRestore: 'paywall_view_did_fail_restore',
-  appear: 'paywall_view_did_appear',
-  disappear: 'paywall_view_did_disappear',
-  failRendering: 'paywall_view_did_fail_rendering',
-  failLoadingProducts: 'paywall_view_did_fail_loading_products',
-  finishWebPaymentNavigation: 'paywall_view_did_finish_web_payment_navigation',
+  action: FlowEventId.DidPerformAction,
+  selectProduct: FlowEventId.DidSelectProduct,
+  startPurchase: FlowEventId.DidStartPurchase,
+  finishPurchase: FlowEventId.DidFinishPurchase,
+  failPurchase: FlowEventId.DidFailPurchase,
+  startRestore: FlowEventId.DidStartRestore,
+  finishRestore: FlowEventId.DidFinishRestore,
+  failRestore: FlowEventId.DidFailRestore,
+  appear: FlowEventId.DidAppear,
+  disappear: FlowEventId.DidDisappear,
+  error: FlowEventId.DidReceiveError,
+  failLoadingProducts: FlowEventId.DidFailLoadingProducts,
+  finishWebPaymentNavigation: FlowEventId.DidFinishWebPaymentNavigation,
 } as const;
 
-const TEST_VIEW_ID = 'test-paywall-view-id';
+const TEST_VIEW_ID = 'test-flow-view-id';
 const WRONG_VIEW_ID = 'different-view-id';
 
 const TEST_EVENT_DATA = {
@@ -39,21 +41,44 @@ const TEST_EVENT_DATA = {
   restoreStarted: `{"id":"${NATIVE_EVENT_NAMES.startRestore}","view":{"id":"${TEST_VIEW_ID}"}}`,
   restoreCompleted: `{"id":"${NATIVE_EVENT_NAMES.finishRestore}","view":{"id":"${TEST_VIEW_ID}"},"profile":{"profileId":"test-profile"}}`,
   restoreFailed: `{"id":"${NATIVE_EVENT_NAMES.failRestore}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Restore failed"}}`,
-  paywallAppeared: `{"id":"${NATIVE_EVENT_NAMES.appear}","view":{"id":"${TEST_VIEW_ID}"}}`,
-  paywallDisappeared: `{"id":"${NATIVE_EVENT_NAMES.disappear}","view":{"id":"${TEST_VIEW_ID}"}}`,
-  renderingFailed: `{"id":"${NATIVE_EVENT_NAMES.failRendering}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Rendering failed"}}`,
+  flowAppeared: `{"id":"${NATIVE_EVENT_NAMES.appear}","view":{"id":"${TEST_VIEW_ID}"}}`,
+  flowDisappeared: `{"id":"${NATIVE_EVENT_NAMES.disappear}","view":{"id":"${TEST_VIEW_ID}"}}`,
+  errorReceived: `{"id":"${NATIVE_EVENT_NAMES.error}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Rendering failed"}}`,
   loadingProductsFailed: `{"id":"${NATIVE_EVENT_NAMES.failLoadingProducts}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Loading products failed"}}`,
   webPaymentFinished: `{"id":"${NATIVE_EVENT_NAMES.finishWebPaymentNavigation}","view":{"id":"${TEST_VIEW_ID}"},"product":{"id":"com.example.premium"},"error":null}`,
+  askPermission: `{"id":"${FlowEventId.DidAskPermission}","view":{"id":"${TEST_VIEW_ID}"},"event_id":"permission-event-1","permission":"push","custom_args":{}}`,
+  observerPurchase: `{"id":"${FlowEventId.ObserverDidInitiatePurchase}","view":{"id":"${TEST_VIEW_ID}"},"event_id":"observer-purchase-1","product":{"id":"com.example.premium"}}`,
+  observerRestore: `{"id":"${FlowEventId.ObserverDidInitiateRestore}","view":{"id":"${TEST_VIEW_ID}"},"event_id":"observer-restore-1"}`,
 } as const;
+
+const mockProduct: AdaptyPaywallProduct = {
+  localizedDescription: 'desc',
+  localizedTitle: 'title',
+  paywallABTestName: 'ab',
+  paywallName: 'pw',
+  price: undefined,
+  adaptyId: 'adapty-id',
+  accessLevelId: 'access',
+  productType: 'type',
+  variationId: 'variation',
+  vendorProductId: 'com.example.premium',
+  paywallProductIndex: 0,
+};
+
+// The permission round-trip handler is async, and the observer send helpers fire
+// `handleMethodCall` without awaiting. This drains the microtask queue so their
+// effects are observable in the assertions.
+const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 jest.mock('../bridge/plugin', () => require('../bridge/plugin.mock').mockAdaptyCapacitorPlugin);
 jest.mock('../logger', () => require('../logger/logger.mock').mockLogger);
-jest.mock('../coders/parse-paywall', () => require('../coders/parse-paywall.mock').mockParsePaywall);
+jest.mock('../coders/parse-flow', () => require('../coders/parse-flow.mock').mockParseFlow);
 
-describe('PaywallViewEmitter', () => {
-  let emitter: PaywallViewEmitter;
+describe('FlowViewEmitter', () => {
+  let emitter: FlowViewEmitter;
+  let adaptyMock: { handleMethodCall: jest.Mock };
   let mockBridgeAddListener: jest.MockedFunction<any>;
-  let mockParsePaywallEvent: jest.MockedFunction<typeof parsePaywallEvent>;
+  let mockParseFlowEvent: jest.MockedFunction<typeof parseFlowEvent>;
   let mockPluginHandle: PluginListenerHandle;
   let mockLogContext: any;
   let mockLog: any;
@@ -82,30 +107,32 @@ describe('PaywallViewEmitter', () => {
 
     jest.mocked(LogContext).mockImplementation(() => mockLogContext as any);
 
-    // Cast to any to match the PaywallViewEmitter implementation which casts to (AdaptyCapacitorPlugin as any)
+    // Cast to any to match the FlowViewEmitter implementation which casts to (AdaptyCapacitorPlugin as any)
     mockBridgeAddListener = jest.fn() as any;
     (AdaptyCapacitorPlugin as any).addListener = mockBridgeAddListener;
     mockBridgeAddListener.mockResolvedValue(mockPluginHandle);
 
-    mockParsePaywallEvent = parsePaywallEvent as jest.MockedFunction<typeof parsePaywallEvent>;
+    mockParseFlowEvent = parseFlowEvent as jest.MockedFunction<typeof parseFlowEvent>;
 
     mockOnRequestClose = jest.fn().mockResolvedValue(undefined);
 
-    emitter = new PaywallViewEmitter(TEST_VIEW_ID);
+    adaptyMock = { handleMethodCall: jest.fn().mockResolvedValue(undefined) };
+
+    emitter = new FlowViewEmitter(TEST_VIEW_ID, adaptyMock as any);
   });
 
   describe('constructor', () => {
     it('should initialize with provided viewId', async () => {
       const testViewId = 'custom-view-id';
-      const customEmitter = new PaywallViewEmitter(testViewId);
-      expect(customEmitter).toBeInstanceOf(PaywallViewEmitter);
+      const customEmitter = new FlowViewEmitter(testViewId, adaptyMock as any);
+      expect(customEmitter).toBeInstanceOf(FlowViewEmitter);
     });
   });
 
   describe('addListener', () => {
     it('should create native event listener for the first handler', async () => {
       const mockListener = jest.fn();
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'close' },
@@ -159,7 +186,7 @@ describe('PaywallViewEmitter', () => {
 
     it('should filter events by viewId and only call handlers for matching view', async () => {
       const mockListener = jest.fn();
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: WRONG_VIEW_ID },
         action: { type: 'close' },
@@ -179,7 +206,7 @@ describe('PaywallViewEmitter', () => {
 
     it('should call handler when viewId matches and action type matches', async () => {
       const mockListener = jest.fn().mockReturnValue(false);
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'close' },
@@ -199,7 +226,7 @@ describe('PaywallViewEmitter', () => {
 
     it('should call onRequestClose when handler returns true', async () => {
       const mockListener = jest.fn().mockReturnValue(true);
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'close' },
@@ -218,7 +245,7 @@ describe('PaywallViewEmitter', () => {
       const closeListener = jest.fn();
       const backListener = jest.fn();
 
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'system_back' },
@@ -240,7 +267,7 @@ describe('PaywallViewEmitter', () => {
       const purchaseCompletedListener = jest.fn();
 
       // Test onProductSelected
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.selectProduct,
         view: { id: TEST_VIEW_ID },
         productId: 'com.example.premium',
@@ -254,7 +281,7 @@ describe('PaywallViewEmitter', () => {
       expect(productSelectedListener).toHaveBeenCalledWith('com.example.premium');
 
       // Test onUrlPress
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'open_url', value: 'https://example.com', openIn: 'browser_in_app' },
@@ -269,20 +296,7 @@ describe('PaywallViewEmitter', () => {
 
       // Test onPurchaseCompleted
       const mockPurchaseResult: AdaptyPurchaseResult = { type: 'pending' };
-      const mockProduct: AdaptyPaywallProduct = {
-        localizedDescription: 'desc',
-        localizedTitle: 'title',
-        paywallABTestName: 'ab',
-        paywallName: 'pw',
-        price: undefined,
-        adaptyId: 'adapty-id',
-        accessLevelId: 'access',
-        productType: 'type',
-        variationId: 'variation',
-        vendorProductId: 'com.example.premium',
-        paywallProductIndex: 0,
-      };
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.finishPurchase,
         view: { id: TEST_VIEW_ID },
         purchaseResult: mockPurchaseResult,
@@ -299,7 +313,7 @@ describe('PaywallViewEmitter', () => {
 
     it('should handle parsing errors gracefully', async () => {
       const mockListener = jest.fn();
-      mockParsePaywallEvent.mockImplementation(() => {
+      mockParseFlowEvent.mockImplementation(() => {
         throw new Error('Parse error');
       });
 
@@ -349,7 +363,7 @@ describe('PaywallViewEmitter', () => {
       const mockListener = jest.fn(() => {
         throw new Error('Listener error');
       });
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'close' },
@@ -368,7 +382,7 @@ describe('PaywallViewEmitter', () => {
     it('should handle onRequestClose errors gracefully', async () => {
       const mockListener = jest.fn().mockReturnValue(true);
       const mockOnRequestCloseWithError = jest.fn().mockRejectedValue(new Error('Close error'));
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'close' },
@@ -388,10 +402,10 @@ describe('PaywallViewEmitter', () => {
       expect(mockLog.failed).toHaveBeenCalled();
     });
 
-    it('should pass parsePaywallEvent context correctly', async () => {
+    it('should pass parseFlowEvent context correctly', async () => {
       const mockListener = jest.fn();
 
-      mockParsePaywallEvent.mockImplementation((input, ctx) => {
+      mockParseFlowEvent.mockImplementation((input, ctx) => {
         expect(typeof input).toBe('string');
         expect(ctx).toBe(mockLogContext);
         return {
@@ -434,7 +448,7 @@ describe('PaywallViewEmitter', () => {
       mockBridgeAddListener.mockReturnValueOnce(mockHandle1).mockReturnValueOnce(mockHandle2);
 
       const mockListener = jest.fn();
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'close' },
@@ -489,7 +503,7 @@ describe('PaywallViewEmitter', () => {
         onRestoreFailed: jest.fn(),
         onAppeared: jest.fn(),
         onDisappeared: jest.fn(),
-        onRenderingFailed: jest.fn(),
+        onError: jest.fn(),
         onLoadingProductsFailed: jest.fn(),
         onWebPaymentNavigationFinished: jest.fn(),
       };
@@ -510,7 +524,7 @@ describe('PaywallViewEmitter', () => {
       const onRequestClose1 = jest.fn().mockResolvedValue(undefined);
       const onRequestClose2 = jest.fn().mockResolvedValue(undefined);
 
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'close' },
@@ -531,13 +545,13 @@ describe('PaywallViewEmitter', () => {
     });
 
     it('should isolate handlers across different views (cross-view isolation)', async () => {
-      const viewEmitter1 = new PaywallViewEmitter('view-1');
-      const viewEmitter2 = new PaywallViewEmitter('view-2');
+      const viewEmitter1 = new FlowViewEmitter('view-1', adaptyMock as any);
+      const viewEmitter2 = new FlowViewEmitter('view-2', adaptyMock as any);
 
       const listener1 = jest.fn();
       const listener2 = jest.fn();
 
-      mockParsePaywallEvent.mockImplementation((input) => {
+      mockParseFlowEvent.mockImplementation((input) => {
         const data = JSON.parse(input);
         return data;
       });
@@ -566,7 +580,7 @@ describe('PaywallViewEmitter', () => {
 
   describe('addInternalListener', () => {
     it('should subscribe natively even without client handlers', async () => {
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.disappear,
         view: { id: TEST_VIEW_ID },
       });
@@ -580,7 +594,7 @@ describe('PaywallViewEmitter', () => {
     it('should call internal handler after client handler for same event', async () => {
       const callOrder: string[] = [];
 
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.disappear,
         view: { id: TEST_VIEW_ID },
       });
@@ -597,7 +611,7 @@ describe('PaywallViewEmitter', () => {
       await emitter.addInternalListener('onDisappeared', internalHandler);
 
       const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
-      nativeCallback({ data: TEST_EVENT_DATA.paywallDisappeared });
+      nativeCallback({ data: TEST_EVENT_DATA.flowDisappeared });
 
       expect(callOrder).toEqual(['client', 'internal']);
       expect(clientHandler).toHaveBeenCalledTimes(1);
@@ -605,10 +619,210 @@ describe('PaywallViewEmitter', () => {
     });
   });
 
+  describe('permission round-trip (onRequestPermission)', () => {
+    it('replies to native with the resolved status from an async handler', async () => {
+      const handler = jest.fn().mockResolvedValue({ status: 'granted' });
+      mockParseFlowEvent.mockReturnValue({
+        id: FlowEventId.DidAskPermission,
+        view: { id: TEST_VIEW_ID },
+        eventId: 'permission-event-1',
+        permission: 'push',
+        customArgs: {},
+      });
+
+      await emitter.addListener('onRequestPermission', handler as any, mockOnRequestClose);
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.askPermission });
+
+      await flushPromises();
+
+      expect(handler).toHaveBeenCalledWith('push', {});
+      expect(adaptyMock.handleMethodCall).toHaveBeenCalledWith(
+        'flow_view_did_answer_permission',
+        expect.any(String),
+        expect.anything(),
+        expect.anything(),
+      );
+
+      const body = JSON.parse(adaptyMock.handleMethodCall.mock.calls[0][1]);
+      expect(body).toMatchObject({
+        method: 'flow_view_did_answer_permission',
+        event_id: 'permission-event-1',
+        status: 'granted',
+      });
+    });
+
+    it('replies denied when using the default permission handler', async () => {
+      mockParseFlowEvent.mockReturnValue({
+        id: FlowEventId.DidAskPermission,
+        view: { id: TEST_VIEW_ID },
+        eventId: 'permission-event-1',
+        permission: 'push',
+        customArgs: {},
+      });
+
+      await emitter.addListener(
+        'onRequestPermission',
+        DEFAULT_FLOW_EVENT_HANDLERS.onRequestPermission as any,
+        mockOnRequestClose,
+      );
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.askPermission });
+
+      await flushPromises();
+
+      const body = JSON.parse(adaptyMock.handleMethodCall.mock.calls[0][1]);
+      expect(body).toMatchObject({
+        method: 'flow_view_did_answer_permission',
+        event_id: 'permission-event-1',
+        status: 'denied',
+      });
+    });
+  });
+
+  describe('observer purchase round-trip (onObserverPurchaseInitiated)', () => {
+    it('injects start/finish callbacks that signal native, and closes the view when the handler returns true', async () => {
+      let startPurchase: (() => void) | undefined;
+      let finishPurchase: (() => void) | undefined;
+      const handler = jest.fn((_product: AdaptyPaywallProduct, onStart: () => void, onFinish: () => void) => {
+        startPurchase = onStart;
+        finishPurchase = onFinish;
+        return true; // request close after driving the purchase
+      });
+
+      mockParseFlowEvent.mockReturnValue({
+        id: FlowEventId.ObserverDidInitiatePurchase,
+        view: { id: TEST_VIEW_ID },
+        eventId: 'observer-purchase-1',
+        product: mockProduct,
+      });
+
+      await emitter.addListener('onObserverPurchaseInitiated', handler as any, mockOnRequestClose);
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.observerPurchase });
+
+      // The handler receives (product, onStartPurchase, onFinishPurchase)
+      expect(handler).toHaveBeenCalledWith(mockProduct, expect.any(Function), expect.any(Function));
+
+      // Returning true requests dismissal (close-on-true) — the Task 11 fix
+      expect(mockOnRequestClose).toHaveBeenCalledTimes(1);
+
+      // Driving the loading state forwards the start/finish signals to native
+      startPurchase?.();
+      expect(adaptyMock.handleMethodCall).toHaveBeenCalledWith(
+        'observer_purchase_did_start',
+        expect.any(String),
+        expect.anything(),
+        expect.anything(),
+      );
+
+      finishPurchase?.();
+      expect(adaptyMock.handleMethodCall).toHaveBeenCalledWith(
+        'observer_purchase_did_finish',
+        expect.any(String),
+        expect.anything(),
+        expect.anything(),
+      );
+
+      // start was the first handleMethodCall (onRequestClose is a separate mock)
+      const startBody = JSON.parse(adaptyMock.handleMethodCall.mock.calls[0][1]);
+      expect(startBody).toMatchObject({ method: 'observer_purchase_did_start', event_id: 'observer-purchase-1' });
+    });
+
+    it('does not close the view when the handler returns false', async () => {
+      const handler = jest.fn(() => false);
+
+      mockParseFlowEvent.mockReturnValue({
+        id: FlowEventId.ObserverDidInitiatePurchase,
+        view: { id: TEST_VIEW_ID },
+        eventId: 'observer-purchase-1',
+        product: mockProduct,
+      });
+
+      await emitter.addListener('onObserverPurchaseInitiated', handler as any, mockOnRequestClose);
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.observerPurchase });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(mockOnRequestClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('observer restore round-trip (onObserverRestoreInitiated)', () => {
+    it('injects start/finish callbacks that signal native, and closes the view when the handler returns true', async () => {
+      let startRestore: (() => void) | undefined;
+      let finishRestore: (() => void) | undefined;
+      const handler = jest.fn((onStart: () => void, onFinish: () => void) => {
+        startRestore = onStart;
+        finishRestore = onFinish;
+        return true; // request close after driving the restore
+      });
+
+      mockParseFlowEvent.mockReturnValue({
+        id: FlowEventId.ObserverDidInitiateRestore,
+        view: { id: TEST_VIEW_ID },
+        eventId: 'observer-restore-1',
+      });
+
+      await emitter.addListener('onObserverRestoreInitiated', handler as any, mockOnRequestClose);
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.observerRestore });
+
+      // The handler receives (onStartRestore, onFinishRestore)
+      expect(handler).toHaveBeenCalledWith(expect.any(Function), expect.any(Function));
+
+      // Returning true requests dismissal (close-on-true)
+      expect(mockOnRequestClose).toHaveBeenCalledTimes(1);
+
+      startRestore?.();
+      expect(adaptyMock.handleMethodCall).toHaveBeenCalledWith(
+        'observer_restore_did_start',
+        expect.any(String),
+        expect.anything(),
+        expect.anything(),
+      );
+
+      finishRestore?.();
+      expect(adaptyMock.handleMethodCall).toHaveBeenCalledWith(
+        'observer_restore_did_finish',
+        expect.any(String),
+        expect.anything(),
+        expect.anything(),
+      );
+
+      // start then finish were the first two handleMethodCall invocations
+      const finishBody = JSON.parse(adaptyMock.handleMethodCall.mock.calls[1][1]);
+      expect(finishBody).toMatchObject({ method: 'observer_restore_did_finish', event_id: 'observer-restore-1' });
+    });
+
+    it('does not close the view when the handler returns false', async () => {
+      const handler = jest.fn(() => false);
+
+      mockParseFlowEvent.mockReturnValue({
+        id: FlowEventId.ObserverDidInitiateRestore,
+        view: { id: TEST_VIEW_ID },
+        eventId: 'observer-restore-1',
+      });
+
+      await emitter.addListener('onObserverRestoreInitiated', handler as any, mockOnRequestClose);
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.observerRestore });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(mockOnRequestClose).not.toHaveBeenCalled();
+    });
+  });
+
   describe('logging', () => {
     it('should log native event processing', async () => {
       const mockListener = jest.fn();
-      mockParsePaywallEvent.mockReturnValue({
+      mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
         view: { id: TEST_VIEW_ID },
         action: { type: 'close' },
