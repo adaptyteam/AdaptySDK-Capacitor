@@ -26,6 +26,8 @@ export const DEFAULT_ONBOARDING_PARAMS: CreateOnboardingViewParamsInput = {
 /**
  * Controller for managing onboarding views.
  *
+ * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
+ *
  * @remarks
  * This class provides methods to present, dismiss, and handle events for onboarding views
  * created with the Onboarding Builder. Create instances using the {@link createOnboardingView} function
