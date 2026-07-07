@@ -18,24 +18,13 @@ For **android**, also ask:
 
 ## iOS Steps
 
-Edit these files, replacing the OLD version with the NEW version:
+iOS dependencies are distributed via Swift Package Manager only (no CocoaPods podspec).
 
-### 1. `AdaptyCapacitor.podspec`
-Update all three pod dependencies:
-```ruby
-s.dependency 'Adapty', '<NEW_VERSION>'
-s.dependency 'AdaptyUI', '<NEW_VERSION>'
-s.dependency 'AdaptyPlugin', '<NEW_VERSION>'
-```
-
-### 2. `Package.swift`
-Update SPM exact version:
+### 1. `Package.swift`
+Update the SPM exact version pin:
 ```swift
 .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS.git", exact: "<NEW_VERSION>")
 ```
-
-### 3. No manual Podfile.lock edit
-The lockfile will be regenerated during the verification step.
 
 ## Android Steps
 
