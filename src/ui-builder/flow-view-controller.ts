@@ -31,7 +31,7 @@ const DEFAULT_PARAMS: CreateFlowViewParamsInput = {
  *
  * @remarks
  * This class provides methods to present, dismiss, and handle events for flow views
- * created with the Paywall Builder. Create instances using the {@link createPaywallView} function
+ * created with the Flow Builder. Create instances using the {@link createFlowView} function
  * rather than directly constructing this class.
  *
  * @public
@@ -113,10 +113,10 @@ export class FlowViewController {
    * @example
    * Present with default full-screen style
    * ```typescript
-   * import { adapty, createPaywallView } from '@adapty/capacitor';
+   * import { adapty, createFlowView } from '@adapty/capacitor';
    *
-   * const paywall = await adapty.getPaywall({ placementId: 'YOUR_PLACEMENT_ID' });
-   * const view = await createPaywallView(paywall);
+   * const flow = await adapty.getFlow({ placementId: 'YOUR_PLACEMENT_ID' });
+   * const view = await createFlowView(flow);
    * await view.present();
    * ```
    *
@@ -160,9 +160,9 @@ export class FlowViewController {
    *
    * @example
    * ```typescript
-   * import { createPaywallView } from '@adapty/capacitor';
+   * import { createFlowView } from '@adapty/capacitor';
    *
-   * const view = await createPaywallView(paywall);
+   * const view = await createFlowView(flow);
    * await view.present();
    * // ... later
    * await view.dismiss();
@@ -268,7 +268,7 @@ export class FlowViewController {
    *
    * @remarks
    * Each event type can have only one handler — new handlers replace existing ones.
-   * Default handlers are registered automatically in {@link createPaywallView} and provide standard closing behavior:
+   * Default handlers are registered automatically in {@link createFlowView} and provide standard closing behavior:
    * - `onCloseButtonPress` - closes the flow
    * - `onAndroidSystemBack` - closes the flow (Android only)
    * - `onRestoreCompleted` - closes the flow after successful restore
@@ -289,9 +289,9 @@ export class FlowViewController {
    * @example
    * Register custom event handlers
    * ```typescript
-   * import { createPaywallView } from '@adapty/capacitor';
+   * import { createFlowView } from '@adapty/capacitor';
    *
-   * const view = await createPaywallView(paywall);
+   * const view = await createFlowView(flow);
    *
    * const unsubscribe = await view.setEventHandlers({
    *   onPurchaseStarted: (product) => {
@@ -393,7 +393,7 @@ export class FlowViewController {
    *
    * @example
    * ```typescript
-   * const view = await createPaywallView(paywall);
+   * const view = await createFlowView(flow);
    * await view.setEventHandlers({ onPurchaseCompleted: handlePurchase });
    *
    * // Later, clear all handlers
