@@ -1,6 +1,4 @@
-import { Adapty } from './adapty';
-
-export const adapty = new Adapty();
+export { adapty } from './adapty-instance';
 export type * from './logger';
 export { consoleLogSink } from './logger';
 export { AdaptyError } from '@adapty/core';
