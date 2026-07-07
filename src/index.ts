@@ -6,19 +6,22 @@ export * from './types';
 export type * from './types/configs';
 
 export {
-  createPaywallView,
-  PaywallViewController,
+  createFlowView,
+  FlowViewController,
   createOnboardingView,
   OnboardingViewController,
 } from './ui-builder/index';
 export type {
-  CreatePaywallViewParamsInput,
+  CreateFlowViewParamsInput,
   AdaptyCustomAsset,
   AdaptyUiView,
   AdaptyUiDialogConfig,
-  AdaptyUiDialogActionType,
   AdaptyIOSPresentationStyle,
-  EventHandlers,
+  FlowEventHandlers,
   OnboardingEventHandlers,
+  AdaptyPermission,
+  FlowPermissionResponse,
+  FlowPermissionStatus,
 } from './ui-builder/index';
+export { AdaptyUiDialogActionType } from './ui-builder/index';
 export type { IdentifyParamsInput } from './types/inputs';
