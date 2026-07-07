@@ -6,22 +6,20 @@ import type {
 } from './inputs';
 
 /**
- * Describes the options for the `getPaywall` method.
+ * Describes the options for the `getFlow` method.
  * @public
  */
-export interface GetPaywallOptions {
+export interface GetFlowOptions {
   placementId: string;
-  locale?: string;
   params?: GetPlacementParamsInput;
 }
 
 /**
- * Describes the options for the `getPaywallForDefaultAudience` method.
+ * Describes the options for the `getFlowForDefaultAudience` method.
  * @public
  */
-export interface GetPaywallForDefaultAudienceOptions {
+export interface GetFlowForDefaultAudienceOptions {
   placementId: string;
-  locale?: string;
   params?: GetPlacementForDefaultAudienceParamsInput;
 }
 
@@ -61,15 +59,15 @@ export interface MakePurchaseOptions {
  */
 export interface AdaptyDefaultOptions {
   /**
-   * Default options for the `getPaywall` method.
+   * Default options for the `getFlow` method.
    */
-  get_paywall: {
+  get_flow: {
     params: Required<GetPlacementParamsInput>;
   };
   /**
-   * Default options for the `getPaywallForDefaultAudience` method.
+   * Default options for the `getFlowForDefaultAudience` method.
    */
-  get_paywall_for_default_audience: {
+  get_flow_for_default_audience: {
     params: GetPlacementForDefaultAudienceParamsInput;
   };
   /**
@@ -88,17 +86,17 @@ export interface AdaptyDefaultOptions {
 }
 
 /**
- * Merged type that combines GetPaywallOptions with required params from AdaptyDefaultOptions
+ * Merged type that combines GetFlowOptions with required params from AdaptyDefaultOptions
  * @public
  */
-export type GetPaywallOptionsWithDefaults = AdaptyDefaultOptions['get_paywall'] & GetPaywallOptions;
+export type GetFlowOptionsWithDefaults = AdaptyDefaultOptions['get_flow'] & GetFlowOptions;
 
 /**
- * Merged type that combines GetPaywallForDefaultAudienceOptions with required params from AdaptyDefaultOptions
+ * Merged type that combines GetFlowForDefaultAudienceOptions with required params from AdaptyDefaultOptions
  * @public
  */
-export type GetPaywallForDefaultAudienceOptionsWithDefaults = AdaptyDefaultOptions['get_paywall_for_default_audience'] &
-  GetPaywallForDefaultAudienceOptions;
+export type GetFlowForDefaultAudienceOptionsWithDefaults = AdaptyDefaultOptions['get_flow_for_default_audience'] &
+  GetFlowForDefaultAudienceOptions;
 
 /**
  * Merged type for `getOnboarding` with defaults
