@@ -926,26 +926,23 @@ const App: React.FC = () => {
         {/* Activation Section */}
         <div className={styles.Section}>
           <h3 className={styles.SectionTitle}>SDK Activation</h3>
-          <button
-            onClick={() => testActivate(false)}
-            className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
-          >
-            {isActivated ? 'Activated' : 'Activate Adapty'}
-          </button>
-          <button
-            onClick={() => testActivate(true)}
-            className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
-            style={{ marginLeft: '10px' }}
-          >
-            {isActivated ? 'Activated' : 'Activate (Observer Mode)'}
-          </button>
-          <button
-            onClick={testIsActivated}
-            className={`${styles.Button} ${styles.ButtonSecondary}`}
-            style={{ marginLeft: '10px' }}
-          >
-            Check Status
-          </button>
+          <div className={styles.ButtonGroup}>
+            <button
+              onClick={() => testActivate(false)}
+              className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
+            >
+              {isActivated ? 'Activated' : 'Activate Adapty'}
+            </button>
+            <button
+              onClick={() => testActivate(true)}
+              className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
+            >
+              {isActivated ? 'Activated' : 'Activate (Observer Mode)'}
+            </button>
+            <button onClick={testIsActivated} className={`${styles.Button} ${styles.ButtonSecondary}`}>
+              Check Status
+            </button>
+          </div>
         </div>
 
         <ResultBanner result={result} />
