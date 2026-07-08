@@ -1,5 +1,14 @@
 import { forwardRef, useImperativeHandle } from 'react';
-import { adapty, createFlowView, AdaptyCustomAsset, AdaptyError, ErrorCodeName } from '@adapty/capacitor';
+import {
+  adapty,
+  createFlowView,
+  AdaptyCustomAsset,
+  AdaptyError,
+  ErrorCodeName,
+  AdaptyFlow,
+  FlowViewController,
+  FlowEventHandlers,
+} from '@adapty/capacitor';
 import { APPLE_ICON_IMAGE_BASE64 } from '../../../assets/base64-data.ts';
 import { showSuccessToast } from '../../../utils/toast.ts';
 
@@ -8,9 +17,9 @@ export type FlowControllerRef = {
 };
 
 type Props = {
-  flow: any | null;
+  flow: AdaptyFlow | null;
   customTagsJson: string;
-  setFlowView: (view: any | null) => void;
+  setFlowView: (view: FlowViewController | null) => void;
   setResult: (value: string) => void;
   log: (
     level: 'info' | 'error' | 'warn',
@@ -57,7 +66,7 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
       const view = await createFlowView(flow, { customTags, customAssets });
       setFlowView(view);
 
-      await view.setEventHandlers({
+      const eventHandlers: Partial<FlowEventHandlers> = {
         onCloseButtonPress: () => {
           log('info', 'User pressed close button', 'flow.onCloseButtonPress');
           setResult('❌ User closed flow');
@@ -79,18 +88,18 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
           setResult(`📦 Product selected: ${productId}`);
           return false;
         },
-        onPurchaseStarted: (product: any) => {
+        onPurchaseStarted: (product) => {
           log('info', 'Purchase started for product', 'flow.onPurchaseStarted', false, { product });
           setResult(`🛒 Purchase started: ${product?.vendorProductId || 'unknown'}`);
           return false;
         },
-        onPurchaseCompleted: (purchaseResult: any, product: any) => {
+        onPurchaseCompleted: (purchaseResult, product) => {
           log('info', 'Purchase completed', 'flow.onPurchaseCompleted', false, { purchaseResult, product });
           setResult(`✅ Purchase completed: ${purchaseResult?.type || 'unknown'}`);
           // Mirror the SDK default: keep the flow view open.
           return false;
         },
-        onPurchaseFailed: (error: any, product: any) => {
+        onPurchaseFailed: (error, product) => {
           log('error', 'Purchase failed', 'flow.onPurchaseFailed', false, { error, product });
           setResult(`❌ Purchase failed: ${error?.message || 'unknown error'}`);
           return false;
@@ -100,13 +109,13 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
           setResult('🔄 Restore started...');
           return false;
         },
-        onRestoreCompleted: (profile: any) => {
+        onRestoreCompleted: (profile) => {
           log('info', 'Restore completed', 'flow.onRestoreCompleted', false, { profile });
           setResult('✅ Restore completed successfully');
           // Mirror the SDK default: keep the flow view open.
           return false;
         },
-        onRestoreFailed: (error: any) => {
+        onRestoreFailed: (error) => {
           log('error', 'Restore failed', 'flow.onRestoreFailed', false, { error });
           setResult(`❌ Restore failed: ${error?.message || 'unknown error'}`);
           return false;
@@ -121,19 +130,19 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
           setResult('👋 Flow disappeared');
           return false;
         },
-        onError: (error: any) => {
+        onError: (error) => {
           log('error', 'Flow error', 'flow.onError', false, { error });
           setResult(`💥 Flow error: ${error?.message || 'unknown error'}`);
           // Keep the flow view open on error so the failure stays visible in this dev
           // tool (intentionally differs from the SDK default, which closes the view).
           return false;
         },
-        onLoadingProductsFailed: (error: any) => {
+        onLoadingProductsFailed: (error) => {
           log('error', 'Loading products failed', 'flow.onLoadingProductsFailed', false, { error });
           setResult(`📦❌ Products loading failed: ${error?.message || 'unknown error'}`);
           return false;
         },
-        onWebPaymentNavigationFinished: (product: any, error: any) => {
+        onWebPaymentNavigationFinished: (product, error) => {
           log('info', 'Web payment navigation finished', 'flow.onWebPaymentNavigationFinished', false, {
             product,
             error,
@@ -144,7 +153,7 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         // Delegate to the handler method, which opens the URL natively honoring
         // `openIn` (`browser_out_app` -> external browser, `browser_in_app` ->
         // in-app browser), same as the SDK's default onUrlPress handler.
-        onUrlPress: (url: string, openIn: any) => {
+        onUrlPress: (url, openIn) => {
           log('info', 'User pressed URL', 'flow.onUrlPress', false, { url, openIn });
           adapty
             .openWebUrl({ url, openIn })
@@ -170,13 +179,13 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
             );
           return false;
         },
-        onRequestPermission: async (permission: any, customArgs: Record<string, string>) => {
+        onRequestPermission: async (permission, customArgs) => {
           log('info', 'Flow requested permission', 'flow.onRequestPermission', false, { permission, customArgs });
           showSuccessToast(`Flow requested permission: ${permission}`);
           // devtools stub: always reply "granted" so the flow can continue.
           return { status: 'granted' as const };
         },
-        onObserverPurchaseInitiated: (product: any, onStartPurchase: () => void, onFinishPurchase: () => void) => {
+        onObserverPurchaseInitiated: (product, onStartPurchase, onFinishPurchase) => {
           log('info', 'Observer purchase initiated', 'flow.onObserverPurchaseInitiated', false, { product });
           showSuccessToast('Observer purchase initiated');
           // devtools stub: no real purchase — just drive the paywall loading cycle.
@@ -192,19 +201,21 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
           onFinishRestore();
           return false;
         },
-      });
+      };
+
+      await view.setEventHandlers(eventHandlers);
 
       setResult('✅ Flow view created. Presenting...');
       await view.present();
       setResult('✅ Flow presented successfully!');
-    } catch (error: any) {
+    } catch (error) {
       if (error instanceof AdaptyError && error.adaptyCode === ErrorCodeName.notActivated) {
         setResult('SDK not activated. Please activate first');
       } else {
-        setResult(`❌ Failed to present flow: ${error?.message || String(error)}`);
+        setResult(`❌ Failed to present flow: ${String(error)}`);
       }
 
-      log('error', 'Failed to present flow', 'presentFlow', false, { error: error?.message || String(error) });
+      log('error', 'Failed to present flow', 'presentFlow', false, { error: String(error) });
     }
   };
 

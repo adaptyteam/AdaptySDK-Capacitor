@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { AdaptyProfile, AdaptyFlow, AdaptyPaywallProduct, AdaptyOnboarding } from '@adapty/capacitor';
+import {
+  AdaptyProfile,
+  AdaptyFlow,
+  AdaptyPaywallProduct,
+  AdaptyOnboarding,
+  FlowViewController,
+} from '@adapty/capacitor';
 import { getPlacementId, getOnboardingPlacementId } from '../helpers';
 
 // Types for the context state
@@ -12,7 +18,7 @@ interface AppState {
   flow: AdaptyFlow | null;
   products: AdaptyPaywallProduct[];
   onboarding: AdaptyOnboarding | null;
-  flowView: any | null;
+  flowView: FlowViewController | null;
 
   // User data
   customerUserId: string;
@@ -48,7 +54,7 @@ interface AppActions {
   setFlow: (value: AdaptyFlow | null) => void;
   setProducts: (value: AdaptyPaywallProduct[]) => void;
   setOnboarding: (value: AdaptyOnboarding | null) => void;
-  setFlowView: (value: any | null) => void;
+  setFlowView: (value: FlowViewController | null) => void;
 
   // User data
   setCustomerUserId: (value: string) => void;
@@ -134,7 +140,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [flow, setFlow] = useState<AdaptyFlow | null>(defaultState.flow);
   const [products, setProducts] = useState<AdaptyPaywallProduct[]>(defaultState.products);
   const [onboarding, setOnboarding] = useState<AdaptyOnboarding | null>(defaultState.onboarding);
-  const [flowView, setFlowView] = useState<any | null>(defaultState.flowView);
+  const [flowView, setFlowView] = useState<FlowViewController | null>(defaultState.flowView);
 
   // User data
   const [customerUserId, setCustomerUserId] = useState<string>(defaultState.customerUserId);

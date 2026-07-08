@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AdaptyFlow, AdaptyPaywallProduct } from '@adapty/capacitor';
+import type { AdaptyFlow, AdaptyPaywallProduct, FlowViewController } from '@adapty/capacitor';
 import styles from '../App.module.css';
 
 type Props = {
@@ -15,7 +15,7 @@ type Props = {
   fetchPolicies: readonly string[];
   webPaywallOpenInIdx: number;
   webPresentations: readonly string[];
-  flowView: any | null;
+  flowView: FlowViewController | null;
   webPaywallUrl: string;
   setPlacementId: (v: string) => void;
   setLoadTimeout: (v: string) => void;

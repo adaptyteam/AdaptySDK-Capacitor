@@ -526,11 +526,11 @@ const App: React.FC = () => {
       setResult('Presenting existing flow view...');
       await flowView.present();
       setResult('✅ Existing flow presented successfully!');
-    } catch (error: any) {
+    } catch (error) {
       log('error', 'Failed to present existing flow', 'presentExistingFlow', false, {
-        error: error.message || error.toString(),
+        error: String(error),
       });
-      setResult(`❌ Failed to present existing flow: ${error.message}`);
+      setResult(`❌ Failed to present existing flow: ${String(error)}`);
     }
   };
 
