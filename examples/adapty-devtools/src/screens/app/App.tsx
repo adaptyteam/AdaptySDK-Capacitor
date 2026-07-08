@@ -114,9 +114,9 @@ const App: React.FC = () => {
     'return_cache_data_if_not_expired_else_load',
   ] as const;
 
-  const testActivate = async () => {
+  const testActivate = async (observerMode = false) => {
     try {
-      setResult('Activating Adapty...');
+      setResult(`Activating Adapty${observerMode ? ' (observer mode)' : ''}...`);
       const trimmedCustomerUserId = customerUserId.trim();
 
       await adapty.activate({
@@ -126,7 +126,7 @@ const App: React.FC = () => {
           // backendBaseUrl: 'http://localhost:8080',
           ...(trimmedCustomerUserId ? { customerUserId: trimmedCustomerUserId } : {}),
           logLevel: 'verbose',
-          observerMode: false,
+          observerMode,
           __ignoreActivationOnFastRefresh: import.meta.env.DEV,
           // android: {
           //   adIdCollectionDisabled: true,
@@ -927,10 +927,17 @@ const App: React.FC = () => {
         <div className={styles.Section}>
           <h3 className={styles.SectionTitle}>SDK Activation</h3>
           <button
-            onClick={testActivate}
+            onClick={() => testActivate(false)}
             className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
           >
             {isActivated ? 'Activated' : 'Activate Adapty'}
+          </button>
+          <button
+            onClick={() => testActivate(true)}
+            className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
+            style={{ marginLeft: '10px' }}
+          >
+            {isActivated ? 'Activated' : 'Activate (Observer Mode)'}
           </button>
           <button
             onClick={testIsActivated}
