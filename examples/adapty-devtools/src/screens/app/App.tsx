@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import {
   adapty,
-  AdaptyPaywall,
+  AdaptyFlow,
   AdaptyPaywallProduct,
   AdaptyOnboarding,
   FileLocation,
@@ -16,8 +16,8 @@ import { useLogs } from '../../contexts/LogsContext';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import styles from './App.module.css';
 import { OnboardingController, OnboardingControllerRef } from './native-presentation-controllers/OnboardingController';
-import { PaywallController, PaywallControllerRef } from './native-presentation-controllers/PaywallController';
-import { PaywallSection } from './sections/PaywallSection';
+import { FlowController, FlowControllerRef } from './native-presentation-controllers/FlowController';
+import { FlowSection } from './sections/FlowSection';
 import { OnboardingSection } from './sections/OnboardingSection';
 import { ResultBanner } from './components/ResultBanner';
 import { CredentialsInfoSection } from './sections/CredentialsInfoSection';
@@ -34,10 +34,10 @@ const App: React.FC = () => {
     // State
     isActivated,
     profile,
-    paywall,
+    flow,
     products,
     onboarding,
-    paywallView,
+    flowView,
     customerUserId,
     transactionId,
     variationId,
@@ -57,10 +57,10 @@ const App: React.FC = () => {
     // Actions
     setIsActivated,
     setProfile,
-    setPaywall,
+    setFlow,
     setProducts,
     setOnboarding,
-    setPaywallView,
+    setFlowView,
     setCustomerUserId,
     setTransactionId,
     setVariationId,
@@ -94,10 +94,10 @@ const App: React.FC = () => {
   // Local state for temporary/UI state that should not persist
   const [result, setResult] = useState<string>('');
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-  const [isLoadingPaywall, setIsLoadingPaywall] = useState(false);
+  const [isLoadingFlow, setIsLoadingFlow] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
 
-  const paywallRef = useRef<PaywallControllerRef>(null);
+  const flowRef = useRef<FlowControllerRef>(null);
   const onboardingRef = useRef<OnboardingControllerRef>(null);
 
   const refundPreferences = [RefundPreference.NoPreference, RefundPreference.Grant, RefundPreference.Decline];
@@ -181,18 +181,18 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchPaywall = async (forDefaultAudience: boolean = false) => {
+  const fetchFlow = async (forDefaultAudience: boolean = false) => {
     if (!isActivated) return;
 
-    setIsLoadingPaywall(true);
+    setIsLoadingFlow(true);
     try {
-      log('info', 'Fetching paywall', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, {
+      log('info', 'Fetching flow', forDefaultAudience ? 'getFlowForDefaultAudience' : 'getFlow', false, {
         placementId,
         forDefaultAudience,
       });
       const fetchPolicy = fetchPolicies[fetchPolicyIndex];
 
-      let paywall: AdaptyPaywall;
+      let flow: AdaptyFlow;
 
       if (forDefaultAudience) {
         // Create params based on fetch policy
@@ -202,13 +202,12 @@ const App: React.FC = () => {
           params.maxAgeSeconds = parseFloat(maxAge);
         }
 
-        paywall = await adapty.getPaywallForDefaultAudience({
+        flow = await adapty.getFlowForDefaultAudience({
           placementId: placementId,
-          ...(locale ? { locale } : {}),
           params,
         });
       } else {
-        // For regular getPaywall, add timeout support
+        // For regular getFlow, add timeout support
         let params: any = { fetchPolicy };
 
         if (fetchPolicy === 'return_cache_data_if_not_expired_else_load') {
@@ -217,30 +216,29 @@ const App: React.FC = () => {
 
         params.loadTimeoutMs = parseFloat(timeout);
 
-        paywall = await adapty.getPaywall({
+        flow = await adapty.getFlow({
           placementId: placementId,
-          ...(locale ? { locale } : {}),
           params,
         });
       }
 
-      log('info', 'Paywall fetched', forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall', false, {
-        paywall,
+      log('info', 'Flow fetched', forDefaultAudience ? 'getFlowForDefaultAudience' : 'getFlow', false, {
+        flow,
         forDefaultAudience,
       });
-      setPaywall(paywall);
+      setFlow(flow);
 
       // Fetch products
-      const productsResult = await adapty.getPaywallProducts({ paywall });
+      const productsResult = await adapty.getPaywallProducts({ flow });
       setProducts(productsResult);
 
       const audienceType = forDefaultAudience ? 'for default audience' : '';
-      setResult(`Paywall loaded ${audienceType}: ${paywall.name}`);
+      setResult(`Flow loaded ${audienceType}: ${flow.name}`);
     } catch (error) {
       log(
         'error',
-        'Error fetching paywall',
-        forDefaultAudience ? 'getPaywallForDefaultAudience' : 'getPaywall',
+        'Error fetching flow',
+        forDefaultAudience ? 'getFlowForDefaultAudience' : 'getFlow',
         false,
         { error: String(error), forDefaultAudience },
       );
@@ -260,13 +258,13 @@ const App: React.FC = () => {
             setResult('Server error. Please try again later');
             break;
           default:
-            setResult(`Error fetching paywall: ${error.localizedDescription}`);
+            setResult(`Error fetching flow: ${error.localizedDescription}`);
         }
       } else {
-        setResult(`Error fetching paywall: ${error}`);
+        setResult(`Error fetching flow: ${error}`);
       }
     } finally {
-      setIsLoadingPaywall(false);
+      setIsLoadingFlow(false);
     }
   };
 
@@ -336,14 +334,20 @@ const App: React.FC = () => {
   };
 
   const createWebPaywallUrl = async () => {
-    if (!paywall) {
-      setResult('Error: Paywall not loaded. Please load paywall first.');
+    if (!flow) {
+      setResult('Error: Flow not loaded. Please load flow first.');
+      return;
+    }
+
+    const flowPaywall = flow.paywalls[0];
+    if (!flowPaywall) {
+      setResult('Error: Flow has no paywall variations.');
       return;
     }
 
     try {
       log('info', 'Creating web paywall URL', 'createWebPaywallUrl');
-      const url = await adapty.createWebPaywallUrl({ paywallOrProduct: paywall });
+      const url = await adapty.createWebPaywallUrl({ paywallOrProduct: flowPaywall });
       setWebPaywallUrl(url);
       setResult(`Web paywall URL created: ${url}`);
       log('info', 'Web paywall URL created', 'createWebPaywallUrl', false, { url });
@@ -354,32 +358,38 @@ const App: React.FC = () => {
     }
   };
 
-  const logPaywallShown = async () => {
-    if (!paywall) {
-      setResult('Error: Paywall not loaded. Please load paywall first.');
+  const logFlowShown = async () => {
+    if (!flow) {
+      setResult('Error: Flow not loaded. Please load flow first.');
       return;
     }
 
     try {
-      log('info', 'Logging custom paywall shown', 'logShowPaywall', true, { paywallId: paywall.name });
-      await adapty.logShowPaywall({ paywall });
-      setResult('Paywall shown event logged');
+      log('info', 'Logging custom flow shown', 'logShowFlow', true, { flowName: flow.name });
+      await adapty.logShowFlow({ flow });
+      setResult('Flow shown event logged');
     } catch (error) {
-      log('error', 'Error logging paywall shown', 'logShowPaywall', false, { error: String(error) });
-      setResult(`Error logging paywall shown: ${error}`);
+      log('error', 'Error logging flow shown', 'logShowFlow', false, { error: String(error) });
+      setResult(`Error logging flow shown: ${error}`);
     }
   };
 
   const openWebPaywall = async () => {
-    if (!paywall) {
-      setResult('Error: Paywall not loaded. Please load paywall first.');
+    if (!flow) {
+      setResult('Error: Flow not loaded. Please load flow first.');
+      return;
+    }
+
+    const flowPaywall = flow.paywalls[0];
+    if (!flowPaywall) {
+      setResult('Error: Flow has no paywall variations.');
       return;
     }
 
     try {
       const openIn = webPresentations[webPaywallOpenInIdx];
       log('info', 'Opening web paywall', 'openWebPaywall', false, { openIn });
-      await adapty.openWebPaywall({ paywallOrProduct: paywall, openIn });
+      await adapty.openWebPaywall({ paywallOrProduct: flowPaywall, openIn });
       setResult('Web paywall opened successfully');
     } catch (error) {
       log('error', 'Error opening web paywall', 'openWebPaywall', false, { error: String(error) });
@@ -495,7 +505,7 @@ const App: React.FC = () => {
       log('info', 'Logging out', 'logout');
       await adapty.logout();
       setProfile(null);
-      setPaywall(null);
+      setFlow(null);
       setProducts([]);
       setOnboarding(null);
       setResult('Logged out successfully');
@@ -505,25 +515,25 @@ const App: React.FC = () => {
     }
   };
 
-  const presentPaywall = async () => {
-    await paywallRef.current?.presentPaywall();
+  const presentFlow = async () => {
+    await flowRef.current?.presentFlow();
   };
 
-  const presentExistingPaywall = async () => {
-    if (!paywallView) {
-      setResult('❌ No paywall view created. Please create paywall first.');
+  const presentExistingFlow = async () => {
+    if (!flowView) {
+      setResult('❌ No flow view created. Please create flow first.');
       return;
     }
 
     try {
-      setResult('Presenting existing paywall view...');
-      await paywallView.present();
-      setResult('✅ Existing paywall presented successfully!');
+      setResult('Presenting existing flow view...');
+      await flowView.present();
+      setResult('✅ Existing flow presented successfully!');
     } catch (error: any) {
-      log('error', 'Failed to present existing paywall', 'presentExistingPaywall', false, {
+      log('error', 'Failed to present existing flow', 'presentExistingFlow', false, {
         error: error.message || error.toString(),
       });
-      setResult(`❌ Failed to present existing paywall: ${error.message}`);
+      setResult(`❌ Failed to present existing flow: ${error.message}`);
     }
   };
 
@@ -569,14 +579,13 @@ const App: React.FC = () => {
     />
   );
 
-  const renderPaywallSection = () => (
-    <PaywallSection
+  const renderFlowSection = () => (
+    <FlowSection
       isActivated={isActivated}
-      isLoadingPaywall={isLoadingPaywall}
-      paywall={paywall}
+      isLoadingFlow={isLoadingFlow}
+      flow={flow}
       products={products}
       placementId={placementId}
-      locale={locale}
       timeout={timeout}
       maxAge={maxAge}
       customTagsJson={customTagsJson}
@@ -584,19 +593,18 @@ const App: React.FC = () => {
       fetchPolicies={fetchPolicies}
       webPaywallOpenInIdx={webPaywallOpenInIdx}
       webPresentations={webPresentations}
-      paywallView={paywallView}
+      flowView={flowView}
       webPaywallUrl={webPaywallUrl}
       setPlacementId={setPlacementId}
-      setLocale={setLocale}
       setLoadTimeout={setLoadTimeout}
       setMaxAge={setMaxAge}
       setCustomTagsJson={setCustomTagsJson}
       setFetchPolicyIndex={setFetchPolicyIndex}
       setWebPaywallOpenInIdx={setWebPaywallOpenInIdx}
-      fetchPaywall={fetchPaywall}
-      presentPaywall={presentPaywall}
-      presentExistingPaywall={presentExistingPaywall}
-      logPaywallShown={logPaywallShown}
+      fetchFlow={fetchFlow}
+      presentFlow={presentFlow}
+      presentExistingFlow={presentExistingFlow}
+      logFlowShown={logFlowShown}
       openWebPaywall={openWebPaywall}
       createWebPaywallUrl={createWebPaywallUrl}
       makePurchase={makePurchase}
@@ -886,11 +894,11 @@ const App: React.FC = () => {
 
   return (
     <div className={styles.AppContainer}>
-      <PaywallController
-        ref={paywallRef}
-        paywall={paywall}
+      <FlowController
+        ref={flowRef}
+        flow={flow}
         customTagsJson={customTagsJson}
-        setPaywallView={setPaywallView}
+        setFlowView={setFlowView}
         setResult={setResult}
         log={log}
       />
@@ -898,8 +906,8 @@ const App: React.FC = () => {
         ref={onboardingRef}
         onboarding={onboarding}
         externalUrlsPresentation={webPresentations[onboardingExternalUrlsPresentationIdx]}
-        canShowPaywall={() => Boolean(paywall?.hasViewConfiguration)}
-        showPaywall={presentPaywall}
+        canShowFlow={() => Boolean(flow)}
+        showFlow={presentFlow}
         setResult={setResult}
         log={log}
       />
@@ -948,8 +956,8 @@ const App: React.FC = () => {
           <ProfileSection profile={profile} isLoadingProfile={isLoadingProfile} fetchProfile={fetchProfile} />
         )}
 
-        {/* Paywall Section */}
-        {isActivated && renderPaywallSection()}
+        {/* Flow Section */}
+        {isActivated && renderFlowSection()}
 
         {/* Onboarding Section */}
         {isActivated && renderOnboardingSection()}
@@ -984,7 +992,7 @@ const App: React.FC = () => {
         {/* Other Actions Section */}
         {isActivated && renderOtherActionsSection()}
 
-        <SdkStatusSection isActivated={isActivated} profile={profile} paywall={paywall} onboarding={onboarding} />
+        <SdkStatusSection isActivated={isActivated} profile={profile} flow={flow} onboarding={onboarding} />
       </main>
     </div>
   );
