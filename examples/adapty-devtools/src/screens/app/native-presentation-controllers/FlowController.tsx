@@ -66,7 +66,8 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         onAndroidSystemBack: () => {
           log('info', 'User pressed system back button', 'flow.onAndroidSystemBack');
           setResult('⬅️ User pressed back button');
-          return true;
+          // Mirror the SDK default: keep the flow view open.
+          return false;
         },
         onCustomAction: (actionId: string) => {
           log('info', 'User performed custom action', 'flow.onCustomAction', false, { actionId });
@@ -86,7 +87,8 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         onPurchaseCompleted: (purchaseResult: any, product: any) => {
           log('info', 'Purchase completed', 'flow.onPurchaseCompleted', false, { purchaseResult, product });
           setResult(`✅ Purchase completed: ${purchaseResult?.type || 'unknown'}`);
-          return purchaseResult?.type !== 'user_cancelled';
+          // Mirror the SDK default: keep the flow view open.
+          return false;
         },
         onPurchaseFailed: (error: any, product: any) => {
           log('error', 'Purchase failed', 'flow.onPurchaseFailed', false, { error, product });
@@ -101,7 +103,8 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         onRestoreCompleted: (profile: any) => {
           log('info', 'Restore completed', 'flow.onRestoreCompleted', false, { profile });
           setResult('✅ Restore completed successfully');
-          return true;
+          // Mirror the SDK default: keep the flow view open.
+          return false;
         },
         onRestoreFailed: (error: any) => {
           log('error', 'Restore failed', 'flow.onRestoreFailed', false, { error });
@@ -121,6 +124,8 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         onError: (error: any) => {
           log('error', 'Flow error', 'flow.onError', false, { error });
           setResult(`💥 Flow error: ${error?.message || 'unknown error'}`);
+          // Keep the flow view open on error so the failure stays visible in this dev
+          // tool (intentionally differs from the SDK default, which closes the view).
           return false;
         },
         onLoadingProductsFailed: (error: any) => {
