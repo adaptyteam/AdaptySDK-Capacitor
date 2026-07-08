@@ -84,7 +84,7 @@ export class OnboardingViewController {
   /**
    * Since constructors in JS cannot be async, it is not
    * preferred to create ViewControllers in direct way.
-   * Consider using @link{OnboardingViewController.create} instead
+   * Consider using {@link OnboardingViewController.create} instead
    *
    * @internal
    */
@@ -223,11 +223,11 @@ export class OnboardingViewController {
    *     // Return true to keep default closing behavior
    *     return true;
    *   },
-   *   onActionPerformed: (action) => {
-   *     console.log('Action performed:', action.name);
+   *   onCustom: (actionId, meta) => {
+   *     console.log('Custom action:', actionId, meta);
    *   },
-   *   onProductSelected: (product) => {
-   *     console.log('Product selected:', product.vendorProductId);
+   *   onStateUpdated: (action, meta) => {
+   *     console.log('State updated:', action, meta);
    *   }
    * });
    *

@@ -89,7 +89,7 @@ export class FlowViewController {
   /**
    * Since constructors in JS cannot be async, it is not
    * preferred to create ViewControllers in direct way.
-   * Consider using @link{ViewController.create} instead
+   * Consider using {@link FlowViewController.create} instead
    *
    * @internal
    */

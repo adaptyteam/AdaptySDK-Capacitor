@@ -50,7 +50,7 @@ export const DEFAULT_FLOW_EVENT_HANDLERS: FlowEventHandlers = {
       .openWebUrl({ url, openIn })
       .catch((error) => Log.warn('onUrlPress', () => `Failed to open url via native: ${error}`));
 
-    return false; // Keep paywall open
+    return false; // Keep flow view open
   },
   onCustomAction: () => false,
   onProductSelected: () => false,
@@ -73,7 +73,7 @@ export const DEFAULT_FLOW_EVENT_HANDLERS: FlowEventHandlers = {
       .requestAppReview()
       .catch((error) => Log.warn('onRequestAppReview', () => `Failed to request app review via native: ${error}`));
 
-    return false; // Keep paywall open
+    return false; // Keep flow view open
   },
   onAnalytics: () => false,
   // There is no real default here: permissions must be declared in the app

@@ -167,8 +167,6 @@ export class Adapty implements AdaptyPlugin {
    * so background activities can be performed and cache can be updated.
    *
    * @example
-   *
-   * @example
    * Usage with your user identifier from your system
    * ```typescript
    * await adapty.activate({
@@ -743,6 +741,7 @@ export class Adapty implements AdaptyPlugin {
    *
    * @param options - The options object
    * @param options.paywallOrProduct - The flow paywall or product to open as a web paywall.
+   * @param options.openIn - Optional. Where to open the web paywall ({@link WebPresentation}).
    * @returns A promise that resolves when the web paywall is opened.
    * @throws Error if an error occurs while opening the web paywall.
    *
@@ -752,7 +751,7 @@ export class Adapty implements AdaptyPlugin {
    *
    * try {
    *   const flow = await adapty.getFlow({ placementId: 'YOUR_PLACEMENT_ID' });
-   *   await adapty.openWebPaywall({ paywallOrProduct: flow.paywall });
+   *   await adapty.openWebPaywall({ paywallOrProduct: flow.paywalls[0] });
    * } catch (error) {
    *   console.error('Failed to open web paywall:', error);
    * }
@@ -802,7 +801,7 @@ export class Adapty implements AdaptyPlugin {
    *
    * try {
    *   const flow = await adapty.getFlow({ placementId: 'YOUR_PLACEMENT_ID' });
-   *   const url = await adapty.createWebPaywallUrl({ paywallOrProduct: flow.paywall });
+   *   const url = await adapty.createWebPaywallUrl({ paywallOrProduct: flow.paywalls[0] });
    *   console.log('Web paywall URL:', url);
    * } catch (error) {
    *   console.error('Failed to create web paywall URL:', error);
@@ -832,9 +831,30 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
-   * Opens a URL using the native browser. Backs the default `onUrlPress` flow
-   * handler; call it from a custom handler to keep native open-URL behavior.
-   * `open_in`: `browser_out_app` → external browser, `browser_in_app` → in-app.
+   * Opens a URL using the native browser.
+   *
+   * @remarks
+   * Backs the default `onUrlPress` flow handler. Call it directly from a custom
+   * `onUrlPress` handler when you want to run your own logic but keep the native
+   * open-URL behavior. `openIn`: `browser_out_app` → external browser,
+   * `browser_in_app` → in-app browser.
+   *
+   * @param options - The options object
+   * @param options.url - The URL to open.
+   * @param options.openIn - Optional. How to present the URL ({@link WebPresentation}). When omitted, the native SDK decides.
+   * @returns A promise that resolves when the URL is opened.
+   * @throws Error if an error occurs while opening the URL.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * try {
+   *   await adapty.openWebUrl({ url: 'https://example.com' });
+   * } catch (error) {
+   *   console.error('Failed to open URL:', error);
+   * }
+   * ```
    */
   async openWebUrl(options: { url: string; openIn?: WebPresentation }): Promise<void> {
     const method = 'adapty_ui_open_url';
@@ -853,8 +873,27 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
-   * Requests the native app-review prompt (SKStoreReviewController on iOS,
-   * In-App Review on Android). Backs the default `onRequestAppReview` handler.
+   * Requests the native app-review prompt.
+   *
+   * @remarks
+   * Uses `SKStoreReviewController` on iOS and In-App Review on Android. Backs the
+   * default `onRequestAppReview` flow handler. Call it directly from a custom
+   * `onRequestAppReview` handler when you want to run your own logic but keep the
+   * native prompt.
+   *
+   * @returns A promise that resolves when the native call completes.
+   * @throws Error if an error occurs while requesting the app review.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * try {
+   *   await adapty.requestAppReview();
+   * } catch (error) {
+   *   console.error('Failed to request app review:', error);
+   * }
+   * ```
    */
   async requestAppReview(): Promise<void> {
     const method = 'adapty_ui_request_app_review';

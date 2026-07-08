@@ -20,6 +20,7 @@ import type {
   ActivateParamsInput,
   GetPlacementParamsInput,
   GetPlacementForDefaultAudienceParamsInput,
+  IdentifyParamsInput,
   MakePurchaseParamsInput,
   FileLocation,
   LogLevel,
@@ -52,6 +53,8 @@ export interface AdaptyPlugin {
 
   /**
    * Gets an onboarding by placement ID.
+   *
+   * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
    */
   getOnboarding(options: {
     placementId: string;
@@ -61,6 +64,8 @@ export interface AdaptyPlugin {
 
   /**
    * Gets an onboarding for default audience by placement ID.
+   *
+   * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
    */
   getOnboardingForDefaultAudience(options: {
     placementId: string;
@@ -76,7 +81,7 @@ export interface AdaptyPlugin {
   /**
    * Identifies the user with a customer user ID.
    */
-  identify(options: { customerUserId: string }): Promise<void>;
+  identify(options: { customerUserId: string; params?: IdentifyParamsInput }): Promise<void>;
 
   /**
    * Logs that a flow was shown to the user.
