@@ -16,7 +16,7 @@
     "start": "vite",
     "build": "vite build",
     "tsc": "tsc --noEmit",
-    "update-native-modules": "cd ./ios/App && pod update Adapty AdaptyUI AdaptyPlugin && yarn run update-cap-config",
+    "update-native-modules": "xcodebuild -project ios/App/App.xcodeproj -resolvePackageDependencies && yarn run update-cap-config",
     "update-cap-config": "yarn cap copy && yarn cap sync",
     "android": "yarn build && yarn cap run android",
     "ios": "yarn build && yarn cap run ios"
