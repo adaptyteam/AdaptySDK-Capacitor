@@ -235,13 +235,10 @@ const App: React.FC = () => {
       const audienceType = forDefaultAudience ? 'for default audience' : '';
       setResult(`Flow loaded ${audienceType}: ${flow.name}`);
     } catch (error) {
-      log(
-        'error',
-        'Error fetching flow',
-        forDefaultAudience ? 'getFlowForDefaultAudience' : 'getFlow',
-        false,
-        { error: String(error), forDefaultAudience },
-      );
+      log('error', 'Error fetching flow', forDefaultAudience ? 'getFlowForDefaultAudience' : 'getFlow', false, {
+        error: String(error),
+        forDefaultAudience,
+      });
 
       if (error instanceof AdaptyError) {
         switch (error.adaptyCode) {

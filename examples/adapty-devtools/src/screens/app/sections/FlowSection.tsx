@@ -234,11 +234,7 @@ export const FlowSection: React.FC<Props> = ({
       </div>
 
       <div className={styles.ButtonGroup}>
-        <button
-          onClick={presentFlow}
-          disabled={!flow}
-          className={`${styles.Button} ${styles.ButtonPrimary}`}
-        >
+        <button onClick={presentFlow} disabled={!flow} className={`${styles.Button} ${styles.ButtonPrimary}`}>
           Present Flow
         </button>
 
