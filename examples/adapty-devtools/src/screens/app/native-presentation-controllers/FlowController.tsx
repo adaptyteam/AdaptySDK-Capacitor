@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle } from 'react';
 import { adapty, createFlowView, AdaptyCustomAsset, AdaptyError, ErrorCodeName } from '@adapty/capacitor';
 import { APPLE_ICON_IMAGE_BASE64 } from '../../../assets/base64-data.ts';
+import { showSuccessToast } from '../../../utils/toast.ts';
 
 export type FlowControllerRef = {
   presentFlow: () => Promise<void>;
@@ -166,11 +167,13 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         },
         onRequestPermission: async (permission: any, customArgs: Record<string, string>) => {
           log('info', 'Flow requested permission', 'flow.onRequestPermission', false, { permission, customArgs });
+          showSuccessToast(`Flow requested permission: ${permission}`);
           // devtools stub: always reply "granted" so the flow can continue.
           return { status: 'granted' as const };
         },
         onObserverPurchaseInitiated: (product: any, onStartPurchase: () => void, onFinishPurchase: () => void) => {
           log('info', 'Observer purchase initiated', 'flow.onObserverPurchaseInitiated', false, { product });
+          showSuccessToast('Observer purchase initiated');
           // devtools stub: no real purchase — just drive the paywall loading cycle.
           onStartPurchase();
           onFinishPurchase();
@@ -178,6 +181,7 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         },
         onObserverRestoreInitiated: (onStartRestore: () => void, onFinishRestore: () => void) => {
           log('info', 'Observer restore initiated', 'flow.onObserverRestoreInitiated');
+          showSuccessToast('Observer restore initiated');
           // devtools stub: no real restore — just drive the paywall loading cycle.
           onStartRestore();
           onFinishRestore();
