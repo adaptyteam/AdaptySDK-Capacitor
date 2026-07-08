@@ -1,14 +1,13 @@
 import React from 'react';
-import type { AdaptyPaywall, AdaptyPaywallProduct } from '@adapty/capacitor';
+import type { AdaptyFlow, AdaptyPaywallProduct } from '@adapty/capacitor';
 import styles from '../App.module.css';
 
 type Props = {
   isActivated: boolean;
-  isLoadingPaywall: boolean;
-  paywall: AdaptyPaywall | null;
+  isLoadingFlow: boolean;
+  flow: AdaptyFlow | null;
   products: AdaptyPaywallProduct[];
   placementId: string;
-  locale: string;
   timeout: string;
   maxAge: string;
   customTagsJson: string;
@@ -16,19 +15,18 @@ type Props = {
   fetchPolicies: readonly string[];
   webPaywallOpenInIdx: number;
   webPresentations: readonly string[];
-  paywallView: any | null;
+  flowView: any | null;
   webPaywallUrl: string;
   setPlacementId: (v: string) => void;
-  setLocale: (v: string) => void;
   setLoadTimeout: (v: string) => void;
   setMaxAge: (v: string) => void;
   setCustomTagsJson: (v: string) => void;
   setFetchPolicyIndex: (v: number) => void;
   setWebPaywallOpenInIdx: (v: number) => void;
-  fetchPaywall: (forDefaultAudience?: boolean) => Promise<void>;
-  presentPaywall: () => Promise<void>;
-  presentExistingPaywall: () => Promise<void>;
-  logPaywallShown: () => Promise<void>;
+  fetchFlow: (forDefaultAudience?: boolean) => Promise<void>;
+  presentFlow: () => Promise<void>;
+  presentExistingFlow: () => Promise<void>;
+  logFlowShown: () => Promise<void>;
   openWebPaywall: () => Promise<void>;
   createWebPaywallUrl: () => Promise<void>;
   makePurchase: (product: AdaptyPaywallProduct) => Promise<void>;
@@ -36,13 +34,12 @@ type Props = {
   createWebPaywallUrlForProduct: (product: AdaptyPaywallProduct) => Promise<void>;
 };
 
-export const PaywallSection: React.FC<Props> = ({
+export const FlowSection: React.FC<Props> = ({
   isActivated,
-  isLoadingPaywall,
-  paywall,
+  isLoadingFlow,
+  flow,
   products,
   placementId,
-  locale,
   timeout,
   maxAge,
   customTagsJson,
@@ -50,28 +47,29 @@ export const PaywallSection: React.FC<Props> = ({
   fetchPolicies,
   webPaywallOpenInIdx,
   webPresentations,
-  paywallView,
+  flowView,
   webPaywallUrl,
   setPlacementId,
-  setLocale,
   setLoadTimeout,
   setMaxAge,
   setCustomTagsJson,
   setFetchPolicyIndex,
   setWebPaywallOpenInIdx,
-  fetchPaywall,
-  presentPaywall,
-  presentExistingPaywall,
-  logPaywallShown,
+  fetchFlow,
+  presentFlow,
+  presentExistingFlow,
+  logFlowShown,
   openWebPaywall,
   createWebPaywallUrl,
   makePurchase,
   openWebPaywallForProduct,
   createWebPaywallUrlForProduct,
 }) => {
+  const remoteConfig = flow?.remoteConfigs?.[0];
+
   return (
     <div className={styles.Section}>
-      <h3 className={styles.SectionTitle}>Paywall Configuration</h3>
+      <h3 className={styles.SectionTitle}>Flow Configuration</h3>
 
       <div className={styles.InputGroup}>
         <input
@@ -79,14 +77,6 @@ export const PaywallSection: React.FC<Props> = ({
           value={placementId}
           onChange={(e) => setPlacementId(e.target.value)}
           placeholder="Placement ID"
-          className={styles.Input}
-          disabled={!isActivated}
-        />
-        <input
-          type="text"
-          value={locale}
-          onChange={(e) => setLocale(e.target.value.toLowerCase())}
-          placeholder="Request Locale (optional)"
           className={styles.Input}
           disabled={!isActivated}
         />
@@ -154,58 +144,50 @@ export const PaywallSection: React.FC<Props> = ({
 
       <div className={styles.ButtonGroup}>
         <button
-          onClick={() => fetchPaywall(false)}
-          disabled={isLoadingPaywall || !isActivated}
-          className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingPaywall || !isActivated ? styles.Loading : ''}`}
+          onClick={() => fetchFlow(false)}
+          disabled={isLoadingFlow || !isActivated}
+          className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingFlow || !isActivated ? styles.Loading : ''}`}
         >
-          {isLoadingPaywall ? 'Loading...' : 'Load Paywall'}
+          {isLoadingFlow ? 'Loading...' : 'Load Flow'}
         </button>
         <button
-          onClick={() => fetchPaywall(true)}
-          disabled={isLoadingPaywall || !isActivated}
-          className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingPaywall || !isActivated ? styles.Loading : ''}`}
+          onClick={() => fetchFlow(true)}
+          disabled={isLoadingFlow || !isActivated}
+          className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingFlow || !isActivated ? styles.Loading : ''}`}
         >
-          {isLoadingPaywall ? 'Loading...' : 'Load (Default Audience)'}
+          {isLoadingFlow ? 'Loading...' : 'Load (Default Audience)'}
         </button>
       </div>
 
       <div className={styles.InfoBox}>
-        {paywall ? (
+        {flow ? (
           <div>
             <div>
-              <strong>Paywall ID:</strong> {paywall.name}
+              <strong>Flow name:</strong> {flow.name}
             </div>
             <div>
-              <strong>Variation ID:</strong> {paywall.variationId}
+              <strong>Variation ID:</strong> {flow.variationId}
             </div>
             <div>
-              <strong>Revision:</strong> {paywall.placement.revision}
+              <strong>Revision:</strong> {flow.placement.revision}
             </div>
             <div>
-              <strong>Has Remote Config:</strong> {paywall.remoteConfig ? '✅ Yes' : '❌ No'}
+              <strong>Paywalls in flow:</strong> {flow.paywalls.length}
             </div>
             <div>
-              <strong>Has Paywall Builder:</strong> {paywall.paywallBuilder ? '✅ Yes' : '❌ No'}
+              <strong>Has Remote Config:</strong> {remoteConfig ? '✅ Yes' : '❌ No'}
             </div>
             <div>
               <strong>Products Count:</strong> {products.length}
             </div>
-            <div>
-              <strong>Request Locale:</strong> {paywall.requestLocale}
-            </div>
-            {paywall.remoteConfig && (
+            {remoteConfig && (
               <div>
                 <div>
-                  <strong>Config Locale:</strong> {paywall.remoteConfig.lang}
+                  <strong>Config Locale:</strong> {remoteConfig.lang}
                 </div>
                 <div>
-                  <strong>Config Data:</strong> {paywall.remoteConfig.dataString}
+                  <strong>Config Data:</strong> {remoteConfig.dataString}
                 </div>
-              </div>
-            )}
-            {paywall.paywallBuilder && (
-              <div>
-                <strong>Builder Locale:</strong> {paywall.paywallBuilder.lang}
               </div>
             )}
 
@@ -247,38 +229,38 @@ export const PaywallSection: React.FC<Props> = ({
             )}
           </div>
         ) : (
-          <div>No paywall loaded</div>
+          <div>No flow loaded</div>
         )}
       </div>
 
       <div className={styles.ButtonGroup}>
         <button
-          onClick={presentPaywall}
-          disabled={!paywall || !paywall.hasViewConfiguration}
+          onClick={presentFlow}
+          disabled={!flow}
           className={`${styles.Button} ${styles.ButtonPrimary}`}
         >
-          Present Paywall
+          Present Flow
         </button>
 
         <button
-          onClick={presentExistingPaywall}
-          disabled={!paywallView}
+          onClick={presentExistingFlow}
+          disabled={!flowView}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
         >
           Present Existing (not supported)
         </button>
 
-        <button onClick={logPaywallShown} disabled={!paywall} className={`${styles.Button} ${styles.ButtonPrimary}`}>
-          Log Custom Paywall Shown
+        <button onClick={logFlowShown} disabled={!flow} className={`${styles.Button} ${styles.ButtonPrimary}`}>
+          Log Custom Flow Shown
         </button>
 
-        <button onClick={openWebPaywall} disabled={!paywall} className={`${styles.Button} ${styles.ButtonPrimary}`}>
+        <button onClick={openWebPaywall} disabled={!flow} className={`${styles.Button} ${styles.ButtonPrimary}`}>
           Open Web Paywall
         </button>
       </div>
 
       <div className={styles.WebUrlContainer}>
-        <button onClick={createWebPaywallUrl} disabled={!paywall} className={styles.WebUrlButton}>
+        <button onClick={createWebPaywallUrl} disabled={!flow} className={styles.WebUrlButton}>
           Create Web URL
         </button>
         <input
