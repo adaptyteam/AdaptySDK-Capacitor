@@ -25,7 +25,7 @@ import {
  * Tests verify bridge communication for UI methods:
  * - Request encoding (camelCase → snake_case)
  * - Response parsing (snake_case → camelCase)
- * - Parameter handling (prefetchProducts, loadTimeoutMs, enableSafeArea, iOS styles)
+ * - Parameter handling (prefetchProducts, loadTimeoutMs, android.enableSafeArea, iOS styles)
  *
  * Note: Event handling tests are separate
  */
@@ -80,7 +80,7 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
       await createFlowView(flow, {
         prefetchProducts: false,
         loadTimeoutMs: 3000,
-        enableSafeArea: false,
+        android: { enableSafeArea: false },
       });
 
       const request = extractNativeRequest<components['requests']['AdaptyUICreateFlowView.Request']>({

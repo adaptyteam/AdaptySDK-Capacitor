@@ -23,7 +23,9 @@ type Req = components['requests'];
 const DEFAULT_PARAMS: CreateFlowViewParamsInput = {
   prefetchProducts: true,
   loadTimeoutMs: 5000,
-  enableSafeArea: true,
+  android: {
+    enableSafeArea: true,
+  },
 };
 
 /**
