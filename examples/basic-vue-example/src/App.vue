@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { adapty, createPaywallView, AdaptyProfile, AdaptyPaywall } from '@adapty/capacitor';
+import { adapty, createFlowView, AdaptyProfile, AdaptyFlow } from '@adapty/capacitor';
 import { getApiKey, getPlacementId } from './helpers';
 import { recipes, Recipe } from './recipes';
 
@@ -8,13 +8,13 @@ import { recipes, Recipe } from './recipes';
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 const profile = ref<AdaptyProfile | null>(null);
-const paywall = ref<AdaptyPaywall | null>(null);
+const flow = ref<AdaptyFlow | null>(null);
 const selectedRecipe = ref<Recipe | null>(null);
 
 // Check if user has premium access
 const isPremiumActive = computed(() => profile.value?.accessLevels?.['premium']?.isActive ?? false);
 
-// Initialize Adapty: activate, load profile, load paywall
+// Initialize Adapty: activate, load profile, load flow
 const initializeAdapty = async () => {
   try {
     isLoading.value = true;
@@ -33,11 +33,11 @@ const initializeAdapty = async () => {
     const userProfile = await adapty.getProfile();
     profile.value = userProfile;
 
-    // Step 3: Load paywall
-    const paywallData = await adapty.getPaywall({
+    // Step 3: Load flow
+    const flowData = await adapty.getFlow({
       placementId: getPlacementId(),
     });
-    paywall.value = paywallData;
+    flow.value = flowData;
 
     isLoading.value = false;
   } catch (err) {
@@ -56,25 +56,20 @@ const handleRecipeClick = async (recipe: Recipe) => {
     return;
   }
 
-  // Otherwise, show paywall
-  await showPaywall();
+  // Otherwise, present the flow (paywall)
+  await showFlow();
 };
 
-// Show paywall using Paywall Builder
-const showPaywall = async () => {
-  if (!paywall.value) {
-    error.value = 'Paywall not loaded. Please try again.';
-    return;
-  }
-
-  if (!paywall.value.hasViewConfiguration) {
-    error.value = 'Paywall does not have Paywall Builder configuration.';
+// Present the flow (paywall) using the Adapty Flow Builder
+const showFlow = async () => {
+  if (!flow.value) {
+    error.value = 'Flow not loaded. Please try again.';
     return;
   }
 
   try {
-    // Create paywall view
-    const view = await createPaywallView(paywall.value);
+    // Create the flow view. Throws if the flow has no view configuration.
+    const view = await createFlowView(flow.value);
 
     // Set up event handlers
     await view.setEventHandlers({
@@ -83,7 +78,7 @@ const showPaywall = async () => {
         if (purchaseResult.type === 'success') {
           // Update profile to reflect new access level
           profile.value = purchaseResult.profile;
-          // Close paywall
+          // Close the flow
           return true;
         }
         // Don't close for cancelled or pending purchases
@@ -91,10 +86,10 @@ const showPaywall = async () => {
       },
     });
 
-    // Present the paywall
+    // Present the flow
     await view.present();
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Failed to show paywall';
+    const errorMessage = err instanceof Error ? err.message : 'Failed to show flow';
     error.value = errorMessage;
   }
 };
