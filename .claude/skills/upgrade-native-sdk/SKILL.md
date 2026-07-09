@@ -66,9 +66,9 @@ node ../../scripts/credentials.mjs \
 # 4. Build devtools
 yarn build
 
-# 5. Update native modules (runs pod update + cap copy + cap sync)
-# IMPORTANT: run this BEFORE bare `cap sync` — cap sync uses pod install which
-# fails when pod versions changed. update-native-modules does pod update first.
+# 5. Update native modules (resolves iOS SPM package versions, then cap copy + cap sync)
+# Run this instead of a bare `cap sync` so Xcode re-resolves the bumped SPM
+# dependency versions before syncing.
 yarn update-native-modules
 ```
 
