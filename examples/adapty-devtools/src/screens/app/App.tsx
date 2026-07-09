@@ -649,6 +649,55 @@ const App: React.FC = () => {
     }
   };
 
+  const openAdaptyIoInApp = async () => {
+    if (!isActivated) return;
+
+    try {
+      log('info', 'Opening adapty.io in in-app browser', 'openAdaptyIoInApp', false, {
+        openIn: WebPresentation.BrowserInApp,
+      });
+      await adapty.openWebUrl({ url: 'https://adapty.io', openIn: WebPresentation.BrowserInApp });
+      setResult('Opened adapty.io in in-app browser');
+    } catch (error) {
+      log('error', 'Error opening adapty.io in in-app browser', 'openAdaptyIoInApp', false, {
+        error: String(error),
+      });
+      setResult(`Error opening adapty.io: ${error}`);
+    }
+  };
+
+  const openAdaptyIoExternal = async () => {
+    if (!isActivated) return;
+
+    try {
+      log('info', 'Opening adapty.io in external browser', 'openAdaptyIoExternal', false, {
+        openIn: WebPresentation.BrowserOutApp,
+      });
+      await adapty.openWebUrl({ url: 'https://adapty.io', openIn: WebPresentation.BrowserOutApp });
+      setResult('Opened adapty.io in external browser');
+    } catch (error) {
+      log('error', 'Error opening adapty.io in external browser', 'openAdaptyIoExternal', false, {
+        error: String(error),
+      });
+      setResult(`Error opening adapty.io: ${error}`);
+    }
+  };
+
+  const requestAppReview = async () => {
+    if (!isActivated) return;
+
+    try {
+      log('info', 'Requesting app review', 'requestAppReview');
+      await adapty.requestAppReview();
+      setResult('App review requested');
+    } catch (error) {
+      log('error', 'Error requesting app review', 'requestAppReview', false, {
+        error: String(error),
+      });
+      setResult(`Error requesting app review: ${error}`);
+    }
+  };
+
   const identify = async () => {
     if (!customerUserId.trim()) {
       setResult('Error: Customer User ID is required');
@@ -842,6 +891,9 @@ const App: React.FC = () => {
       setLogLevel={setLogLevel}
       testSetFallback={testSetFallback}
       getCurrentInstallationStatus={getCurrentInstallationStatus}
+      openAdaptyIoInApp={openAdaptyIoInApp}
+      openAdaptyIoExternal={openAdaptyIoExternal}
+      requestAppReview={requestAppReview}
       logout={logout}
     />
   );
