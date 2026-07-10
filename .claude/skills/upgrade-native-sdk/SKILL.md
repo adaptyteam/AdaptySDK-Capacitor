@@ -21,9 +21,16 @@ For **android**, also ask:
 iOS dependencies are distributed via Swift Package Manager only (no CocoaPods podspec).
 
 ### 1. `Package.swift`
-Update the SPM exact version pin:
+Update the SPM exact version pin. **Preserve the `traits:` block** — it forwards the native `KidsMode` trait (COPPA / Kids-category builds); dropping it silently breaks Kids Mode:
 ```swift
-.package(url: "https://github.com/adaptyteam/AdaptySDK-iOS.git", exact: "<NEW_VERSION>")
+.package(
+    url: "https://github.com/adaptyteam/AdaptySDK-iOS.git",
+    exact: "<NEW_VERSION>",
+    traits: [
+        .defaults,
+        .trait(name: "KidsMode", condition: .when(traits: ["AdaptyCapacitorKidsMode"]))
+    ]
+)
 ```
 
 ## Android Steps
