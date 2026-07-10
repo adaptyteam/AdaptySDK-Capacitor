@@ -32,9 +32,6 @@ rsync -av --delete ./ios/Tests/ "$TARGET_DIR/ios/Tests/"
 echo "📄 Syncing Package.swift ..."
 rsync -av ./Package.swift "$TARGET_DIR/"
 
-echo "📄 Syncing AdaptyCapacitor.podspec ..."
-rsync -av ./AdaptyCapacitor.podspec "$TARGET_DIR/"
-
 echo "📄 Syncing package.json ..."
 rsync -av ./package.json "$TARGET_DIR/"
 

@@ -11,7 +11,21 @@ export const mockLogger = {
       failed: jest.fn(),
     }),
   })),
-  Log: jest.fn(),
+  // `Log` is used via static methods (e.g. `Log.setVersion`, `Log.warn`), so the
+  // mock must expose them as jest.fn()s rather than being a bare function.
+  Log: {
+    logLevel: null,
+    setVersion: jest.fn(),
+    configure: jest.fn(),
+    addSink: jest.fn(),
+    removeSink: jest.fn(),
+    clearSinks: jest.fn(),
+    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    verbose: jest.fn(),
+  },
   LogScope: jest.fn(),
   consoleLogSink: jest.fn(),
 };

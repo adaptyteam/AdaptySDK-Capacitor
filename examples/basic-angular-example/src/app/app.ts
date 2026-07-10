@@ -1,5 +1,5 @@
 import { Component, OnInit, NgZone } from '@angular/core';
-import { adapty, createPaywallView, AdaptyProfile, AdaptyPaywall } from '@adapty/capacitor';
+import { adapty, createFlowView, AdaptyProfile, AdaptyFlow } from '@adapty/capacitor';
 import { getApiKey, getPlacementId } from './helpers';
 import { recipes, Recipe } from './recipes';
 
@@ -14,7 +14,7 @@ export class App implements OnInit {
   isLoading = true;
   error: string | null = null;
   profile: AdaptyProfile | null = null;
-  paywall: AdaptyPaywall | null = null;
+  flow: AdaptyFlow | null = null;
   selectedRecipe: Recipe | null = null;
 
   // Recipe data
@@ -25,7 +25,7 @@ export class App implements OnInit {
     this.initializeAdapty();
   }
 
-  // Initialize Adapty: activate, load profile, load paywall
+  // Initialize Adapty: activate, load profile, load flow
   async initializeAdapty() {
     try {
       this.isLoading = true;
@@ -44,11 +44,11 @@ export class App implements OnInit {
       const userProfile = await adapty.getProfile();
       this.profile = userProfile;
 
-      // Step 3: Load paywall
-      const paywallData = await adapty.getPaywall({
+      // Step 3: Load flow
+      const flowData = await adapty.getFlow({
         placementId: getPlacementId(),
       });
-      this.paywall = paywallData;
+      this.flow = flowData;
 
       this.isLoading = false;
     } catch (err) {
@@ -82,36 +82,31 @@ export class App implements OnInit {
       return;
     }
 
-    // Otherwise, show paywall
-    await this.showPaywall();
+    // Otherwise, present the flow (paywall)
+    await this.showFlow();
   }
 
-  // Show paywall using Paywall Builder
-  async showPaywall() {
-    if (!this.paywall) {
-      this.error = 'Paywall not loaded. Please try again.';
-      return;
-    }
-
-    if (!this.paywall.hasViewConfiguration) {
-      this.error = 'Paywall does not have Paywall Builder configuration.';
+  // Present the flow (paywall) using the Adapty Flow Builder
+  async showFlow() {
+    if (!this.flow) {
+      this.error = 'Flow not loaded. Please try again.';
       return;
     }
 
     try {
-      // Create paywall view
-      const view = await createPaywallView(this.paywall);
+      // Create the flow view. Throws if the flow has no view configuration.
+      const view = await createFlowView(this.flow);
 
       // Set up event handlers
       await view.setEventHandlers({
         onPurchaseCompleted: (purchaseResult, _product) => {
           // Purchase completed successfully
           if (purchaseResult.type === 'success') {
-            // Update profile to reflect new access level
+            // Update profile (from a native callback) inside Angular's zone
             this.ngZone.run(() => {
               this.profile = purchaseResult.profile;
             });
-            // Close paywall
+            // Close the flow
             return true;
           }
           // Don't close for cancelled or pending purchases
@@ -119,10 +114,10 @@ export class App implements OnInit {
         },
       });
 
-      // Present the paywall
+      // Present the flow
       await view.present();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to show paywall';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to show flow';
       this.error = errorMessage;
     }
   }

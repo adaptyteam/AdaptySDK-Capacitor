@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { AdaptyProfile, AdaptyPaywall, AdaptyPaywallProduct, AdaptyOnboarding } from '@adapty/capacitor';
+import {
+  AdaptyProfile,
+  AdaptyFlow,
+  AdaptyPaywallProduct,
+  AdaptyOnboarding,
+  FlowViewController,
+} from '@adapty/capacitor';
 import { getPlacementId, getOnboardingPlacementId } from '../helpers';
 
 // Types for the context state
@@ -9,10 +15,10 @@ interface AppState {
 
   // Core Adapty data
   profile: AdaptyProfile | null;
-  paywall: AdaptyPaywall | null;
+  flow: AdaptyFlow | null;
   products: AdaptyPaywallProduct[];
   onboarding: AdaptyOnboarding | null;
-  paywallView: any | null;
+  flowView: FlowViewController | null;
 
   // User data
   customerUserId: string;
@@ -28,7 +34,7 @@ interface AppState {
   collectingRefundDataConsent: boolean;
   refundPreferenceIdx: number;
 
-  // Paywall configuration
+  // Flow configuration
   placementId: string;
   onboardingPlacementId: string;
   locale: string;
@@ -45,10 +51,10 @@ interface AppActions {
 
   // Core Adapty data
   setProfile: (value: AdaptyProfile | null) => void;
-  setPaywall: (value: AdaptyPaywall | null) => void;
+  setFlow: (value: AdaptyFlow | null) => void;
   setProducts: (value: AdaptyPaywallProduct[]) => void;
   setOnboarding: (value: AdaptyOnboarding | null) => void;
-  setPaywallView: (value: any | null) => void;
+  setFlowView: (value: FlowViewController | null) => void;
 
   // User data
   setCustomerUserId: (value: string) => void;
@@ -64,7 +70,7 @@ interface AppActions {
   setCollectingRefundDataConsent: (value: boolean) => void;
   setRefundPreferenceIdx: (value: number) => void;
 
-  // Paywall configuration
+  // Flow configuration
   setPlacementId: (value: string) => void;
   setOnboardingPlacementId: (value: string) => void;
   setLocale: (value: string) => void;
@@ -87,10 +93,10 @@ const defaultState: AppState = {
 
   // Core Adapty data
   profile: null,
-  paywall: null,
+  flow: null,
   products: [],
   onboarding: null,
-  paywallView: null,
+  flowView: null,
 
   // User data
   customerUserId: '',
@@ -106,7 +112,7 @@ const defaultState: AppState = {
   collectingRefundDataConsent: false,
   refundPreferenceIdx: 0,
 
-  // Paywall configuration
+  // Flow configuration
   placementId: getPlacementId(),
   onboardingPlacementId: getOnboardingPlacementId(),
   locale: '',
@@ -131,10 +137,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Core Adapty data
   const [profile, setProfile] = useState<AdaptyProfile | null>(defaultState.profile);
-  const [paywall, setPaywall] = useState<AdaptyPaywall | null>(defaultState.paywall);
+  const [flow, setFlow] = useState<AdaptyFlow | null>(defaultState.flow);
   const [products, setProducts] = useState<AdaptyPaywallProduct[]>(defaultState.products);
   const [onboarding, setOnboarding] = useState<AdaptyOnboarding | null>(defaultState.onboarding);
-  const [paywallView, setPaywallView] = useState<any | null>(defaultState.paywallView);
+  const [flowView, setFlowView] = useState<FlowViewController | null>(defaultState.flowView);
 
   // User data
   const [customerUserId, setCustomerUserId] = useState<string>(defaultState.customerUserId);
@@ -152,7 +158,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   );
   const [refundPreferenceIdx, setRefundPreferenceIdx] = useState<number>(defaultState.refundPreferenceIdx);
 
-  // Paywall configuration
+  // Flow configuration
   const [placementId, setPlacementId] = useState<string>(defaultState.placementId);
   const [onboardingPlacementId, setOnboardingPlacementId] = useState<string>(defaultState.onboardingPlacementId);
   const [locale, setLocale] = useState<string>(defaultState.locale);
@@ -165,10 +171,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const resetAllData = () => {
     setIsActivated(defaultState.isActivated);
     setProfile(defaultState.profile);
-    setPaywall(defaultState.paywall);
+    setFlow(defaultState.flow);
     setProducts(defaultState.products);
     setOnboarding(defaultState.onboarding);
-    setPaywallView(defaultState.paywallView);
+    setFlowView(defaultState.flowView);
     setCustomerUserId(defaultState.customerUserId);
     setTransactionId(defaultState.transactionId);
     setVariationId(defaultState.variationId);
@@ -190,10 +196,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // State
     isActivated,
     profile,
-    paywall,
+    flow,
     products,
     onboarding,
-    paywallView,
+    flowView,
     customerUserId,
     transactionId,
     variationId,
@@ -213,10 +219,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // Actions
     setIsActivated,
     setProfile,
-    setPaywall,
+    setFlow,
     setProducts,
     setOnboarding,
-    setPaywallView,
+    setFlowView,
     setCustomerUserId,
     setTransactionId,
     setVariationId,

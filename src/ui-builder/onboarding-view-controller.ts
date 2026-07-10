@@ -26,6 +26,8 @@ export const DEFAULT_ONBOARDING_PARAMS: CreateOnboardingViewParamsInput = {
 /**
  * Controller for managing onboarding views.
  *
+ * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
+ *
  * @remarks
  * This class provides methods to present, dismiss, and handle events for onboarding views
  * created with the Onboarding Builder. Create instances using the {@link createOnboardingView} function
@@ -82,7 +84,7 @@ export class OnboardingViewController {
   /**
    * Since constructors in JS cannot be async, it is not
    * preferred to create ViewControllers in direct way.
-   * Consider using @link{OnboardingViewController.create} instead
+   * Consider using {@link OnboardingViewController.create} instead
    *
    * @internal
    */
@@ -221,11 +223,11 @@ export class OnboardingViewController {
    *     // Return true to keep default closing behavior
    *     return true;
    *   },
-   *   onActionPerformed: (action) => {
-   *     console.log('Action performed:', action.name);
+   *   onCustom: (actionId, meta) => {
+   *     console.log('Custom action:', actionId, meta);
    *   },
-   *   onProductSelected: (product) => {
-   *     console.log('Product selected:', product.vendorProductId);
+   *   onStateUpdated: (action, meta) => {
+   *     console.log('State updated:', action, meta);
    *   }
    * });
    *

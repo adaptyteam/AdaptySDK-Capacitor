@@ -4,7 +4,8 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import type { LoggerConfig } from '../logger';
 
 import type {
-  AdaptyPaywall,
+  AdaptyFlow,
+  AdaptyFlowPaywall,
   AdaptyPaywallProduct,
   AdaptyOnboarding,
   AdaptyProfile,
@@ -19,6 +20,7 @@ import type {
   ActivateParamsInput,
   GetPlacementParamsInput,
   GetPlacementForDefaultAudienceParamsInput,
+  IdentifyParamsInput,
   MakePurchaseParamsInput,
   FileLocation,
   LogLevel,
@@ -32,30 +34,27 @@ export interface AdaptyPlugin {
   activate(options: { apiKey: string; params?: ActivateParamsInput }): Promise<void>;
 
   /**
-   * Gets a paywall by placement ID.
+   * Gets a flow by placement ID.
    */
-  getPaywall(options: {
-    placementId: string;
-    locale?: string;
-    params?: GetPlacementParamsInput;
-  }): Promise<AdaptyPaywall>;
+  getFlow(options: { placementId: string; params?: GetPlacementParamsInput }): Promise<AdaptyFlow>;
 
   /**
-   * Gets a paywall for default audience by placement ID.
+   * Gets a flow for default audience by placement ID.
    */
-  getPaywallForDefaultAudience(options: {
+  getFlowForDefaultAudience(options: {
     placementId: string;
-    locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
-  }): Promise<AdaptyPaywall>;
+  }): Promise<AdaptyFlow>;
 
   /**
-   * Gets products for a specific paywall.
+   * Gets products for a specific flow.
    */
-  getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<AdaptyPaywallProduct[]>;
+  getPaywallProducts(options: { flow: AdaptyFlow }): Promise<AdaptyPaywallProduct[]>;
 
   /**
    * Gets an onboarding by placement ID.
+   *
+   * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
    */
   getOnboarding(options: {
     placementId: string;
@@ -65,6 +64,8 @@ export interface AdaptyPlugin {
 
   /**
    * Gets an onboarding for default audience by placement ID.
+   *
+   * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
    */
   getOnboardingForDefaultAudience(options: {
     placementId: string;
@@ -80,25 +81,35 @@ export interface AdaptyPlugin {
   /**
    * Identifies the user with a customer user ID.
    */
-  identify(options: { customerUserId: string }): Promise<void>;
+  identify(options: { customerUserId: string; params?: IdentifyParamsInput }): Promise<void>;
 
   /**
-   * Logs that a paywall was shown to the user.
+   * Logs that a flow was shown to the user.
    */
-  logShowPaywall(options: { paywall: AdaptyPaywall }): Promise<void>;
+  logShowFlow(options: { flow: AdaptyFlow }): Promise<void>;
 
   /**
    * Opens a web paywall.
    */
   openWebPaywall(options: {
-    paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
+    paywallOrProduct: AdaptyFlowPaywall | AdaptyPaywallProduct;
     openIn?: WebPresentation;
   }): Promise<void>;
 
   /**
    * Creates a URL for web paywall.
    */
-  createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string>;
+  createWebPaywallUrl(options: { paywallOrProduct: AdaptyFlowPaywall | AdaptyPaywallProduct }): Promise<string>;
+
+  /**
+   * Opens a URL using the native browser.
+   */
+  openWebUrl(options: { url: string; openIn?: WebPresentation }): Promise<void>;
+
+  /**
+   * Requests the native app-review prompt.
+   */
+  requestAppReview(): Promise<void>;
 
   /**
    * Logs out the current user.

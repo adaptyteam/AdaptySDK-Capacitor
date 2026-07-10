@@ -10,6 +10,8 @@ const adaptyPlugin = new Adapty();
  * Creates an onboarding view controller.
  * You can use it to further configure a view or present it.
  *
+ * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
+ *
  * @see {@link https://adapty.io/docs/capacitor-get-onboardings | [DOC] Creating an onboarding view}
  *
  * @param {AdaptyOnboarding} onboarding - onboarding that you want to present.

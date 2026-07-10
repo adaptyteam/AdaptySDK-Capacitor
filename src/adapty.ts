@@ -10,7 +10,8 @@ import { defaultAdaptyOptions } from './default-configs';
 import { Log, LogContext } from './logger';
 import type { LoggerConfig, LogScope } from './logger';
 import type {
-  AdaptyPaywall,
+  AdaptyFlow,
+  AdaptyFlowPaywall,
   AdaptyPaywallProduct,
   AdaptyOnboarding,
   AdaptyProfile,
@@ -24,10 +25,10 @@ import type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapt
 import type { components } from './types/api';
 import type {
   AdaptyDefaultOptions,
-  GetPaywallOptions,
-  GetPaywallOptionsWithDefaults,
-  GetPaywallForDefaultAudienceOptions,
-  GetPaywallForDefaultAudienceOptionsWithDefaults,
+  GetFlowOptions,
+  GetFlowOptionsWithDefaults,
+  GetFlowForDefaultAudienceOptions,
+  GetFlowForDefaultAudienceOptionsWithDefaults,
   MakePurchaseOptions,
   GetOnboardingOptions,
   GetOnboardingOptionsWithDefaults,
@@ -60,7 +61,7 @@ export class Adapty implements AdaptyPlugin {
   private nonWaitingMethods: MethodName[] = [
     'activate',
     'is_activated',
-    'get_paywall_for_default_audience',
+    'get_flow_for_default_audience',
     'get_onboarding_for_default_audience',
     'set_log_level',
     'set_fallback',
@@ -153,7 +154,7 @@ export class Adapty implements AdaptyPlugin {
     }
   }
 
-  private isPaywallProduct(obj: AdaptyPaywall | AdaptyPaywallProduct): obj is AdaptyPaywallProduct {
+  private isPaywallProduct(obj: AdaptyFlowPaywall | AdaptyPaywallProduct): obj is AdaptyPaywallProduct {
     return 'vendorProductId' in obj;
   }
 
@@ -164,8 +165,6 @@ export class Adapty implements AdaptyPlugin {
    * This method must be called in order for the SDK to work.
    * It is preferred to call it as early as possible in the app lifecycle,
    * so background activities can be performed and cache can be updated.
-   *
-   * @example
    *
    * @example
    * Usage with your user identifier from your system
@@ -321,51 +320,48 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
-   * Fetches the paywall by the specified placement.
+   * Fetches the flow by the specified placement.
    *
    * @remarks
    * With Adapty, you can remotely configure the products and offers in your app
-   * by simply adding them to paywalls – no need for hardcoding them.
+   * by simply adding them to flows – no need for hardcoding them.
    * The only thing you hardcode is the placement ID.
-   * This flexibility allows you to easily update paywalls, products, and offers,
+   * This flexibility allows you to easily update flows, products, and offers,
    * or run A/B tests, all without the need for a new app release.
    *
-   * @param options - The options for fetching the paywall
+   * @param options - The options for fetching the flow
    * @param options.placementId - The identifier of the desired placement. This is the value you specified when creating a placement in the Adapty Dashboard.
-   * @param options.locale - Optional. The identifier of the paywall localization. Default: `'en'`. See {@link https://docs.adapty.io/docs/localizations-and-locale-codes | Localizations and locale codes} for more information.
-   * @param options.params - Optional. Additional parameters for fetching the paywall, including fetch policy and load timeout.
-   * @returns A promise that resolves with the requested {@link AdaptyPaywall}.
-   * @throws Error if the paywall with the specified ID is not found or if your bundle ID does not match with your Adapty Dashboard setup.
+   * @param options.params - Optional. Additional parameters for fetching the flow, including fetch policy and load timeout.
+   * @returns A promise that resolves with the requested {@link AdaptyFlow}.
+   * @throws Error if the flow with the specified ID is not found or if your bundle ID does not match with your Adapty Dashboard setup.
    *
    * @example
    * ```typescript
    * import { adapty } from '@adapty/capacitor';
    *
    * try {
-   *   const paywall = await adapty.getPaywall({
+   *   const flow = await adapty.getFlow({
    *     placementId: 'YOUR_PLACEMENT_ID',
-   *     locale: 'en',
    *   });
-   *   console.log('Paywall fetched successfully');
+   *   console.log('Flow fetched successfully');
    * } catch (error) {
-   *   console.error('Failed to fetch paywall:', error);
+   *   console.error('Failed to fetch flow:', error);
    * }
    * ```
    */
-  async getPaywall(options: GetPaywallOptions): Promise<AdaptyPaywall> {
-    const method = 'get_paywall';
-    const optionsWithDefault = mergeOptions<GetPaywallOptionsWithDefaults>(options, this.options[method]);
+  async getFlow(options: GetFlowOptions): Promise<AdaptyFlow> {
+    const method = 'get_flow';
+    const optionsWithDefault = mergeOptions<GetFlowOptionsWithDefaults>(options, this.options[method]);
     const params = optionsWithDefault.params;
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ optionsWithDefault }));
 
-    const argsWithUndefined: Req['GetPaywall.Request'] = {
+    const argsWithUndefined: Req['GetFlow.Request'] = {
       method,
       placement_id: optionsWithDefault.placementId,
       load_timeout: params.loadTimeoutMs / 1000,
-      locale: optionsWithDefault.locale,
       fetch_policy:
         params.fetchPolicy === 'return_cache_data_if_not_expired_else_load'
           ? { type: params.fetchPolicy, max_age: params.maxAgeSeconds }
@@ -374,49 +370,47 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyPaywall');
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyFlow');
   }
 
   /**
-   * Fetches the paywall of the specified placement for the **All Users** audience.
+   * Fetches the flow of the specified placement for the **All Users** audience.
    *
    * @remarks
    * With Adapty, you can remotely configure the products and offers in your app
-   * by simply adding them to paywalls – no need for hardcoding them.
+   * by simply adding them to flows – no need for hardcoding them.
    * The only thing you hardcode is the placement ID.
    *
-   * However, it's crucial to understand that the recommended approach is to fetch the paywall
-   * through the placement ID by the {@link getPaywall} method.
-   * The `getPaywallForDefaultAudience` method should be a last resort due to its significant drawbacks:
+   * However, it's crucial to understand that the recommended approach is to fetch the flow
+   * through the placement ID by the {@link getFlow} method.
+   * The `getFlowForDefaultAudience` method should be a last resort due to its significant drawbacks:
    * - Potential backward compatibility issues
-   * - Loss of targeting (all users see the same paywall)
+   * - Loss of targeting (all users see the same flow)
    *
    * See {@link https://docs.adapty.io/docs/capacitor-get-pb-paywalls#get-a-paywall-for-a-default-audience-to-fetch-it-faster | documentation} for more details.
    *
-   * @param options - The options for fetching the paywall
+   * @param options - The options for fetching the flow
    * @param options.placementId - The identifier of the desired placement.
-   * @param options.locale - Optional. The identifier of the paywall localization. Default: `'en'`.
-   * @param options.params - Optional. Additional parameters for fetching the paywall.
-   * @returns A promise that resolves with the requested {@link AdaptyPaywall}.
-   * @throws Error if the paywall with the specified ID is not found.
+   * @param options.params - Optional. Additional parameters for fetching the flow.
+   * @returns A promise that resolves with the requested {@link AdaptyFlow}.
+   * @throws Error if the flow with the specified ID is not found.
    *
    * @example
    * ```typescript
    * import { adapty } from '@adapty/capacitor';
    *
    * try {
-   *   const paywall = await adapty.getPaywallForDefaultAudience({
+   *   const flow = await adapty.getFlowForDefaultAudience({
    *     placementId: 'YOUR_PLACEMENT_ID',
-   *     locale: 'en',
    *   });
    * } catch (error) {
-   *   console.error('Failed to fetch paywall:', error);
+   *   console.error('Failed to fetch flow:', error);
    * }
    * ```
    */
-  async getPaywallForDefaultAudience(options: GetPaywallForDefaultAudienceOptions): Promise<AdaptyPaywall> {
-    const method = 'get_paywall_for_default_audience';
-    const optionsWithDefault = mergeOptions<GetPaywallForDefaultAudienceOptionsWithDefaults>(
+  async getFlowForDefaultAudience(options: GetFlowForDefaultAudienceOptions): Promise<AdaptyFlow> {
+    const method = 'get_flow_for_default_audience';
+    const optionsWithDefault = mergeOptions<GetFlowForDefaultAudienceOptionsWithDefaults>(
       options,
       this.options[method],
     );
@@ -426,10 +420,9 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ optionsWithDefault }));
 
-    const argsWithUndefined: Req['GetPaywallForDefaultAudience.Request'] = {
+    const argsWithUndefined: Req['GetFlowForDefaultAudience.Request'] = {
       method,
       placement_id: optionsWithDefault.placementId,
-      locale: optionsWithDefault.locale,
       fetch_policy:
         params.fetchPolicy === 'return_cache_data_if_not_expired_else_load'
           ? { type: params.fetchPolicy, max_age: params.maxAgeSeconds }
@@ -438,15 +431,15 @@ export class Adapty implements AdaptyPlugin {
 
     const args = filterUndefined(argsWithUndefined);
 
-    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyPaywall');
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyFlow');
   }
 
   /**
-   * Fetches a list of products associated with a provided paywall.
+   * Fetches a list of products associated with a provided flow.
    *
    * @param options - The options object
-   * @param options.paywall - A paywall to fetch products for. You can get it using {@link getPaywall} method.
-   * @returns A promise that resolves with a list of {@link AdaptyPaywallProduct} associated with a provided paywall.
+   * @param options.flow - A flow to fetch products for. You can get it using {@link getFlow} method.
+   * @returns A promise that resolves with a list of {@link AdaptyPaywallProduct} associated with a provided flow.
    * @throws Error if an error occurs while fetching products.
    *
    * @example
@@ -454,26 +447,26 @@ export class Adapty implements AdaptyPlugin {
    * import { adapty } from '@adapty/capacitor';
    *
    * try {
-   *   const paywall = await adapty.getPaywall({ placementId: 'YOUR_PLACEMENT_ID' });
-   *   const products = await adapty.getPaywallProducts({ paywall });
+   *   const flow = await adapty.getFlow({ placementId: 'YOUR_PLACEMENT_ID' });
+   *   const products = await adapty.getPaywallProducts({ flow });
    *   console.log('Products:', products);
    * } catch (error) {
    *   console.error('Failed to fetch products:', error);
    * }
    * ```
    */
-  async getPaywallProducts(options: { paywall: AdaptyPaywall }): Promise<AdaptyPaywallProduct[]> {
+  async getPaywallProducts(options: { flow: AdaptyFlow }): Promise<AdaptyPaywallProduct[]> {
     const method = 'get_paywall_products';
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const paywallCoder = coderFactory.createPaywallCoder();
+    const coder = coderFactory.createFlowCoder();
 
     const argsWithUndefined: Req['GetPaywallProducts.Request'] = {
       method,
-      paywall: this.encodeWithLogging(paywallCoder, options.paywall, 'AdaptyPaywall', ctx),
+      flow: this.encodeWithLogging(coder, options.flow, 'AdaptyFlow', ctx),
     };
 
     const args = filterUndefined(argsWithUndefined);
@@ -483,6 +476,8 @@ export class Adapty implements AdaptyPlugin {
 
   /**
    * Fetches the onboarding by the specified placement.
+   *
+   * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
    *
    * @remarks
    * When you create an onboarding with the no-code builder, it's stored as a container with configuration
@@ -542,6 +537,8 @@ export class Adapty implements AdaptyPlugin {
 
   /**
    * Fetches the onboarding of the specified placement for the **All Users** audience.
+   *
+   * @deprecated Since 4.0.0. Migrate onboardings to the Flow Builder API.
    *
    * @remarks
    * It's crucial to understand that the recommended approach is to fetch the onboarding
@@ -695,19 +692,19 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
-   * Logs a paywall view event.
+   * Logs a flow view event.
    *
    * @remarks
-   * Adapty helps you to measure the performance of the paywalls.
-   * We automatically collect all the metrics related to purchases except for custom paywall views.
-   * This is because only you know when the paywall was shown to a customer.
+   * Adapty helps you to measure the performance of the flows.
+   * We automatically collect all the metrics related to purchases except for custom flow views.
+   * This is because only you know when the flow was shown to a customer.
    *
-   * Whenever you show a paywall to your user,
+   * Whenever you show a flow to your user,
    * call this function to log the event,
-   * and it will be accumulated in the paywall metrics.
+   * and it will be accumulated in the flow metrics.
    *
    * @param options - The options object
-   * @param options.paywall - The paywall object that was shown to the user.
+   * @param options.flow - The flow object that was shown to the user.
    * @returns A promise that resolves when the event is logged.
    * @throws Error if an error occurs while logging the event.
    *
@@ -715,23 +712,23 @@ export class Adapty implements AdaptyPlugin {
    * ```typescript
    * import { adapty } from '@adapty/capacitor';
    *
-   * const paywall = await adapty.getPaywall({ placementId: 'YOUR_PLACEMENT_ID' });
-   * // ...after opening the paywall
-   * await adapty.logShowPaywall({ paywall });
+   * const flow = await adapty.getFlow({ placementId: 'YOUR_PLACEMENT_ID' });
+   * // ...after opening the flow
+   * await adapty.logShowFlow({ flow });
    * ```
    */
-  async logShowPaywall(options: { paywall: AdaptyPaywall }): Promise<void> {
-    const method = 'log_show_paywall';
+  async logShowFlow(options: { flow: AdaptyFlow }): Promise<void> {
+    const method = 'log_show_flow';
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const paywallCoder = coderFactory.createPaywallCoder();
+    const coder = coderFactory.createFlowCoder();
 
-    const argsWithUndefined: Req['LogShowPaywall.Request'] = {
+    const argsWithUndefined: Req['LogShowFlow.Request'] = {
       method,
-      paywall: this.encodeWithLogging(paywallCoder, options.paywall, 'AdaptyPaywall', ctx),
+      flow: this.encodeWithLogging(coder, options.flow, 'AdaptyFlow', ctx),
     };
 
     const args = filterUndefined(argsWithUndefined);
@@ -743,7 +740,8 @@ export class Adapty implements AdaptyPlugin {
    * Opens a web paywall in the default browser.
    *
    * @param options - The options object
-   * @param options.paywallOrProduct - The paywall or product to open as a web paywall.
+   * @param options.paywallOrProduct - The flow paywall or product to open as a web paywall.
+   * @param options.openIn - Optional. Where to open the web paywall ({@link WebPresentation}).
    * @returns A promise that resolves when the web paywall is opened.
    * @throws Error if an error occurs while opening the web paywall.
    *
@@ -752,15 +750,15 @@ export class Adapty implements AdaptyPlugin {
    * import { adapty } from '@adapty/capacitor';
    *
    * try {
-   *   const paywall = await adapty.getPaywall({ placementId: 'YOUR_PLACEMENT_ID' });
-   *   await adapty.openWebPaywall({ paywallOrProduct: paywall });
+   *   const flow = await adapty.getFlow({ placementId: 'YOUR_PLACEMENT_ID' });
+   *   await adapty.openWebPaywall({ paywallOrProduct: flow.paywalls[0] });
    * } catch (error) {
    *   console.error('Failed to open web paywall:', error);
    * }
    * ```
    */
   async openWebPaywall(options: {
-    paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct;
+    paywallOrProduct: AdaptyFlowPaywall | AdaptyPaywallProduct;
     openIn?: WebPresentation;
   }): Promise<void> {
     const method = 'open_web_paywall';
@@ -769,14 +767,14 @@ export class Adapty implements AdaptyPlugin {
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const paywallCoder = coderFactory.createPaywallCoder();
+    const flowPaywallCoder = coderFactory.createFlowPaywallCoder();
     const productCoder = coderFactory.createPaywallProductCoder();
 
     const argsWithUndefined: Req['OpenWebPaywall.Request'] = {
       method,
       ...(this.isPaywallProduct(options.paywallOrProduct)
         ? { product: this.encodeWithLogging(productCoder, options.paywallOrProduct, 'AdaptyPaywallProduct', ctx) }
-        : { paywall: this.encodeWithLogging(paywallCoder, options.paywallOrProduct, 'AdaptyPaywall', ctx) }),
+        : { paywall: this.encodeWithLogging(flowPaywallCoder, options.paywallOrProduct, 'AdaptyFlowPaywall', ctx) }),
       ...(options.openIn ? { open_in: options.openIn } : {}),
     };
 
@@ -793,7 +791,7 @@ export class Adapty implements AdaptyPlugin {
    * You can use this URL in a custom web view or a browser.
    *
    * @param options - The options object
-   * @param options.paywallOrProduct - The paywall or product to create a URL for.
+   * @param options.paywallOrProduct - The flow paywall or product to create a URL for.
    * @returns A promise that resolves with the web paywall URL.
    * @throws Error if an error occurs while creating the URL.
    *
@@ -802,34 +800,110 @@ export class Adapty implements AdaptyPlugin {
    * import { adapty } from '@adapty/capacitor';
    *
    * try {
-   *   const paywall = await adapty.getPaywall({ placementId: 'YOUR_PLACEMENT_ID' });
-   *   const url = await adapty.createWebPaywallUrl({ paywallOrProduct: paywall });
+   *   const flow = await adapty.getFlow({ placementId: 'YOUR_PLACEMENT_ID' });
+   *   const url = await adapty.createWebPaywallUrl({ paywallOrProduct: flow.paywalls[0] });
    *   console.log('Web paywall URL:', url);
    * } catch (error) {
    *   console.error('Failed to create web paywall URL:', error);
    * }
    * ```
    */
-  async createWebPaywallUrl(options: { paywallOrProduct: AdaptyPaywall | AdaptyPaywallProduct }): Promise<string> {
+  async createWebPaywallUrl(options: { paywallOrProduct: AdaptyFlowPaywall | AdaptyPaywallProduct }): Promise<string> {
     const method = 'create_web_paywall_url';
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const paywallCoder = coderFactory.createPaywallCoder();
+    const flowPaywallCoder = coderFactory.createFlowPaywallCoder();
     const productCoder = coderFactory.createPaywallProductCoder();
 
     const argsWithUndefined: Req['CreateWebPaywallUrl.Request'] = {
       method,
       ...(this.isPaywallProduct(options.paywallOrProduct)
         ? { product: this.encodeWithLogging(productCoder, options.paywallOrProduct, 'AdaptyPaywallProduct', ctx) }
-        : { paywall: this.encodeWithLogging(paywallCoder, options.paywallOrProduct, 'AdaptyPaywall', ctx) }),
+        : { paywall: this.encodeWithLogging(flowPaywallCoder, options.paywallOrProduct, 'AdaptyFlowPaywall', ctx) }),
     };
 
     const args = filterUndefined(argsWithUndefined);
 
     return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'String');
+  }
+
+  /**
+   * Opens a URL using the native browser.
+   *
+   * @remarks
+   * Backs the default `onUrlPress` flow handler. Call it directly from a custom
+   * `onUrlPress` handler when you want to run your own logic but keep the native
+   * open-URL behavior. `openIn`: `browser_out_app` → external browser,
+   * `browser_in_app` → in-app browser.
+   *
+   * @param options - The options object
+   * @param options.url - The URL to open.
+   * @param options.openIn - Optional. How to present the URL ({@link WebPresentation}). When omitted, the native SDK decides.
+   * @returns A promise that resolves when the URL is opened.
+   * @throws Error if an error occurs while opening the URL.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * try {
+   *   await adapty.openWebUrl({ url: 'https://example.com' });
+   * } catch (error) {
+   *   console.error('Failed to open URL:', error);
+   * }
+   * ```
+   */
+  async openWebUrl(options: { url: string; openIn?: WebPresentation }): Promise<void> {
+    const method = 'adapty_ui_open_url';
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
+    const argsWithUndefined: Req['AdaptyUIOpenUrl.Request'] = {
+      method,
+      url: options.url,
+      ...(options.openIn ? { open_in: options.openIn } : {}),
+    };
+    const args = filterUndefined(argsWithUndefined);
+
+    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+  }
+
+  /**
+   * Requests the native app-review prompt.
+   *
+   * @remarks
+   * Uses `SKStoreReviewController` on iOS and In-App Review on Android. Backs the
+   * default `onRequestAppReview` flow handler. Call it directly from a custom
+   * `onRequestAppReview` handler when you want to run your own logic but keep the
+   * native prompt.
+   *
+   * @returns A promise that resolves when the native call completes.
+   * @throws Error if an error occurs while requesting the app review.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * try {
+   *   await adapty.requestAppReview();
+   * } catch (error) {
+   *   console.error('Failed to request app review:', error);
+   * }
+   * ```
+   */
+  async requestAppReview(): Promise<void> {
+    const method = 'adapty_ui_request_app_review';
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({}));
+
+    const args: Req['AdaptyUIRequestAppReview.Request'] = { method };
+
+    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
   /**
@@ -974,7 +1048,7 @@ export class Adapty implements AdaptyPlugin {
    *
    * @param options - The options object
    * @param options.transactionId - The transaction ID of the purchase.
-   * @param options.variationId - Optional. The variation ID from the {@link AdaptyPaywall}.
+   * @param options.variationId - Optional. The variation ID from the {@link AdaptyFlow}.
    * @returns A promise that resolves when the transaction is reported.
    * @throws Error if an error occurs while reporting the transaction.
    *

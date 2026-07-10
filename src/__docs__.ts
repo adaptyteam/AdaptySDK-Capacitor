@@ -4,7 +4,8 @@
  */
 export { Adapty } from './adapty';
 export type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
-export { PaywallViewController } from './ui-builder/paywall-view-controller';
+export { FlowViewController } from './ui-builder/flow-view-controller';
+export { createFlowView } from './ui-builder/create-flow-view';
 export { OnboardingViewController } from './ui-builder/onboarding-view-controller';
 export {
   AdaptyError,
@@ -28,7 +29,6 @@ export {
   ActivateParamsInput,
   IdentifyParamsInput,
   AdaptyAndroidSubscriptionUpdateReplacementMode,
-  AdaptyAndroidSubscriptionUpdateParameters,
   AdaptyAndroidPurchaseParams,
   MakePurchaseParamsInput,
   FileLocation,
@@ -36,11 +36,11 @@ export {
 // Core types
 export {
   AdaptyPrice,
-  AdaptyPaywall,
+  AdaptyFlow,
+  AdaptyFlowPaywall,
   AdaptyOnboarding,
   AdaptyPlacement,
   AdaptyRemoteConfig,
-  AdaptyPaywallBuilder,
   AdaptyOnboardingBuilder,
   AdaptyPurchaseResult,
   AdaptyProfile,
@@ -54,7 +54,6 @@ export {
   AdaptyDiscountPhase,
   AdaptySubscriptionPeriod,
   AdaptyProfileParameters,
-  ProductReference,
   AdaptyProductIdentifier,
   RefundPreference,
   AdaptyInstallationStatus,
@@ -62,18 +61,21 @@ export {
 } from './types';
 // Config types
 export {
-  GetPaywallOptions,
-  GetPaywallForDefaultAudienceOptions,
+  GetFlowOptions,
+  GetFlowForDefaultAudienceOptions,
   GetOnboardingOptions,
   GetOnboardingForDefaultAudienceOptions,
   MakePurchaseOptions,
 } from './types/configs';
 // UI Builder types
 export {
-  EventHandlers,
+  FlowEventHandlers,
   EventHandlerResult,
   OnboardingEventHandlers,
-  CreatePaywallViewParamsInput,
+  AdaptyPermission,
+  FlowPermissionResponse,
+  FlowPermissionStatus,
+  CreateFlowViewParamsInput,
   CreateOnboardingViewParamsInput,
   AdaptyUiView,
   AdaptyUiMediaCache,

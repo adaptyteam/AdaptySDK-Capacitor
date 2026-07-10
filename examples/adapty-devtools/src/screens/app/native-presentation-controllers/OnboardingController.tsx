@@ -8,8 +8,8 @@ export type OnboardingControllerRef = {
 type Props = {
   onboarding: any | null;
   externalUrlsPresentation: WebPresentation;
-  canShowPaywall: () => boolean;
-  showPaywall?: () => Promise<void> | void;
+  canShowFlow: () => boolean;
+  showFlow?: () => Promise<void> | void;
   setResult: (value: string) => void;
   log: (
     level: 'info' | 'error' | 'warn',
@@ -21,7 +21,7 @@ type Props = {
 };
 
 export const OnboardingController = forwardRef<OnboardingControllerRef, Props>(function OnboardingController(
-  { onboarding, externalUrlsPresentation, canShowPaywall, showPaywall, setResult, log }: Props,
+  { onboarding, externalUrlsPresentation, canShowFlow, showFlow, setResult, log }: Props,
   ref,
 ) {
   const presentOnboarding = async () => {
@@ -57,14 +57,14 @@ export const OnboardingController = forwardRef<OnboardingControllerRef, Props>(f
         onPaywall: (actionId: any, meta: any) => {
           log('info', 'Onboarding paywall action', 'onboarding.onPaywall', false, { actionId, meta });
 
-          if (!canShowPaywall()) {
-            setResult('❌ Cannot show paywall: load paywall first (and ensure it has view configuration).');
+          if (!canShowFlow()) {
+            setResult('❌ Cannot show flow: load flow first.');
             return false;
           }
 
-          // RN-like behavior: close onboarding modal first, then present paywall
+          // RN-like behavior: close onboarding modal first, then present flow
           view.dismiss().then(() => {
-            showPaywall?.();
+            showFlow?.();
           });
 
           return false;
@@ -102,8 +102,8 @@ export const OnboardingController = forwardRef<OnboardingControllerRef, Props>(f
   useImperativeHandle(ref, () => ({ presentOnboarding }), [
     onboarding,
     externalUrlsPresentation,
-    canShowPaywall,
-    showPaywall,
+    canShowFlow,
+    showFlow,
   ]);
 
   return null;
