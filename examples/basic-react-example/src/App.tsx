@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { adapty, createPaywallView, AdaptyProfile, AdaptyPaywall } from '@adapty/capacitor';
+import { adapty, createFlowView, AdaptyProfile, AdaptyFlow } from '@adapty/capacitor';
 import { getApiKey, getPlacementId } from './helpers';
 import { recipes, Recipe } from './recipes';
 import styles from './main.module.css';
@@ -9,7 +9,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<AdaptyProfile | null>(null);
-  const [paywall, setPaywall] = useState<AdaptyPaywall | null>(null);
+  const [flow, setFlow] = useState<AdaptyFlow | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   // Initialize Adapty SDK on mount
@@ -17,7 +17,7 @@ const App: React.FC = () => {
     initializeAdapty();
   }, []);
 
-  // Initialize Adapty: activate, load profile, load paywall
+  // Initialize Adapty: activate, load profile, load flow
   const initializeAdapty = async () => {
     try {
       setIsLoading(true);
@@ -36,11 +36,11 @@ const App: React.FC = () => {
       const userProfile = await adapty.getProfile();
       setProfile(userProfile);
 
-      // Step 3: Load paywall
-      const paywallData = await adapty.getPaywall({
+      // Step 3: Load flow
+      const flowData = await adapty.getFlow({
         placementId: getPlacementId(),
       });
-      setPaywall(paywallData);
+      setFlow(flowData);
 
       setIsLoading(false);
     } catch (err) {
@@ -62,25 +62,20 @@ const App: React.FC = () => {
       return;
     }
 
-    // Otherwise, show paywall
-    await showPaywall();
+    // Otherwise, present the flow (paywall)
+    await showFlow();
   };
 
-  // Show paywall using Paywall Builder
-  const showPaywall = async () => {
-    if (!paywall) {
-      setError('Paywall not loaded. Please try again.');
-      return;
-    }
-
-    if (!paywall.hasViewConfiguration) {
-      setError('Paywall does not have Paywall Builder configuration.');
+  // Present the flow (paywall) using the Adapty Flow Builder
+  const showFlow = async () => {
+    if (!flow) {
+      setError('Flow not loaded. Please try again.');
       return;
     }
 
     try {
-      // Create paywall view
-      const view = await createPaywallView(paywall);
+      // Create the flow view. Throws if the flow has no view configuration.
+      const view = await createFlowView(flow);
 
       // Set up event handlers
       await view.setEventHandlers({
@@ -89,7 +84,7 @@ const App: React.FC = () => {
           if (purchaseResult.type === 'success') {
             // Update profile to reflect new access level
             setProfile(purchaseResult.profile);
-            // Close paywall
+            // Close the flow
             return true;
           }
           // Don't close for cancelled or pending purchases
@@ -97,10 +92,10 @@ const App: React.FC = () => {
         },
       });
 
-      // Present the paywall
+      // Present the flow
       await view.present();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to show paywall';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to show flow';
       setError(errorMessage);
     }
   };

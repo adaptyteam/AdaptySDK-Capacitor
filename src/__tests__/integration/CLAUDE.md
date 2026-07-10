@@ -5,24 +5,24 @@
 ### `adapty-handler/` — Bridge Protocol Tests
 Tests SDK method communication with native: JS (camelCase) → encode → snake_case JSON → Capacitor bridge → decode → JS.
 Uses `NativeModuleMock` spy to verify exact request format and response parsing.
-**72 tests** across 15 test files covering all major SDK methods:
-- activation (27 tests), attribution (1), configuration (1), event-listeners (5)
-- installation (1), ios-specific (2), onboarding (3), paywall (7)
-- products (3), profile (2), purchase (2), purchase-event (1)
-- restore-purchases (1), user-management (3), web-paywall (2)
+**73 tests** across 15 test files covering all major SDK methods:
+- activation (27 tests), attribution (3), configuration (3), event-listeners (5)
+- installation (4), ios-specific (6), onboarding (3), flow (7)
+- products (2), profile (2), purchase (2), purchase-event (1)
+- restore-purchases (1), user-management (3), web-paywall (4)
 
 ### `ui-builder/` — UI ViewController Method Tests
-Tests SDK UI controller methods (PaywallViewController, OnboardingViewController) for bridge communication:
+Tests SDK UI controller methods (FlowViewController, OnboardingViewController) for bridge communication:
 JS (camelCase) → encode → snake_case JSON → Capacitor bridge → decode → JS.
 Uses `NativeModuleMock` spy to verify exact request format and response parsing.
 **11 tests** across 2 test files:
-- paywall-view-controller-methods (7 tests): createPaywallView, present, dismiss, showDialog
+- flow-view-controller-methods (7 tests): createFlowView, present, dismiss, showDialog
 - onboarding-view-controller-methods (4 tests): createOnboardingView, present, dismiss
 
 ## Shared Utilities (`shared/`)
 
 ### `bridge-samples/` — Typed Request/Response Fixtures
-Organized by domain: `activation.ts` (more to come: `profile.ts`, `paywall.ts`, etc.).
+Organized by domain: `activation.ts`, `configuration.ts`, `events.ts`, `flow.ts`, `flow-reply-events.ts`, `installation.ts`, `ios-specific.ts`, `onboarding.ts`, `profile.ts`, `purchase.ts`, `ui-methods.ts`, `user-management.ts` (plus shared `common.ts`).
 All samples are **strictly typed** against `api.d.ts` — compile-time validation catches API drift.
 Re-exported via `index.ts` barrel.
 
@@ -78,8 +78,8 @@ JS API call (camelCase)
 
 ## Running Tests
 ```bash
-npx jest src/__tests__/integration/                   # All integration tests (83 tests)
-npx jest src/__tests__/integration/adapty-handler/    # Bridge protocol tests (72 tests)
+npx jest src/__tests__/integration/                   # All integration tests (84 tests)
+npx jest src/__tests__/integration/adapty-handler/    # Bridge protocol tests (73 tests)
 npx jest src/__tests__/integration/ui-builder/        # UI ViewController tests (11 tests)
 npx jest src/__tests__/integration/adapty-handler/activation.test.ts  # Just activation
 ```

@@ -18,24 +18,13 @@ For **android**, also ask:
 
 ## iOS Steps
 
-Edit these files, replacing the OLD version with the NEW version:
+iOS dependencies are distributed via Swift Package Manager only (no CocoaPods podspec).
 
-### 1. `AdaptyCapacitor.podspec`
-Update all three pod dependencies:
-```ruby
-s.dependency 'Adapty', '<NEW_VERSION>'
-s.dependency 'AdaptyUI', '<NEW_VERSION>'
-s.dependency 'AdaptyPlugin', '<NEW_VERSION>'
-```
-
-### 2. `Package.swift`
-Update SPM exact version:
+### 1. `Package.swift`
+Update the SPM exact version pin:
 ```swift
 .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS.git", exact: "<NEW_VERSION>")
 ```
-
-### 3. No manual Podfile.lock edit
-The lockfile will be regenerated during the verification step.
 
 ## Android Steps
 
@@ -77,9 +66,9 @@ node ../../scripts/credentials.mjs \
 # 4. Build devtools
 yarn build
 
-# 5. Update native modules (runs pod update + cap copy + cap sync)
-# IMPORTANT: run this BEFORE bare `cap sync` — cap sync uses pod install which
-# fails when pod versions changed. update-native-modules does pod update first.
+# 5. Update native modules (resolves iOS SPM package versions, then cap copy + cap sync)
+# Run this instead of a bare `cap sync` so Xcode re-resolves the bumped SPM
+# dependency versions before syncing.
 yarn update-native-modules
 ```
 

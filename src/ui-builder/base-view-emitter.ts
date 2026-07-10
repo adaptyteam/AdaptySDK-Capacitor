@@ -63,6 +63,15 @@ export abstract class BaseViewEmitter<
    */
   protected abstract getEmitterName(): string;
 
+  /**
+   * Hook for subclasses to fully handle an event themselves (e.g. async
+   * request/response round-trips). Return true to skip the standard
+   * "call handler → maybe close view" dispatch for this event.
+   */
+  protected handleSpecialEvent(_handlerName: keyof TEventHandlers, _eventData: TEventData): boolean {
+    return false;
+  }
+
   public async addListener(
     event: keyof TEventHandlers,
     callback: TEventHandlers[keyof TEventHandlers],
@@ -151,6 +160,11 @@ export abstract class BaseViewEmitter<
 
       const handlerName = this.getHandlerForNativeEvent(nativeEvent, eventData);
       if (!handlerName) {
+        return;
+      }
+
+      if (this.handleSpecialEvent(handlerName, eventData)) {
+        log.success(() => ({ message: 'Special event handled', handlerName }));
         return;
       }
 

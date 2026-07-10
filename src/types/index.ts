@@ -1,11 +1,11 @@
 // Re-export all model types from @adapty/core
 export type {
   AdaptyPrice,
-  AdaptyPaywall,
+  AdaptyFlow,
+  AdaptyFlowPaywall,
   AdaptyOnboarding,
   AdaptyPlacement,
   AdaptyRemoteConfig,
-  AdaptyPaywallBuilder,
   AdaptyOnboardingBuilder,
   AdaptyPurchaseResult,
   AdaptyProfile,
@@ -20,7 +20,6 @@ export type {
   AdaptyDiscountPhase,
   AdaptySubscriptionPeriod,
   AdaptyProfileParameters,
-  ProductReference,
   AdaptyProductIdentifier,
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
@@ -43,5 +42,5 @@ export {
 
 // Re-export local modules that are NOT in core
 export * from './inputs';
-export * from './paywall-events';
+export * from './flow-events';
 export * from './onboarding-events';

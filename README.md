@@ -33,6 +33,7 @@ Adapty SDK is an open-source framework that makes implementing in-app subscripti
 - [Mobile app monetization's largest community](#mobile-app-monetizations-largest-community)
 - [Platform Support](#platform-support)
 - [Capacitor compatibility](#capacitor-compatibility)
+- [iOS dependency manager](#ios-dependency-manager)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [Like Adapty SDK?](#like-adapty-sdk)
@@ -111,6 +112,13 @@ Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms
 | 8.x | 3.16.0 and newer     |
 | 7.x | 3.15.x and older            |
 | 6.x and older | Not supported               |
+
+### iOS dependency manager
+
+| `@adapty/capacitor` version | iOS dependency manager |
+| --- | --- |
+| 4.x and newer | Swift Package Manager (SPM) only |
+| 3.x | CocoaPods and Swift Package Manager (SPM) |
 
 
 ## Examples

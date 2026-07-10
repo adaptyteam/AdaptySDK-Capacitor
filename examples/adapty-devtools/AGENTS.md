@@ -15,7 +15,7 @@ See [Capacitor Environment Setup](https://capacitorjs.com/docs/getting-started/e
 - Node.js 22+
 - JDK 21 (Android)
 - Xcode 26+ with Command Line Tools (`xcode-select --install`)
-- CocoaPods 1.12+ (or use Swift Package Manager)
+- Swift Package Manager (iOS dependencies; no CocoaPods)
 - Yarn (not npm)
 - Ruby 2.7+ (for link-assets script)
 
@@ -35,7 +35,7 @@ yarn dev:android            # Live reload on Android
 
 # Capacitor sync
 yarn update-cap-config      # Copy and sync Capacitor config
-yarn update-native-modules  # Update native pods and sync
+yarn update-native-modules  # Resolve iOS SPM packages and sync
 
 # Credentials and assets
 yarn credentials            # Interactive setup for Adapty credentials (see below)

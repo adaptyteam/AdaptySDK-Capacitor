@@ -10,6 +10,9 @@ type Props = {
   setLogLevel: () => Promise<void>;
   testSetFallback: () => Promise<void>;
   getCurrentInstallationStatus: () => Promise<void>;
+  openAdaptyIoInApp: () => Promise<void>;
+  openAdaptyIoExternal: () => Promise<void>;
+  requestAppReview: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -21,6 +24,9 @@ export const OtherActionsSection: React.FC<Props> = ({
   setLogLevel,
   testSetFallback,
   getCurrentInstallationStatus,
+  openAdaptyIoInApp,
+  openAdaptyIoExternal,
+  requestAppReview,
   logout,
 }) => {
   return (
@@ -71,6 +77,33 @@ export const OtherActionsSection: React.FC<Props> = ({
           className={`${styles.Button} ${styles.ButtonSecondary}`}
         >
           Get Installation Status
+        </button>
+      </ButtonGroup>
+
+      <ButtonGroup>
+        <button
+          onClick={openAdaptyIoInApp}
+          disabled={!isActivated}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Open adapty.io (in-app)
+        </button>
+        <button
+          onClick={openAdaptyIoExternal}
+          disabled={!isActivated}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Open adapty.io (external)
+        </button>
+      </ButtonGroup>
+
+      <ButtonGroup>
+        <button
+          onClick={requestAppReview}
+          disabled={!isActivated}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Request App Review
         </button>
       </ButtonGroup>
 

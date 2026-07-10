@@ -3,7 +3,7 @@ import type { components } from 'types/api';
 
 import {
   ACTIVATE_RESPONSE_SUCCESS,
-  GET_PAYWALL_RESPONSE,
+  GET_FLOW_RESPONSE,
   OPEN_WEB_PAYWALL_RESPONSE_SUCCESS,
   CREATE_WEB_PAYWALL_URL_RESPONSE,
 } from '../shared/bridge-samples';
@@ -33,17 +33,18 @@ describe('Adapty - Web Paywall (Bridge Integration)', () => {
   });
 
   describe('openWebPaywall', () => {
-    it('should send OpenWebPaywall.Request with paywall', async () => {
+    it('should send OpenWebPaywall.Request with flow paywall', async () => {
       nativeMock = createNativeModuleMock({
         activate: ACTIVATE_RESPONSE_SUCCESS,
-        get_paywall: GET_PAYWALL_RESPONSE,
+        get_flow: GET_FLOW_RESPONSE,
         open_web_paywall: OPEN_WEB_PAYWALL_RESPONSE_SUCCESS,
       });
 
       await adapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } });
 
-      // First, get a paywall
-      const paywall = await adapty.getPaywall({ placementId: 'test_placement' });
+      // First, get a flow and use its paywall variation
+      const flow = await adapty.getFlow({ placementId: 'test_placement' });
+      const paywall = flow.paywalls[0]!;
 
       await adapty.openWebPaywall({ paywallOrProduct: paywall, openIn: 'browser_out_app' });
 
@@ -63,14 +64,15 @@ describe('Adapty - Web Paywall (Bridge Integration)', () => {
     it('should send CreateWebPaywallUrl.Request and return URL', async () => {
       nativeMock = createNativeModuleMock({
         activate: ACTIVATE_RESPONSE_SUCCESS,
-        get_paywall: GET_PAYWALL_RESPONSE,
+        get_flow: GET_FLOW_RESPONSE,
         create_web_paywall_url: CREATE_WEB_PAYWALL_URL_RESPONSE,
       });
 
       await adapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } });
 
-      // First, get a paywall
-      const paywall = await adapty.getPaywall({ placementId: 'test_placement' });
+      // First, get a flow and use its paywall variation
+      const flow = await adapty.getFlow({ placementId: 'test_placement' });
+      const paywall = flow.paywalls[0]!;
 
       const url = await adapty.createWebPaywallUrl({ paywallOrProduct: paywall });
 
@@ -83,6 +85,48 @@ describe('Adapty - Web Paywall (Bridge Integration)', () => {
       expect(request.paywall).toBeDefined();
       expect(request.paywall?.paywall_id).toBe('paywall_test_placement');
       expect(url).toBe('https://example.adapty.io/web-paywall-url');
+    });
+  });
+
+  describe('openWebUrl', () => {
+    it('should send AdaptyUIOpenUrl.Request', async () => {
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+        adapty_ui_open_url: { success: true },
+      });
+
+      await adapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } });
+
+      await adapty.openWebUrl({ url: 'https://example.com/offer', openIn: 'browser_out_app' });
+
+      const request = extractNativeRequest<components['requests']['AdaptyUIOpenUrl.Request']>({
+        nativeModule: nativeMock,
+        callIndex: 1,
+      });
+
+      expect(request.method).toBe('adapty_ui_open_url');
+      expect(request.url).toBe('https://example.com/offer');
+      expect(request.open_in).toBe('browser_out_app');
+    });
+  });
+
+  describe('requestAppReview', () => {
+    it('should send AdaptyUIRequestAppReview.Request', async () => {
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+        adapty_ui_request_app_review: { success: true },
+      });
+
+      await adapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } });
+
+      await adapty.requestAppReview();
+
+      const request = extractNativeRequest<components['requests']['AdaptyUIRequestAppReview.Request']>({
+        nativeModule: nativeMock,
+        callIndex: 1,
+      });
+
+      expect(request.method).toBe('adapty_ui_request_app_review');
     });
   });
 });
