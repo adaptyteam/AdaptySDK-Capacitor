@@ -24,7 +24,7 @@
   },
   "private": true,
   "dependencies": {
-    "@adapty/capacitor": "link:../..",
+    "@adapty/capacitor": "4.0.0-beta.1",
     "@capacitor/android": "^8.0.0",
     "@capacitor/core": "^8.0.0",
     "@capacitor/ios": "^8.0.0",
