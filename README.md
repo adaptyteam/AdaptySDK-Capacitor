@@ -34,6 +34,7 @@ Adapty SDK is an open-source framework that makes implementing in-app subscripti
 - [Platform Support](#platform-support)
 - [Capacitor compatibility](#capacitor-compatibility)
 - [iOS dependency manager](#ios-dependency-manager)
+- [Kids Mode (iOS)](#kids-mode-ios)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [Like Adapty SDK?](#like-adapty-sdk)
@@ -120,6 +121,43 @@ Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms
 | 4.x and newer | Swift Package Manager (SPM) only |
 | 3.x | CocoaPods and Swift Package Manager (SPM) |
 
+
+## Kids Mode (iOS)
+
+If your app targets kids and must comply with COPPA / the App Store Kids Category,
+AdaptySDK-iOS ships a `KidsMode` Swift package trait that compiles out all
+IDFA / AdSupport / AppTrackingTransparency code. This plugin exposes it through its own
+`AdaptyCapacitorKidsMode` trait, toggled by the bundled `adapty-kids-mode` helper.
+Requires Xcode 26+ (already the floor for AdaptySDK-iOS 4.x).
+
+Enable it with a `postinstall` script in your app's `package.json`, then reinstall and
+re-sync:
+
+```json
+{
+  "scripts": {
+    "postinstall": "adapty-kids-mode"
+  }
+}
+```
+
+```bash
+yarn install
+npx cap sync ios
+```
+
+The helper patches `node_modules/@adapty/capacitor/Package.swift` to enable the trait
+by default for your app. Running it from `postinstall` re-applies the patch after every
+install. It is idempotent and **fails the install loudly** if the manifest cannot be
+patched — a silent fallback to a non-kids build is never acceptable for a compliance
+feature.
+
+> **Note:** after toggling Kids Mode, re-resolve packages and do a **clean build** (Product > Clean Build Folder, or `xcodebuild clean`) — an incremental build may keep the previous trait state.
+
+**Verify:** after `Adapty.activate`, the native iOS log reports `kids_mode_enabled: true`.
+
+**Disable:** remove the `postinstall` line and run `npx adapty-kids-mode disable`
+(or simply reinstall dependencies).
 
 ## Examples
 
