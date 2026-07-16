@@ -12,6 +12,8 @@ xcuserdata
 /Packages
 xcuserdata/
 DerivedData/
+.derivedData-kids-mode/
+.spm-kids-mode/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc

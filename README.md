@@ -125,8 +125,8 @@ Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms
 ## Kids Mode (iOS)
 
 If your app targets kids and must comply with COPPA / the App Store Kids Category,
-AdaptySDK-iOS ships a `KidsMode` Swift package trait that compiles out all
-IDFA / AdSupport / AppTrackingTransparency code. This plugin exposes it through its own
+AdaptySDK-iOS ships a `KidsMode` Swift package trait that compiles out the
+IDFA / AdSupport tracking code. This plugin exposes it through its own
 `AdaptyCapacitorKidsMode` trait, toggled by the bundled `adapty-kids-mode` helper.
 Requires Xcode 26+ (already the floor for AdaptySDK-iOS 4.x).
 
