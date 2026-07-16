@@ -6,13 +6,17 @@
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "unpkg": "dist/plugin.js",
+  "bin": {
+    "adapty-kids-mode": "scripts/kids-mode.cjs"
+  },
   "files": [
     "android/src/main/",
     "android/build.gradle",
     "dist/",
     "ios/Sources",
     "ios/Tests",
-    "Package.swift"
+    "Package.swift",
+    "scripts/kids-mode.cjs"
   ],
   "author": "Adapty team <support@adapty.io>",
   "license": "MIT",
