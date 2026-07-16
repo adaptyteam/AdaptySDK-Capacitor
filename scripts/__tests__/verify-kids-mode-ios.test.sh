@@ -11,7 +11,7 @@ check() { if [[ "$2" == "$3" ]]; then echo "ok   - $1"; else echo "NOT OK - $1 (
 echo "/System/Library/Frameworks/AdSupport.framework/AdSupport" | frameworks_present && r=0 || r=1
 check "frameworks_present detects AdSupport" 0 "$r"
 echo "/System/Library/Frameworks/AppTrackingTransparency.framework/AppTrackingTransparency" | frameworks_present && r=0 || r=1
-check "frameworks_present detects AppTrackingTransparency" 0 "$r"
+check "frameworks_present excludes AppTrackingTransparency (ATT disabled until SDK fix)" 1 "$r"
 echo "/usr/lib/libSystem.B.dylib" | frameworks_present && r=0 || r=1
 check "frameworks_present absent on clean output" 1 "$r"
 printf '%s\n' '_OBJC_CLASS_$_ASIdentifierManager' | symbols_present && r=0 || r=1
