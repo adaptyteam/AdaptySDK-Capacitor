@@ -71,6 +71,12 @@ JSON Schema defining all method signatures and data structures. Native arguments
 - `examples/adapty-devtools/` - Full devtools app (React + Capacitor) - has its own CLAUDE.md
 - `examples/basic-*-example/` - Minimal examples for React, Angular, Vue
 
+### Kids Mode (iOS) — `scripts/kids-mode.cjs`
+
+`scripts/kids-mode.cjs` is the `adapty-kids-mode` CLI, shipped in the npm package via `bin` + `files`. It toggles the `AdaptyCapacitorKidsMode` SPM trait in `Package.swift` (`enable` (default) / `disable`), which forwards to the native `KidsMode` trait of AdaptySDK-iOS — compiling out all IDFA / AdSupport / AppTrackingTransparency code for COPPA / App Store Kids Category builds. It edits the package's own `Package.swift` (in this repo: the root manifest; in a consumer app: `node_modules/@adapty/capacitor/Package.swift`), is idempotent, and fails loudly if the trait anchor is missing. Consumers wire it into their app's `postinstall`. Unit tests: `scripts/__tests__/kids-mode.test.js`. User-facing docs: README "Kids Mode (iOS)".
+
+**CI verification:** `scripts/verify-kids-mode-ios.sh <on|off|both>` builds `examples/adapty-devtools` with the trait toggled and inspects every Mach-O in `App.app` (`otool`/`nm`) to prove IDFA / AdSupport / AppTrackingTransparency are compiled out. The workflow `.github/workflows/kids-mode-ios.yml` runs it with `on`; run `both` locally for the positive + negative control.
+
 ## Development Rules
 
 ### Code Standards
