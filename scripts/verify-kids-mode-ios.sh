@@ -21,13 +21,9 @@ APP_PROJECT="$EXAMPLE_DIR/ios/App/App.xcodeproj"
 DERIVED_DATA="$REPO_ROOT/.derivedData-kids-mode"
 SPM_DIR="$REPO_ROOT/.spm-kids-mode"
 
-# Tokens that must vanish when Kids Mode is on.
-# ATT temporarily EXCLUDED — AdaptySDK-iOS 4.0.0 imports AppTrackingTransparency
-# unconditionally in AdaptyProfileParameters.Builder.swift (not gated by !KidsMode), so an
-# "ATT absent" assertion is unachievable until the SDK ships the fix. Re-enable then by
-# appending '|AppTrackingTransparency' / '|ATTrackingManager' to the two patterns below.
-FRAMEWORK_PATTERN='AdSupport'
-SYMBOL_PATTERN='ASIdentifierManager'
+# Tokens that must vanish when Kids Mode is on: IDFA/AdSupport and AppTrackingTransparency.
+FRAMEWORK_PATTERN='AdSupport|AppTrackingTransparency'
+SYMBOL_PATTERN='ASIdentifierManager|ATTrackingManager'
 # Positive sentinel — Adapty code MUST be visible, else the inspection is vacuous.
 SENTINEL_SYMBOL='AdaptyCapacitorPlugin'
 
