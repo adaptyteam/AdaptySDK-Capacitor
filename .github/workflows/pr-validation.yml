@@ -46,7 +46,7 @@ jobs:
       run: yarn install --frozen-lockfile --prefer-offline
 
   validate-pr:
-    runs-on: ubuntu-slim
+    runs-on: ${{ matrix.runner }}
     needs: setup
     strategy:
       fail-fast: true
@@ -54,8 +54,10 @@ jobs:
         include:
           - check-type: js-checks
             name: "JS Checks"
+            runner: ubuntu-slim
           - check-type: android
             name: "Android Build"
+            runner: ubuntu-24.04
     name: ${{ matrix.name }}
 
     steps:
@@ -138,16 +140,6 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '21'
-
-    - name: Setup Android SDK
-      if: matrix.check-type == 'android'
-      uses: android-actions/setup-android@v3
-
-    - name: Install Android SDK packages
-      if: matrix.check-type == 'android'
-      run: |
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
     - name: Cache Gradle dependencies
       if: matrix.check-type == 'android'
