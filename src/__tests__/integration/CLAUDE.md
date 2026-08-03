@@ -15,8 +15,8 @@ Uses `NativeModuleMock` spy to verify exact request format and response parsing.
 Tests SDK UI controller methods (FlowViewController, OnboardingViewController) for bridge communication:
 JS (camelCase) → encode → snake_case JSON → Capacitor bridge → decode → JS.
 Uses `NativeModuleMock` spy to verify exact request format and response parsing.
-**11 tests** across 2 test files:
-- flow-view-controller-methods (7 tests): createFlowView, present, dismiss, showDialog
+**13 tests** across 2 test files:
+- flow-view-controller-methods (9 tests): createFlowView, present, dismiss, showDialog
 - onboarding-view-controller-methods (4 tests): createOnboardingView, present, dismiss
 
 ## Shared Utilities (`shared/`)
@@ -78,7 +78,7 @@ JS API call (camelCase)
 
 ## Running Tests
 ```bash
-npx jest src/__tests__/integration/                   # All integration tests (84 tests)
+npx jest src/__tests__/integration/                   # All integration tests (86 tests)
 npx jest src/__tests__/integration/adapty-handler/    # Bridge protocol tests (73 tests)
 npx jest src/__tests__/integration/ui-builder/        # UI ViewController tests (11 tests)
 npx jest src/__tests__/integration/adapty-handler/activation.test.ts  # Just activation

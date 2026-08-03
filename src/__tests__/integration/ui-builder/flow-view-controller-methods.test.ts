@@ -8,6 +8,7 @@ import {
   ACTIVATE_RESPONSE_SUCCESS,
   GET_FLOW_RESPONSE,
   ADAPTY_UI_CREATE_FLOW_VIEW_RESPONSE,
+  ADAPTY_UI_CREATE_FLOW_VIEW_RESPONSE_WITH_LOCALE,
   ADAPTY_UI_PRESENT_FLOW_VIEW_RESPONSE,
   ADAPTY_UI_DISMISS_FLOW_VIEW_RESPONSE,
   ADAPTY_UI_SHOW_DIALOG_RESPONSE_PRIMARY,
@@ -74,6 +75,28 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
 
       // Verify response parsing
       expect((view as any).id).toBe('mock_flow_view_123');
+      expect(request.locale).toBeUndefined();
+      expect(view.locale).toBeUndefined();
+    });
+
+    it('should encode requested locale', async () => {
+      await createFlowView(flow, { locale: 'es' });
+
+      const request = extractNativeRequest<components['requests']['AdaptyUICreateFlowView.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.locale).toBe('es');
+    });
+
+    it('should expose the locale reported by the native view', async () => {
+      createNativeModuleMock({
+        adapty_ui_create_flow_view: ADAPTY_UI_CREATE_FLOW_VIEW_RESPONSE_WITH_LOCALE,
+      });
+
+      const view = await createFlowView(flow);
+
+      expect(view.locale).toBe('es');
     });
 
     it('should encode custom parameters', async () => {
