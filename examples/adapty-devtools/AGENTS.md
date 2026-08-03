@@ -82,18 +82,34 @@ This script (`../../scripts/credentials.mjs`):
 
 ### Key Patterns
 - Use `appendLog` instead of `console.log` for testing/debugging
+- Every interactive element, clickable element and state readout carries a stable `id` from
+  `src/elementIds.ts` — see [Element IDs](#element-ids) below before touching any UI
 - CSS Modules for component style isolation
 - Capacitor plugins for native features (clipboard, filesystem, share, toast)
 
-## Parent Plugin Rules (from .cursor/rules/)
+## Element IDs
 
-When working with the Adapty SDK integration:
-- Reference implementation is React Native SDK (do not modify it)
-- Copy reusable TypeScript to `src/shared/`
-- All native arguments in JSON format per `cross_platform.yaml`
-- Strict TypeScript (no `any`)
-- Methods return `Promise<T>`
-- Prefer extending existing methods with optional parameters over adding new methods
+Every button, input, select, textarea, clickable element and state readout carries a stable DOM
+`id`, so the app can be driven from outside its WebView by id rather than by hashed class names or
+copy-dependent labels.
+
+- **Full list:** `docs/element-ids.md` — generated, never hand-edited
+- **Source of truth:** `src/elementIds.ts`
+- **Validate:** `yarn check-ids` (CI runs it too); `yarn check-ids:write` regenerates the list
+
+### Naming
+
+`<area>-<name>-<kind>`, lowercase kebab-case, where `<kind>` is one of `btn`, `input`, `select`,
+`textarea`, `toggle` (clickable non-button), `value` (a state readout), `tab`, `item` (list row).
+
+Rows of a dynamic list carry the key as a segment: `flow-product-0-purchase-btn`,
+`logs-<log-id>-item`. The generated list shows these with a `{key}` placeholder.
+
+### Contract
+
+- External automation scripts hardcode these strings — **never rename or reuse an id**.
+- In JSX always `id={elementIds.<path>}`: no literals, no template literals, no destructuring.
+- One id, one element.
 
 ## Capacitor Configuration
 

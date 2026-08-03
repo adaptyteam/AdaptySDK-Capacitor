@@ -18,6 +18,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "tsc": "tsc --noEmit",
+    "check-ids": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check-element-ids.mjs --check",
+    "check-ids:write": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check-element-ids.mjs",
     "update-cap-config": "yarn cap copy && yarn cap sync",
     "update-native-modules": "xcodebuild -project ios/App/App.xcodeproj -resolvePackageDependencies && yarn run update-cap-config",
     "android": "yarn build && yarn cap run android",

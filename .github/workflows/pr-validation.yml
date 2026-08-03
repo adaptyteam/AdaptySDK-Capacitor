@@ -134,6 +134,12 @@ jobs:
         cd examples/adapty-devtools
         yarn tsc
 
+    - name: Run adapty-devtools element id check
+      if: matrix.check-type == 'js-checks'
+      run: |
+        cd examples/adapty-devtools
+        yarn check-ids
+
     - name: Setup Java
       if: matrix.check-type == 'android'
       uses: actions/setup-java@v4

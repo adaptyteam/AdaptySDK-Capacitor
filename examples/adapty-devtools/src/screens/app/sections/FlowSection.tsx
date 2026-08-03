@@ -1,6 +1,7 @@
 import React from 'react';
 import type { AdaptyFlow, AdaptyPaywallProduct, FlowViewController } from '@adapty/capacitor';
 import styles from '../App.module.css';
+import { elementIds } from '../../../elementIds';
 
 type Props = {
   isActivated: boolean;
@@ -77,6 +78,7 @@ export const FlowSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <input
+          id={elementIds.flow.placementInput}
           type="text"
           value={placementId}
           onChange={(e) => setPlacementId(e.target.value)}
@@ -88,6 +90,7 @@ export const FlowSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <input
+          id={elementIds.flow.timeoutInput}
           type="text"
           value={timeout}
           onChange={(e) => setLoadTimeout(e.target.value)}
@@ -96,6 +99,7 @@ export const FlowSection: React.FC<Props> = ({
           disabled={!isActivated}
         />
         <input
+          id={elementIds.flow.maxAgeInput}
           type="text"
           value={maxAge}
           onChange={(e) => setMaxAge(e.target.value)}
@@ -107,6 +111,7 @@ export const FlowSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <select
+          id={elementIds.flow.fetchPolicySelect}
           value={fetchPolicyIndex}
           onChange={(e) => setFetchPolicyIndex(parseInt(e.target.value))}
           className={styles.Input}
@@ -122,6 +127,7 @@ export const FlowSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <select
+          id={elementIds.flow.webPaywallOpenInSelect}
           value={webPaywallOpenInIdx}
           onChange={(e) => setWebPaywallOpenInIdx(parseInt(e.target.value))}
           className={styles.Input}
@@ -137,6 +143,7 @@ export const FlowSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <input
+          id={elementIds.flow.viewLocaleInput}
           type="text"
           value={flowViewLocale}
           onChange={(e) => setFlowViewLocale(e.target.value.toLowerCase())}
@@ -148,6 +155,7 @@ export const FlowSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <textarea
+          id={elementIds.flow.customTagsTextarea}
           value={customTagsJson}
           onChange={(e) => setCustomTagsJson(e.target.value)}
           placeholder="Custom tags (JSON)"
@@ -159,6 +167,7 @@ export const FlowSection: React.FC<Props> = ({
 
       <div className={styles.ButtonGroup}>
         <button
+          id={elementIds.flow.loadBtn}
           onClick={() => fetchFlow(false)}
           disabled={isLoadingFlow || !isActivated}
           className={`${styles.Button} ${styles.ButtonPrimary} ${isLoadingFlow || !isActivated ? styles.Loading : ''}`}
@@ -166,6 +175,7 @@ export const FlowSection: React.FC<Props> = ({
           {isLoadingFlow ? 'Loading...' : 'Load Flow'}
         </button>
         <button
+          id={elementIds.flow.loadDefaultAudienceBtn}
           onClick={() => fetchFlow(true)}
           disabled={isLoadingFlow || !isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingFlow || !isActivated ? styles.Loading : ''}`}
@@ -177,30 +187,30 @@ export const FlowSection: React.FC<Props> = ({
       <div className={styles.InfoBox}>
         {flow ? (
           <div>
-            <div>
+            <div id={elementIds.flow.nameValue}>
               <strong>Flow name:</strong> {flow.name}
             </div>
-            <div>
+            <div id={elementIds.flow.variationIdValue}>
               <strong>Variation ID:</strong> {flow.variationId}
             </div>
-            <div>
+            <div id={elementIds.flow.revisionValue}>
               <strong>Revision:</strong> {flow.placement.revision}
             </div>
-            <div>
+            <div id={elementIds.flow.paywallsCountValue}>
               <strong>Paywalls in flow:</strong> {flow.paywalls.length}
             </div>
-            <div>
+            <div id={elementIds.flow.hasRemoteConfigValue}>
               <strong>Has Remote Config:</strong> {remoteConfig ? '✅ Yes' : '❌ No'}
             </div>
-            <div>
+            <div id={elementIds.flow.productsCountValue}>
               <strong>Products Count:</strong> {products.length}
             </div>
             {remoteConfig && (
               <div>
-                <div>
+                <div id={elementIds.flow.configLocaleValue}>
                   <strong>Config Locale:</strong> {remoteConfig.lang}
                 </div>
-                <div>
+                <div id={elementIds.flow.configDataValue}>
                   <strong>Config Data:</strong> {remoteConfig.dataString}
                 </div>
               </div>
@@ -209,10 +219,19 @@ export const FlowSection: React.FC<Props> = ({
             {products.length > 0 && (
               <div className={styles.ProductsList}>
                 <strong>Products:</strong>
-                {products.map((product) => (
-                  <div key={product.vendorProductId} className={styles.ProductItem}>
-                    <div className={styles.ProductTitle}>{product.localizedTitle}</div>
-                    <div className={styles.ProductPrice}>Price: {product.price?.localizedString || 'N/A'}</div>
+                {products.map((product, index) => (
+                  <div
+                    key={product.vendorProductId}
+                    id={elementIds.flow.productItem(index)}
+                    data-vendor-product-id={product.vendorProductId}
+                    className={styles.ProductItem}
+                  >
+                    <div id={elementIds.flow.productTitleValue(index)} className={styles.ProductTitle}>
+                      {product.localizedTitle}
+                    </div>
+                    <div id={elementIds.flow.productPriceValue(index)} className={styles.ProductPrice}>
+                      Price: {product.price?.localizedString || 'N/A'}
+                    </div>
                     <div className={styles.ProductId}>ID: {product.vendorProductId}</div>
                     <div className={styles.ProductId}>Access Level: {product.accessLevelId || 'N/A'}</div>
                     <div className={styles.ProductId}>Product Type: {product.productType || 'N/A'}</div>
@@ -220,18 +239,21 @@ export const FlowSection: React.FC<Props> = ({
 
                     <div className={styles.ProductButtons}>
                       <button
+                        id={elementIds.flow.productPurchaseBtn(index)}
                         onClick={() => makePurchase(product)}
                         className={`${styles.Button} ${styles.ButtonPrimary} ${styles.ButtonSmall}`}
                       >
                         Purchase
                       </button>
                       <button
+                        id={elementIds.flow.productOpenWebPaywallBtn(index)}
                         onClick={() => openWebPaywallForProduct(product)}
                         className={`${styles.Button} ${styles.ButtonSecondary} ${styles.ButtonSmall}`}
                       >
                         Open Web Paywall for product (iOS)
                       </button>
                       <button
+                        id={elementIds.flow.productCreateWebUrlBtn(index)}
                         onClick={() => createWebPaywallUrlForProduct(product)}
                         className={`${styles.Button} ${styles.ButtonSecondary} ${styles.ButtonSmall}`}
                       >
@@ -244,16 +266,22 @@ export const FlowSection: React.FC<Props> = ({
             )}
           </div>
         ) : (
-          <div>No flow loaded</div>
+          <div id={elementIds.flow.emptyValue}>No flow loaded</div>
         )}
       </div>
 
       <div className={styles.ButtonGroup}>
-        <button onClick={presentFlow} disabled={!flow} className={`${styles.Button} ${styles.ButtonPrimary}`}>
+        <button
+          id={elementIds.flow.presentBtn}
+          onClick={presentFlow}
+          disabled={!flow}
+          className={`${styles.Button} ${styles.ButtonPrimary}`}
+        >
           Present Flow
         </button>
 
         <button
+          id={elementIds.flow.presentExistingBtn}
           onClick={presentExistingFlow}
           disabled={!flowView}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -261,28 +289,44 @@ export const FlowSection: React.FC<Props> = ({
           Present Existing (not supported)
         </button>
 
-        <button onClick={logFlowShown} disabled={!flow} className={`${styles.Button} ${styles.ButtonPrimary}`}>
+        <button
+          id={elementIds.flow.logShownBtn}
+          onClick={logFlowShown}
+          disabled={!flow}
+          className={`${styles.Button} ${styles.ButtonPrimary}`}
+        >
           Log Custom Flow Shown
         </button>
 
-        <button onClick={openWebPaywall} disabled={!flow} className={`${styles.Button} ${styles.ButtonPrimary}`}>
+        <button
+          id={elementIds.flow.openWebPaywallBtn}
+          onClick={openWebPaywall}
+          disabled={!flow}
+          className={`${styles.Button} ${styles.ButtonPrimary}`}
+        >
           Open Web Paywall
         </button>
       </div>
 
       {flowView && (
         <div className={styles.InfoBox}>
-          <div>
+          <div id={elementIds.flow.viewLocaleValue}>
             <strong>View Locale:</strong> {flowView.locale ?? 'not reported by native'}
           </div>
         </div>
       )}
 
       <div className={styles.WebUrlContainer}>
-        <button onClick={createWebPaywallUrl} disabled={!flow} className={styles.WebUrlButton}>
+        <button
+          id={elementIds.flow.createWebUrlBtn}
+          onClick={createWebPaywallUrl}
+          disabled={!flow}
+          className={styles.WebUrlButton}
+        >
           Create Web URL
         </button>
         <input
+          id={elementIds.flow.webUrlInput}
           type="text"
           value={webPaywallUrl}
           placeholder="Generated URL will appear here..."

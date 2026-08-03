@@ -20,6 +20,7 @@ import { FlowController, FlowControllerRef } from './native-presentation-control
 import { FlowSection } from './sections/FlowSection';
 import { OnboardingSection } from './sections/OnboardingSection';
 import { ResultBanner } from './components/ResultBanner';
+import { elementIds } from '../../elementIds';
 import { CredentialsInfoSection } from './sections/CredentialsInfoSection';
 import { ProfileSection } from './sections/ProfileSection';
 import { SdkStatusSection } from './sections/SdkStatusSection';
@@ -546,6 +547,7 @@ const App: React.FC = () => {
         <h3 className={styles.SectionTitle}>Identify User</h3>
         <div className={styles.InputGroup}>
           <input
+            id={elementIds.identify.customerUserIdInput}
             type="text"
             value={customerUserId}
             onChange={(e) => setCustomerUserId(e.target.value)}
@@ -553,6 +555,7 @@ const App: React.FC = () => {
             className={styles.Input}
           />
           <button
+            id={elementIds.identify.submitBtn}
             onClick={identify}
             disabled={!customerUserId.trim()}
             className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -982,24 +985,30 @@ const App: React.FC = () => {
           <h3 className={styles.SectionTitle}>SDK Activation</h3>
           <div className={styles.ButtonGroup}>
             <button
+              id={elementIds.sdk.activateBtn}
               onClick={() => testActivate(false)}
               className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
             >
               {isActivated ? 'Activated' : 'Activate Adapty'}
             </button>
             <button
+              id={elementIds.sdk.activateObserverBtn}
               onClick={() => testActivate(true)}
               className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
             >
               {isActivated ? 'Activated' : 'Activate (Observer Mode)'}
             </button>
-            <button onClick={testIsActivated} className={`${styles.Button} ${styles.ButtonSecondary}`}>
+            <button
+              id={elementIds.sdk.checkStatusBtn}
+              onClick={testIsActivated}
+              className={`${styles.Button} ${styles.ButtonSecondary}`}
+            >
               Check Status
             </button>
           </div>
         </div>
 
-        <ResultBanner result={result} />
+        <ResultBanner id={elementIds.app.resultValue} result={result} />
 
         {/* Events Section */}
         {isActivated && (
