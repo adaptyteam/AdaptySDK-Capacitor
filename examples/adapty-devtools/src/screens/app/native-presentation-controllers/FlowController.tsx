@@ -19,6 +19,7 @@ export type FlowControllerRef = {
 type Props = {
   flow: AdaptyFlow | null;
   customTagsJson: string;
+  locale: string;
   setFlowView: (view: FlowViewController | null) => void;
   setResult: (value: string) => void;
   log: (
@@ -31,7 +32,7 @@ type Props = {
 };
 
 export const FlowController = forwardRef<FlowControllerRef, Props>(function FlowController(
-  { flow, customTagsJson, setFlowView, setResult, log }: Props,
+  { flow, customTagsJson, locale, setFlowView, setResult, log }: Props,
   ref,
 ) {
   const presentFlow = async () => {
@@ -63,8 +64,12 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         apple_icon_image: { type: 'image' as const, base64: APPLE_ICON_IMAGE_BASE64 },
       } satisfies Record<string, AdaptyCustomAsset>;
 
-      const view = await createFlowView(flow, { customTags, customAssets });
+      const view = await createFlowView(flow, { customTags, customAssets, ...(locale ? { locale } : {}) });
       setFlowView(view);
+
+      // `view.locale` is the localization the flow was actually built with:
+      // the requested one when it exists, the flow default otherwise.
+      log('info', 'Flow view created', 'presentFlow', false, { requestedLocale: locale || null, locale: view.locale });
 
       const eventHandlers: Partial<FlowEventHandlers> = {
         onCloseButtonPress: () => {
@@ -205,7 +210,7 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
 
       await view.setEventHandlers(eventHandlers);
 
-      setResult('✅ Flow view created. Presenting...');
+      setResult(`✅ Flow view created (locale: ${view.locale ?? 'not reported'}). Presenting...`);
       await view.present();
       setResult('✅ Flow presented successfully!');
     } catch (error) {
@@ -219,7 +224,7 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
     }
   };
 
-  useImperativeHandle(ref, () => ({ presentFlow }), [flow, customTagsJson]);
+  useImperativeHandle(ref, () => ({ presentFlow }), [flow, customTagsJson, locale]);
 
   return null;
 });

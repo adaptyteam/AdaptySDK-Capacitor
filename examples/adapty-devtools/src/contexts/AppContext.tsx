@@ -38,6 +38,7 @@ interface AppState {
   placementId: string;
   onboardingPlacementId: string;
   locale: string;
+  flowViewLocale: string;
   timeout: string;
   maxAge: string;
   customTagsJson: string;
@@ -74,6 +75,7 @@ interface AppActions {
   setPlacementId: (value: string) => void;
   setOnboardingPlacementId: (value: string) => void;
   setLocale: (value: string) => void;
+  setFlowViewLocale: (value: string) => void;
   setLoadTimeout: (value: string) => void;
   setMaxAge: (value: string) => void;
   setCustomTagsJson: (value: string) => void;
@@ -116,6 +118,7 @@ const defaultState: AppState = {
   placementId: getPlacementId(),
   onboardingPlacementId: getOnboardingPlacementId(),
   locale: '',
+  flowViewLocale: '',
   timeout: '6000',
   maxAge: '120',
   customTagsJson: '{"USER":"Bruce","CITY":"Philadelphia"}',
@@ -162,6 +165,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [placementId, setPlacementId] = useState<string>(defaultState.placementId);
   const [onboardingPlacementId, setOnboardingPlacementId] = useState<string>(defaultState.onboardingPlacementId);
   const [locale, setLocale] = useState<string>(defaultState.locale);
+  const [flowViewLocale, setFlowViewLocale] = useState<string>(defaultState.flowViewLocale);
   const [timeout, setLoadTimeout] = useState<string>(defaultState.timeout);
   const [maxAge, setMaxAge] = useState<string>(defaultState.maxAge);
   const [customTagsJson, setCustomTagsJson] = useState<string>(defaultState.customTagsJson);
@@ -186,6 +190,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setPlacementId(getPlacementId());
     setOnboardingPlacementId(getOnboardingPlacementId());
     setLocale(defaultState.locale);
+    setFlowViewLocale(defaultState.flowViewLocale);
     setLoadTimeout(defaultState.timeout);
     setMaxAge(defaultState.maxAge);
     setCustomTagsJson(defaultState.customTagsJson);
@@ -211,6 +216,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     placementId,
     onboardingPlacementId,
     locale,
+    flowViewLocale,
     timeout,
     maxAge,
     customTagsJson,
@@ -234,6 +240,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setPlacementId,
     setOnboardingPlacementId,
     setLocale,
+    setFlowViewLocale,
     setLoadTimeout,
     setMaxAge,
     setCustomTagsJson,
