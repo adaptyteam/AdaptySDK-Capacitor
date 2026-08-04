@@ -40,6 +40,14 @@ yarn update-native-modules  # Resolve iOS SPM packages and sync
 # Credentials and assets
 yarn credentials            # Interactive setup for Adapty credentials (see below)
 yarn link-assets            # Copy Adapty assets to native projects
+
+# Driving the app in the iOS Simulator (see the drive-devtools-webview skill)
+yarn wvd snap                # text snapshot of every element with an id — use instead of a screenshot
+yarn wvd logs 20             # structured JS log tail without navigating to /logs
+yarn wvd native --seconds=30 # native iOS SDK log (os_log) — what the Xcode console shows
+yarn wvd do click:flow-load-btn wait:flow-present-btn:enabled read:flow-name-value
+yarn wvd scenario flow       # relaunch -> activate -> load -> present -> dismiss
+yarn test-wvd                # unit tests for the wvd CLI
 ```
 
 ## Credentials Setup
@@ -54,8 +62,12 @@ This script (`../../scripts/credentials.mjs`):
 1. Creates/updates `.adapty-credentials.json` with Adapty token and placement IDs
 2. Patches iOS `project.pbxproj` with the correct bundle identifier
 3. Patches Android `build.gradle` with the correct application ID
+4. Patches `capacitor.config.json`'s `appId` with the iOS bundle identifier — `yarn wvd` passes it to
+   `simctl terminate` / `simctl launch`, so a stale value breaks `wvd relaunch`. Reconciled against
+   the file on every run, not only when the bundle ID changes
 
 **Note**: `.adapty-credentials.json` is gitignored. Each developer runs this once with their own test credentials.
+Steps 2–4 leave tracked files modified in the working tree — that is expected, don't commit them.
 
 ## Architecture
 
@@ -110,6 +122,10 @@ Rows of a dynamic list carry the key as a segment: `flow-product-0-purchase-btn`
 - External automation scripts hardcode these strings — **never rename or reuse an id**.
 - In JSX always `id={elementIds.<path>}`: no literals, no template literals, no destructuring.
 - One id, one element.
+- To drive the app from outside, prefer `yarn wvd` over screenshots and taps: one call carries a
+  whole chain of steps, and `yarn wvd logs` reads the log without navigating. `yarn wvd snap` reports
+  ids, form values and disabled state; long `textContent` is clipped with a trailing `…`, so read
+  those with `read:<id>`. Only a presented native view needs `yarn wvd shot`.
 
 ## Capacitor Configuration
 

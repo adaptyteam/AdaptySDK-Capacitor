@@ -8,7 +8,7 @@ export default {
       preferBuiltins: false,
       // Support for resolving from node_modules if needed
       exportConditions: ['node', 'default', 'module', 'import'],
-    })
+    }),
   ],
   output: [
     {

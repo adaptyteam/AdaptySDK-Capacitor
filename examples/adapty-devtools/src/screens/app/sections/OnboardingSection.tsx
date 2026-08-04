@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AdaptyOnboarding } from '@adapty/capacitor';
+import type { AdaptyOnboarding, OnboardingViewController } from '@adapty/capacitor';
 import styles from '../App.module.css';
 import { elementIds } from '../../../elementIds';
 
@@ -23,6 +23,8 @@ type Props = {
   setOnboardingExternalUrlsPresentationIdx: (v: number) => void;
   fetchOnboarding: (forDefaultAudience?: boolean) => Promise<void>;
   presentOnboarding: () => Promise<void>;
+  onboardingView: OnboardingViewController | null;
+  dismissOnboarding: () => Promise<void>;
 };
 
 export const OnboardingSection: React.FC<Props> = ({
@@ -45,6 +47,8 @@ export const OnboardingSection: React.FC<Props> = ({
   setOnboardingExternalUrlsPresentationIdx,
   fetchOnboarding,
   presentOnboarding,
+  onboardingView,
+  dismissOnboarding,
 }) => {
   return (
     <div className={styles.Section}>
@@ -192,6 +196,14 @@ export const OnboardingSection: React.FC<Props> = ({
           className={`${styles.Button} ${styles.ButtonPrimary}`}
         >
           Present Onboarding
+        </button>
+        <button
+          id={elementIds.onboarding.dismissBtn}
+          onClick={dismissOnboarding}
+          disabled={!onboardingView}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Dismiss Onboarding
         </button>
       </div>
     </div>

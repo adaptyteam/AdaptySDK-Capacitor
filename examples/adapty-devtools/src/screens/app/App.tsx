@@ -39,6 +39,7 @@ const App: React.FC = () => {
     products,
     onboarding,
     flowView,
+    onboardingView,
     customerUserId,
     transactionId,
     variationId,
@@ -63,6 +64,7 @@ const App: React.FC = () => {
     setProducts,
     setOnboarding,
     setFlowView,
+    setOnboardingView,
     setCustomerUserId,
     setTransactionId,
     setVariationId,
@@ -537,8 +539,40 @@ const App: React.FC = () => {
     }
   };
 
+  const dismissFlow = async () => {
+    if (!flowView) {
+      setResult('❌ No flow view to dismiss.');
+      return;
+    }
+
+    try {
+      await flowView.dismiss();
+      setFlowView(null);
+      setResult('✅ Flow dismissed');
+    } catch (error) {
+      setResult(`❌ Failed to dismiss flow: ${String(error)}`);
+      log('error', 'Failed to dismiss flow', 'dismissFlow', false, { error: String(error) });
+    }
+  };
+
   const presentOnboarding = async () => {
     await onboardingRef.current?.presentOnboarding();
+  };
+
+  const dismissOnboarding = async () => {
+    if (!onboardingView) {
+      setResult('❌ No onboarding view to dismiss.');
+      return;
+    }
+
+    try {
+      await onboardingView.dismiss();
+      setOnboardingView(null);
+      setResult('✅ Onboarding dismissed');
+    } catch (error) {
+      setResult(`❌ Failed to dismiss onboarding: ${String(error)}`);
+      log('error', 'Failed to dismiss onboarding', 'dismissOnboarding', false, { error: String(error) });
+    }
   };
 
   const renderIdentifySection = () => {
@@ -608,6 +642,7 @@ const App: React.FC = () => {
       fetchFlow={fetchFlow}
       presentFlow={presentFlow}
       presentExistingFlow={presentExistingFlow}
+      dismissFlow={dismissFlow}
       logFlowShown={logFlowShown}
       openWebPaywall={openWebPaywall}
       createWebPaywallUrl={createWebPaywallUrl}
@@ -638,6 +673,8 @@ const App: React.FC = () => {
       setOnboardingExternalUrlsPresentationIdx={setOnboardingExternalUrlsPresentationIdx}
       fetchOnboarding={fetchOnboarding}
       presentOnboarding={presentOnboarding}
+      onboardingView={onboardingView}
+      dismissOnboarding={dismissOnboarding}
     />
   );
 
@@ -965,6 +1002,7 @@ const App: React.FC = () => {
         externalUrlsPresentation={webPresentations[onboardingExternalUrlsPresentationIdx]}
         canShowFlow={() => Boolean(flow)}
         showFlow={presentFlow}
+        setOnboardingView={setOnboardingView}
         setResult={setResult}
         log={log}
       />

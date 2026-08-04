@@ -106,4 +106,9 @@ yarn test                     # Unit tests (Jest)
 yarn dev-example              # Integration testing via devtools app
 ```
 
+To drive the devtools app in the iOS Simulator from the shell — click by DOM id, read state,
+tail the JS and native SDK logs, no screenshots or taps — use `yarn wvd` from
+`examples/adapty-devtools`. Invoke the `drive-devtools-webview` skill, or read
+[.claude/skills/drive-devtools-webview/SKILL.md](.claude/skills/drive-devtools-webview/SKILL.md).
+
 Test all platforms: Web (mock), iOS, Android. Verify method signatures match across implementations.

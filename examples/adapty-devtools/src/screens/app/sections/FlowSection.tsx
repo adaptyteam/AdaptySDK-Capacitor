@@ -29,6 +29,7 @@ type Props = {
   fetchFlow: (forDefaultAudience?: boolean) => Promise<void>;
   presentFlow: () => Promise<void>;
   presentExistingFlow: () => Promise<void>;
+  dismissFlow: () => Promise<void>;
   logFlowShown: () => Promise<void>;
   openWebPaywall: () => Promise<void>;
   createWebPaywallUrl: () => Promise<void>;
@@ -63,6 +64,7 @@ export const FlowSection: React.FC<Props> = ({
   fetchFlow,
   presentFlow,
   presentExistingFlow,
+  dismissFlow,
   logFlowShown,
   openWebPaywall,
   createWebPaywallUrl,
@@ -287,6 +289,15 @@ export const FlowSection: React.FC<Props> = ({
           className={`${styles.Button} ${styles.ButtonSecondary}`}
         >
           Present Existing (not supported)
+        </button>
+
+        <button
+          id={elementIds.flow.dismissBtn}
+          onClick={dismissFlow}
+          disabled={!flowView}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Dismiss Flow
         </button>
 
         <button

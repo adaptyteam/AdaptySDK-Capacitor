@@ -140,6 +140,14 @@ jobs:
         cd examples/adapty-devtools
         yarn check-ids
 
+    - name: Run adapty-devtools wvd CLI tests
+      if: matrix.check-type == 'js-checks'
+      # `yarn test-wvd` fails on its own when it finds no test file, so this step cannot go
+      # green having run nothing — see examples/adapty-devtools/scripts/webview-driver/run-tests.mjs
+      run: |
+        cd examples/adapty-devtools
+        yarn test-wvd
+
     - name: Setup Java
       if: matrix.check-type == 'android'
       uses: actions/setup-java@v4
