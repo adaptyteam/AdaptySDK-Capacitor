@@ -44,6 +44,14 @@ export class FlowViewController {
   private viewEmitter: FlowViewEmitter | null = null;
 
   /**
+   * The localization the view was actually built with.
+   *
+   * @remarks
+   * May differ from the requested localization if it is not available in the flow.
+   */
+  public locale?: string;
+
+  /**
    * Intended way to create a ViewController instance.
    * It prepares a native controller to be presented
    * and creates reference between native controller and JS instance
@@ -81,6 +89,7 @@ export class FlowViewController {
       log,
     )) as AdaptyUiView;
     controller.id = result.id;
+    controller.locale = result.locale;
     controller.viewEmitter = new FlowViewEmitter(controller.id, controller.adaptyPlugin);
 
     await controller.setEventHandlers(DEFAULT_FLOW_EVENT_HANDLERS);

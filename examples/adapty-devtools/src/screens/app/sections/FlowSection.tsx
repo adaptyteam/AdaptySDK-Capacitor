@@ -8,6 +8,7 @@ type Props = {
   flow: AdaptyFlow | null;
   products: AdaptyPaywallProduct[];
   placementId: string;
+  flowViewLocale: string;
   timeout: string;
   maxAge: string;
   customTagsJson: string;
@@ -18,6 +19,7 @@ type Props = {
   flowView: FlowViewController | null;
   webPaywallUrl: string;
   setPlacementId: (v: string) => void;
+  setFlowViewLocale: (v: string) => void;
   setLoadTimeout: (v: string) => void;
   setMaxAge: (v: string) => void;
   setCustomTagsJson: (v: string) => void;
@@ -40,6 +42,7 @@ export const FlowSection: React.FC<Props> = ({
   flow,
   products,
   placementId,
+  flowViewLocale,
   timeout,
   maxAge,
   customTagsJson,
@@ -50,6 +53,7 @@ export const FlowSection: React.FC<Props> = ({
   flowView,
   webPaywallUrl,
   setPlacementId,
+  setFlowViewLocale,
   setLoadTimeout,
   setMaxAge,
   setCustomTagsJson,
@@ -129,6 +133,17 @@ export const FlowSection: React.FC<Props> = ({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className={styles.InputGroup}>
+        <input
+          type="text"
+          value={flowViewLocale}
+          onChange={(e) => setFlowViewLocale(e.target.value.toLowerCase())}
+          placeholder="View Locale (optional, e.g. es)"
+          className={styles.Input}
+          disabled={!isActivated}
+        />
       </div>
 
       <div className={styles.InputGroup}>
@@ -254,6 +269,14 @@ export const FlowSection: React.FC<Props> = ({
           Open Web Paywall
         </button>
       </div>
+
+      {flowView && (
+        <div className={styles.InfoBox}>
+          <div>
+            <strong>View Locale:</strong> {flowView.locale ?? 'not reported by native'}
+          </div>
+        </div>
+      )}
 
       <div className={styles.WebUrlContainer}>
         <button onClick={createWebPaywallUrl} disabled={!flow} className={styles.WebUrlButton}>

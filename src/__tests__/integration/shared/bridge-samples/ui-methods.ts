@@ -59,6 +59,19 @@ export const ADAPTY_UI_CREATE_FLOW_VIEW_RESPONSE: components['requests']['Adapty
 };
 
 /**
+ * AdaptyUICreateFlowView.Response reporting the localization the view was built with
+ */
+export const ADAPTY_UI_CREATE_FLOW_VIEW_RESPONSE_WITH_LOCALE: components['requests']['AdaptyUICreateFlowView.Response'] =
+  {
+    success: {
+      id: 'mock_flow_view_123',
+      placement_id: 'test_placement',
+      variation_id: 'variation_123',
+      locale: 'es',
+    },
+  };
+
+/**
  * AdaptyUIPresentFlowView.Request with full_screen style
  */
 export const ADAPTY_UI_PRESENT_FLOW_VIEW_REQUEST_FULL_SCREEN: components['requests']['AdaptyUIPresentFlowView.Request'] =
