@@ -54,6 +54,19 @@ export const HELPERS_SOURCE = `(() => {
   return 'ok';
 })()`;
 
+/**
+ * True once the app is actually drivable after a relaunch.
+ *
+ * The WebView becomes inspectable well before React has routed: a snapshot taken in that
+ * window reports route `#/` with 3 elements, which reads as "the app has almost nothing in
+ * it" rather than "ask again in a moment". Both platforms used to paper over this with a
+ * fixed sleep; this is the condition that sleep was approximating.
+ */
+export const APP_READY = `(() => {
+  const root = document.getElementById('root');
+  return !!root && root.children.length > 0 && /^#\\/[a-z]/.test(location.hash || '');
+})()`;
+
 /** Collects every element carrying an id. Returns a JSON string; Node formats it. */
 export const COLLECT_SNAPSHOT = `(() => {
   const rows = [];

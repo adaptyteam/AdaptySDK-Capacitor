@@ -40,6 +40,35 @@ Every output below is a real capture, with the Yarn banner lines stripped. What 
 depends on the app's current state and, for `wvd native`, on which records fall inside the window —
 so expect the same *shape*, not the same rows.
 
+### Choosing the platform
+
+`wvd` drives the iOS Simulator and Android (emulator or attached device) through one command set. The
+backend is autodetected from what is running; pass `--ios` / `--android` (or set `WVD_PLATFORM`) when
+both are up:
+
+```bash
+$ yarn wvd snap
+wvd: both a booted iOS simulator and an attached Android device are present — pass --ios or --android (or set WVD_PLATFORM)
+$ yarn wvd --android snap
+#/app | 93 els
+```
+
+Autodetection deliberately errors instead of picking one. Driving the wrong platform is the only
+failure here with no symptom: every command succeeds, the ids are the same, and the output looks
+entirely normal — you just measured the other SDK.
+
+What differs between the backends is only the transport and the device tooling; `page-script.mjs`,
+`steps.mjs` and `runner.mjs` are shared verbatim, which is what makes an iOS-vs-Android comparison a
+comparison of the SDKs rather than of two harnesses.
+
+| | iOS | Android |
+| --- | --- | --- |
+| Transport | WebKit inspector via `ios_webkit_debug_proxy` (`inspector.mjs`) | CDP via `adb forward` (`cdp.mjs`) |
+| Device | `xcrun simctl` (`simulator.mjs`) | `adb` (`android-device.mjs`) |
+| Native log | `os_log`, `subsystem == "io.adapty"` | `logcat`, tags matching `Adapty*` |
+| Clean state | uninstall + install, ~1 min | `wvd clear` (`pm clear`), ~1 s |
+| Native-view taps | derive coordinates from `wvd shot` | `wvd bounds <text>`, measured |
+
 ### `yarn wvd snap` — what state is the app in
 
 One line per element carrying an `id`, with its value or its trimmed text, plus `DISABLED` and
@@ -417,6 +446,31 @@ relaunch, rather than guessing whether the SDK is already active.
 - **Node 22+**, which the app already requires: `wvd` uses the global `WebSocket` and has no
   dependencies of its own.
 
+### Android
+
+- **`adb` on `PATH`** (`~/Library/Android/sdk/platform-tools`) and **exactly one attached device** —
+  same refusal-to-guess as the simulator: `several attached devices (…) — leave one`.
+- **A debug build.** Capacitor calls `setWebContentsDebuggingEnabled(true)` only for a debuggable
+  app; a release build exposes no `webview_devtools_remote_*` socket and nothing here works.
+- **The app running**, since the devtools socket name carries its pid — so it is re-resolved on every
+  command, never cached:
+
+  ```bash
+  yarn build && npx cap run android --target emulator-5554
+  ```
+
+- **A Google Play system image** if purchases matter: the image name shows it
+  (`sdk_gphone64_arm64`), and `adb shell pm list packages | grep com.android.vending` confirms Play
+  is present. A plain "Google APIs" image has no Play Store, so Play Billing cannot run at all.
+- **The Android package is not `capacitor.config.json`'s `appId`.** It comes from
+  `android/app/build.gradle`'s `applicationId`, and the two genuinely differ in this repo
+  (`com.adaptytest` vs `com.adapty.adaptydemoapp`) because `yarn credentials` patches them
+  independently. `android-device.mjs` reads the gradle file for that reason; taking `appId` there
+  would target a package that does not exist and every adb call would quietly no-op.
+- **Port 9333, not 9222.** `ios_webkit_debug_proxy` owns 9222, so the `adb forward` uses 9333. They
+  used to share it, and `adb` binding `127.0.0.1:9222` first shadowed the iOS proxy: every iOS
+  command failed with `lists no inspectable page` while Android looked perfectly healthy.
+
 ## 3. What each tool can and cannot see
 
 Getting this wrong is what costs round-trips.
@@ -469,6 +523,34 @@ wait:flow-view-locale-value:absent -> absent
 `#onboarding-dismiss-btn` is the equivalent. `wvd snap` and `wvd do` keep working normally while a
 native view is up: they see the DOM underneath it, which is what makes both the dismiss click and
 the `absent` assertion possible.
+
+### Tapping inside a native view
+
+Controls *inside* a presented paywall, onboarding or system sheet are not in the DOM.
+
+On **Android**, do not compute coordinates — `uiautomator` exposes a real hierarchy with measured
+bounds, and `wvd bounds` returns the centre of the first node whose text or content-desc matches:
+
+```bash
+$ yarn wvd bounds "1-tap buy"
+672 2824   (bounds 72,2770,1272,2878)
+$ yarn wvd tap 672 2824
+tapped 672 2824
+```
+
+It prints the centre only, on purpose: the full dump is ~40 KB of XML on one line, and pasting that
+into a conversation is what the command exists to avoid. `bounds` matches `text=` and
+`content-desc=` attributes only — matching the whole node would let the needle hit an attribute name
+or a resource id and return the rectangle of the entire screen.
+
+This works on system UI as well as the app's own, which is what makes the Google Play purchase sheet
+drivable. Note it is not blocked by `FLAG_SECURE` here: both `screencap` and the dump return the
+Play sheet's contents.
+
+On **iOS** there is no equivalent — derive coordinates from `wvd shot`, which is a uniform 0.46 scale
+of the point space (230×500 for a 402×874 device: `x_pt = x_img / 230 * 402`). Do not derive them
+from another screenshot tool: the simulator MCP's own capture is not uniformly scaled and put a tap
+~80 pt off target.
 
 **Present twice without dismissing in between and Dismiss goes stale — while still reporting
 success.** Each `click:flow-present-btn` creates a *new* view controller and overwrites the stored
@@ -577,6 +659,8 @@ Two gotchas when reading them back:
 
 ## 7. Protocol notes
 
+### iOS — WebKit inspector
+
 All verified against iOS 26.5 in the simulator; each one has cost someone an hour.
 
 - **Every command must be wrapped in `Target.sendMessageToTarget`.** A top-level `Runtime.evaluate`
@@ -601,6 +685,28 @@ All verified against iOS 26.5 in the simulator; each one has cost someone an hou
   than guarding with `||`. Editing `scripts/webview-driver/page-script.mjs` takes effect on the very next
   command, with no app reload and no rebuild.
 
+### Android — Chrome DevTools Protocol
+
+Verified against Android 16 (`sdk_gphone64_arm64`), WebView Chrome 149.
+
+- **No wrapper, no proxy.** `Runtime.evaluate` is sent at the top level and `adb forward` exposes the
+  devtools socket directly — which is why `cdp.mjs` is a quarter the size of `inspector.mjs`.
+- **`awaitPromise` is passed as `false` deliberately**, matching the iOS behaviour rather than the
+  protocol's capability: CDP *would* await, but the shared helpers are synchronous and awaiting turns
+  a page that returns a pending promise into a hang. Poll with `wait:` on both platforms.
+- **The socket name carries the app's pid** (`@webview_devtools_remote_21846`), so the forward is
+  re-established per command. A cached one silently points at a dead process after any relaunch.
+- **`pidof` exits 1 when the app is not running**, and `execFileSync` throws on a non-zero exit. That
+  made "the app is stopped" fatal and broke `relaunch`, whose whole middle is a stopped app.
+- **`adb exec-out screencap`, never `adb shell screencap`.** The shell variant sends the PNG through a
+  pty that rewrites `\n` as `\r\n` and corrupts every capture.
+- **The logcat window is computed on the device** (`date -d @epoch`), because logcat prints
+  device-local timestamps and a host-computed bound shifts the window by the clock skew.
+- **`logcat` needs the tag filter to be readable at all.** The Adapty tag carries the version
+  (`Adapty_v4.0.1`), so the filter is a prefix match; without it a 60-second window is ~1100 lines of
+  `WindowManager` noise. The SDK also prints its own level as a message prefix (`VERBOSE:`, `INFO:`),
+  and that is what `wvd native` reports — the logcat priority is lossy by comparison.
+
 ## 8. Troubleshooting
 
 | Symptom | Cause |
@@ -623,11 +729,20 @@ All verified against iOS 26.5 in the simulator; each one has cost someone an hou
 | A value set on an input reverts | React controlled component — use `set:`, not `wvd eval "el.value = …"` |
 | Typing through the simulator does nothing | keyboard events do not reach WebView inputs; that is what `set:` is for |
 | `head`/`grep` on `yarn wvd …` shows a Yarn banner | use `yarn --silent wvd …` or `node scripts/webview-driver.mjs …` |
+| `both a booted iOS simulator and an attached Android device are present` | pass `--ios` / `--android`, or set `WVD_PLATFORM` |
+| `no booted iOS simulator and no attached Android device` | nothing to drive — boot one and launch the app |
+| `several attached devices (…) — leave one` | the Android side of the refusal to guess |
+| iOS `lists no inspectable page` **while the app is definitely running** | two causes worth checking in order: (a) something else holds 9222 — `lsof -nP -iTCP:9222 -sTCP:LISTEN`, an old `adb forward tcp:9222` shadows the proxy; (b) the installed app is not ours. The React Native demo ships the **same** bundle id `com.adapty.adaptydemoapp`, so building it replaces the Capacitor app — `wvd shot` shows RN's red `No script URL provided` box, and an app with no WebView cannot have an inspectable page |
+| Android `<pkg> is not running — launch it first` | the devtools socket only exists while the app is up; `npx cap run android --target <serial>` |
+| Android `could not resolve a launcher activity` | the package is installed but has no launcher intent — check `adb shell cmd package resolve-activity --brief <pkg>` |
+| `no native view matching "…" — is it on screen?` | `bounds` searches the CURRENT hierarchy; the sheet may have closed, or the text differs from what is rendered |
+| `app did not finish routing within the wait — continuing anyway` | warning, not an error: `relaunch` waits for React to route and gave up. The next command reports the real state |
 
 ## Tests
 
-The pure parts of the CLI — step parsing, snapshot and log formatting, the `os_log` parser, the
-step runner — are unit-tested without a simulator, and CI runs them:
+The pure parts of the CLI — step parsing, snapshot and log formatting, the `os_log` and `logcat`
+parsers, platform resolution, `bounds` extraction, the step runner — are unit-tested without a
+simulator or a device, and CI runs them:
 
 ```bash
 cd examples/adapty-devtools && yarn test-wvd
