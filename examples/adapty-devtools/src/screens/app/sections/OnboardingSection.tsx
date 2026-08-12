@@ -1,6 +1,7 @@
 import React from 'react';
-import type { AdaptyOnboarding } from '@adapty/capacitor';
+import type { AdaptyOnboarding, OnboardingViewController } from '@adapty/capacitor';
 import styles from '../App.module.css';
+import { elementIds } from '../../../elementIds';
 
 type Props = {
   isActivated: boolean;
@@ -22,6 +23,8 @@ type Props = {
   setOnboardingExternalUrlsPresentationIdx: (v: number) => void;
   fetchOnboarding: (forDefaultAudience?: boolean) => Promise<void>;
   presentOnboarding: () => Promise<void>;
+  onboardingView: OnboardingViewController | null;
+  dismissOnboarding: () => Promise<void>;
 };
 
 export const OnboardingSection: React.FC<Props> = ({
@@ -44,6 +47,8 @@ export const OnboardingSection: React.FC<Props> = ({
   setOnboardingExternalUrlsPresentationIdx,
   fetchOnboarding,
   presentOnboarding,
+  onboardingView,
+  dismissOnboarding,
 }) => {
   return (
     <div className={styles.Section}>
@@ -51,6 +56,7 @@ export const OnboardingSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <input
+          id={elementIds.onboarding.placementInput}
           type="text"
           value={onboardingPlacementId}
           onChange={(e) => setOnboardingPlacementId(e.target.value)}
@@ -59,6 +65,7 @@ export const OnboardingSection: React.FC<Props> = ({
           disabled={!isActivated}
         />
         <input
+          id={elementIds.onboarding.requestLocaleInput}
           type="text"
           value={locale}
           onChange={(e) => setLocale(e.target.value.toLowerCase())}
@@ -70,6 +77,7 @@ export const OnboardingSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <input
+          id={elementIds.onboarding.timeoutInput}
           type="text"
           value={timeout}
           onChange={(e) => setLoadTimeout(e.target.value)}
@@ -78,6 +86,7 @@ export const OnboardingSection: React.FC<Props> = ({
           disabled={!isActivated}
         />
         <input
+          id={elementIds.onboarding.maxAgeInput}
           type="text"
           value={maxAge}
           onChange={(e) => setMaxAge(e.target.value)}
@@ -89,6 +98,7 @@ export const OnboardingSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <select
+          id={elementIds.onboarding.fetchPolicySelect}
           value={fetchPolicyIndex}
           onChange={(e) => setFetchPolicyIndex(parseInt(e.target.value))}
           className={styles.Input}
@@ -104,6 +114,7 @@ export const OnboardingSection: React.FC<Props> = ({
 
       <div className={styles.InputGroup}>
         <select
+          id={elementIds.onboarding.externalUrlsPresentationSelect}
           value={onboardingExternalUrlsPresentationIdx}
           onChange={(e) => setOnboardingExternalUrlsPresentationIdx(parseInt(e.target.value))}
           className={styles.Input}
@@ -119,6 +130,7 @@ export const OnboardingSection: React.FC<Props> = ({
 
       <div className={styles.ButtonGroup}>
         <button
+          id={elementIds.onboarding.loadBtn}
           onClick={() => fetchOnboarding(false)}
           disabled={isLoadingOnboarding || !isActivated}
           className={`${styles.Button} ${styles.ButtonPrimary} ${
@@ -128,6 +140,7 @@ export const OnboardingSection: React.FC<Props> = ({
           {isLoadingOnboarding ? 'Loading...' : 'Load Onboarding'}
         </button>
         <button
+          id={elementIds.onboarding.loadDefaultAudienceBtn}
           onClick={() => fetchOnboarding(true)}
           disabled={isLoadingOnboarding || !isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary} ${
@@ -141,47 +154,56 @@ export const OnboardingSection: React.FC<Props> = ({
       <div className={styles.InfoBox}>
         {onboarding ? (
           <div>
-            <div>
+            <div id={elementIds.onboarding.nameValue}>
               <strong>Onboarding Name:</strong> {onboarding.name}
             </div>
-            <div>
+            <div id={elementIds.onboarding.variationIdValue}>
               <strong>Variation ID:</strong> {onboarding.variationId}
             </div>
-            <div>
+            <div id={elementIds.onboarding.revisionValue}>
               <strong>Revision:</strong> {onboarding.placement.revision}
             </div>
-            <div>
+            <div id={elementIds.onboarding.hasRemoteConfigValue}>
               <strong>Has Remote Config:</strong> {onboarding.remoteConfig ? '✅ Yes' : '❌ No'}
             </div>
-            <div>
+            <div id={elementIds.onboarding.hasBuilderValue}>
               <strong>Has Onboarding Builder:</strong> {onboarding.onboardingBuilder ? '✅ Yes' : '❌ No'}
             </div>
-            <div>
+            <div id={elementIds.onboarding.requestLocaleValue}>
               <strong>Request Locale:</strong> {onboarding.requestLocale}
             </div>
             {onboarding.remoteConfig && (
               <div>
-                <div>
+                <div id={elementIds.onboarding.configLocaleValue}>
                   <strong>Config Locale:</strong> {onboarding.remoteConfig.lang}
                 </div>
-                <div>
+                <div id={elementIds.onboarding.configDataValue}>
                   <strong>Config Data:</strong> {onboarding.remoteConfig.dataString}
                 </div>
               </div>
             )}
           </div>
         ) : (
-          <div>No onboarding loaded</div>
+          <div id={elementIds.onboarding.emptyValue}>No onboarding loaded</div>
         )}
       </div>
 
       <div className={styles.ButtonGroup}>
         <button
+          id={elementIds.onboarding.presentBtn}
           onClick={presentOnboarding}
           disabled={!onboarding || !onboarding.hasViewConfiguration}
           className={`${styles.Button} ${styles.ButtonPrimary}`}
         >
           Present Onboarding
+        </button>
+        <button
+          id={elementIds.onboarding.dismissBtn}
+          onClick={dismissOnboarding}
+          disabled={!onboardingView}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Dismiss Onboarding
         </button>
       </div>
     </div>

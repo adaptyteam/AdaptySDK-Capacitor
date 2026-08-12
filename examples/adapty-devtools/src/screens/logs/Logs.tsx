@@ -3,6 +3,7 @@ import { Share } from '@capacitor/share';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { JsLog, formatDate, getFuncNameColor, getLogLevelColor } from '../../helpers';
 import styles from './Logs.module.css';
+import { elementIds } from '../../elementIds';
 
 interface LogsProps {
   logs: JsLog[];
@@ -61,33 +62,38 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
       <div className={styles.LogsHeader}>
         <div className={styles.LogsHeaderContent}>
           <h2>Logs</h2>
-          <div className={styles.LogsSubheader}>{filteredLogs.length} logs (Newest first)</div>
+          <div id={elementIds.logs.countValue} className={styles.LogsSubheader}>
+            {filteredLogs.length} logs (Newest first)
+          </div>
         </div>
         <div className={styles.LogsControls}>
           <div className={styles.FilterButtons}>
             <button
+              id={elementIds.logs.filterSdkBtn}
               className={`${styles.FilterButton} ${filter === 'sdk' ? styles.FilterButtonActive : ''}`}
               onClick={() => setFilter('sdk')}
             >
               SDK
             </button>
             <button
+              id={elementIds.logs.filterAppBtn}
               className={`${styles.FilterButton} ${filter === 'app' ? styles.FilterButtonActive : ''}`}
               onClick={() => setFilter('app')}
             >
               App
             </button>
             <button
+              id={elementIds.logs.filterAllBtn}
               className={`${styles.FilterButton} ${filter === 'all' ? styles.FilterButtonActive : ''}`}
               onClick={() => setFilter('all')}
             >
               All
             </button>
           </div>
-          <button className={styles.ExportButton} onClick={exportAsJson}>
+          <button id={elementIds.logs.exportBtn} className={styles.ExportButton} onClick={exportAsJson}>
             Export
           </button>
-          <button className={styles.ClearButton} onClick={onClearLogs}>
+          <button id={elementIds.logs.clearBtn} className={styles.ClearButton} onClick={onClearLogs}>
             Clear
           </button>
         </div>
@@ -99,6 +105,7 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
           .map((log, index) => (
             <LogLine
               key={log.id}
+              id={elementIds.logs.item(log.id)}
               log={log}
               onClick={() => onLogClick(log)}
               isFirst={index === 0}
@@ -111,13 +118,14 @@ function Logs({ logs, onLogClick, onClearLogs }: LogsProps) {
 }
 
 interface LogLineProps {
+  id: string;
   log: JsLog;
   isFirst?: boolean;
   isLast?: boolean;
   onClick?: () => void;
 }
 
-function LogLine({ log, isFirst, isLast, onClick }: LogLineProps) {
+function LogLine({ id, log, isFirst, isLast, onClick }: LogLineProps) {
   const borderStyle = useMemo(
     () => ({
       borderLeft: `6px solid ${getFuncNameColor(log.funcName)}`,
@@ -127,6 +135,7 @@ function LogLine({ log, isFirst, isLast, onClick }: LogLineProps) {
 
   return (
     <div
+      id={id}
       className={`${styles.LogLine} ${isFirst ? styles.LogLineFirst : ''} ${isLast ? styles.LogLineLast : ''}`}
       onClick={onClick}
       style={borderStyle}

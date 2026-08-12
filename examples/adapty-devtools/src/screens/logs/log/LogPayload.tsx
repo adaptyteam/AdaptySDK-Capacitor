@@ -5,6 +5,7 @@ import styles from './LogPayload.module.css';
 import { useParams } from 'react-router-dom';
 import { useLogs } from '../../../contexts/LogsContext.tsx';
 import { StackTrace } from '../stack-trace';
+import { elementIds } from '../../../elementIds';
 
 interface LogPayloadProps {
   onBack: () => void;
@@ -96,7 +97,7 @@ function LogPayload({ onBack }: LogPayloadProps) {
   return (
     <div className={styles.LogPayloadContainer}>
       <div className={styles.LogPayloadHeader}>
-        <button className={styles.BackButton} onClick={onBack}>
+        <button id={elementIds.logDetails.backBtn} className={styles.BackButton} onClick={onBack}>
           Back
         </button>
         <h2>Log Details</h2>
@@ -108,19 +109,30 @@ function LogPayload({ onBack }: LogPayloadProps) {
           <div className={styles.InfoGrid}>
             <div className={styles.InfoItem}>
               <span className={styles.InfoItemLabel}>Level:</span>
-              <span className={`${styles.InfoItemValue} ${getLogLevelClass(log.logLevel)}`}>{log.logLevel}</span>
+              <span
+                id={elementIds.logDetails.levelValue}
+                className={`${styles.InfoItemValue} ${getLogLevelClass(log.logLevel)}`}
+              >
+                {log.logLevel}
+              </span>
             </div>
             <div className={styles.InfoItem}>
               <span className={styles.InfoItemLabel}>Time:</span>
-              <span className={styles.InfoItemValue}>{formatDate(log.isoDate)}</span>
+              <span id={elementIds.logDetails.timeValue} className={styles.InfoItemValue}>
+                {formatDate(log.isoDate)}
+              </span>
             </div>
             <div className={styles.InfoItem}>
               <span className={styles.InfoItemLabel}>Function:</span>
-              <span className={styles.InfoItemValue}>{log.funcName}</span>
+              <span id={elementIds.logDetails.functionValue} className={styles.InfoItemValue}>
+                {log.funcName}
+              </span>
             </div>
             <div className={`${styles.InfoItem} ${styles.InfoItemFullWidth}`}>
               <span className={styles.InfoItemLabel}>Message:</span>
-              <span className={styles.InfoItemValue}>{log.message}</span>
+              <span id={elementIds.logDetails.messageValue} className={styles.InfoItemValue}>
+                {log.message}
+              </span>
             </div>
           </div>
         </div>
@@ -129,7 +141,12 @@ function LogPayload({ onBack }: LogPayloadProps) {
           <div className={styles.Section}>
             <div className={styles.SectionHeader}>
               <h3>Parameters</h3>
-              <button className={styles.ConsoleButton} onClick={handleCopyParams} title="Copy parameters to clipboard">
+              <button
+                id={elementIds.logDetails.copyParamsBtn}
+                className={styles.ConsoleButton}
+                onClick={handleCopyParams}
+                title="Copy parameters to clipboard"
+              >
                 Copy to clipboard
               </button>
             </div>

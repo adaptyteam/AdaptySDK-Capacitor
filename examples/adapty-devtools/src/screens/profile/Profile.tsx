@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { adapty, Gender } from '@adapty/capacitor';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import styles from './Profile.module.css';
+import { elementIds } from '../../elementIds';
 
 function Profile() {
   // Get profile context state and actions
@@ -61,6 +62,7 @@ function Profile() {
       <div className={styles.Section}>
         <div className={styles.InputGroup}>
           <input
+            id={elementIds.profileForm.emailInput}
             className={styles.Input}
             type="email"
             value={email}
@@ -70,6 +72,7 @@ function Profile() {
         </div>
         <div className={styles.InputGroup}>
           <input
+            id={elementIds.profileForm.phoneInput}
             className={styles.Input}
             type="tel"
             value={phoneNumber}
@@ -79,6 +82,7 @@ function Profile() {
         </div>
         <div className={styles.InputGroup}>
           <input
+            id={elementIds.profileForm.firstNameInput}
             className={styles.Input}
             type="text"
             value={firstName}
@@ -88,6 +92,7 @@ function Profile() {
         </div>
         <div className={styles.InputGroup}>
           <input
+            id={elementIds.profileForm.lastNameInput}
             className={styles.Input}
             type="text"
             value={lastName}
@@ -96,7 +101,12 @@ function Profile() {
           />
         </div>
         <div className={styles.InputGroup}>
-          <select className={styles.Input} value={gender} onChange={(e) => setGender(e.target.value as Gender)}>
+          <select
+            id={elementIds.profileForm.genderSelect}
+            className={styles.Input}
+            value={gender}
+            onChange={(e) => setGender(e.target.value as Gender)}
+          >
             <option value={Gender.Female}>Female</option>
             <option value={Gender.Male}>Male</option>
             <option value={Gender.Other}>Other</option>
@@ -104,6 +114,7 @@ function Profile() {
         </div>
         <div className={styles.InputGroup}>
           <input
+            id={elementIds.profileForm.birthdayInput}
             className={styles.Input}
             type="date"
             value={birthday}
@@ -113,6 +124,7 @@ function Profile() {
         </div>
         <div className={styles.ButtonGroup}>
           <button
+            id={elementIds.profileForm.submitBtn}
             className={`${styles.Button} ${styles.ButtonPrimary}`}
             onClick={updateProfile}
             disabled={!isActivated}
@@ -122,6 +134,7 @@ function Profile() {
         </div>
         {result ? (
           <div
+            id={elementIds.profileForm.resultValue}
             className={`${styles.ResultBox} ${result.startsWith('Error') ? styles.ResultBoxError : styles.ResultBoxSuccess}`}
           >
             {result}

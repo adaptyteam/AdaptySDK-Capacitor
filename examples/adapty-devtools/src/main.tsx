@@ -21,6 +21,7 @@ import { useInitializationService } from './hooks/useInitializationService';
 import { LogsProvider, useLogs } from './contexts/LogsContext.tsx';
 import { AppProvider } from './contexts/AppContext';
 import { ProfileProvider } from './contexts/ProfileContext';
+import { elementIds } from './elementIds';
 
 function BackHandler() {
   // Handle Android hardware back: navigate back if possible, otherwise exit app
@@ -40,17 +41,21 @@ function BackHandler() {
   return null;
 }
 
+// The `id` field is the pass-through the NavLink below renders; it always comes from elementIds.
+type TabDescriptor = { to: string; label: string; id: string };
+
 function Tabs() {
-  const tabs = [
-    { to: '/app', label: 'App' },
-    { to: '/logs', label: 'Logs' },
-    { to: '/profile', label: 'Profile' },
+  const tabs: TabDescriptor[] = [
+    { to: '/app', label: 'App', id: elementIds.nav.appTab },
+    { to: '/logs', label: 'Logs', id: elementIds.nav.logsTab },
+    { to: '/profile', label: 'Profile', id: elementIds.nav.profileTab },
   ];
   return (
     <nav className={styles.Tabs}>
       {tabs.map((t) => (
         <NavLink
           key={t.to}
+          id={t.id}
           to={t.to}
           className={({ isActive }) => `${styles.TabLink}${isActive ? ' ' + styles.TabLinkActive : ''}`}
         >

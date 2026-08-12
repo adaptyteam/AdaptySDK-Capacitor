@@ -20,6 +20,7 @@ import { FlowController, FlowControllerRef } from './native-presentation-control
 import { FlowSection } from './sections/FlowSection';
 import { OnboardingSection } from './sections/OnboardingSection';
 import { ResultBanner } from './components/ResultBanner';
+import { elementIds } from '../../elementIds';
 import { CredentialsInfoSection } from './sections/CredentialsInfoSection';
 import { ProfileSection } from './sections/ProfileSection';
 import { SdkStatusSection } from './sections/SdkStatusSection';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
     products,
     onboarding,
     flowView,
+    onboardingView,
     customerUserId,
     transactionId,
     variationId,
@@ -62,6 +64,7 @@ const App: React.FC = () => {
     setProducts,
     setOnboarding,
     setFlowView,
+    setOnboardingView,
     setCustomerUserId,
     setTransactionId,
     setVariationId,
@@ -536,8 +539,40 @@ const App: React.FC = () => {
     }
   };
 
+  const dismissFlow = async () => {
+    if (!flowView) {
+      setResult('❌ No flow view to dismiss.');
+      return;
+    }
+
+    try {
+      await flowView.dismiss();
+      setFlowView(null);
+      setResult('✅ Flow dismissed');
+    } catch (error) {
+      setResult(`❌ Failed to dismiss flow: ${String(error)}`);
+      log('error', 'Failed to dismiss flow', 'dismissFlow', false, { error: String(error) });
+    }
+  };
+
   const presentOnboarding = async () => {
     await onboardingRef.current?.presentOnboarding();
+  };
+
+  const dismissOnboarding = async () => {
+    if (!onboardingView) {
+      setResult('❌ No onboarding view to dismiss.');
+      return;
+    }
+
+    try {
+      await onboardingView.dismiss();
+      setOnboardingView(null);
+      setResult('✅ Onboarding dismissed');
+    } catch (error) {
+      setResult(`❌ Failed to dismiss onboarding: ${String(error)}`);
+      log('error', 'Failed to dismiss onboarding', 'dismissOnboarding', false, { error: String(error) });
+    }
   };
 
   const renderIdentifySection = () => {
@@ -546,6 +581,7 @@ const App: React.FC = () => {
         <h3 className={styles.SectionTitle}>Identify User</h3>
         <div className={styles.InputGroup}>
           <input
+            id={elementIds.identify.customerUserIdInput}
             type="text"
             value={customerUserId}
             onChange={(e) => setCustomerUserId(e.target.value)}
@@ -553,6 +589,7 @@ const App: React.FC = () => {
             className={styles.Input}
           />
           <button
+            id={elementIds.identify.submitBtn}
             onClick={identify}
             disabled={!customerUserId.trim()}
             className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -605,6 +642,7 @@ const App: React.FC = () => {
       fetchFlow={fetchFlow}
       presentFlow={presentFlow}
       presentExistingFlow={presentExistingFlow}
+      dismissFlow={dismissFlow}
       logFlowShown={logFlowShown}
       openWebPaywall={openWebPaywall}
       createWebPaywallUrl={createWebPaywallUrl}
@@ -635,6 +673,8 @@ const App: React.FC = () => {
       setOnboardingExternalUrlsPresentationIdx={setOnboardingExternalUrlsPresentationIdx}
       fetchOnboarding={fetchOnboarding}
       presentOnboarding={presentOnboarding}
+      onboardingView={onboardingView}
+      dismissOnboarding={dismissOnboarding}
     />
   );
 
@@ -962,6 +1002,7 @@ const App: React.FC = () => {
         externalUrlsPresentation={webPresentations[onboardingExternalUrlsPresentationIdx]}
         canShowFlow={() => Boolean(flow)}
         showFlow={presentFlow}
+        setOnboardingView={setOnboardingView}
         setResult={setResult}
         log={log}
       />
@@ -982,24 +1023,30 @@ const App: React.FC = () => {
           <h3 className={styles.SectionTitle}>SDK Activation</h3>
           <div className={styles.ButtonGroup}>
             <button
+              id={elementIds.sdk.activateBtn}
               onClick={() => testActivate(false)}
               className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
             >
               {isActivated ? 'Activated' : 'Activate Adapty'}
             </button>
             <button
+              id={elementIds.sdk.activateObserverBtn}
               onClick={() => testActivate(true)}
               className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
             >
               {isActivated ? 'Activated' : 'Activate (Observer Mode)'}
             </button>
-            <button onClick={testIsActivated} className={`${styles.Button} ${styles.ButtonSecondary}`}>
+            <button
+              id={elementIds.sdk.checkStatusBtn}
+              onClick={testIsActivated}
+              className={`${styles.Button} ${styles.ButtonSecondary}`}
+            >
               Check Status
             </button>
           </div>
         </div>
 
-        <ResultBanner result={result} />
+        <ResultBanner id={elementIds.app.resultValue} result={result} />
 
         {/* Events Section */}
         {isActivated && (
