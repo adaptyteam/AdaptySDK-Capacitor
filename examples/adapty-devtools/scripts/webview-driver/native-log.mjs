@@ -81,14 +81,19 @@ export function filterByLevel(entries, minLevel) {
   });
 }
 
-export function formatNativeLog(entries, { window, maxMessage = 200 } = {}) {
+/**
+ * `subsystem` names the log scope in the header. It defaults to the iOS predicate so the
+ * iOS output is unchanged; the Android backend passes its tag filter instead, because a
+ * header claiming `io.adapty` over logcat records would be a quiet lie about what was read.
+ */
+export function formatNativeLog(entries, { window, maxMessage = 200, subsystem = 'io.adapty' } = {}) {
   const lines = entries.map((entry) => {
     const message = entry.message.replace(/\s+/g, ' ').trim();
     const clipped = message.length > maxMessage ? `${message.slice(0, maxMessage)}…` : message;
     const source = entry.source ? ` | ${entry.source}` : '';
     return `${entry.time} ${entry.level.padEnd(LEVEL_COLUMN_WIDTH)} ${clipped}${source}`;
   });
-  const scope = window ? ` (io.adapty, last ${window})` : ' (io.adapty)';
+  const scope = window ? ` (${subsystem}, last ${window})` : ` (${subsystem})`;
   const header = `${entries.length} native entries${scope}`;
   // An empty window reads as "the SDK logged nothing", which is almost never true —
   // it usually means the action happened before the window started.

@@ -41,12 +41,15 @@ yarn update-native-modules  # Resolve iOS SPM packages and sync
 yarn credentials            # Interactive setup for Adapty credentials (see below)
 yarn link-assets            # Copy Adapty assets to native projects
 
-# Driving the app in the iOS Simulator (see the drive-devtools-webview skill)
+# Driving the app on iOS Simulator or Android (see the drive-devtools-webview skill)
+# Platform is autodetected; pass --ios / --android when both are running.
 yarn wvd snap                # text snapshot of every element with an id — use instead of a screenshot
 yarn wvd logs 20             # structured JS log tail without navigating to /logs
-yarn wvd native --seconds=30 # native iOS SDK log (os_log) — what the Xcode console shows
+yarn wvd native --seconds=30 # native SDK log — os_log on iOS, logcat on Android
 yarn wvd do click:flow-load-btn wait:flow-present-btn:enabled read:flow-name-value
 yarn wvd scenario flow       # relaunch -> activate -> load -> present -> dismiss
+yarn wvd bounds "1-tap buy"  # android: measured coordinates of native UI, then `wvd tap <x> <y>`
+yarn wvd clear               # android: wipe app data + relaunch — the cheap "clean install"
 yarn test-wvd                # unit tests for the wvd CLI
 ```
 

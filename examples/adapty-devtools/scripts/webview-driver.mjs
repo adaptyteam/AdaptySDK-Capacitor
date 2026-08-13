@@ -1,46 +1,78 @@
 #!/usr/bin/env node
-// wvd — drives the devtools app in the iOS Simulator by element id.
+// wvd — drives the devtools app by element id, on the iOS Simulator or an Android device.
 // Run from examples/adapty-devtools. See the drive-devtools-webview skill in .claude/skills/.
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { ensureProxy, openSession, RELAUNCH_SETTLE_MS } from './webview-driver/inspector.mjs';
-import { filterByLevel, formatNativeLog, parseNativeLog } from './webview-driver/native-log.mjs';
+import { filterByLevel, formatNativeLog } from './webview-driver/native-log.mjs';
 import { COLLECT_SNAPSHOT, LOG_TAIL } from './webview-driver/page-script.mjs';
+import { resolvePlatform } from './webview-driver/platform.mjs';
 import { runSteps } from './webview-driver/runner.mjs';
 import { SCENARIO_NAMES, scenarioSteps } from './webview-driver/scenario.mjs';
-import { nativeLog, relaunch, screenshot } from './webview-driver/simulator.mjs';
 import { formatLogs, formatSnapshot, parseStep } from './webview-driver/steps.mjs';
 
-const USAGE = `usage: yarn wvd <command>
+const USAGE = `usage: yarn wvd [--ios|--android] <command>
+
+  platform is autodetected from what is running; the flag (or WVD_PLATFORM) is required
+  only when both a booted simulator and an attached Android device are present
 
   snap                 print a compact text snapshot of every element with an id
   logs [n]             print the last n log entries (default 20)
-  native [--seconds=N]  print the native iOS SDK log (os_log, subsystem io.adapty)
+  native [--seconds=N]  print the native SDK log (iOS: os_log io.adapty, Android: logcat)
                         options: --level=error|warn|info|verbose|debug --full
   do <step>...         run steps in one session; stops at the first failure
                        set:<id>=<value> | click:<id> | read:<id> | sleep:<ms> | snap
                        wait:<id>[:enabled|:disabled|:absent]
                        option: --timeout=<ms> (default 15000) for wait steps
-  shot [path]          screenshot the simulator, downscaled (default .wvd/shot.png)
+  shot [path]          screenshot the device, downscaled (default .wvd/shot.png)
   relaunch             terminate and relaunch the app — clears a stuck native view
   scenario flow        activate -> load flow -> present -> dismiss
                        relaunches the app first for a clean session
                        options: --placement=<id> --locale=<code> --no-relaunch
   eval <expression>    evaluate JavaScript in the app's WebView
+
+  android only:
+  bounds <text>        centre coordinates of the native view whose text/label matches —
+                       use for taps on system UI (Google Play sheets, dialogs)
+  tap <x> <y>          inject a tap at device pixels
+  clear                wipe app data (pm clear) — the cheap "clean install"
 `;
 
-const [command, ...rest] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+// Stripped before the command is read so every subcommand's own flag parsing is untouched.
+const platformFlag = argv.includes('--android') ? 'android' : argv.includes('--ios') ? 'ios' : null;
+const [command, ...rest] = argv.filter((token) => token !== '--android' && token !== '--ios');
 
 const render = (value) => (typeof value === 'string' ? value : JSON.stringify(value, null, 2));
 
+/** Fails with the platform named, so "unknown command" never masks "wrong platform". */
+function androidOnly(platform, name) {
+  const fn = platform.only[name];
+  if (!fn) throw new Error(`${command} is Android-only — current platform is ${platform.name}`);
+  return fn;
+}
+
 async function main() {
-  if (command === 'snap') {
-    const session = await openSession();
+  if (!command) {
+    console.error(USAGE);
+    process.exitCode = 2;
+    return;
+  }
+
+  const platform = await resolvePlatform({ flag: platformFlag });
+
+  const withSession = async (fn) => {
+    const session = await platform.openSession();
     try {
-      console.log(formatSnapshot(JSON.parse(await session.evaluate(COLLECT_SNAPSHOT))));
+      return await fn(session);
     } finally {
       session.close();
     }
+  };
+
+  if (command === 'snap') {
+    await withSession(async (session) =>
+      console.log(formatSnapshot(JSON.parse(await session.evaluate(COLLECT_SNAPSHOT)))),
+    );
     return;
   }
 
@@ -55,41 +87,65 @@ async function main() {
       timeoutMs = Number(match[1]);
     }
     const steps = rawSteps.map(parseStep);
-    const session = await openSession();
-    try {
+    await withSession(async (session) => {
       // `!== undefined`, not a truthiness test: --timeout=0 is a legitimate "fail a wait
       // immediately" and a truthy guard silently substituted the 15000ms default for it.
       const { lines, failed } = await runSteps(session, steps, timeoutMs !== undefined ? { timeoutMs } : {});
       console.log(lines.join('\n'));
       if (failed) process.exitCode = 1;
-    } finally {
-      session.close();
-    }
+    });
     return;
   }
 
   if (command === 'shot') {
     const outPath = rest[0] ?? '.wvd/shot.png';
     mkdirSync(dirname(outPath), { recursive: true });
-    console.log(screenshot(outPath));
+    console.log(platform.screenshot(outPath));
     return;
   }
 
   if (command === 'relaunch') {
-    const launched = relaunch();
-    // ensureProxy(), not waitForPage(): both wait for the new WebView, but only this one
-    // starts the proxy or replaces a stale one. relaunch is the command an agent reaches
-    // for first, so it is the last place that should assume a healthy proxy.
-    await ensureProxy({ settleMs: RELAUNCH_SETTLE_MS });
+    const launched = platform.relaunch();
+    // ensureReady(), not a bare page wait: on iOS it also starts the proxy or replaces a
+    // stale one. relaunch is the command an agent reaches for first, so it is the last
+    // place that should assume a healthy transport.
+    await platform.ensureReady();
     console.log(launched);
+    return;
+  }
+
+  if (command === 'clear') {
+    const cleared = androidOnly(platform, 'clearData')();
+    // pm clear also stops the app, so leaving it dead would make the next command fail with
+    // a confusing "not running" instead of just working.
+    const launched = platform.relaunch();
+    await platform.ensureReady();
+    console.log(`cleared ${cleared} -> ${launched}`);
+    return;
+  }
+
+  if (command === 'bounds') {
+    const needle = rest.join(' ');
+    if (!needle) throw new Error('bounds needs text to match');
+    const found = androidOnly(platform, 'uiBounds')(needle);
+    if (!found) {
+      throw new Error(`no native view matching "${needle}" — is it on screen?`);
+    }
+    console.log(`${found.x} ${found.y}   (bounds ${found.bounds.join(',')})`);
+    return;
+  }
+
+  if (command === 'tap') {
+    const [x, y] = rest;
+    if (!/^\d+$/.test(x ?? '') || !/^\d+$/.test(y ?? '')) throw new Error('tap needs <x> <y> in device pixels');
+    console.log(androidOnly(platform, 'tap')(Number(x), Number(y)));
     return;
   }
 
   if (command === 'logs') {
     const count = rest[0] ? Number(rest[0]) : 20;
     if (!Number.isInteger(count) || count <= 0) throw new Error(`logs needs a positive count, got "${rest[0]}"`);
-    const session = await openSession();
-    try {
+    await withSession(async (session) => {
       const payload = JSON.parse(await session.evaluate(LOG_TAIL(count)));
       if (payload.missing) {
         throw new Error(
@@ -97,9 +153,7 @@ async function main() {
         );
       }
       console.log(formatLogs(payload));
-    } finally {
-      session.close();
-    }
+    });
     return;
   }
 
@@ -115,9 +169,9 @@ async function main() {
       else if (flag === '--full') maxMessage = Number.MAX_SAFE_INTEGER;
       else throw new Error(`unknown option "${flag}"`);
     }
-    let entries = parseNativeLog(nativeLog({ seconds }));
+    let entries = platform.parseNativeLog(platform.nativeLog({ seconds }));
     if (level) entries = filterByLevel(entries, level);
-    console.log(formatNativeLog(entries, { window: `${seconds}s`, maxMessage }));
+    console.log(formatNativeLog(entries, { window: `${seconds}s`, maxMessage, subsystem: platform.subsystem }));
     return;
   }
 
@@ -139,30 +193,22 @@ async function main() {
     if (fresh) {
       // A repeat activate throws and unmounts every section, and a stale flow keeps
       // the Present button enabled — so a dirty session makes this scenario lie.
-      console.log(`relaunched: ${relaunch()}`);
-      // see the relaunch command — a dead proxy must not read as a dead page
-      await ensureProxy({ settleMs: RELAUNCH_SETTLE_MS });
+      console.log(`relaunched: ${platform.relaunch()}`);
+      // see the relaunch command — a dead transport must not read as a dead page
+      await platform.ensureReady();
     }
-    const session = await openSession();
-    try {
+    await withSession(async (session) => {
       const { lines, failed } = await runSteps(session, steps);
       console.log(lines.join('\n'));
       if (failed) process.exitCode = 1;
-    } finally {
-      session.close();
-    }
+    });
     return;
   }
 
   if (command === 'eval') {
     const expression = rest.join(' ');
     if (!expression) throw new Error('eval needs an expression');
-    const session = await openSession();
-    try {
-      console.log(render(await session.evaluate(expression)));
-    } finally {
-      session.close();
-    }
+    await withSession(async (session) => console.log(render(await session.evaluate(expression))));
     return;
   }
 
