@@ -70,6 +70,7 @@ export {
 // UI Builder types
 export {
   FlowEventHandlers,
+  FlowEventView,
   EventHandlerResult,
   OnboardingEventHandlers,
   AdaptyPermission,
