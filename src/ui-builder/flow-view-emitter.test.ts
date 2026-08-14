@@ -4,7 +4,7 @@ import { AdaptyCapacitorPlugin } from '../bridge/plugin';
 import { parseFlowEvent } from '../coders/parse-flow';
 import { LogContext } from '../logger';
 import type { AdaptyPaywallProduct, AdaptyPurchaseResult } from '../types';
-import { FlowEventId } from '../types/flow-events';
+import { FlowEventId, type FlowEventView } from '../types/flow-events';
 
 import { FlowViewEmitter } from './flow-view-emitter';
 import { DEFAULT_FLOW_EVENT_HANDLERS } from './types';
@@ -27,6 +27,20 @@ const NATIVE_EVENT_NAMES = {
 
 const TEST_VIEW_ID = 'test-flow-view-id';
 const WRONG_VIEW_ID = 'different-view-id';
+const TEST_PLACEMENT_ID = 'test_placement';
+const TEST_VARIATION_ID = 'test_variation';
+
+/**
+ * Builds the `view` payload the flow coder produces for every flow event.
+ * `placementId` and `variationId` are always reported by native; `locale` is
+ * only set for events that carry the localization the view was built with.
+ */
+const viewOf = (id: string, locale?: string): FlowEventView => ({
+  id,
+  placementId: TEST_PLACEMENT_ID,
+  variationId: TEST_VARIATION_ID,
+  locale,
+});
 
 const TEST_EVENT_DATA = {
   closeAction: `{"id":"${NATIVE_EVENT_NAMES.action}","view":{"id":"${TEST_VIEW_ID}"},"action":{"type":"close"}}`,
@@ -41,7 +55,7 @@ const TEST_EVENT_DATA = {
   restoreStarted: `{"id":"${NATIVE_EVENT_NAMES.startRestore}","view":{"id":"${TEST_VIEW_ID}"}}`,
   restoreCompleted: `{"id":"${NATIVE_EVENT_NAMES.finishRestore}","view":{"id":"${TEST_VIEW_ID}"},"profile":{"profileId":"test-profile"}}`,
   restoreFailed: `{"id":"${NATIVE_EVENT_NAMES.failRestore}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Restore failed"}}`,
-  flowAppeared: `{"id":"${NATIVE_EVENT_NAMES.appear}","view":{"id":"${TEST_VIEW_ID}"}}`,
+  flowAppeared: `{"id":"${NATIVE_EVENT_NAMES.appear}","view":{"id":"${TEST_VIEW_ID}","placement_id":"${TEST_PLACEMENT_ID}","variation_id":"${TEST_VARIATION_ID}"}}`,
   flowDisappeared: `{"id":"${NATIVE_EVENT_NAMES.disappear}","view":{"id":"${TEST_VIEW_ID}"}}`,
   errorReceived: `{"id":"${NATIVE_EVENT_NAMES.error}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Rendering failed"}}`,
   loadingProductsFailed: `{"id":"${NATIVE_EVENT_NAMES.failLoadingProducts}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Loading products failed"}}`,
@@ -134,7 +148,7 @@ describe('FlowViewEmitter', () => {
       const mockListener = jest.fn();
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'close' },
       });
 
@@ -188,7 +202,7 @@ describe('FlowViewEmitter', () => {
       const mockListener = jest.fn();
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: WRONG_VIEW_ID },
+        view: viewOf(WRONG_VIEW_ID),
         action: { type: 'close' },
       });
 
@@ -208,7 +222,7 @@ describe('FlowViewEmitter', () => {
       const mockListener = jest.fn().mockReturnValue(false);
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'close' },
       });
 
@@ -228,7 +242,7 @@ describe('FlowViewEmitter', () => {
       const mockListener = jest.fn().mockReturnValue(true);
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'close' },
       });
 
@@ -247,7 +261,7 @@ describe('FlowViewEmitter', () => {
 
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'system_back' },
       });
 
@@ -269,7 +283,7 @@ describe('FlowViewEmitter', () => {
       // Test onProductSelected
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.selectProduct,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         productId: 'com.example.premium',
       });
 
@@ -283,7 +297,7 @@ describe('FlowViewEmitter', () => {
       // Test onUrlPress
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'open_url', value: 'https://example.com', openIn: 'browser_in_app' },
       });
 
@@ -298,7 +312,7 @@ describe('FlowViewEmitter', () => {
       const mockPurchaseResult: AdaptyPurchaseResult = { type: 'pending' };
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.finishPurchase,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         purchaseResult: mockPurchaseResult,
         product: mockProduct,
       });
@@ -365,7 +379,7 @@ describe('FlowViewEmitter', () => {
       });
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'close' },
       });
 
@@ -384,7 +398,7 @@ describe('FlowViewEmitter', () => {
       const mockOnRequestCloseWithError = jest.fn().mockRejectedValue(new Error('Close error'));
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'close' },
       });
 
@@ -410,7 +424,7 @@ describe('FlowViewEmitter', () => {
         expect(ctx).toBe(mockLogContext);
         return {
           id: NATIVE_EVENT_NAMES.action,
-          view: { id: TEST_VIEW_ID },
+          view: viewOf(TEST_VIEW_ID),
           action: { type: 'close' },
         };
       });
@@ -450,7 +464,7 @@ describe('FlowViewEmitter', () => {
       const mockListener = jest.fn();
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'close' },
       });
 
@@ -526,7 +540,7 @@ describe('FlowViewEmitter', () => {
 
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'close' },
       });
 
@@ -582,7 +596,7 @@ describe('FlowViewEmitter', () => {
     it('should subscribe natively even without client handlers', async () => {
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.disappear,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
       });
 
       await emitter.addInternalListener('onDisappeared', jest.fn());
@@ -596,7 +610,7 @@ describe('FlowViewEmitter', () => {
 
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.disappear,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
       });
 
       const clientHandler = jest.fn(() => {
@@ -624,7 +638,7 @@ describe('FlowViewEmitter', () => {
       const handler = jest.fn().mockResolvedValue({ status: 'granted' });
       mockParseFlowEvent.mockReturnValue({
         id: FlowEventId.DidAskPermission,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         eventId: 'permission-event-1',
         permission: 'push',
         customArgs: {},
@@ -656,7 +670,7 @@ describe('FlowViewEmitter', () => {
     it('replies denied when using the default permission handler', async () => {
       mockParseFlowEvent.mockReturnValue({
         id: FlowEventId.DidAskPermission,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         eventId: 'permission-event-1',
         permission: 'push',
         customArgs: {},
@@ -694,7 +708,7 @@ describe('FlowViewEmitter', () => {
 
       mockParseFlowEvent.mockReturnValue({
         id: FlowEventId.ObserverDidInitiatePurchase,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         eventId: 'observer-purchase-1',
         product: mockProduct,
       });
@@ -737,7 +751,7 @@ describe('FlowViewEmitter', () => {
 
       mockParseFlowEvent.mockReturnValue({
         id: FlowEventId.ObserverDidInitiatePurchase,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         eventId: 'observer-purchase-1',
         product: mockProduct,
       });
@@ -764,7 +778,7 @@ describe('FlowViewEmitter', () => {
 
       mockParseFlowEvent.mockReturnValue({
         id: FlowEventId.ObserverDidInitiateRestore,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         eventId: 'observer-restore-1',
       });
 
@@ -805,7 +819,7 @@ describe('FlowViewEmitter', () => {
 
       mockParseFlowEvent.mockReturnValue({
         id: FlowEventId.ObserverDidInitiateRestore,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         eventId: 'observer-restore-1',
       });
 
@@ -824,7 +838,7 @@ describe('FlowViewEmitter', () => {
       const mockListener = jest.fn();
       mockParseFlowEvent.mockReturnValue({
         id: NATIVE_EVENT_NAMES.action,
-        view: { id: TEST_VIEW_ID },
+        view: viewOf(TEST_VIEW_ID),
         action: { type: 'close' },
       });
 
