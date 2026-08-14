@@ -3,3 +3,5 @@ examples/adapty-devtools/ios
 examples/**/dist
 /dist
 src/shared/
+# checkouts of this repo made by agents — not ours to format
+.claude/worktrees/

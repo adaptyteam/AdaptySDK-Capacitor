@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../App.module.css';
+import { elementIds } from '../../../elementIds';
 
 type Props = {
   isActivated: boolean;
@@ -23,6 +24,7 @@ export const ReportTransactionSection: React.FC<Props> = ({
       <h3 className={styles.SectionTitle}>Report Transaction</h3>
       <div className={styles.InputGroup}>
         <input
+          id={elementIds.reportTransaction.transactionIdInput}
           type="text"
           value={transactionId}
           onChange={(e) => setTransactionId(e.target.value)}
@@ -31,6 +33,7 @@ export const ReportTransactionSection: React.FC<Props> = ({
           disabled={!isActivated}
         />
         <input
+          id={elementIds.reportTransaction.variationIdInput}
           type="text"
           value={variationId}
           onChange={(e) => setVariationId(e.target.value)}
@@ -39,6 +42,7 @@ export const ReportTransactionSection: React.FC<Props> = ({
           disabled={!isActivated}
         />
         <button
+          id={elementIds.reportTransaction.submitBtn}
           onClick={reportTransaction}
           disabled={!isActivated || !transactionId.trim()}
           className={`${styles.Button} ${styles.ButtonPrimary}`}

@@ -6,6 +6,10 @@ node_modules/
 .sourcemaps
 dist/
 
+# wvd CLI scratch output (.dt/ is the pre-rename name; still ignored for existing checkouts)
+.wvd/
+.dt/
+
 # Adapty credentials
 .adapty-credentials.*
 !Podfile.lock

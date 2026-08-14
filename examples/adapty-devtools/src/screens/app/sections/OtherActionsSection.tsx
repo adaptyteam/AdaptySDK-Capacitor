@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../App.module.css';
 import { ButtonGroup } from '../components/ButtonGroup';
+import { elementIds } from '../../../elementIds';
 
 type Props = {
   isActivated: boolean;
@@ -35,6 +36,7 @@ export const OtherActionsSection: React.FC<Props> = ({
 
       <ButtonGroup>
         <button
+          id={elementIds.otherActions.restorePurchasesBtn}
           onClick={restorePurchases}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonPrimary}`}
@@ -42,6 +44,7 @@ export const OtherActionsSection: React.FC<Props> = ({
           Restore Purchases
         </button>
         <button
+          id={elementIds.otherActions.updateAttributionBtn}
           onClick={updateAttribution}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -52,19 +55,26 @@ export const OtherActionsSection: React.FC<Props> = ({
 
       <ButtonGroup>
         <button
+          id={elementIds.otherActions.codeRedemptionBtn}
           onClick={presentCodeRedemptionSheet}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
         >
           Code Redemption (iOS)
         </button>
-        <button onClick={setLogLevel} disabled={!isActivated} className={`${styles.Button} ${styles.ButtonSecondary}`}>
+        <button
+          id={elementIds.otherActions.setLogLevelBtn}
+          onClick={setLogLevel}
+          disabled={!isActivated}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
           Set Log Level
         </button>
       </ButtonGroup>
 
       <ButtonGroup>
         <button
+          id={elementIds.otherActions.setFallbackBtn}
           onClick={testSetFallback}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -72,6 +82,7 @@ export const OtherActionsSection: React.FC<Props> = ({
           Set Fallback Paywalls
         </button>
         <button
+          id={elementIds.otherActions.installationStatusBtn}
           onClick={getCurrentInstallationStatus}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -82,6 +93,7 @@ export const OtherActionsSection: React.FC<Props> = ({
 
       <ButtonGroup>
         <button
+          id={elementIds.otherActions.openAdaptyInAppBtn}
           onClick={openAdaptyIoInApp}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -89,6 +101,7 @@ export const OtherActionsSection: React.FC<Props> = ({
           Open adapty.io (in-app)
         </button>
         <button
+          id={elementIds.otherActions.openAdaptyExternalBtn}
           onClick={openAdaptyIoExternal}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -99,6 +112,7 @@ export const OtherActionsSection: React.FC<Props> = ({
 
       <ButtonGroup>
         <button
+          id={elementIds.otherActions.requestAppReviewBtn}
           onClick={requestAppReview}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
@@ -108,7 +122,12 @@ export const OtherActionsSection: React.FC<Props> = ({
       </ButtonGroup>
 
       <ButtonGroup>
-        <button onClick={logout} disabled={!isActivated} className={`${styles.Button} ${styles.ButtonDanger}`}>
+        <button
+          id={elementIds.otherActions.logoutBtn}
+          onClick={logout}
+          disabled={!isActivated}
+          className={`${styles.Button} ${styles.ButtonDanger}`}
+        >
           Logout
         </button>
       </ButtonGroup>

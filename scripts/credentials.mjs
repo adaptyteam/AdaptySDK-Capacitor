@@ -25,10 +25,7 @@ for (var arg of args) {
 
 // Check if running in non-interactive mode (all required params provided)
 var nonInteractive =
-  cliParams['token'] &&
-  cliParams['ios-bundle'] &&
-  cliParams['android-id'] &&
-  cliParams['placement-id'];
+  cliParams['token'] && cliParams['ios-bundle'] && cliParams['android-id'] && cliParams['placement-id'];
 
 // Only initialize prompt if in interactive mode
 var prompt = null;
@@ -107,7 +104,9 @@ function read_credentials_sync(obj = {}) {
     var cache_onboarding_placement = obj[onboarding_placement_id_key];
     var input_onboarding_placement_id = nonInteractive
       ? cliParams['onboarding-placement-id']
-      : prompt(`Enter your onboarding placement ID${cache_onboarding_placement ? ` (${cache_onboarding_placement})` : ''}: `);
+      : prompt(
+          `Enter your onboarding placement ID${cache_onboarding_placement ? ` (${cache_onboarding_placement})` : ''}: `,
+        );
 
     if (input_onboarding_placement_id) {
       result[onboarding_placement_id_key] = input_onboarding_placement_id;
@@ -129,6 +128,11 @@ function read_credentials_sync(obj = {}) {
   } else {
     console.log(`[CREDENTIALS] Bundle ID unchanged (${result[ios_bundle_key]}), because no update needed`);
   }
+
+  // Always reconciled against the file, not against the cached value: `capacitor.config.json` is
+  // committed with a placeholder appId, so a checkout can be stale even when the bundle ID itself
+  // did not change on this run.
+  write_capacitor_app_id(result[ios_bundle_key]);
 
   if (result[android_application_id_key] !== cache_android_app_id || forceBundleUpdate) {
     if (forceBundleUpdate) {
@@ -182,6 +186,49 @@ function write_ios_bundle(new_bundle) {
     console.log('[CREDENTIALS] ✅ Successfully updated iOS bundle identifier in project.pbxproj');
   } catch (error) {
     console.error(`[CREDENTIALS] Error updating project file: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+// write_capacitor_app_id keeps capacitor.config.json's appId in sync with the iOS bundle
+// identifier. Capacitor itself only consumes appId when generating a native project, but the
+// tooling around the app reads it as the installed bundle ID — `scripts/webview-driver/simulator.mjs` passes it
+// to `simctl terminate` / `simctl launch`, which fail against the placeholder value.
+function write_capacitor_app_id(new_bundle) {
+  var capacitorConfigPath = 'capacitor.config.json';
+
+  if (!new_bundle) {
+    return;
+  }
+
+  try {
+    if (!fs.existsSync(capacitorConfigPath)) {
+      console.error(`[CREDENTIALS] Error: ${capacitorConfigPath} not found`);
+      return;
+    }
+
+    var configContent = fs.readFileSync(capacitorConfigPath, 'utf8');
+    var currentAppId = JSON.parse(configContent).appId;
+
+    if (currentAppId === new_bundle) {
+      console.log(`[CREDENTIALS] Capacitor appId unchanged (${currentAppId}), because no update needed`);
+      return;
+    }
+
+    // Targeted replace instead of re-serializing, to keep the diff to the one line
+    var configContentNew = configContent.replace(/("appId"\s*:\s*)"[^"]*"/, `$1"${new_bundle}"`);
+
+    if (configContentNew === configContent) {
+      console.error(`[CREDENTIALS] Error: appId key not found in ${capacitorConfigPath}`);
+      process.exit(1);
+    }
+
+    fs.writeFileSync(capacitorConfigPath, configContentNew);
+    console.log(
+      `[CREDENTIALS] ✅ Successfully updated Capacitor appId in capacitor.config.json ("${currentAppId}" -> "${new_bundle}")`,
+    );
+  } catch (error) {
+    console.error(`[CREDENTIALS] Error updating ${capacitorConfigPath}: ${error.message}`);
     process.exit(1);
   }
 }

@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle } from 'react';
-import { createOnboardingView, AdaptyError, WebPresentation } from '@adapty/capacitor';
+import { createOnboardingView, AdaptyError, WebPresentation, OnboardingViewController } from '@adapty/capacitor';
 
 export type OnboardingControllerRef = {
   presentOnboarding: () => Promise<void>;
@@ -10,6 +10,7 @@ type Props = {
   externalUrlsPresentation: WebPresentation;
   canShowFlow: () => boolean;
   showFlow?: () => Promise<void> | void;
+  setOnboardingView: (view: OnboardingViewController | null) => void;
   setResult: (value: string) => void;
   log: (
     level: 'info' | 'error' | 'warn',
@@ -21,7 +22,7 @@ type Props = {
 };
 
 export const OnboardingController = forwardRef<OnboardingControllerRef, Props>(function OnboardingController(
-  { onboarding, externalUrlsPresentation, canShowFlow, showFlow, setResult, log }: Props,
+  { onboarding, externalUrlsPresentation, canShowFlow, showFlow, setOnboardingView, setResult, log }: Props,
   ref,
 ) {
   const presentOnboarding = async () => {
@@ -39,11 +40,14 @@ export const OnboardingController = forwardRef<OnboardingControllerRef, Props>(f
       setResult('Creating onboarding view...');
 
       const view = await createOnboardingView(onboarding, { externalUrlsPresentation });
+      setOnboardingView(view);
 
       await view.setEventHandlers({
         onClose: (actionId: any, meta: any) => {
           log('info', 'Onboarding closed', 'onboarding.onClose', false, { actionId, meta });
           setResult('👋 Onboarding closed');
+          // The native view closes itself here; drop the reference so Dismiss Onboarding reports honestly.
+          setOnboardingView(null);
           return true;
         },
         onFinishedLoading: (meta: any) => {
@@ -64,6 +68,7 @@ export const OnboardingController = forwardRef<OnboardingControllerRef, Props>(f
 
           // RN-like behavior: close onboarding modal first, then present flow
           view.dismiss().then(() => {
+            setOnboardingView(null);
             showFlow?.();
           });
 

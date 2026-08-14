@@ -5,6 +5,7 @@ import {
   AdaptyPaywallProduct,
   AdaptyOnboarding,
   FlowViewController,
+  OnboardingViewController,
 } from '@adapty/capacitor';
 import { getPlacementId, getOnboardingPlacementId } from '../helpers';
 
@@ -19,6 +20,7 @@ interface AppState {
   products: AdaptyPaywallProduct[];
   onboarding: AdaptyOnboarding | null;
   flowView: FlowViewController | null;
+  onboardingView: OnboardingViewController | null;
 
   // User data
   customerUserId: string;
@@ -56,6 +58,7 @@ interface AppActions {
   setProducts: (value: AdaptyPaywallProduct[]) => void;
   setOnboarding: (value: AdaptyOnboarding | null) => void;
   setFlowView: (value: FlowViewController | null) => void;
+  setOnboardingView: (value: OnboardingViewController | null) => void;
 
   // User data
   setCustomerUserId: (value: string) => void;
@@ -99,6 +102,7 @@ const defaultState: AppState = {
   products: [],
   onboarding: null,
   flowView: null,
+  onboardingView: null,
 
   // User data
   customerUserId: '',
@@ -144,6 +148,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [products, setProducts] = useState<AdaptyPaywallProduct[]>(defaultState.products);
   const [onboarding, setOnboarding] = useState<AdaptyOnboarding | null>(defaultState.onboarding);
   const [flowView, setFlowView] = useState<FlowViewController | null>(defaultState.flowView);
+  const [onboardingView, setOnboardingView] = useState<OnboardingViewController | null>(defaultState.onboardingView);
 
   // User data
   const [customerUserId, setCustomerUserId] = useState<string>(defaultState.customerUserId);
@@ -179,6 +184,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setProducts(defaultState.products);
     setOnboarding(defaultState.onboarding);
     setFlowView(defaultState.flowView);
+    setOnboardingView(defaultState.onboardingView);
     setCustomerUserId(defaultState.customerUserId);
     setTransactionId(defaultState.transactionId);
     setVariationId(defaultState.variationId);
@@ -205,6 +211,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     products,
     onboarding,
     flowView,
+    onboardingView,
     customerUserId,
     transactionId,
     variationId,
@@ -229,6 +236,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setProducts,
     setOnboarding,
     setFlowView,
+    setOnboardingView,
     setCustomerUserId,
     setTransactionId,
     setVariationId,

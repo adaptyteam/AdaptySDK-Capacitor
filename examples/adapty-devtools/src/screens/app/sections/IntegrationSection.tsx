@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../App.module.css';
+import { elementIds } from '../../../elementIds';
 
 type Props = {
   isActivated: boolean;
@@ -23,6 +24,7 @@ export const IntegrationSection: React.FC<Props> = ({
       <h3 className={styles.SectionTitle}>Integration Identifiers</h3>
       <div className={styles.InputGroup}>
         <input
+          id={elementIds.integration.keyInput}
           type="text"
           value={integrationIdKey}
           onChange={(e) => setIntegrationIdKey(e.target.value)}
@@ -30,6 +32,7 @@ export const IntegrationSection: React.FC<Props> = ({
           className={styles.Input}
         />
         <input
+          id={elementIds.integration.valueInput}
           type="text"
           value={integrationIdValue}
           onChange={(e) => setIntegrationIdValue(e.target.value)}
@@ -37,6 +40,7 @@ export const IntegrationSection: React.FC<Props> = ({
           className={styles.Input}
         />
         <button
+          id={elementIds.integration.submitBtn}
           onClick={setIntegrationId}
           disabled={!isActivated || !integrationIdKey.trim() || !integrationIdValue.trim()}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
