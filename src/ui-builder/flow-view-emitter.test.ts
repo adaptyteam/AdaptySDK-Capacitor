@@ -56,6 +56,7 @@ const TEST_EVENT_DATA = {
   restoreCompleted: `{"id":"${NATIVE_EVENT_NAMES.finishRestore}","view":{"id":"${TEST_VIEW_ID}"},"profile":{"profileId":"test-profile"}}`,
   restoreFailed: `{"id":"${NATIVE_EVENT_NAMES.failRestore}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Restore failed"}}`,
   flowAppeared: `{"id":"${NATIVE_EVENT_NAMES.appear}","view":{"id":"${TEST_VIEW_ID}","placement_id":"${TEST_PLACEMENT_ID}","variation_id":"${TEST_VARIATION_ID}"}}`,
+  flowAppearedWithLocale: `{"id":"${NATIVE_EVENT_NAMES.appear}","view":{"id":"${TEST_VIEW_ID}","placement_id":"${TEST_PLACEMENT_ID}","variation_id":"${TEST_VARIATION_ID}","locale":"es"}}`,
   flowDisappeared: `{"id":"${NATIVE_EVENT_NAMES.disappear}","view":{"id":"${TEST_VIEW_ID}"}}`,
   errorReceived: `{"id":"${NATIVE_EVENT_NAMES.error}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Rendering failed"}}`,
   loadingProductsFailed: `{"id":"${NATIVE_EVENT_NAMES.failLoadingProducts}","view":{"id":"${TEST_VIEW_ID}"},"error":{"message":"Loading products failed"}}`,
@@ -589,6 +590,35 @@ describe('FlowViewEmitter', () => {
 
       expect(listener1).not.toHaveBeenCalled();
       expect(listener2).toHaveBeenCalled();
+    });
+  });
+
+  describe('onAppeared', () => {
+    it('should pass the appeared view, including the resolved locale, to the handler', async () => {
+      const handler = jest.fn().mockReturnValue(false);
+      const appearedView = viewOf(TEST_VIEW_ID, 'es');
+      mockParseFlowEvent.mockReturnValue({ id: NATIVE_EVENT_NAMES.appear, view: appearedView });
+
+      await emitter.addListener('onAppeared', handler, mockOnRequestClose);
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.flowAppearedWithLocale });
+
+      expect(handler).toHaveBeenCalledWith(appearedView);
+      expect(mockOnRequestClose).not.toHaveBeenCalled();
+    });
+
+    it('should close the view when the onAppeared handler returns true', async () => {
+      const handler = jest.fn().mockReturnValue(true);
+      mockParseFlowEvent.mockReturnValue({ id: NATIVE_EVENT_NAMES.appear, view: viewOf(TEST_VIEW_ID) });
+
+      await emitter.addListener('onAppeared', handler, mockOnRequestClose);
+
+      const nativeCallback = mockBridgeAddListener.mock.calls[0][1];
+      nativeCallback({ data: TEST_EVENT_DATA.flowAppeared });
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(mockOnRequestClose).toHaveBeenCalledTimes(1);
     });
   });
 
