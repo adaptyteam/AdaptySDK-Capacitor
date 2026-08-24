@@ -35,6 +35,7 @@ import {
   sendProviderAttribution,
   type ExternalAttributionProvider,
 } from '../../services/externalAttribution';
+import { buildActivateParams } from '../../services/activateParams';
 
 const App: React.FC = () => {
   // Get context state and actions
@@ -108,6 +109,7 @@ const App: React.FC = () => {
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingFlow, setIsLoadingFlow] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
+  const [adaptyAttributionEnabled, setAdaptyAttributionEnabled] = useState(false);
 
   const flowRef = useRef<FlowControllerRef>(null);
   const onboardingRef = useRef<OnboardingControllerRef>(null);
@@ -133,25 +135,12 @@ const App: React.FC = () => {
 
       await adapty.activate({
         apiKey: getApiKey(),
-        params: {
-          // serverCluster: 'cn',
-          // backendBaseUrl: 'http://localhost:8080',
-          ...(trimmedCustomerUserId ? { customerUserId: trimmedCustomerUserId } : {}),
-          logLevel: 'verbose',
+        params: buildActivateParams({
           observerMode,
-          __ignoreActivationOnFastRefresh: import.meta.env.DEV,
-          // android: {
-          //   adIdCollectionDisabled: true,
-          //   pendingPrepaidPlansEnabled: false,
-          //   localAccessLevelAllowed: false,
-          //   obfuscatedAccountId: 'testObfAccId',
-          // },
-          // ios: {
-          //   idfaCollectionDisabled: true,
-          //   appAccountToken: '550e8400-e29b-41d4-a716-446655440000',
-          //   clearDataOnBackup: true,
-          // },
-        },
+          adaptyAttributionEnabled,
+          ignoreActivationOnFastRefresh: import.meta.env.DEV,
+          customerUserId: trimmedCustomerUserId,
+        }),
       });
       const customerIdMessage = trimmedCustomerUserId ? ` customer user id: ${trimmedCustomerUserId}` : '';
       setResult(`Adapty activated successfully!${customerIdMessage}`);
@@ -1033,6 +1022,20 @@ const App: React.FC = () => {
         {/* Activation Section */}
         <div className={styles.Section}>
           <h3 className={styles.SectionTitle}>SDK Activation</h3>
+          <div
+            id={elementIds.sdk.adaptyAttributionToggle}
+            className={styles.ClickableParam}
+            onClick={() => {
+              if (!isActivated) {
+                setAdaptyAttributionEnabled(!adaptyAttributionEnabled);
+              }
+            }}
+          >
+            <span>Adapty Attribution (activation-time only)</span>
+            <span id={elementIds.sdk.adaptyAttributionValue} className={styles.ParamValue}>
+              {adaptyAttributionEnabled.toString()}
+            </span>
+          </div>
           <div className={styles.ButtonGroup}>
             <button
               id={elementIds.sdk.activateBtn}

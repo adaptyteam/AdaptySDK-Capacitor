@@ -180,5 +180,7 @@ export const elementIds = {
     activateBtn: 'sdk-activate-btn',
     activateObserverBtn: 'sdk-activate-observer-btn',
     checkStatusBtn: 'sdk-check-status-btn',
+    adaptyAttributionToggle: 'sdk-adapty-attribution-toggle',
+    adaptyAttributionValue: 'sdk-adapty-attribution-value',
   },
 } as const;
