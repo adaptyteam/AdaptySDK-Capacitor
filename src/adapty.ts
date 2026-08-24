@@ -1596,9 +1596,19 @@ export class Adapty implements AdaptyPlugin {
   /**
    * Adds an event listener for SDK events.
    *
+   * Supported events:
+   * - onLatestProfileLoad → { profile: AdaptyProfile }
+   * - onPromotedPurchaseReceived → { product: AdaptyPromotedProduct }
+   * - onInstallationDetailsSuccess → { details: AdaptyInstallationDetails }
+   * - onInstallationDetailsFail → { error: AdaptyError }
+   *
    * @remarks
-   * You can listen to various events from the Adapty SDK such as profile updates.
-   * The listener will be called whenever the corresponding event occurs.
+   * Registering a listener for `'onPromotedPurchaseReceived'` replaces the
+   * SDK's default behaviour, which is to complete the purchase automatically.
+   * While a listener is registered you are responsible for completing the
+   * purchase — call {@link Adapty.makePromotedPurchase} with the product
+   * you receive, or the purchase never happens. Removing the returned handle
+   * restores the default.
    *
    * @param eventName - The name of the event to listen to.
    * @param listenerFunc - The function to call when the event occurs.
@@ -1636,6 +1646,12 @@ export class Adapty implements AdaptyPlugin {
    * This method removes all event listeners that were added via {@link addListener}.
    * It's recommended to call this method when cleaning up resources,
    * such as when unmounting a component.
+   *
+   * The SDK's own subscriptions are not app-owned and are re-created right
+   * after the teardown, so App Store promoted purchases keep being completed
+   * automatically. Your own `'onPromotedPurchaseReceived'` listener, however,
+   * is dropped with the rest, and that SDK default resumes in its place —
+   * re-register the listener if the app still owns completion.
    *
    * @returns A promise that resolves when all listeners are removed.
    *
