@@ -12,6 +12,9 @@ const EVENT_NAMES = {
   onInstallationDetailsFail: 'on_installation_details_fail',
 } as const;
 
+/** Lets the pending promise chains inside the emitter settle. */
+const flushMicrotasks = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 const TEST_EVENT_DATA = {
   profile: `{"id":"${EVENT_NAMES.didLoadLatestProfile}","profile":{}}`,
   installationSuccess: `{"id":"${EVENT_NAMES.onInstallationDetailsSuccess}","details":{"payload":"","install_id":"8716c26f-2e95-482e-a441-14b06a67792d","install_time":"2025-08-22T16:36:43.533Z","app_launch_count":16}}`,
@@ -667,6 +670,78 @@ describe('AdaptyEmitter', () => {
 
       expect(mockBridgeAddListener).toHaveBeenCalledTimes(2);
       expect((emitter as any).nativeEventListeners.has('did_receive_promoted_purchase')).toBe(true);
+    });
+
+    it('should dispatch once when removeAllListeners races an in-flight subscribe', async () => {
+      // The cold-launch shape: activate()'s own subscribe has not been
+      // acknowledged yet when the app tears its listeners down, and the promoted
+      // purchase arrives inside that window. A teardown that drops the in-flight
+      // request neither removes it nor waits for it, so the re-subscribe leaves
+      // TWO live native subscriptions dispatching the same event — and with no
+      // app handler each one runs the fallback, i.e. buys the product twice.
+      const fallback = jest.fn();
+      mockParseCommonEvent.mockReturnValue({ vendorProductId: 'yearly.premium.6999' });
+      emitter.setFallback('onPromotedPurchaseReceived', fallback);
+
+      // Stands in for the native side: a callback is live from the moment the
+      // bridge receives it, only the acknowledgement is late.
+      const liveHandlers = new Set<(arg: { data: string }) => void>();
+      let releaseFirstSubscribe!: () => void;
+      const firstSubscribeAcknowledged = new Promise<void>((resolve) => {
+        releaseFirstSubscribe = resolve;
+      });
+      let subscribeCount = 0;
+
+      mockBridgeAddListener.mockImplementation(async (_eventName, listenerFunc) => {
+        liveHandlers.add(listenerFunc);
+        subscribeCount += 1;
+
+        if (subscribeCount === 1) {
+          await firstSubscribeAcknowledged;
+        }
+
+        return {
+          remove: async () => {
+            liveHandlers.delete(listenerFunc);
+          },
+        } as PluginListenerHandle;
+      });
+
+      const emitNative = () => {
+        for (const handler of Array.from(liveHandlers)) {
+          handler({ data: TEST_EVENT_DATA.promotedPurchase });
+        }
+      };
+
+      const observing = emitter.startObserving('onPromotedPurchaseReceived');
+      const teardown = emitter.removeAllListeners();
+      await flushMicrotasks();
+
+      emitNative();
+      expect(fallback).toHaveBeenCalledTimes(1);
+
+      releaseFirstSubscribe();
+      await Promise.all([observing, teardown]);
+
+      // And once everything has settled exactly one subscription may remain:
+      // the second delivery must not be doubled either.
+      emitNative();
+      expect(fallback).toHaveBeenCalledTimes(2);
+      expect(liveHandlers.size).toBe(1);
+      expect((emitter as any).nativeEventListeners.size).toBe(1);
+    });
+
+    it('should not reject when the re-subscribe after removeAllListeners fails', async () => {
+      // Apps call removeAllListeners() unawaited from effect cleanups, where a
+      // rejection surfaces as an unhandled one. activate() treats the identical
+      // subscribe as best-effort; so must the teardown.
+      await emitter.startObserving('onPromotedPurchaseReceived');
+      mockBridgeAddListener.mockRejectedValueOnce(new Error('bridge unavailable'));
+
+      await expect(emitter.removeAllListeners()).resolves.toBeUndefined();
+
+      expect(mockLog.failed).toHaveBeenCalled();
+      expect((emitter as any).nativeEventListeners.size).toBe(0);
     });
 
     it('should still reach the fallback after removeAllListeners re-subscribes', async () => {

@@ -116,6 +116,29 @@ describe('Adapty - Activation (Bridge Integration)', () => {
       expect(request.configuration.customer_user_id).toBe('user_123');
     });
 
+    it('should send exactly one Activate.Request when two activations race', async () => {
+      // The `if (this.activating)` re-entrancy guard sits BELOW an awaited
+      // subscribe, so whichever call resumes first passes it — but the guard
+      // check and the assignment that arms it are synchronous, so only one of
+      // the two can ever reach performActivation, in any resume order. Pinned
+      // here because that subscribe is the SDK's promoted-purchase observer:
+      // anything added to it changes how many microtasks precede the guard.
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+      });
+
+      await Promise.all([
+        adapty.activate({ apiKey: 'test_api_key_12345', params: { logLevel: 'error' } }),
+        adapty.activate({ apiKey: 'test_api_key_12345', params: { logLevel: 'error' } }),
+      ]);
+
+      const activateCalls = nativeMock.handleMethodCall.mock.calls.filter(
+        ([{ methodName }]) => methodName === 'activate',
+      );
+
+      expect(activateCalls).toHaveLength(1);
+    });
+
     it('should handle Activate.Response error', async () => {
       nativeMock = createNativeModuleMock({
         activate: ACTIVATE_RESPONSE_ERROR,

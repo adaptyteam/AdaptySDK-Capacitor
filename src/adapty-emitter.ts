@@ -69,6 +69,13 @@ const EVENT_MAP: { [K in keyof EventPayloadMap]: EventConfig<K> } = {
   },
 };
 
+/**
+ * How many times `removeAllListeners()` re-checks for subscribe requests that
+ * started while it was draining the previous ones. Bounded so a teardown always
+ * terminates, even if something keeps subscribing in a loop.
+ */
+const MAX_SUBSCRIPTION_DRAIN_ROUNDS = 10;
+
 export class AdaptyEmitter {
   private nativeEventListeners: Map<string, PluginListenerHandle> = new Map();
   private externalHandlers: Map<
@@ -99,8 +106,8 @@ export class AdaptyEmitter {
   private fallbacks: Map<string, EventFallback> = new Map();
 
   /**
-   * Native subscriptions that have been requested but not yet resolved, keyed by
-   * native event id.
+   * `ensureNativeSubscription` operations that have been started but have not
+   * yet finished, keyed by native event id.
    *
    * `nativeEventListeners` alone cannot make `ensureNativeSubscription`
    * idempotent: it is only populated once `AdaptyCapacitorPlugin.addListener`
@@ -109,8 +116,13 @@ export class AdaptyEmitter {
    * for the promoted-purchase fallback that is a double purchase. Callers that
    * arrive while a request is in flight await this promise instead of issuing a
    * second one.
+   *
+   * What is cached is the whole operation rather than the raw native promise:
+   * an operation only settles once its handle has been recorded in
+   * `nativeEventListeners`, which is what lets `removeAllListeners()` drain the
+   * in-flight requests and then tear every subscription down from that one map.
    */
-  private pendingSubscriptions: Map<string, Promise<PluginListenerHandle>> = new Map();
+  private pendingSubscriptions: Map<string, Promise<void>> = new Map();
 
   public addListener: AddListenerFn = async <T extends keyof EventPayloadMap>(
     eventName: T,
@@ -158,8 +170,38 @@ export class AdaptyEmitter {
       return;
     }
 
+    // Published before `subscribeNatively` reaches its first await, so there is
+    // no window in which a concurrent caller sees neither a handle nor an
+    // in-flight request.
+    const operation = this.subscribeNatively(eventConfig);
+    this.pendingSubscriptions.set(eventConfig.native, operation);
+
+    try {
+      await operation;
+    } finally {
+      // Only retract our own entry: a teardown may already have cleared the map
+      // and a later call may have put its own request there. Clearing it on
+      // failure as well as success is what lets a failed attempt be retried
+      // instead of poisoning the cache forever.
+      if (this.pendingSubscriptions.get(eventConfig.native) === operation) {
+        this.pendingSubscriptions.delete(eventConfig.native);
+      }
+    }
+  }
+
+  /**
+   * Issues the native subscription and records the handle it returns.
+   *
+   * Kept as a single awaitable unit: whoever waits on it — a concurrent caller,
+   * or `removeAllListeners()` draining before a teardown — knows that once it
+   * settles the handle is either in `nativeEventListeners` or already removed.
+   * Awaiting the raw `AdaptyCapacitorPlugin.addListener` promise instead would
+   * hand back control one step too early, while the subscription is live but
+   * still invisible to a teardown.
+   */
+  private async subscribeNatively(eventConfig: EventConfig<keyof EventPayloadMap>): Promise<void> {
     const handlers = this.externalHandlers;
-    const subscriptionPromise = AdaptyCapacitorPlugin.addListener(eventConfig.native, (arg: { data: string }) => {
+    const subscription = await AdaptyCapacitorPlugin.addListener(eventConfig.native, (arg: { data: string }) => {
       const eventCtx = new LogContext();
       const eventLog = eventCtx.event({ methodName: eventConfig.native });
       eventLog.start(() => ({ raw: arg }));
@@ -200,31 +242,46 @@ export class AdaptyEmitter {
       }
     });
 
-    this.pendingSubscriptions.set(eventConfig.native, subscriptionPromise);
-
-    let subscription: PluginListenerHandle;
-    try {
-      subscription = await subscriptionPromise;
-    } finally {
-      // Only retract our own entry: a teardown may already have cleared the map
-      // and a later call may have put its own request there. Clearing it on
-      // failure as well as success is what lets a failed attempt be retried
-      // instead of poisoning the cache forever.
-      if (this.pendingSubscriptions.get(eventConfig.native) === subscriptionPromise) {
-        this.pendingSubscriptions.delete(eventConfig.native);
-      }
-    }
-
     const existing = this.nativeEventListeners.get(eventConfig.native);
     if (existing && existing !== subscription) {
-      // `removeAllListeners()` tore down and re-subscribed while this request was
-      // in flight. Overwriting the map entry would orphan a live native
-      // subscription that nothing could ever remove, so drop ours instead.
+      // Something re-subscribed while this request was in flight. Overwriting
+      // the map entry would orphan a live native subscription that nothing
+      // could ever remove, so drop ours instead. `removeAllListeners()` no
+      // longer produces this race — it drains first — but a caller that
+      // bypasses the in-flight cache still could, and an orphan here is a
+      // duplicate dispatch.
       await subscription.remove().catch(() => undefined);
       return;
     }
 
     this.nativeEventListeners.set(eventConfig.native, subscription);
+  }
+
+  /**
+   * Waits for the in-flight `ensureNativeSubscription` operations to finish and
+   * leaves `pendingSubscriptions` empty.
+   *
+   * Every settled operation has recorded its handle in `nativeEventListeners`,
+   * so the caller can tear all of them down from that one map. A request that
+   * starts while we are waiting is drained as well, for a bounded number of
+   * rounds: a teardown has to terminate even against a caller that keeps
+   * subscribing.
+   */
+  private async drainPendingSubscriptions(): Promise<void> {
+    for (let round = 0; round < MAX_SUBSCRIPTION_DRAIN_ROUNDS && this.pendingSubscriptions.size > 0; round += 1) {
+      const inFlight = Array.from(this.pendingSubscriptions.entries());
+      await Promise.allSettled(inFlight.map(([, operation]) => operation));
+
+      // Retract exactly what was awaited, so a request that started meanwhile
+      // is kept for the next round instead of being dropped.
+      for (const [native, operation] of inFlight) {
+        if (this.pendingSubscriptions.get(native) === operation) {
+          this.pendingSubscriptions.delete(native);
+        }
+      }
+    }
+
+    this.pendingSubscriptions.clear();
   }
 
   private parsePayload(
@@ -400,9 +457,14 @@ export class AdaptyEmitter {
     const observed = Array.from(this.observedEvents);
 
     try {
-      // Dropped along with the handles: a stale in-flight entry would make the
-      // re-subscribe below a no-op and leave the SDK permanently unsubscribed.
-      this.pendingSubscriptions.clear();
+      // Awaited, not dropped. A dropped in-flight subscribe is neither torn down
+      // here nor waited for: it registers its native subscription after this
+      // teardown, alongside the one the re-subscribe below creates, and two live
+      // subscriptions dispatch the same event twice — for the promoted-purchase
+      // fallback, a product bought twice. Draining first makes the late handle
+      // land in `nativeEventListeners` before it is read, so it goes down with
+      // the rest and the re-subscribe below is the only subscription left.
+      await this.drainPendingSubscriptions();
 
       const removePromises = Array.from(this.nativeEventListeners.values()).map((handle, index) =>
         handle.remove().catch((error) => {
@@ -419,7 +481,15 @@ export class AdaptyEmitter {
       await Promise.all(removePromises);
 
       for (const eventName of observed) {
-        await this.startObserving(eventName);
+        try {
+          await this.startObserving(eventName);
+        } catch (error) {
+          // Same reasoning as activate(), which wraps this very call the same
+          // way: losing the SDK-side default is not a reason to reject a public
+          // teardown method that apps routinely call unawaited from an effect
+          // cleanup, where the rejection would surface as an unhandled one.
+          log.failed(() => ({ message: `Failed to re-subscribe to ${eventName}`, error, eventName }));
+        }
       }
 
       log.success(() => ({ message: 'All listeners removed successfully' }));

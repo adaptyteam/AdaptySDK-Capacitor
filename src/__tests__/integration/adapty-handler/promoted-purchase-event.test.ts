@@ -18,6 +18,7 @@ import {
   createNativeModuleMock,
   emitNativeEvent,
   extractNativeRequest,
+  getTestEmitter,
   resetNativeModuleMock,
   resetTestEmitter,
   type MockNativeModule,
@@ -210,6 +211,67 @@ describe('Adapty - Promoted Purchase Event (Bridge Integration)', () => {
 
     expect(secondHandlerRan).toHaveLength(1);
     expect(calledMethods(nativeMock)).not.toContain('make_promoted_purchase');
+  });
+
+  it('should auto-purchase exactly once when removeAllListeners races the SDK subscribe', async () => {
+    // Cold launch from an itms-services purchaseIntent link: activate()'s own
+    // subscribe is still unacknowledged when the app tears its listeners down
+    // during startup, and the promoted purchase lands inside that window.
+    //
+    // A teardown that drops the in-flight request neither removes it nor waits
+    // for it: the re-subscribe adds a SECOND live native subscription, the one
+    // event is dispatched twice, and with no app handler the fallback buys the
+    // product twice. The teardown has to drain the in-flight subscribe first.
+    resetTestEmitter();
+
+    let releaseFirstSubscribe!: () => void;
+    const firstSubscribeAcknowledged = new Promise<void>((resolve) => {
+      releaseFirstSubscribe = resolve;
+    });
+    let subscribeCount = 0;
+
+    nativeMock.addListener.mockImplementation(async (eventName, listenerFunc) => {
+      // The listener is live natively as soon as the bridge receives it; only
+      // the acknowledgement is delayed, which is what a slow round-trip on a
+      // cold launch looks like.
+      const handle = getTestEmitter().addListener(eventName, listenerFunc);
+      subscribeCount += 1;
+
+      if (subscribeCount === 1) {
+        await firstSubscribeAcknowledged;
+      }
+
+      return handle;
+    });
+
+    const racingAdapty = new Adapty();
+    const activation = racingAdapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } });
+    await flush();
+
+    const teardown = racingAdapty.removeAllListeners();
+    await flush();
+
+    nativeMock.handleMethodCall.mockClear();
+    emitNativeEvent({
+      eventName: 'did_receive_promoted_purchase',
+      eventData: EVENT_DID_RECEIVE_PROMOTED_PURCHASE,
+    });
+    await flush();
+
+    releaseFirstSubscribe();
+    await Promise.all([activation, teardown]);
+    await flush();
+
+    // A delivery after everything has settled must be dispatched once too:
+    // exactly one native subscription may survive the race.
+    emitNativeEvent({
+      eventName: 'did_receive_promoted_purchase',
+      eventData: EVENT_DID_RECEIVE_PROMOTED_PURCHASE,
+    });
+    await flush();
+
+    const purchases = calledMethods(nativeMock).filter((method) => method === 'make_promoted_purchase');
+    expect(purchases).toHaveLength(2);
   });
 
   it('should auto-purchase exactly once when two activations race', async () => {
