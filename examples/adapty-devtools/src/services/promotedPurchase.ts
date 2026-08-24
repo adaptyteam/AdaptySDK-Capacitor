@@ -80,13 +80,21 @@ export function subscribeToPromotedPurchase(
     handle = subscription;
   }, onError);
 
-  return () =>
-    enqueue(async () => {
+  return () => {
+    // Flip the flag synchronously, before the removal is queued: that is what
+    // lets the registration step above short-circuit when it has not run yet
+    // (never call addListener at all) or when addListener resolves after we
+    // were already unsubscribed (remove the subscription immediately).
+    cancelled = true;
+
+    return enqueue(async () => {
       // Queued behind our own registration step, so the next subscribe cannot
-      // start until this handler is provably gone.
+      // start until this handler is provably gone. Idempotent: after the first
+      // call handle is null and this is a no-op.
       await handle?.remove();
       handle = null;
     }, onError);
+  };
 }
 
 /**
