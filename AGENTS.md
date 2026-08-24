@@ -64,7 +64,7 @@ src/
 
 ### cross_platform.yaml
 
-JSON Schema defining all method signatures and data structures. Native arguments must conform to request schemas (e.g., `Activate.Request`, `GetPaywall.Request`).
+The JSON Schema defining all method signatures and data structures. It lives in **`@adapty/core`, not in this repo** — do not look for it here. Its generated types reach this SDK through core's declarations, re-exported by `src/types/api.d.ts` as `components['requests']['Activate.Request']` and friends, and `scripts/check-bridge-api-test-coverage.js` reads the method list from `node_modules/@adapty/core/dist/index.d.mts` for the same reason. Native arguments must conform to those request schemas (e.g. `Activate.Request`, `GetPaywall.Request`).
 
 ### Examples
 
