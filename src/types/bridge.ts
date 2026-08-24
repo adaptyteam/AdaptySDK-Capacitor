@@ -1,4 +1,10 @@
-import type { AdaptyProfile, AdaptyInstallationDetails, UserEventName, AdaptyError } from '@adapty/core';
+import type {
+  AdaptyProfile,
+  AdaptyPromotedProduct,
+  AdaptyInstallationDetails,
+  UserEventName,
+  AdaptyError,
+} from '@adapty/core';
 
 // Re-export bridge types from @adapty/core
 export { MethodNames } from '@adapty/core';
@@ -17,5 +23,6 @@ export type AddListenerGeneric<E extends UserEventName, Data> = (
 
 export type AddListenerFn =
   | AddListenerGeneric<'onLatestProfileLoad', AdaptyProfile>
+  | AddListenerGeneric<'onPromotedPurchaseReceived', AdaptyPromotedProduct>
   | AddListenerGeneric<'onInstallationDetailsSuccess', AdaptyInstallationDetails>
   | AddListenerGeneric<'onInstallationDetailsFail', AdaptyError>;

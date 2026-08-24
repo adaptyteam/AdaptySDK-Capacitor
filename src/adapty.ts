@@ -54,6 +54,19 @@ type Req = components['requests'];
 export class Adapty implements AdaptyPlugin {
   constructor() {
     Log.setVersion(VERSION);
+
+    // An App Store promoted purchase that nobody completes silently does
+    // nothing — the store hands the product to the app and waits. So the
+    // fallback is a real purchase, not a no-op. Registering any app listener
+    // for the event replaces it.
+    this.emitter.setFallback('onPromotedPurchaseReceived', ({ product }) =>
+      this.makePromotedPurchase({ product }).catch((error) =>
+        Log.warn(
+          'onPromotedPurchaseReceived',
+          () => `Failed to complete the promoted purchase automatically: ${error}`,
+        ),
+      ),
+    );
   }
 
   private activating: Promise<void> | null = null;
@@ -192,6 +205,15 @@ export class Adapty implements AdaptyPlugin {
       throw new Error('API key is required and must be a non-empty string');
     }
 
+    // Eager, and before any early return: both native bridges only deliver an
+    // event while JS holds a listener, so the SDK has to hold one from
+    // activation onward or the promoted purchase never reaches JS and there is
+    // nothing for the default to react to. Every early return below — an
+    // activation already in flight, the fast-refresh short circuit, the
+    // deferred-activation path — skips performActivation, so installing it
+    // there would leave those paths deaf to the event.
+    await this.startObservingPromotedPurchases();
+
     // Prevent multiple activations
     if (this.activating) {
       await this.activating;
@@ -230,6 +252,20 @@ export class Adapty implements AdaptyPlugin {
     this.activating = this.performActivation(apiKey, params);
     await this.activating;
     this.activating = null;
+  }
+
+  /**
+   * Subscribes the SDK itself to the promoted-purchase event.
+   *
+   * A failure here must not fail activation: the app still works, it just loses
+   * the automatic completion of App Store promoted purchases.
+   */
+  private async startObservingPromotedPurchases(): Promise<void> {
+    try {
+      await this.emitter.startObserving('onPromotedPurchaseReceived');
+    } catch (error) {
+      Log.warn('activate', () => `Failed to observe promoted purchases: ${error}`);
+    }
   }
 
   private async performActivation(apiKey: string, params: ActivateParamsInput): Promise<void> {

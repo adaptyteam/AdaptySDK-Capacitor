@@ -534,4 +534,75 @@ describe('AdaptyEmitter', () => {
       expect(uniqueIds.size).toBe(20);
     });
   });
+  describe('SDK-owned events', () => {
+    it('should subscribe natively without any app handler', async () => {
+      await emitter.startObserving('onPromotedPurchaseReceived');
+
+      expect(mockBridgeAddListener).toHaveBeenCalledTimes(1);
+      expect(mockBridgeAddListener).toHaveBeenCalledWith('did_receive_promoted_purchase', expect.any(Function));
+    });
+
+    it('should subscribe only once across repeated calls', async () => {
+      await emitter.startObserving('onPromotedPurchaseReceived');
+      await emitter.startObserving('onPromotedPurchaseReceived');
+
+      expect(mockBridgeAddListener).toHaveBeenCalledTimes(1);
+    });
+
+    it('should run the fallback when no app handler is registered', async () => {
+      const fallback = jest.fn();
+      mockParseCommonEvent.mockReturnValue({ vendorProductId: 'yearly.premium.6999' });
+
+      emitter.setFallback('onPromotedPurchaseReceived', fallback);
+      await emitter.startObserving('onPromotedPurchaseReceived');
+
+      const nativeHandler = mockBridgeAddListener.mock.calls[0]![1];
+      nativeHandler({ data: '{"id":"did_receive_promoted_purchase","product":{}}' });
+
+      expect(fallback).toHaveBeenCalledTimes(1);
+      expect(fallback).toHaveBeenCalledWith({ product: { vendorProductId: 'yearly.premium.6999' } });
+    });
+
+    it('should skip the fallback while an app handler is registered', async () => {
+      const fallback = jest.fn();
+      const listener = jest.fn();
+      mockParseCommonEvent.mockReturnValue({ vendorProductId: 'yearly.premium.6999' });
+
+      emitter.setFallback('onPromotedPurchaseReceived', fallback);
+      await emitter.startObserving('onPromotedPurchaseReceived');
+      await emitter.addListener('onPromotedPurchaseReceived', listener);
+
+      const nativeHandler = mockBridgeAddListener.mock.calls[0]![1];
+      nativeHandler({ data: '{"id":"did_receive_promoted_purchase","product":{}}' });
+
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(fallback).not.toHaveBeenCalled();
+    });
+
+    it('should keep the native subscription when the last app handler is removed', async () => {
+      await emitter.startObserving('onPromotedPurchaseReceived');
+      const handle = await emitter.addListener('onPromotedPurchaseReceived', jest.fn());
+
+      await handle.remove();
+
+      expect(mockPluginHandle.remove).not.toHaveBeenCalled();
+    });
+
+    it('should re-subscribe an observed event after removeAllListeners', async () => {
+      await emitter.startObserving('onPromotedPurchaseReceived');
+
+      await emitter.removeAllListeners();
+
+      expect(mockPluginHandle.remove).toHaveBeenCalledTimes(1);
+      expect(mockBridgeAddListener).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not re-subscribe an event that was never observed', async () => {
+      await emitter.addListener('onLatestProfileLoad', jest.fn());
+
+      await emitter.removeAllListeners();
+
+      expect(mockBridgeAddListener).toHaveBeenCalledTimes(1);
+    });
+  });
 });

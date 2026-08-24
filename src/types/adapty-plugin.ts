@@ -195,8 +195,17 @@ export interface AdaptyPlugin {
    *
    * Supported events:
    * - onLatestProfileLoad → { profile: AdaptyProfile }
+   * - onPromotedPurchaseReceived → { product: AdaptyPromotedProduct }
    * - onInstallationDetailsSuccess → { details: AdaptyInstallationDetails }
    * - onInstallationDetailsFail → { error: AdaptyError }
+   *
+   * @remarks
+   * Registering a listener for `'onPromotedPurchaseReceived'` replaces the
+   * SDK's default behaviour, which is to complete the purchase automatically.
+   * While a listener is registered you are responsible for completing the
+   * purchase — call {@link AdaptyPlugin.makePromotedPurchase} with the product
+   * you receive, or the purchase never happens. Removing the returned handle
+   * restores the default.
    */
   addListener: AddListenerFn;
 
@@ -209,13 +218,18 @@ export interface AdaptyPlugin {
 /**
  * Supported event names.
  */
-export type AdaptyEventName = 'onLatestProfileLoad' | 'onInstallationDetailsSuccess' | 'onInstallationDetailsFail';
+export type AdaptyEventName =
+  | 'onLatestProfileLoad'
+  | 'onPromotedPurchaseReceived'
+  | 'onInstallationDetailsSuccess'
+  | 'onInstallationDetailsFail';
 
 /**
  * Mapping between event names and their payload types.
  */
 export type EventPayloadMap = {
   onLatestProfileLoad: { profile: AdaptyProfile };
+  onPromotedPurchaseReceived: { product: AdaptyPromotedProduct };
   onInstallationDetailsSuccess: { details: AdaptyInstallationDetails };
   onInstallationDetailsFail: { error: AdaptyError };
 };
