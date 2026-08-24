@@ -98,6 +98,20 @@ export class AdaptyEmitter {
    */
   private fallbacks: Map<string, EventFallback> = new Map();
 
+  /**
+   * Native subscriptions that have been requested but not yet resolved, keyed by
+   * native event id.
+   *
+   * `nativeEventListeners` alone cannot make `ensureNativeSubscription`
+   * idempotent: it is only populated once `AdaptyCapacitorPlugin.addListener`
+   * resolves, so two callers racing across that await would both see an empty
+   * map and both subscribe. Two live subscriptions dispatch every event twice —
+   * for the promoted-purchase fallback that is a double purchase. Callers that
+   * arrive while a request is in flight await this promise instead of issuing a
+   * second one.
+   */
+  private pendingSubscriptions: Map<string, Promise<PluginListenerHandle>> = new Map();
+
   public addListener: AddListenerFn = async <T extends keyof EventPayloadMap>(
     eventName: T,
     listener: (data: EventPayloadMap[T]) => void,
@@ -138,8 +152,14 @@ export class AdaptyEmitter {
       return;
     }
 
+    const inFlight = this.pendingSubscriptions.get(eventConfig.native);
+    if (inFlight) {
+      await inFlight;
+      return;
+    }
+
     const handlers = this.externalHandlers;
-    const subscription = await AdaptyCapacitorPlugin.addListener(eventConfig.native, (arg: { data: string }) => {
+    const subscriptionPromise = AdaptyCapacitorPlugin.addListener(eventConfig.native, (arg: { data: string }) => {
       const eventCtx = new LogContext();
       const eventLog = eventCtx.event({ methodName: eventConfig.native });
       eventLog.start(() => ({ raw: arg }));
@@ -179,6 +199,30 @@ export class AdaptyEmitter {
         eventLog.success(() => ({ message: 'Event handled successfully', handlerName }));
       }
     });
+
+    this.pendingSubscriptions.set(eventConfig.native, subscriptionPromise);
+
+    let subscription: PluginListenerHandle;
+    try {
+      subscription = await subscriptionPromise;
+    } finally {
+      // Only retract our own entry: a teardown may already have cleared the map
+      // and a later call may have put its own request there. Clearing it on
+      // failure as well as success is what lets a failed attempt be retried
+      // instead of poisoning the cache forever.
+      if (this.pendingSubscriptions.get(eventConfig.native) === subscriptionPromise) {
+        this.pendingSubscriptions.delete(eventConfig.native);
+      }
+    }
+
+    const existing = this.nativeEventListeners.get(eventConfig.native);
+    if (existing && existing !== subscription) {
+      // `removeAllListeners()` tore down and re-subscribed while this request was
+      // in flight. Overwriting the map entry would orphan a live native
+      // subscription that nothing could ever remove, so drop ours instead.
+      await subscription.remove().catch(() => undefined);
+      return;
+    }
 
     this.nativeEventListeners.set(eventConfig.native, subscription);
   }
@@ -242,8 +286,11 @@ export class AdaptyEmitter {
   /**
    * Subscribes the SDK itself to a native event, once.
    *
-   * Idempotent, so callers may call it on every activation attempt without
-   * risking a second live subscription — two would dispatch every event twice.
+   * Idempotent for sequential AND concurrent callers: unawaited overlapping
+   * calls — two `activate()`s racing, say — all await the same in-flight
+   * request, so only one native subscription is ever created. Two would
+   * dispatch every event twice, which for the promoted-purchase fallback means
+   * buying the product twice.
    */
   public async startObserving<K extends keyof EventPayloadMap>(eventName: K): Promise<void> {
     const eventConfig = EVENT_MAP[eventName];
@@ -353,6 +400,10 @@ export class AdaptyEmitter {
     const observed = Array.from(this.observedEvents);
 
     try {
+      // Dropped along with the handles: a stale in-flight entry would make the
+      // re-subscribe below a no-op and leave the SDK permanently unsubscribed.
+      this.pendingSubscriptions.clear();
+
       const removePromises = Array.from(this.nativeEventListeners.values()).map((handle, index) =>
         handle.remove().catch((error) => {
           log.failed(() => ({

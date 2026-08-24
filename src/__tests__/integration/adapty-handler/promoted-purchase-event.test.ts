@@ -19,6 +19,7 @@ import {
   emitNativeEvent,
   extractNativeRequest,
   resetNativeModuleMock,
+  resetTestEmitter,
   type MockNativeModule,
 } from '../shared/native-module-mock.utils';
 
@@ -209,5 +210,34 @@ describe('Adapty - Promoted Purchase Event (Bridge Integration)', () => {
 
     expect(secondHandlerRan).toHaveLength(1);
     expect(calledMethods(nativeMock)).not.toContain('make_promoted_purchase');
+  });
+
+  it('should auto-purchase exactly once when two activations race', async () => {
+    // Two unawaited activate() calls both reach the SDK's startObserving before
+    // either native subscription resolves. Without an in-flight guard both would
+    // subscribe, the one event would be dispatched twice, and the fallback would
+    // buy the product twice.
+    //
+    // A fresh test emitter drops the subscription held by the instance activated
+    // in beforeEach, so every make_promoted_purchase counted here belongs to the
+    // racing pair.
+    resetTestEmitter();
+
+    const racingAdapty = new Adapty();
+    await Promise.all([
+      racingAdapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } }),
+      racingAdapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } }),
+    ]);
+    nativeMock.handleMethodCall.mockClear();
+
+    emitNativeEvent({
+      eventName: 'did_receive_promoted_purchase',
+      eventData: EVENT_DID_RECEIVE_PROMOTED_PURCHASE,
+    });
+
+    await flush();
+
+    const purchases = calledMethods(nativeMock).filter((method) => method === 'make_promoted_purchase');
+    expect(purchases).toHaveLength(1);
   });
 });

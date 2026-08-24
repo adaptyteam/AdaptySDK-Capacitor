@@ -7,6 +7,7 @@ import { LogContext } from './logger';
 
 const EVENT_NAMES = {
   didLoadLatestProfile: 'did_load_latest_profile',
+  didReceivePromotedPurchase: 'did_receive_promoted_purchase',
   onInstallationDetailsSuccess: 'on_installation_details_success',
   onInstallationDetailsFail: 'on_installation_details_fail',
 } as const;
@@ -15,6 +16,7 @@ const TEST_EVENT_DATA = {
   profile: `{"id":"${EVENT_NAMES.didLoadLatestProfile}","profile":{}}`,
   installationSuccess: `{"id":"${EVENT_NAMES.onInstallationDetailsSuccess}","details":{"payload":"","install_id":"8716c26f-2e95-482e-a441-14b06a67792d","install_time":"2025-08-22T16:36:43.533Z","app_launch_count":16}}`,
   installationFail: `{"id":"${EVENT_NAMES.onInstallationDetailsFail}","error":{}}`,
+  promotedPurchase: `{"id":"${EVENT_NAMES.didReceivePromotedPurchase}","product":{}}`,
 } as const;
 
 jest.mock('./bridge/plugin', () => require('./bridge/plugin.mock').mockAdaptyCapacitorPlugin);
@@ -603,6 +605,86 @@ describe('AdaptyEmitter', () => {
       await emitter.removeAllListeners();
 
       expect(mockBridgeAddListener).toHaveBeenCalledTimes(1);
+    });
+
+    it('should issue a single native subscription for concurrent startObserving calls', async () => {
+      // Neither call is awaited before the other starts, and the native
+      // subscription stays unresolved until both are past the idempotency check
+      // — the exact window in which a plain `has()` guard would let both through
+      // and leave two live subscriptions dispatching every event twice.
+      let resolveSubscription!: (handle: PluginListenerHandle) => void;
+      mockBridgeAddListener.mockImplementationOnce(
+        () =>
+          new Promise<PluginListenerHandle>((resolve) => {
+            resolveSubscription = resolve;
+          }),
+      );
+
+      const first = emitter.startObserving('onPromotedPurchaseReceived');
+      const second = emitter.startObserving('onPromotedPurchaseReceived');
+
+      resolveSubscription(mockPluginHandle);
+      await Promise.all([first, second]);
+
+      expect(mockBridgeAddListener).toHaveBeenCalledTimes(1);
+      expect((emitter as any).nativeEventListeners.size).toBe(1);
+    });
+
+    it('should dispatch a concurrently observed event to the fallback exactly once', async () => {
+      const fallback = jest.fn();
+      mockParseCommonEvent.mockReturnValue({ vendorProductId: 'yearly.premium.6999' });
+      emitter.setFallback('onPromotedPurchaseReceived', fallback);
+
+      let resolveSubscription!: (handle: PluginListenerHandle) => void;
+      mockBridgeAddListener.mockImplementationOnce(
+        () =>
+          new Promise<PluginListenerHandle>((resolve) => {
+            resolveSubscription = resolve;
+          }),
+      );
+
+      const first = emitter.startObserving('onPromotedPurchaseReceived');
+      const second = emitter.startObserving('onPromotedPurchaseReceived');
+      resolveSubscription(mockPluginHandle);
+      await Promise.all([first, second]);
+
+      // Every registered native handler would receive the event; only one exists.
+      for (const call of mockBridgeAddListener.mock.calls) {
+        call[1]({ data: TEST_EVENT_DATA.promotedPurchase });
+      }
+
+      expect(fallback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should retry the subscription after a failed attempt', async () => {
+      // A rejected request must not poison the in-flight cache: the next call
+      // has to be able to try again.
+      mockBridgeAddListener.mockRejectedValueOnce(new Error('bridge unavailable'));
+
+      await expect(emitter.startObserving('onPromotedPurchaseReceived')).rejects.toThrow('bridge unavailable');
+
+      await emitter.startObserving('onPromotedPurchaseReceived');
+
+      expect(mockBridgeAddListener).toHaveBeenCalledTimes(2);
+      expect((emitter as any).nativeEventListeners.has('did_receive_promoted_purchase')).toBe(true);
+    });
+
+    it('should still reach the fallback after removeAllListeners re-subscribes', async () => {
+      const fallback = jest.fn();
+      mockParseCommonEvent.mockReturnValue({ vendorProductId: 'yearly.premium.6999' });
+
+      emitter.setFallback('onPromotedPurchaseReceived', fallback);
+      await emitter.startObserving('onPromotedPurchaseReceived');
+
+      await emitter.removeAllListeners();
+
+      expect(mockBridgeAddListener).toHaveBeenCalledTimes(2);
+
+      const nativeHandler = mockBridgeAddListener.mock.calls[1]![1];
+      nativeHandler({ data: TEST_EVENT_DATA.promotedPurchase });
+
+      expect(fallback).toHaveBeenCalledTimes(1);
+      expect(fallback).toHaveBeenCalledWith({ product: { vendorProductId: 'yearly.premium.6999' } });
     });
   });
 });
