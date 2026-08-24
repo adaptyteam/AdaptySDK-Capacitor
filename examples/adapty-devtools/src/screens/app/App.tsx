@@ -120,6 +120,10 @@ const App: React.FC = () => {
   const flowRef = useRef<FlowControllerRef>(null);
   const onboardingRef = useRef<OnboardingControllerRef>(null);
 
+  // Serializes every subscribe/remove of the app-owned promoted-purchase
+  // handler so that at most one of them is registered at any instant.
+  const promotedRegistrationRef = useRef<Promise<void>>(Promise.resolve());
+
   const refundPreferences = [RefundPreference.NoPreference, RefundPreference.Grant, RefundPreference.Decline];
 
   const refundPreferenceLabels = ['No Preference', 'Grant', 'Decline'];
@@ -139,6 +143,13 @@ const App: React.FC = () => {
   // runs while the app explicitly claims ownership. Unsubscribing via the
   // handle — never adapty.removeAllListeners() — restores that default without
   // touching the listeners EventListenersManager registered.
+  //
+  // Both the subscribe and the remove are queued on promotedRegistrationRef, so
+  // a run can only register its handler after the previous run's handler is
+  // gone. Without that queue a fast off→on toggle would append a second
+  // app-level handler for the event while the first one is still registered
+  // (the first one is removed only once its addListener promise resolves), and
+  // a promoted purchase arriving inside that window would be reported twice.
   useEffect(() => {
     if (!isActivated || !appHandlesPromoted) {
       return;
@@ -148,23 +159,47 @@ const App: React.FC = () => {
     let cancelled = false;
 
     log('info', 'App now owns promoted purchases', 'promotedPurchase');
-    subscribeToPromotedPurchase((product) => {
-      log('info', 'Event: promoted purchase received', 'onPromotedPurchaseReceived', false, { product });
-      setPromotedProduct(product);
-    }).then((subscription) => {
-      // addListener resolves asynchronously; if the effect was already torn
-      // down we must not leave a live subscription behind.
-      if (cancelled) {
-        void subscription.remove();
-        return;
-      }
-      handle = subscription;
-    });
+    const registration = promotedRegistrationRef.current
+      .then(async () => {
+        // The effect may already have been torn down while we waited for the
+        // previous run to unsubscribe — then we must not subscribe at all.
+        if (cancelled) {
+          return;
+        }
+
+        const subscription = await subscribeToPromotedPurchase((product) => {
+          log('info', 'Event: promoted purchase received', 'onPromotedPurchaseReceived', false, { product });
+          setPromotedProduct(product);
+        });
+
+        // addListener resolves asynchronously; if the effect was torn down
+        // meanwhile we must not leave a live subscription behind.
+        if (cancelled) {
+          await subscription.remove();
+          return;
+        }
+
+        handle = subscription;
+      })
+      .catch((error) => {
+        log('error', 'Error subscribing to promoted purchases', 'promotedPurchase', false, { error: String(error) });
+      });
+
+    promotedRegistrationRef.current = registration;
 
     return () => {
       cancelled = true;
       log('info', 'Restoring the SDK promoted-purchase default', 'promotedPurchase');
-      void handle?.remove();
+      promotedRegistrationRef.current = registration
+        .then(async () => {
+          await handle?.remove();
+          handle = null;
+        })
+        .catch((error) => {
+          log('error', 'Error restoring the SDK promoted-purchase default', 'promotedPurchase', false, {
+            error: String(error),
+          });
+        });
       setPromotedProduct(null);
     };
   }, [isActivated, appHandlesPromoted]);
