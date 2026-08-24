@@ -37,7 +37,6 @@ import {
 } from '../../services/externalAttribution';
 import { buildActivateParams } from '../../services/activateParams';
 import type { AdaptyPromotedProduct } from '@adapty/capacitor';
-import type { PluginListenerHandle } from '@capacitor/core';
 import { buyPromotedProduct, subscribeToPromotedPurchase } from '../../services/promotedPurchase';
 import { PromotedPurchaseSection } from './sections/PromotedPurchaseSection';
 
@@ -120,10 +119,6 @@ const App: React.FC = () => {
   const flowRef = useRef<FlowControllerRef>(null);
   const onboardingRef = useRef<OnboardingControllerRef>(null);
 
-  // Serializes every subscribe/remove of the app-owned promoted-purchase
-  // handler so that at most one of them is registered at any instant.
-  const promotedRegistrationRef = useRef<Promise<void>>(Promise.resolve());
-
   const refundPreferences = [RefundPreference.NoPreference, RefundPreference.Grant, RefundPreference.Decline];
 
   const refundPreferenceLabels = ['No Preference', 'Grant', 'Decline'];
@@ -140,66 +135,34 @@ const App: React.FC = () => {
 
   // Registering our own handler switches the SDK out of its default behaviour
   // (which is to complete the promoted purchase itself), so this effect only
-  // runs while the app explicitly claims ownership. Unsubscribing via the
-  // handle — never adapty.removeAllListeners() — restores that default without
-  // touching the listeners EventListenersManager registered.
-  //
-  // Both the subscribe and the remove are queued on promotedRegistrationRef, so
-  // a run can only register its handler after the previous run's handler is
-  // gone. Without that queue a fast off→on toggle would append a second
-  // app-level handler for the event while the first one is still registered
-  // (the first one is removed only once its addListener promise resolves), and
-  // a promoted purchase arriving inside that window would be reported twice.
+  // runs while the app explicitly claims ownership. Unsubscribing through the
+  // function subscribeToPromotedPurchase returned — never
+  // adapty.removeAllListeners() — restores that default without touching the
+  // listeners EventListenersManager registered. That helper queues the
+  // subscribe and the remove on one module-level chain, so no interleaving of
+  // toggles, of resolutions, or of remounts of this screen can leave two app
+  // handlers registered at once.
   useEffect(() => {
     if (!isActivated || !appHandlesPromoted) {
       return;
     }
 
-    let handle: PluginListenerHandle | null = null;
-    let cancelled = false;
-
     log('info', 'App now owns promoted purchases', 'promotedPurchase');
-    const registration = promotedRegistrationRef.current
-      .then(async () => {
-        // The effect may already have been torn down while we waited for the
-        // previous run to unsubscribe — then we must not subscribe at all.
-        if (cancelled) {
-          return;
-        }
-
-        const subscription = await subscribeToPromotedPurchase((product) => {
-          log('info', 'Event: promoted purchase received', 'onPromotedPurchaseReceived', false, { product });
-          setPromotedProduct(product);
+    const unsubscribe = subscribeToPromotedPurchase(
+      (product) => {
+        log('info', 'Event: promoted purchase received', 'onPromotedPurchaseReceived', false, { product });
+        setPromotedProduct(product);
+      },
+      (error) => {
+        log('error', 'Error switching promoted-purchase ownership', 'promotedPurchase', false, {
+          error: String(error),
         });
-
-        // addListener resolves asynchronously; if the effect was torn down
-        // meanwhile we must not leave a live subscription behind.
-        if (cancelled) {
-          await subscription.remove();
-          return;
-        }
-
-        handle = subscription;
-      })
-      .catch((error) => {
-        log('error', 'Error subscribing to promoted purchases', 'promotedPurchase', false, { error: String(error) });
-      });
-
-    promotedRegistrationRef.current = registration;
+      },
+    );
 
     return () => {
-      cancelled = true;
       log('info', 'Restoring the SDK promoted-purchase default', 'promotedPurchase');
-      promotedRegistrationRef.current = registration
-        .then(async () => {
-          await handle?.remove();
-          handle = null;
-        })
-        .catch((error) => {
-          log('error', 'Error restoring the SDK promoted-purchase default', 'promotedPurchase', false, {
-            error: String(error),
-          });
-        });
+      void unsubscribe();
       setPromotedProduct(null);
     };
   }, [isActivated, appHandlesPromoted]);
