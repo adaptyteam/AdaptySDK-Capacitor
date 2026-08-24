@@ -191,6 +191,16 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `profile-form-submit-btn` | `elementIds.profileForm.submitBtn` | src/screens/profile/Profile.tsx |
 | `profile-form-result-value` | `elementIds.profileForm.resultValue` | src/screens/profile/Profile.tsx |
 
+## promoted
+
+| id | registry path | used in |
+| --- | --- | --- |
+| `promoted-owner-value` | `elementIds.promoted.ownerValue` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+| `promoted-use-sdk-default-btn` | `elementIds.promoted.useSdkDefaultBtn` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+| `promoted-use-app-handler-btn` | `elementIds.promoted.useAppHandlerBtn` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+| `promoted-last-product-value` | `elementIds.promoted.lastProductValue` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+| `promoted-buy-btn` | `elementIds.promoted.buyBtn` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+
 ## refund
 
 | id | registry path | used in |

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   adapty,
   AdaptyFlow,
@@ -36,6 +36,10 @@ import {
   type ExternalAttributionProvider,
 } from '../../services/externalAttribution';
 import { buildActivateParams } from '../../services/activateParams';
+import type { AdaptyPromotedProduct } from '@adapty/capacitor';
+import type { PluginListenerHandle } from '@capacitor/core';
+import { buyPromotedProduct, subscribeToPromotedPurchase } from '../../services/promotedPurchase';
+import { PromotedPurchaseSection } from './sections/PromotedPurchaseSection';
 
 const App: React.FC = () => {
   // Get context state and actions
@@ -110,6 +114,8 @@ const App: React.FC = () => {
   const [isLoadingFlow, setIsLoadingFlow] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
   const [adaptyAttributionEnabled, setAdaptyAttributionEnabled] = useState(false);
+  const [appHandlesPromoted, setAppHandlesPromoted] = useState(false);
+  const [promotedProduct, setPromotedProduct] = useState<AdaptyPromotedProduct | null>(null);
 
   const flowRef = useRef<FlowControllerRef>(null);
   const onboardingRef = useRef<OnboardingControllerRef>(null);
@@ -127,6 +133,41 @@ const App: React.FC = () => {
     'return_cache_data_else_load',
     'return_cache_data_if_not_expired_else_load',
   ] as const;
+
+  // Registering our own handler switches the SDK out of its default behaviour
+  // (which is to complete the promoted purchase itself), so this effect only
+  // runs while the app explicitly claims ownership. Unsubscribing via the
+  // handle — never adapty.removeAllListeners() — restores that default without
+  // touching the listeners EventListenersManager registered.
+  useEffect(() => {
+    if (!isActivated || !appHandlesPromoted) {
+      return;
+    }
+
+    let handle: PluginListenerHandle | null = null;
+    let cancelled = false;
+
+    log('info', 'App now owns promoted purchases', 'promotedPurchase');
+    subscribeToPromotedPurchase((product) => {
+      log('info', 'Event: promoted purchase received', 'onPromotedPurchaseReceived', false, { product });
+      setPromotedProduct(product);
+    }).then((subscription) => {
+      // addListener resolves asynchronously; if the effect was already torn
+      // down we must not leave a live subscription behind.
+      if (cancelled) {
+        void subscription.remove();
+        return;
+      }
+      handle = subscription;
+    });
+
+    return () => {
+      cancelled = true;
+      log('info', 'Restoring the SDK promoted-purchase default', 'promotedPurchase');
+      void handle?.remove();
+      setPromotedProduct(null);
+    };
+  }, [isActivated, appHandlesPromoted]);
 
   const testActivate = async (observerMode = false) => {
     try {
@@ -332,6 +373,20 @@ const App: React.FC = () => {
         provider,
       });
       setResult(`Error updating attribution: ${error}`);
+    }
+  };
+
+  const buyLastPromotedProduct = async () => {
+    if (!promotedProduct) return;
+
+    try {
+      log('info', 'Completing promoted purchase', 'makePromotedPurchase', false, { promotedProduct });
+      const purchaseResult = await buyPromotedProduct(promotedProduct);
+      log('info', 'Promoted purchase result', 'makePromotedPurchase', false, { purchaseResult });
+      setResult(`Promoted purchase result: ${purchaseResult.type}`);
+    } catch (error) {
+      log('error', 'Error completing promoted purchase', 'makePromotedPurchase', false, { error: String(error) });
+      setResult(`Error completing promoted purchase: ${error}`);
     }
   };
 
@@ -1091,6 +1146,17 @@ const App: React.FC = () => {
             setTransactionId={setTransactionId}
             setVariationId={setVariationId}
             reportTransaction={reportTransaction}
+          />
+        )}
+
+        {/* Promoted Purchases Section */}
+        {isActivated && (
+          <PromotedPurchaseSection
+            isActivated={isActivated}
+            appHandlesPromoted={appHandlesPromoted}
+            promotedProduct={promotedProduct}
+            setAppHandlesPromoted={setAppHandlesPromoted}
+            buyLastPromotedProduct={buyLastPromotedProduct}
           />
         )}
 

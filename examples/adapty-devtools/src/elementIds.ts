@@ -121,6 +121,13 @@ export const elementIds = {
     variationIdInput: 'report-tx-variation-id-input',
     submitBtn: 'report-tx-submit-btn',
   },
+  promoted: {
+    ownerValue: 'promoted-owner-value',
+    useSdkDefaultBtn: 'promoted-use-sdk-default-btn',
+    useAppHandlerBtn: 'promoted-use-app-handler-btn',
+    lastProductValue: 'promoted-last-product-value',
+    buyBtn: 'promoted-buy-btn',
+  },
   integration: {
     keyInput: 'integration-key-input',
     valueInput: 'integration-value-input',
