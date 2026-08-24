@@ -7,6 +7,7 @@ import type {
   AdaptyFlow,
   AdaptyFlowPaywall,
   AdaptyPaywallProduct,
+  AdaptyPromotedProduct,
   AdaptyOnboarding,
   AdaptyProfile,
   AdaptyPurchaseResult,
@@ -123,6 +124,11 @@ export interface AdaptyPlugin {
     product: AdaptyPaywallProduct;
     params?: MakePurchaseParamsInput;
   }): Promise<AdaptyPurchaseResult>;
+
+  /**
+   * Purchases a product promoted in the App Store.
+   */
+  makePromotedPurchase(options: { product: AdaptyPromotedProduct }): Promise<AdaptyPurchaseResult>;
 
   /**
    * Presents the code redemption sheet (iOS only).

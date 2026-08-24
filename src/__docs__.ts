@@ -70,6 +70,7 @@ export {
   GetOnboardingOptions,
   GetOnboardingForDefaultAudienceOptions,
   MakePurchaseOptions,
+  MakePromotedPurchaseOptions,
 } from './types/configs';
 // UI Builder types
 export {

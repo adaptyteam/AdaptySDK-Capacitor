@@ -30,6 +30,7 @@ import type {
   GetFlowForDefaultAudienceOptions,
   GetFlowForDefaultAudienceOptionsWithDefaults,
   MakePurchaseOptions,
+  MakePromotedPurchaseOptions,
   GetOnboardingOptions,
   GetOnboardingOptionsWithDefaults,
   GetOnboardingForDefaultAudienceOptions,
@@ -994,6 +995,50 @@ export class Adapty implements AdaptyPlugin {
       method,
       product: productInput,
       parameters: purchaseParams,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyPurchaseResult');
+  }
+
+  /**
+   * Purchases a product promoted in the App Store.
+   *
+   * @remarks
+   * Use this with the product delivered by the `'onPromotedPurchaseReceived'`
+   * event. Unlike {@link makePurchase}, a promoted product carries no paywall
+   * context, so no purchase parameters are accepted.
+   *
+   * @param options - The purchase options
+   * @param options.product - The promoted product to purchase.
+   * @returns A promise that resolves with the {@link AdaptyPurchaseResult} object.
+   * @throws Error if an error occurs during the purchase process.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * await adapty.addListener('onPromotedPurchaseReceived', async ({ product }) => {
+   *   await adapty.makePromotedPurchase({ product });
+   * });
+   * ```
+   */
+  async makePromotedPurchase(options: MakePromotedPurchaseOptions): Promise<AdaptyPurchaseResult> {
+    const method = 'make_promoted_purchase';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
+    const productCoder = coderFactory.createPromotedProductCoder();
+
+    const encodedProduct = this.encodeWithLogging(productCoder, options.product, 'AdaptyPromotedProduct', ctx);
+    const productInput = productCoder.getInput(encodedProduct);
+
+    const argsWithUndefined: Req['MakePromotedPurchase.Request'] = {
+      method,
+      product: productInput,
     };
 
     const args = filterUndefined(argsWithUndefined);
