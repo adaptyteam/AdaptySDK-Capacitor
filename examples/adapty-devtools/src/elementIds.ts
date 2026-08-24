@@ -83,6 +83,7 @@ export const elementIds = {
     variationIdValue: 'flow-variation-id-value',
     revisionValue: 'flow-revision-value',
     paywallsCountValue: 'flow-paywalls-count-value',
+    uiSchemaValue: 'flow-ui-schema-value',
     hasRemoteConfigValue: 'flow-has-remote-config-value',
     productsCountValue: 'flow-products-count-value',
     configLocaleValue: 'flow-config-locale-value',

@@ -66,6 +66,7 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `flow-variation-id-value` | `elementIds.flow.variationIdValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-revision-value` | `elementIds.flow.revisionValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-paywalls-count-value` | `elementIds.flow.paywallsCountValue` | src/screens/app/sections/FlowSection.tsx |
+| `flow-ui-schema-value` | `elementIds.flow.uiSchemaValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-has-remote-config-value` | `elementIds.flow.hasRemoteConfigValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-products-count-value` | `elementIds.flow.productsCountValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-config-locale-value` | `elementIds.flow.configLocaleValue` | src/screens/app/sections/FlowSection.tsx |
