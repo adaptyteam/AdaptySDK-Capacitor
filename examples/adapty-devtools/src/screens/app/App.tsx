@@ -28,6 +28,13 @@ import { OtherActionsSection } from './sections/OtherActionsSection';
 import { RefundSection } from './sections/RefundSection';
 import { IntegrationSection } from './sections/IntegrationSection';
 import { ReportTransactionSection } from './sections/ReportTransactionSection';
+import {
+  CUSTOM_ATTRIBUTION_PAYLOAD,
+  PROVIDER_ATTRIBUTION_PAYLOAD,
+  sendCustomAttribution,
+  sendProviderAttribution,
+  type ExternalAttributionProvider,
+} from '../../services/externalAttribution';
 
 const App: React.FC = () => {
   // Get context state and actions
@@ -301,35 +308,39 @@ const App: React.FC = () => {
     }
   };
 
-  const updateAttribution = async () => {
+  const updateCustomAttribution = async () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Updating attribution', 'updateAttribution', false, {
-        source: 'custom',
-        attribution: {
-          status: 'non_organic',
-          channel: 'Google Ads',
-          campaign: 'Adapty Web Test',
-          ad_group: 'adapty ad_group',
-          creative: 'test_creative',
-        },
+      log('info', 'Updating attribution', 'updateExternalAttribution', false, {
+        provider: 'custom',
+        attribution: CUSTOM_ATTRIBUTION_PAYLOAD,
       });
-      await adapty.updateAttribution({
-        attribution: {
-          status: 'non_organic',
-          channel: 'Google Ads',
-          campaign: 'Adapty Web Test',
-          ad_group: 'adapty ad_group',
-          creative: 'test_creative',
-        },
-        source: 'custom',
-      });
-      setResult('Attribution updated successfully');
+      await sendCustomAttribution();
+      setResult('Attribution updated successfully (custom)');
     } catch (error) {
-      log('error', 'Error updating attribution', 'updateAttribution', false, {
+      log('error', 'Error updating attribution', 'updateExternalAttribution', false, {
         error: String(error),
-        source: 'custom',
+        provider: 'custom',
+      });
+      setResult(`Error updating attribution: ${error}`);
+    }
+  };
+
+  const updateProviderAttribution = async (provider: ExternalAttributionProvider) => {
+    if (!isActivated) return;
+
+    try {
+      log('info', 'Updating attribution', 'updateExternalAttribution', false, {
+        provider,
+        attribution: PROVIDER_ATTRIBUTION_PAYLOAD,
+      });
+      await sendProviderAttribution(provider);
+      setResult(`Attribution updated successfully (${provider})`);
+    } catch (error) {
+      log('error', 'Error updating attribution', 'updateExternalAttribution', false, {
+        error: String(error),
+        provider,
       });
       setResult(`Error updating attribution: ${error}`);
     }
@@ -930,7 +941,8 @@ const App: React.FC = () => {
     <OtherActionsSection
       isActivated={isActivated}
       restorePurchases={restorePurchases}
-      updateAttribution={updateAttribution}
+      updateCustomAttribution={updateCustomAttribution}
+      updateProviderAttribution={updateProviderAttribution}
       presentCodeRedemptionSheet={presentCodeRedemptionSheet}
       setLogLevel={setLogLevel}
       testSetFallback={testSetFallback}

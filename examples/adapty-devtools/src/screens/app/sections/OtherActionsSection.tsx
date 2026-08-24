@@ -2,11 +2,17 @@ import React from 'react';
 import styles from '../App.module.css';
 import { ButtonGroup } from '../components/ButtonGroup';
 import { elementIds } from '../../../elementIds';
+import {
+  EXTERNAL_ATTRIBUTION_LABELS,
+  EXTERNAL_ATTRIBUTION_PROVIDERS,
+  type ExternalAttributionProvider,
+} from '../../../services/externalAttribution';
 
 type Props = {
   isActivated: boolean;
   restorePurchases: () => Promise<void>;
-  updateAttribution: () => Promise<void>;
+  updateCustomAttribution: () => Promise<void>;
+  updateProviderAttribution: (provider: ExternalAttributionProvider) => Promise<void>;
   presentCodeRedemptionSheet: () => Promise<void>;
   setLogLevel: () => Promise<void>;
   testSetFallback: () => Promise<void>;
@@ -20,7 +26,8 @@ type Props = {
 export const OtherActionsSection: React.FC<Props> = ({
   isActivated,
   restorePurchases,
-  updateAttribution,
+  updateCustomAttribution,
+  updateProviderAttribution,
   presentCodeRedemptionSheet,
   setLogLevel,
   testSetFallback,
@@ -44,13 +51,27 @@ export const OtherActionsSection: React.FC<Props> = ({
           Restore Purchases
         </button>
         <button
-          id={elementIds.otherActions.updateAttributionBtn}
-          onClick={updateAttribution}
+          id={elementIds.otherActions.updateCustomAttributionBtn}
+          onClick={updateCustomAttribution}
           disabled={!isActivated}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
         >
-          Update Attribution
+          Update Attribution (custom)
         </button>
+      </ButtonGroup>
+
+      <ButtonGroup>
+        {EXTERNAL_ATTRIBUTION_PROVIDERS.map((provider: ExternalAttributionProvider) => (
+          <button
+            key={provider}
+            id={elementIds.otherActions.updateProviderAttributionBtn(provider)}
+            onClick={() => updateProviderAttribution(provider)}
+            disabled={!isActivated}
+            className={`${styles.Button} ${styles.ButtonSecondary}`}
+          >
+            {EXTERNAL_ATTRIBUTION_LABELS[provider]}
+          </button>
+        ))}
       </ButtonGroup>
 
       <ButtonGroup>

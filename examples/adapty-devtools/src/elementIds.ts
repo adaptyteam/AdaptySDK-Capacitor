@@ -137,7 +137,8 @@ export const elementIds = {
   },
   otherActions: {
     restorePurchasesBtn: 'other-restore-purchases-btn',
-    updateAttributionBtn: 'other-update-attribution-btn',
+    updateCustomAttributionBtn: 'other-update-custom-attribution-btn',
+    updateProviderAttributionBtn: (key: string | number) => `other-update-attribution-${key}-btn`,
     codeRedemptionBtn: 'other-code-redemption-btn',
     setLogLevelBtn: 'other-set-log-level-btn',
     setFallbackBtn: 'other-set-fallback-btn',

@@ -154,7 +154,8 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | id | registry path | used in |
 | --- | --- | --- |
 | `other-restore-purchases-btn` | `elementIds.otherActions.restorePurchasesBtn` | src/screens/app/sections/OtherActionsSection.tsx |
-| `other-update-attribution-btn` | `elementIds.otherActions.updateAttributionBtn` | src/screens/app/sections/OtherActionsSection.tsx |
+| `other-update-custom-attribution-btn` | `elementIds.otherActions.updateCustomAttributionBtn` | src/screens/app/sections/OtherActionsSection.tsx |
+| `other-update-attribution-{key}-btn` | `elementIds.otherActions.updateProviderAttributionBtn` | src/screens/app/sections/OtherActionsSection.tsx |
 | `other-code-redemption-btn` | `elementIds.otherActions.codeRedemptionBtn` | src/screens/app/sections/OtherActionsSection.tsx |
 | `other-set-log-level-btn` | `elementIds.otherActions.setLogLevelBtn` | src/screens/app/sections/OtherActionsSection.tsx |
 | `other-set-fallback-btn` | `elementIds.otherActions.setFallbackBtn` | src/screens/app/sections/OtherActionsSection.tsx |
