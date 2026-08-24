@@ -51,7 +51,7 @@ interface ResponseRegistry {
   report_transaction?: components['requests']['ReportTransaction.Response'];
   set_log_level?: components['requests']['SetLogLevel.Response'];
   set_fallback?: components['requests']['SetFallback.Response'];
-  update_attribution_data?: components['requests']['UpdateAttributionData.Response'];
+  update_external_attribution_data?: components['requests']['UpdateExternalAttributionData.Response'];
   update_profile?: components['requests']['UpdateProfile.Response'];
   get_current_installation_status?: components['requests']['GetCurrentInstallationStatus.Response'];
   present_code_redemption_sheet?: components['requests']['PresentCodeRedemptionSheet.Response'];

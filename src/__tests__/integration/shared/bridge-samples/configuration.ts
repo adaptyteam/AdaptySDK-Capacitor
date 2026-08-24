@@ -65,17 +65,19 @@ export const SET_INTEGRATION_IDENTIFIER_RESPONSE_SUCCESS: components['requests']
   };
 
 /**
- * UpdateAttributionData request
+ * UpdateExternalAttributionData request
  */
-export const UPDATE_ATTRIBUTION_DATA_REQUEST: components['requests']['UpdateAttributionData.Request'] = {
-  method: 'update_attribution_data',
-  attribution: '{"campaign":"summer_sale","source":"google"}',
-  source: 'appsflyer',
-};
+export const UPDATE_EXTERNAL_ATTRIBUTION_DATA_REQUEST: components['requests']['UpdateExternalAttributionData.Request'] =
+  {
+    method: 'update_external_attribution_data',
+    attribution: '{"campaign":"summer_sale","source":"google"}',
+    provider: 'appsflyer',
+  };
 
 /**
- * UpdateAttributionData successful response
+ * UpdateExternalAttributionData successful response
  */
-export const UPDATE_ATTRIBUTION_DATA_RESPONSE_SUCCESS: components['requests']['UpdateAttributionData.Response'] = {
-  success: true,
-};
+export const UPDATE_EXTERNAL_ATTRIBUTION_DATA_RESPONSE_SUCCESS: components['requests']['UpdateExternalAttributionData.Response'] =
+  {
+    success: true,
+  };

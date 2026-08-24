@@ -155,9 +155,9 @@ export interface AdaptyPlugin {
   setLogLevel(options: { logLevel?: LogLevel; logger?: LoggerConfig }): Promise<void>;
 
   /**
-   * Updates attribution data for the current user.
+   * Updates attribution data from an external attribution provider for the current user.
    */
-  updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void>;
+  updateExternalAttribution(options: { attribution: Record<string, any>; provider: string }): Promise<void>;
 
   /**
    * Updates collecting refund data consent (iOS only).

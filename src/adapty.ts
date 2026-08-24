@@ -1301,14 +1301,17 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
-   * Updates attribution data for the current user.
+   * Updates attribution data from an external attribution provider
+   * for the current user.
    *
    * @remarks
    * Attribution data can be used to track marketing campaigns and user acquisition sources.
+   * Renamed from `updateAttribution` in 4.1.0 to match the native SDKs;
+   * the second field is now the provider name.
    *
    * @param options - The options object
    * @param options.attribution - An object containing attribution data.
-   * @param options.source - The source of the attribution data (e.g., 'adjust', 'appsflyer').
+   * @param options.provider - The attribution provider the data came from (e.g., 'adjust', 'appsflyer').
    * @returns A promise that resolves when the attribution data is updated.
    * @throws Error if parameters are invalid or not provided.
    *
@@ -1324,23 +1327,23 @@ export class Adapty implements AdaptyPlugin {
    *     'Adjust Adgroup': 'adjust_adgroup',
    *   };
    *
-   *   await adapty.updateAttribution({ attribution, source: 'adjust' });
+   *   await adapty.updateExternalAttribution({ attribution, provider: 'adjust' });
    * } catch (error) {
    *   console.error('Failed to update attribution:', error);
    * }
    * ```
    */
-  async updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void> {
-    const method = 'update_attribution_data';
+  async updateExternalAttribution(options: { attribution: Record<string, any>; provider: string }): Promise<void> {
+    const method = 'update_external_attribution_data';
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const argsWithUndefined: Req['UpdateAttributionData.Request'] = {
+    const argsWithUndefined: Req['UpdateExternalAttributionData.Request'] = {
       method,
       attribution: JSON.stringify(options.attribution),
-      source: options.source,
+      provider: options.provider,
     };
 
     const args = filterUndefined(argsWithUndefined);
