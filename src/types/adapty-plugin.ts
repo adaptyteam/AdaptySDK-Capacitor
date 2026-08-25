@@ -4,6 +4,7 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import type { LoggerConfig } from '../logger';
 
 import type {
+  AdaptyExternalAttributionProvider,
   AdaptyFlow,
   AdaptyFlowPaywall,
   AdaptyPaywallProduct,
@@ -163,7 +164,10 @@ export interface AdaptyPlugin {
   /**
    * Updates attribution data from an external attribution provider for the current user.
    */
-  updateExternalAttribution(options: { attribution: Record<string, any>; provider: string }): Promise<void>;
+  updateExternalAttribution(options: {
+    attribution: Record<string, any>;
+    provider: AdaptyExternalAttributionProvider;
+  }): Promise<void>;
 
   /**
    * Updates collecting refund data consent (iOS only).
