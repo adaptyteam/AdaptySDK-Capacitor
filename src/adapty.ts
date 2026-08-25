@@ -30,6 +30,7 @@ import type {
   GetFlowForDefaultAudienceOptions,
   GetFlowForDefaultAudienceOptionsWithDefaults,
   MakePurchaseOptions,
+  MakePromotedPurchaseOptions,
   GetOnboardingOptions,
   GetOnboardingOptionsWithDefaults,
   GetOnboardingForDefaultAudienceOptions,
@@ -53,6 +54,19 @@ type Req = components['requests'];
 export class Adapty implements AdaptyPlugin {
   constructor() {
     Log.setVersion(VERSION);
+
+    // An App Store promoted purchase that nobody completes silently does
+    // nothing — the store hands the product to the app and waits. So the
+    // fallback is a real purchase, not a no-op. Registering any app listener
+    // for the event replaces it.
+    this.emitter.setFallback('onPromotedPurchaseReceived', ({ product }) =>
+      this.makePromotedPurchase({ product }).catch((error) =>
+        Log.warn(
+          'onPromotedPurchaseReceived',
+          () => `Failed to complete the promoted purchase automatically: ${error}`,
+        ),
+      ),
+    );
   }
 
   private activating: Promise<void> | null = null;
@@ -191,6 +205,15 @@ export class Adapty implements AdaptyPlugin {
       throw new Error('API key is required and must be a non-empty string');
     }
 
+    // Eager, and before any early return: both native bridges only deliver an
+    // event while JS holds a listener, so the SDK has to hold one from
+    // activation onward or the promoted purchase never reaches JS and there is
+    // nothing for the default to react to. Every early return below — an
+    // activation already in flight, the fast-refresh short circuit, the
+    // deferred-activation path — skips performActivation, so installing it
+    // there would leave those paths deaf to the event.
+    await this.startObservingPromotedPurchases();
+
     // Prevent multiple activations
     if (this.activating) {
       await this.activating;
@@ -229,6 +252,20 @@ export class Adapty implements AdaptyPlugin {
     this.activating = this.performActivation(apiKey, params);
     await this.activating;
     this.activating = null;
+  }
+
+  /**
+   * Subscribes the SDK itself to the promoted-purchase event.
+   *
+   * A failure here must not fail activation: the app still works, it just loses
+   * the automatic completion of App Store promoted purchases.
+   */
+  private async startObservingPromotedPurchases(): Promise<void> {
+    try {
+      await this.emitter.startObserving('onPromotedPurchaseReceived');
+    } catch (error) {
+      Log.warn('activate', () => `Failed to observe promoted purchases: ${error}`);
+    }
   }
 
   private async performActivation(apiKey: string, params: ActivateParamsInput): Promise<void> {
@@ -1002,6 +1039,50 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
+   * Purchases a product promoted in the App Store.
+   *
+   * @remarks
+   * Use this with the product delivered by the `'onPromotedPurchaseReceived'`
+   * event. Unlike {@link makePurchase}, a promoted product carries no paywall
+   * context, so no purchase parameters are accepted.
+   *
+   * @param options - The purchase options
+   * @param options.product - The promoted product to purchase.
+   * @returns A promise that resolves with the {@link AdaptyPurchaseResult} object.
+   * @throws Error if an error occurs during the purchase process.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * await adapty.addListener('onPromotedPurchaseReceived', async ({ product }) => {
+   *   await adapty.makePromotedPurchase({ product });
+   * });
+   * ```
+   */
+  async makePromotedPurchase(options: MakePromotedPurchaseOptions): Promise<AdaptyPurchaseResult> {
+    const method = 'make_promoted_purchase';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
+    const productCoder = coderFactory.createPromotedProductCoder();
+
+    const encodedProduct = this.encodeWithLogging(productCoder, options.product, 'AdaptyPromotedProduct', ctx);
+    const productInput = productCoder.getInput(encodedProduct);
+
+    const argsWithUndefined: Req['MakePromotedPurchase.Request'] = {
+      method,
+      product: productInput,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyPurchaseResult');
+  }
+
+  /**
    * Opens a native modal screen to redeem Apple Offer Codes.
    *
    * @remarks
@@ -1301,14 +1382,17 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
-   * Updates attribution data for the current user.
+   * Updates attribution data from an external attribution provider
+   * for the current user.
    *
    * @remarks
    * Attribution data can be used to track marketing campaigns and user acquisition sources.
+   * Renamed from `updateAttribution` in 4.1.0 to match the native SDKs;
+   * the second field is now the provider name.
    *
    * @param options - The options object
    * @param options.attribution - An object containing attribution data.
-   * @param options.source - The source of the attribution data (e.g., 'adjust', 'appsflyer').
+   * @param options.provider - The attribution provider the data came from (e.g., 'adjust', 'appsflyer').
    * @returns A promise that resolves when the attribution data is updated.
    * @throws Error if parameters are invalid or not provided.
    *
@@ -1324,23 +1408,23 @@ export class Adapty implements AdaptyPlugin {
    *     'Adjust Adgroup': 'adjust_adgroup',
    *   };
    *
-   *   await adapty.updateAttribution({ attribution, source: 'adjust' });
+   *   await adapty.updateExternalAttribution({ attribution, provider: 'adjust' });
    * } catch (error) {
    *   console.error('Failed to update attribution:', error);
    * }
    * ```
    */
-  async updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void> {
-    const method = 'update_attribution_data';
+  async updateExternalAttribution(options: { attribution: Record<string, any>; provider: string }): Promise<void> {
+    const method = 'update_external_attribution_data';
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const argsWithUndefined: Req['UpdateAttributionData.Request'] = {
+    const argsWithUndefined: Req['UpdateExternalAttributionData.Request'] = {
       method,
       attribution: JSON.stringify(options.attribution),
-      source: options.source,
+      provider: options.provider,
     };
 
     const args = filterUndefined(argsWithUndefined);
@@ -1512,9 +1596,19 @@ export class Adapty implements AdaptyPlugin {
   /**
    * Adds an event listener for SDK events.
    *
+   * Supported events:
+   * - onLatestProfileLoad → { profile: AdaptyProfile }
+   * - onPromotedPurchaseReceived → { product: AdaptyPromotedProduct }
+   * - onInstallationDetailsSuccess → { details: AdaptyInstallationDetails }
+   * - onInstallationDetailsFail → { error: AdaptyError }
+   *
    * @remarks
-   * You can listen to various events from the Adapty SDK such as profile updates.
-   * The listener will be called whenever the corresponding event occurs.
+   * Registering a listener for `'onPromotedPurchaseReceived'` replaces the
+   * SDK's default behaviour, which is to complete the purchase automatically.
+   * While a listener is registered you are responsible for completing the
+   * purchase — call {@link Adapty.makePromotedPurchase} with the product
+   * you receive, or the purchase never happens. Removing the returned handle
+   * restores the default.
    *
    * @param eventName - The name of the event to listen to.
    * @param listenerFunc - The function to call when the event occurs.
@@ -1552,6 +1646,12 @@ export class Adapty implements AdaptyPlugin {
    * This method removes all event listeners that were added via {@link addListener}.
    * It's recommended to call this method when cleaning up resources,
    * such as when unmounting a component.
+   *
+   * The SDK's own subscriptions are not app-owned and are re-created right
+   * after the teardown, so App Store promoted purchases keep being completed
+   * automatically. Your own `'onPromotedPurchaseReceived'` listener, however,
+   * is dropped with the rest, and that SDK default resumes in its place —
+   * re-register the listener if the app still owns completion.
    *
    * @returns A promise that resolves when all listeners are removed.
    *

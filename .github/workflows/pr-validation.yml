@@ -104,6 +104,10 @@ jobs:
       if: matrix.check-type == 'js-checks'
       run: yarn test
 
+    - name: Check bridge API test coverage
+      if: matrix.check-type == 'js-checks'
+      run: yarn test:coverage
+
     - name: Run build verification
       if: matrix.check-type == 'js-checks'
       run: yarn verify:web

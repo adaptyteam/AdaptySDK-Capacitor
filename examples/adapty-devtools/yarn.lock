@@ -6,10 +6,10 @@
   version "0.0.0"
   uid ""
 
-"@adapty/core@4.0.2-dev.7f2916d50c20823a81b13bead46906975bdf70d4":
-  version "4.0.2-dev.7f2916d50c20823a81b13bead46906975bdf70d4"
-  resolved "https://registry.yarnpkg.com/@adapty/core/-/core-4.0.2-dev.7f2916d50c20823a81b13bead46906975bdf70d4.tgz#5aa9a947d1c9a8800aec1b4a2a958ee405fb97e3"
-  integrity sha512-ETUjMa9zqWmLxZ4CQWTpi71T5XxzFP7Cm6e3d2zp2eFYrlgxthBMybhdYwtVDRonckU0KJnFpyXmwWz13DmDyw==
+"@adapty/core@4.1.0-dev.51f7b5e66af39a9a82a499d0a75bedc5b5c796f5":
+  version "4.1.0-dev.51f7b5e66af39a9a82a499d0a75bedc5b5c796f5"
+  resolved "https://registry.yarnpkg.com/@adapty/core/-/core-4.1.0-dev.51f7b5e66af39a9a82a499d0a75bedc5b5c796f5.tgz#63a8884ba64d5f0326d1f307936d5f1bcb2037d8"
+  integrity sha512-4pf9UR83tfakyMR/y3VeFSPmS7mkCjSKdljSX0xTA892r9LxzTNT7QUBRV+YUP6X76bYSFhtKv+JdnDsDW1X2Q==
   dependencies:
     tslib "^2.5.0"
 

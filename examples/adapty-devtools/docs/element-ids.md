@@ -66,6 +66,7 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `flow-variation-id-value` | `elementIds.flow.variationIdValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-revision-value` | `elementIds.flow.revisionValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-paywalls-count-value` | `elementIds.flow.paywallsCountValue` | src/screens/app/sections/FlowSection.tsx |
+| `flow-ui-schema-value` | `elementIds.flow.uiSchemaValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-has-remote-config-value` | `elementIds.flow.hasRemoteConfigValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-products-count-value` | `elementIds.flow.productsCountValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-config-locale-value` | `elementIds.flow.configLocaleValue` | src/screens/app/sections/FlowSection.tsx |
@@ -154,7 +155,8 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | id | registry path | used in |
 | --- | --- | --- |
 | `other-restore-purchases-btn` | `elementIds.otherActions.restorePurchasesBtn` | src/screens/app/sections/OtherActionsSection.tsx |
-| `other-update-attribution-btn` | `elementIds.otherActions.updateAttributionBtn` | src/screens/app/sections/OtherActionsSection.tsx |
+| `other-update-custom-attribution-btn` | `elementIds.otherActions.updateCustomAttributionBtn` | src/screens/app/sections/OtherActionsSection.tsx |
+| `other-update-attribution-{key}-btn` | `elementIds.otherActions.updateProviderAttributionBtn` | src/screens/app/sections/OtherActionsSection.tsx |
 | `other-code-redemption-btn` | `elementIds.otherActions.codeRedemptionBtn` | src/screens/app/sections/OtherActionsSection.tsx |
 | `other-set-log-level-btn` | `elementIds.otherActions.setLogLevelBtn` | src/screens/app/sections/OtherActionsSection.tsx |
 | `other-set-fallback-btn` | `elementIds.otherActions.setFallbackBtn` | src/screens/app/sections/OtherActionsSection.tsx |
@@ -190,6 +192,16 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `profile-form-submit-btn` | `elementIds.profileForm.submitBtn` | src/screens/profile/Profile.tsx |
 | `profile-form-result-value` | `elementIds.profileForm.resultValue` | src/screens/profile/Profile.tsx |
 
+## promoted
+
+| id | registry path | used in |
+| --- | --- | --- |
+| `promoted-owner-value` | `elementIds.promoted.ownerValue` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+| `promoted-use-sdk-default-btn` | `elementIds.promoted.useSdkDefaultBtn` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+| `promoted-use-app-handler-btn` | `elementIds.promoted.useAppHandlerBtn` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+| `promoted-last-product-value` | `elementIds.promoted.lastProductValue` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+| `promoted-buy-btn` | `elementIds.promoted.buyBtn` | src/screens/app/sections/PromotedPurchaseSection.tsx |
+
 ## refund
 
 | id | registry path | used in |
@@ -217,6 +229,8 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `sdk-activate-btn` | `elementIds.sdk.activateBtn` | src/screens/app/App.tsx |
 | `sdk-activate-observer-btn` | `elementIds.sdk.activateObserverBtn` | src/screens/app/App.tsx |
 | `sdk-check-status-btn` | `elementIds.sdk.checkStatusBtn` | src/screens/app/App.tsx |
+| `sdk-adapty-attribution-toggle` | `elementIds.sdk.adaptyAttributionToggle` | src/screens/app/App.tsx |
+| `sdk-adapty-attribution-value` | `elementIds.sdk.adaptyAttributionValue` | src/screens/app/App.tsx |
 
 ## sdkStatus
 

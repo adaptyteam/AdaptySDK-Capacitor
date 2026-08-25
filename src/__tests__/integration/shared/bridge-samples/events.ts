@@ -122,3 +122,22 @@ export const INSTALLATION_DETAILS_FAIL: components['events']['Event.OnInstallati
     message: 'Failed to fetch installation details',
   },
 };
+
+/**
+ * Event.DidReceivePromotedPurchase — App Store promoted product.
+ */
+export const EVENT_DID_RECEIVE_PROMOTED_PURCHASE: components['events']['Event.DidReceivePromotedPurchase'] = {
+  id: 'did_receive_promoted_purchase',
+  product: {
+    vendor_product_id: 'yearly.premium.6999',
+    localized_description: 'Get premium features with this plan',
+    localized_title: 'Yearly Premium Plan',
+    is_family_shareable: false,
+    price: {
+      amount: 69.99,
+      currency_code: 'USD',
+      currency_symbol: '$',
+      localized_string: '$69.99',
+    },
+  },
+};

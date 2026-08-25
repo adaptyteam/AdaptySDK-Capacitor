@@ -5,18 +5,27 @@
 ### `adapty-handler/` — Bridge Protocol Tests
 Tests SDK method communication with native: JS (camelCase) → encode → snake_case JSON → Capacitor bridge → decode → JS.
 Uses `NativeModuleMock` spy to verify exact request format and response parsing.
-**73 tests** across 15 test files covering all major SDK methods:
-- activation (27 tests), attribution (3), configuration (3), event-listeners (5)
+**89 tests** across 16 test files covering all major SDK methods:
+- activation (30 tests), attribution (3), configuration (3), event-listeners (5)
 - installation (4), ios-specific (6), onboarding (3), flow (7)
-- products (2), profile (2), purchase (2), purchase-event (1)
-- restore-purchases (1), user-management (3), web-paywall (4)
+- products (2), profile (2), promoted-purchase-event (10), purchase (5)
+- purchase-event (1), restore-purchases (1), user-management (3), web-paywall (4)
+
+`promoted-purchase-event.test.ts` is the App Store promoted-purchase suite: it
+pins who completes the purchase (the SDK default vs. an app handler) and the
+concurrency invariant behind it — one native `did_receive_promoted_purchase`
+must produce at most one `make_promoted_purchase`, across racing `activate()`
+calls and a `removeAllListeners()` that overlaps an unresolved subscribe.
+
+Counts are a snapshot; regenerate them with
+`npx jest src/__tests__/integration/ --json` when suites change.
 
 ### `ui-builder/` — UI ViewController Method Tests
 Tests SDK UI controller methods (FlowViewController, OnboardingViewController) for bridge communication:
 JS (camelCase) → encode → snake_case JSON → Capacitor bridge → decode → JS.
 Uses `NativeModuleMock` spy to verify exact request format and response parsing.
-**13 tests** across 2 test files:
-- flow-view-controller-methods (9 tests): createFlowView, present, dismiss, showDialog
+**14 tests** across 2 test files:
+- flow-view-controller-methods (10 tests): createFlowView, present, dismiss, showDialog
 - onboarding-view-controller-methods (4 tests): createOnboardingView, present, dismiss
 
 ## Shared Utilities (`shared/`)
@@ -78,8 +87,8 @@ JS API call (camelCase)
 
 ## Running Tests
 ```bash
-npx jest src/__tests__/integration/                   # All integration tests (86 tests)
-npx jest src/__tests__/integration/adapty-handler/    # Bridge protocol tests (73 tests)
-npx jest src/__tests__/integration/ui-builder/        # UI ViewController tests (11 tests)
+npx jest src/__tests__/integration/                   # All integration tests (103 tests)
+npx jest src/__tests__/integration/adapty-handler/    # Bridge protocol tests (89 tests)
+npx jest src/__tests__/integration/ui-builder/        # UI ViewController tests (14 tests)
 npx jest src/__tests__/integration/adapty-handler/activation.test.ts  # Just activation
 ```

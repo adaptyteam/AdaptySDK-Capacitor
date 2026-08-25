@@ -38,6 +38,9 @@ export {
   AdaptyPrice,
   AdaptyFlow,
   AdaptyFlowPaywall,
+  AdaptyFlowUiSchema,
+  AdaptyFlowUiSchemaGrid,
+  AdaptyFlowUiSchemaLayout,
   AdaptyOnboarding,
   AdaptyPlacement,
   AdaptyRemoteConfig,
@@ -48,6 +51,7 @@ export {
   AdaptyNonSubscription,
   AdaptySubscription,
   AdaptyPaywallProduct,
+  AdaptyPromotedProduct,
   AdaptySubscriptionDetails,
   AdaptySubscriptionOffer,
   AdaptySubscriptionOfferId,
@@ -66,6 +70,7 @@ export {
   GetOnboardingOptions,
   GetOnboardingForDefaultAudienceOptions,
   MakePurchaseOptions,
+  MakePromotedPurchaseOptions,
 } from './types/configs';
 // UI Builder types
 export {

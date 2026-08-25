@@ -26,7 +26,7 @@ import {
  * Tests verify bridge communication for UI methods:
  * - Request encoding (camelCase → snake_case)
  * - Response parsing (snake_case → camelCase)
- * - Parameter handling (prefetchProducts, loadTimeoutMs, android.enableSafeArea, iOS styles)
+ * - Parameter handling (prefetchProducts, loadTimeoutMs, customLayoutId, android.enableSafeArea, iOS styles)
  *
  * Note: Event handling tests are separate
  */
@@ -99,6 +99,26 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
       expect(view.locale).toBe('es');
     });
 
+    it('should encode customLayoutId', async () => {
+      await createFlowView(flow, { customLayoutId: 'tablet_layout' });
+
+      const request = extractNativeRequest<components['requests']['AdaptyUICreateFlowView.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.custom_layout_id).toBe('tablet_layout');
+    });
+
+    it('should omit custom_layout_id when customLayoutId is not provided', async () => {
+      await createFlowView(flow);
+
+      const request = extractNativeRequest<components['requests']['AdaptyUICreateFlowView.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.custom_layout_id).toBeUndefined();
+    });
+
     it('should encode custom parameters', async () => {
       await createFlowView(flow, {
         prefetchProducts: false,
@@ -113,6 +133,20 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
       expect(request.preload_products).toBe(false);
       expect(request.load_timeout).toBe(3); // 3000ms → 3s
       expect(request.enable_safe_area_paddings).toBe(false); // caller override (wire key)
+    });
+
+    it('should send ui_schema back unchanged', async () => {
+      await createFlowView(flow);
+
+      const request = extractNativeRequest<components['requests']['AdaptyUICreateFlowView.Request']>({
+        nativeModule: nativeMock,
+        callIndex: 0,
+      });
+
+      expect(request.flow.ui_schema).toStrictEqual({
+        layouts: [{ flow_layout_id: 'layout1' }],
+        grids: [{ platforms: 'all', h_breakpoints: [320], cells: [0] }],
+      });
     });
   });
 

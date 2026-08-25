@@ -1,4 +1,4 @@
-import type { AdaptyPaywallProduct } from './index';
+import type { AdaptyPaywallProduct, AdaptyPromotedProduct } from './index';
 import type {
   GetPlacementParamsInput,
   GetPlacementForDefaultAudienceParamsInput,
@@ -51,6 +51,18 @@ export interface GetOnboardingForDefaultAudienceOptions {
 export interface MakePurchaseOptions {
   product: AdaptyPaywallProduct;
   params?: MakePurchaseParamsInput;
+}
+
+/**
+ * Describes the options for the `makePromotedPurchase` method.
+ *
+ * @remarks
+ * A promoted product carries no paywall context, so unlike
+ * {@link MakePurchaseOptions} there are no purchase parameters.
+ * @public
+ */
+export interface MakePromotedPurchaseOptions {
+  product: AdaptyPromotedProduct;
 }
 
 /**
