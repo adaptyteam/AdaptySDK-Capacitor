@@ -55,19 +55,6 @@ type Req = components['requests'];
 export class Adapty implements AdaptyPlugin {
   constructor() {
     Log.setVersion(VERSION);
-
-    // An App Store promoted purchase that nobody completes silently does
-    // nothing — the store hands the product to the app and waits. So the
-    // fallback is a real purchase, not a no-op. Registering any app listener
-    // for the event replaces it.
-    this.emitter.setFallback('onPromotedPurchaseReceived', ({ product }) =>
-      this.makePromotedPurchase({ product }).catch((error) =>
-        Log.warn(
-          'onPromotedPurchaseReceived',
-          () => `Failed to complete the promoted purchase automatically: ${error}`,
-        ),
-      ),
-    );
   }
 
   private activating: Promise<void> | null = null;
@@ -213,7 +200,7 @@ export class Adapty implements AdaptyPlugin {
     // activation already in flight, the fast-refresh short circuit, the
     // deferred-activation path — skips performActivation, so installing it
     // there would leave those paths deaf to the event.
-    await this.startObservingPromotedPurchases();
+    await this.addPromotedPurchaseListener();
 
     // Prevent multiple activations
     if (this.activating) {
@@ -256,16 +243,29 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
-   * Subscribes the SDK itself to the promoted-purchase event.
+   * Registers the SDK's own handler for the promoted-purchase event and
+   * subscribes to it.
+   *
+   * An App Store promoted purchase that nobody completes silently does nothing —
+   * the store hands the product to the app and waits. So the default is a real
+   * purchase, not a no-op; registering any app listener for the event replaces
+   * it.
    *
    * A failure here must not fail activation: the app still works, it just loses
    * the automatic completion of App Store promoted purchases.
    */
-  private async startObservingPromotedPurchases(): Promise<void> {
+  private async addPromotedPurchaseListener(): Promise<void> {
     try {
-      await this.emitter.startObserving('onPromotedPurchaseReceived');
+      await this.emitter.addInternalListener('onPromotedPurchaseReceived', ({ product }) =>
+        this.makePromotedPurchase({ product }).catch((error) =>
+          Log.warn(
+            'onPromotedPurchaseReceived',
+            () => `Failed to complete the promoted purchase automatically: ${error}`,
+          ),
+        ),
+      );
     } catch (error) {
-      Log.warn('activate', () => `Failed to observe promoted purchases: ${error}`);
+      Log.warn('activate', () => `Failed to add the internal promoted-purchase listener: ${error}`);
     }
   }
 
