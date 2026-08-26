@@ -221,7 +221,7 @@ describe('Adapty - Promoted Purchase Event (Bridge Integration)', () => {
     // A teardown that drops the in-flight request neither removes it nor waits
     // for it: the re-subscribe adds a SECOND live native subscription, the one
     // event is dispatched twice, and with no app handler the fallback buys the
-    // product twice. The teardown has to drain the in-flight subscribe first.
+    // product twice. The teardown has to await the in-flight subscribe first.
     resetTestEmitter();
 
     let releaseFirstSubscribe!: () => void;
@@ -275,7 +275,7 @@ describe('Adapty - Promoted Purchase Event (Bridge Integration)', () => {
   });
 
   it('should auto-purchase exactly once when two activations race', async () => {
-    // Two unawaited activate() calls both reach the SDK's startObserving before
+    // Two unawaited activate() calls both reach addInternalListener() before
     // either native subscription resolves. Without an in-flight guard both would
     // subscribe, the one event would be dispatched twice, and the fallback would
     // buy the product twice.

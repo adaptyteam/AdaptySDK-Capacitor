@@ -18,7 +18,14 @@ type EventConfig<K extends keyof EventPayloadMap> = {
 };
 
 type AnyEventPayload = EventPayloadMap[keyof EventPayloadMap];
-type EventFallback = (data: AnyEventPayload) => void | Promise<unknown>;
+type EventListener = (data: AnyEventPayload) => void | Promise<unknown>;
+
+/** A listener the SDK registered on its own behalf: one per event, never removed. */
+type InternalHandler = {
+  handlerName: keyof EventPayloadMap;
+  listener: EventListener;
+  config: EventConfig<keyof EventPayloadMap>;
+};
 
 // Type-safe parser functions for each event
 function parseProfileEvent(raw: string, eventCtx: LogContext): EventPayloadMap['onLatestProfileLoad'] | null {
@@ -69,12 +76,8 @@ const EVENT_MAP: { [K in keyof EventPayloadMap]: EventConfig<K> } = {
   },
 };
 
-/**
- * How many times `removeAllListeners()` re-checks for subscribe requests that
- * started while it was draining the previous ones. Bounded so a teardown always
- * terminates, even if something keeps subscribing in a loop.
- */
-const MAX_SUBSCRIPTION_DRAIN_ROUNDS = 10;
+/** Bounds the wait in `removeAllListeners()`, so a teardown always terminates. */
+const MAX_PENDING_SUBSCRIPTION_ROUNDS = 10;
 
 export class AdaptyEmitter {
   private nativeEventListeners: Map<string, PluginListenerHandle> = new Map();
@@ -88,39 +91,18 @@ export class AdaptyEmitter {
     }[]
   > = new Map();
 
-  /**
-   * Events the SDK subscribes to on its own behalf, keyed by public name.
-   *
-   * Their native subscription outlives every app handler: it is created at
-   * activation and survives both `removeHandler` reaching zero handlers and a
-   * `removeAllListeners()` teardown. Without that, an event whose only consumer
-   * is an SDK-side default would never arrive.
-   */
-  private observedEvents: Set<keyof EventPayloadMap> = new Set();
+  /** SDK-owned handlers, keyed by native event id. At most one per event. */
+  private internalHandlers: Map<string, InternalHandler> = new Map();
 
   /**
-   * Runs when an observed event fires and the app registered no handler for it.
-   * Keyed by native event id, mirroring `externalHandlers`, and typed with the
-   * same widened payload those handlers already use.
-   */
-  private fallbacks: Map<string, EventFallback> = new Map();
-
-  /**
-   * `ensureNativeSubscription` operations that have been started but have not
-   * yet finished, keyed by native event id.
+   * In-flight `ensureNativeSubscription` operations, keyed by native event id.
    *
-   * `nativeEventListeners` alone cannot make `ensureNativeSubscription`
-   * idempotent: it is only populated once `AdaptyCapacitorPlugin.addListener`
-   * resolves, so two callers racing across that await would both see an empty
-   * map and both subscribe. Two live subscriptions dispatch every event twice —
-   * for the promoted-purchase fallback that is a double purchase. Callers that
-   * arrive while a request is in flight await this promise instead of issuing a
-   * second one.
-   *
-   * What is cached is the whole operation rather than the raw native promise:
-   * an operation only settles once its handle has been recorded in
-   * `nativeEventListeners`, which is what lets `removeAllListeners()` drain the
-   * in-flight requests and then tear every subscription down from that one map.
+   * `nativeEventListeners` fills in only after the native `addListener`
+   * resolves, so racing callers would both subscribe — and two live
+   * subscriptions dispatch every event twice (a double promoted purchase).
+   * The whole operation is cached, not the native promise: it settles only once
+   * its handle is in `nativeEventListeners`, which is what lets a teardown
+   * wait them out first and then remove everything from that one map.
    */
   private pendingSubscriptions: Map<string, Promise<void>> = new Map();
 
@@ -170,19 +152,17 @@ export class AdaptyEmitter {
       return;
     }
 
-    // Published before `subscribeNatively` reaches its first await, so there is
-    // no window in which a concurrent caller sees neither a handle nor an
-    // in-flight request.
+    // Published before the first await, so a concurrent caller always sees
+    // either a handle or an in-flight request.
     const operation = this.subscribeNatively(eventConfig);
     this.pendingSubscriptions.set(eventConfig.native, operation);
 
     try {
       await operation;
     } finally {
-      // Only retract our own entry: a teardown may already have cleared the map
-      // and a later call may have put its own request there. Clearing it on
-      // failure as well as success is what lets a failed attempt be retried
-      // instead of poisoning the cache forever.
+      // Only retract our own entry — a teardown may have cleared the map and a
+      // later call put its own request there. Clearing on failure too keeps a
+      // failed attempt retriable.
       if (this.pendingSubscriptions.get(eventConfig.native) === operation) {
         this.pendingSubscriptions.delete(eventConfig.native);
       }
@@ -190,14 +170,9 @@ export class AdaptyEmitter {
   }
 
   /**
-   * Issues the native subscription and records the handle it returns.
-   *
-   * Kept as a single awaitable unit: whoever waits on it — a concurrent caller,
-   * or `removeAllListeners()` draining before a teardown — knows that once it
-   * settles the handle is either in `nativeEventListeners` or already removed.
-   * Awaiting the raw `AdaptyCapacitorPlugin.addListener` promise instead would
-   * hand back control one step too early, while the subscription is live but
-   * still invisible to a teardown.
+   * Subscribes natively and records the handle, as one awaitable unit: once it
+   * settles the handle is either in `nativeEventListeners` or already removed,
+   * never live but invisible to a teardown.
    */
   private async subscribeNatively(eventConfig: EventConfig<keyof EventPayloadMap>): Promise<void> {
     const handlers = this.externalHandlers;
@@ -217,8 +192,8 @@ export class AdaptyEmitter {
       const eventHandlers = Array.from(handlers.get(eventConfig.native) ?? []);
 
       if (eventHandlers.length === 0) {
-        const fallback = this.fallbacks.get(eventConfig.native);
-        if (!fallback) {
+        const internal = this.internalHandlers.get(eventConfig.native);
+        if (!internal) {
           return;
         }
 
@@ -227,7 +202,7 @@ export class AdaptyEmitter {
           return;
         }
 
-        this.invoke(fallback, payload, 'Fallback', eventLog);
+        this.invoke(internal.listener, payload, 'Internal', eventLog);
         return;
       }
 
@@ -244,12 +219,8 @@ export class AdaptyEmitter {
 
     const existing = this.nativeEventListeners.get(eventConfig.native);
     if (existing && existing !== subscription) {
-      // Something re-subscribed while this request was in flight. Overwriting
-      // the map entry would orphan a live native subscription that nothing
-      // could ever remove, so drop ours instead. `removeAllListeners()` no
-      // longer produces this race — it drains first — but a caller that
-      // bypasses the in-flight cache still could, and an orphan here is a
-      // duplicate dispatch.
+      // Something re-subscribed while we were in flight. Overwriting the entry
+      // would orphan a live subscription nothing could remove, so drop ours.
       await subscription.remove().catch(() => undefined);
       return;
     }
@@ -258,17 +229,12 @@ export class AdaptyEmitter {
   }
 
   /**
-   * Waits for the in-flight `ensureNativeSubscription` operations to finish and
-   * leaves `pendingSubscriptions` empty.
-   *
-   * Every settled operation has recorded its handle in `nativeEventListeners`,
-   * so the caller can tear all of them down from that one map. A request that
-   * starts while we are waiting is drained as well, for a bounded number of
-   * rounds: a teardown has to terminate even against a caller that keeps
-   * subscribing.
+   * Awaits the in-flight subscribe operations, so every handle is in
+   * `nativeEventListeners` and the caller can tear them all down from that map.
+   * Requests started meanwhile are awaited too, for a bounded number of rounds.
    */
-  private async drainPendingSubscriptions(): Promise<void> {
-    for (let round = 0; round < MAX_SUBSCRIPTION_DRAIN_ROUNDS && this.pendingSubscriptions.size > 0; round += 1) {
+  private async awaitPendingSubscriptions(): Promise<void> {
+    for (let round = 0; round < MAX_PENDING_SUBSCRIPTION_ROUNDS && this.pendingSubscriptions.size > 0; round += 1) {
       const inFlight = Array.from(this.pendingSubscriptions.entries());
       await Promise.allSettled(inFlight.map(([, operation]) => operation));
 
@@ -307,17 +273,14 @@ export class AdaptyEmitter {
   }
 
   /**
-   * Both failure shapes have to be caught and neither catches the other:
-   * `Promise.resolve().catch()` handles a rejecting async callee, while the
-   * try/catch handles a plain one that throws synchronously — `callee(payload)`
-   * is evaluated as an argument, so a sync throw escapes before `.catch()` is
-   * ever attached. Either one escaping would abort dispatch to the handlers
-   * after it.
+   * Catches both failure shapes — `.catch()` a rejecting async callee, the
+   * try/catch a sync throw from `callee(payload)`, which escapes before
+   * `.catch()` is attached. Either would abort dispatch to the handlers after.
    */
   private invoke(
-    callee: EventFallback,
+    callee: EventListener,
     payload: AnyEventPayload,
-    kind: 'Handler' | 'Fallback',
+    kind: 'Handler' | 'Internal',
     eventLog: LogScope,
   ): void {
     try {
@@ -327,46 +290,24 @@ export class AdaptyEmitter {
     }
   }
 
-  /**
-   * Registers the handler that runs when an event fires and the app registered
-   * none of its own. Do the failure logging inside the fallback — the catch in
-   * `invoke` is a generic backstop, and only the caller knows what failing means.
-   */
-  public setFallback<K extends keyof EventPayloadMap>(
+  public async addInternalListener<K extends keyof EventPayloadMap>(
     eventName: K,
-    fallback: (data: EventPayloadMap[K]) => void | Promise<unknown>,
-  ): void {
-    const eventConfig = EVENT_MAP[eventName];
-    this.fallbacks.set(eventConfig.native, fallback as EventFallback);
-  }
-
-  /**
-   * Subscribes the SDK itself to a native event, once.
-   *
-   * Idempotent for sequential AND concurrent callers: unawaited overlapping
-   * calls — two `activate()`s racing, say — all await the same in-flight
-   * request, so only one native subscription is ever created. Two would
-   * dispatch every event twice, which for the promoted-purchase fallback means
-   * buying the product twice.
-   */
-  public async startObserving<K extends keyof EventPayloadMap>(eventName: K): Promise<void> {
+    listener: (data: EventPayloadMap[K]) => void | Promise<unknown>,
+  ): Promise<void> {
     const eventConfig = EVENT_MAP[eventName];
     if (!eventConfig) {
       throw new Error(`[Adapty] Unsupported event: ${eventName}`);
     }
 
-    this.observedEvents.add(eventName);
+    // Recorded before the await: another caller's subscription may already be
+    // live, and an event arriving on it needs a listener to reach.
+    this.internalHandlers.set(eventConfig.native, {
+      handlerName: eventName,
+      listener: listener as EventListener,
+      config: eventConfig as EventConfig<keyof EventPayloadMap>,
+    });
+
     await this.ensureNativeSubscription(eventConfig as EventConfig<keyof EventPayloadMap>);
-  }
-
-  private isObservedNativeEvent(nativeEvent: string): boolean {
-    for (const eventName of this.observedEvents) {
-      if (EVENT_MAP[eventName].native === nativeEvent) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   private async removeHandler(nativeEvent: string, handlerId: string): Promise<void> {
@@ -396,13 +337,12 @@ export class AdaptyEmitter {
       return;
     }
 
-    // If no more handlers for this native event, remove the subscription —
-    // unless the SDK is observing this event on its own behalf, in which case
-    // the subscription is not the app's to end.
+    // Last handler gone: remove the subscription — unless the SDK is observing
+    // this event itself, in which case it is not the app's to end.
     if (filteredHandlers.length === 0) {
       this.externalHandlers.delete(nativeEvent);
 
-      if (this.isObservedNativeEvent(nativeEvent)) {
+      if (this.internalHandlers.has(nativeEvent)) {
         log.success(() => ({
           message: 'Handler removed, native subscription kept for SDK-owned event',
           nativeEvent,
@@ -451,20 +391,11 @@ export class AdaptyEmitter {
     const log = ctx.call({ methodName: 'removeAllListeners' });
     log.start(() => ({ listenersCount: this.nativeEventListeners.size }));
 
-    // Captured before the teardown clears the maps. The SDK's own subscriptions
-    // went down with the app's, and nothing else would put them back:
-    // activate() runs once per process.
-    const observed = Array.from(this.observedEvents);
-
     try {
-      // Awaited, not dropped. A dropped in-flight subscribe is neither torn down
-      // here nor waited for: it registers its native subscription after this
-      // teardown, alongside the one the re-subscribe below creates, and two live
-      // subscriptions dispatch the same event twice — for the promoted-purchase
-      // fallback, a product bought twice. Draining first makes the late handle
-      // land in `nativeEventListeners` before it is read, so it goes down with
-      // the rest and the re-subscribe below is the only subscription left.
-      await this.drainPendingSubscriptions();
+      // Awaited, not dropped: a dropped in-flight subscribe would register its
+      // handle after this teardown, alongside the re-subscribe below, and two
+      // live subscriptions dispatch every event twice.
+      await this.awaitPendingSubscriptions();
 
       const removePromises = Array.from(this.nativeEventListeners.values()).map((handle, index) =>
         handle.remove().catch((error) => {
@@ -480,15 +411,15 @@ export class AdaptyEmitter {
       this.externalHandlers.clear();
       await Promise.all(removePromises);
 
-      for (const eventName of observed) {
+      const internal = Array.from(this.internalHandlers.values());
+
+      for (const { handlerName, config } of internal) {
         try {
-          await this.startObserving(eventName);
+          // The listener is still registered — only the native subscription
+          // went down — so this re-subscribes without touching the map.
+          await this.ensureNativeSubscription(config);
         } catch (error) {
-          // Same reasoning as activate(), which wraps this very call the same
-          // way: losing the SDK-side default is not a reason to reject a public
-          // teardown method that apps routinely call unawaited from an effect
-          // cleanup, where the rejection would surface as an unhandled one.
-          log.failed(() => ({ message: `Failed to re-subscribe to ${eventName}`, error, eventName }));
+          log.failed(() => ({ message: `Failed to re-subscribe to ${handlerName}`, error, eventName: handlerName }));
         }
       }
 
