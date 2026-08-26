@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@adapty/core@4.1.0-dev.51f7b5e66af39a9a82a499d0a75bedc5b5c796f5":
-  version "4.1.0-dev.51f7b5e66af39a9a82a499d0a75bedc5b5c796f5"
-  resolved "https://registry.yarnpkg.com/@adapty/core/-/core-4.1.0-dev.51f7b5e66af39a9a82a499d0a75bedc5b5c796f5.tgz#63a8884ba64d5f0326d1f307936d5f1bcb2037d8"
-  integrity sha512-4pf9UR83tfakyMR/y3VeFSPmS7mkCjSKdljSX0xTA892r9LxzTNT7QUBRV+YUP6X76bYSFhtKv+JdnDsDW1X2Q==
+"@adapty/core@4.1.0-dev.1396a8d7cefb0e3107a7ddc23796d2d092e89ec2":
+  version "4.1.0-dev.1396a8d7cefb0e3107a7ddc23796d2d092e89ec2"
+  resolved "https://registry.yarnpkg.com/@adapty/core/-/core-4.1.0-dev.1396a8d7cefb0e3107a7ddc23796d2d092e89ec2.tgz#4c4e2af84bd3e09d07d49450898f59103a8d4aef"
+  integrity sha512-CsgEv98H1sb3M3cpforVo2jjJ+WFMr9+wfZm+ZIrTCiu/4gfVVMSEWhAL8+vE1sZFVpTdMqyJj2KjNhe61+f7Q==
   dependencies:
     tslib "^2.5.0"
 

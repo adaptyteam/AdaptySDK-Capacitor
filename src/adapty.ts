@@ -10,6 +10,7 @@ import { defaultAdaptyOptions } from './default-configs';
 import { Log, LogContext } from './logger';
 import type { LoggerConfig, LogScope } from './logger';
 import type {
+  AdaptyExternalAttributionProvider,
   AdaptyFlow,
   AdaptyFlowPaywall,
   AdaptyPaywallProduct,
@@ -1393,6 +1394,7 @@ export class Adapty implements AdaptyPlugin {
    * @param options - The options object
    * @param options.attribution - An object containing attribution data.
    * @param options.provider - The attribution provider the data came from (e.g., 'adjust', 'appsflyer').
+   *   Any string is accepted, so a provider added by the backend works without an SDK update.
    * @returns A promise that resolves when the attribution data is updated.
    * @throws Error if parameters are invalid or not provided.
    *
@@ -1414,7 +1416,10 @@ export class Adapty implements AdaptyPlugin {
    * }
    * ```
    */
-  async updateExternalAttribution(options: { attribution: Record<string, any>; provider: string }): Promise<void> {
+  async updateExternalAttribution(options: {
+    attribution: Record<string, any>;
+    provider: AdaptyExternalAttributionProvider;
+  }): Promise<void> {
     const method = 'update_external_attribution_data';
 
     const ctx = new LogContext();
