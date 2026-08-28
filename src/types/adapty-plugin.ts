@@ -4,9 +4,11 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import type { LoggerConfig } from '../logger';
 
 import type {
+  AdaptyExternalAttributionProvider,
   AdaptyFlow,
   AdaptyFlowPaywall,
   AdaptyPaywallProduct,
+  AdaptyPromotedProduct,
   AdaptyOnboarding,
   AdaptyProfile,
   AdaptyPurchaseResult,
@@ -125,6 +127,11 @@ export interface AdaptyPlugin {
   }): Promise<AdaptyPurchaseResult>;
 
   /**
+   * Purchases a product promoted in the App Store.
+   */
+  makePromotedPurchase(options: { product: AdaptyPromotedProduct }): Promise<AdaptyPurchaseResult>;
+
+  /**
    * Presents the code redemption sheet (iOS only).
    */
   presentCodeRedemptionSheet(): Promise<void>;
@@ -155,9 +162,12 @@ export interface AdaptyPlugin {
   setLogLevel(options: { logLevel?: LogLevel; logger?: LoggerConfig }): Promise<void>;
 
   /**
-   * Updates attribution data for the current user.
+   * Updates attribution data from an external attribution provider for the current user.
    */
-  updateAttribution(options: { attribution: Record<string, any>; source: string }): Promise<void>;
+  updateExternalAttribution(options: {
+    attribution: Record<string, any>;
+    provider: AdaptyExternalAttributionProvider;
+  }): Promise<void>;
 
   /**
    * Updates collecting refund data consent (iOS only).
@@ -189,8 +199,17 @@ export interface AdaptyPlugin {
    *
    * Supported events:
    * - onLatestProfileLoad → { profile: AdaptyProfile }
+   * - onPromotedPurchaseReceived → { product: AdaptyPromotedProduct }
    * - onInstallationDetailsSuccess → { details: AdaptyInstallationDetails }
    * - onInstallationDetailsFail → { error: AdaptyError }
+   *
+   * @remarks
+   * Registering a listener for `'onPromotedPurchaseReceived'` replaces the
+   * SDK's default behaviour, which is to complete the purchase automatically.
+   * While a listener is registered you are responsible for completing the
+   * purchase — call {@link AdaptyPlugin.makePromotedPurchase} with the product
+   * you receive, or the purchase never happens. Removing the returned handle
+   * restores the default.
    */
   addListener: AddListenerFn;
 
@@ -203,13 +222,18 @@ export interface AdaptyPlugin {
 /**
  * Supported event names.
  */
-export type AdaptyEventName = 'onLatestProfileLoad' | 'onInstallationDetailsSuccess' | 'onInstallationDetailsFail';
+export type AdaptyEventName =
+  | 'onLatestProfileLoad'
+  | 'onPromotedPurchaseReceived'
+  | 'onInstallationDetailsSuccess'
+  | 'onInstallationDetailsFail';
 
 /**
  * Mapping between event names and their payload types.
  */
 export type EventPayloadMap = {
   onLatestProfileLoad: { profile: AdaptyProfile };
+  onPromotedPurchaseReceived: { product: AdaptyPromotedProduct };
   onInstallationDetailsSuccess: { details: AdaptyInstallationDetails };
   onInstallationDetailsFail: { error: AdaptyError };
 };

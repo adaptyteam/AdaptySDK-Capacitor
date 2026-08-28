@@ -83,6 +83,7 @@ export const elementIds = {
     variationIdValue: 'flow-variation-id-value',
     revisionValue: 'flow-revision-value',
     paywallsCountValue: 'flow-paywalls-count-value',
+    uiSchemaValue: 'flow-ui-schema-value',
     hasRemoteConfigValue: 'flow-has-remote-config-value',
     productsCountValue: 'flow-products-count-value',
     configLocaleValue: 'flow-config-locale-value',
@@ -121,6 +122,13 @@ export const elementIds = {
     variationIdInput: 'report-tx-variation-id-input',
     submitBtn: 'report-tx-submit-btn',
   },
+  promoted: {
+    ownerValue: 'promoted-owner-value',
+    useSdkDefaultBtn: 'promoted-use-sdk-default-btn',
+    useAppHandlerBtn: 'promoted-use-app-handler-btn',
+    lastProductValue: 'promoted-last-product-value',
+    buyBtn: 'promoted-buy-btn',
+  },
   integration: {
     keyInput: 'integration-key-input',
     valueInput: 'integration-value-input',
@@ -137,7 +145,8 @@ export const elementIds = {
   },
   otherActions: {
     restorePurchasesBtn: 'other-restore-purchases-btn',
-    updateAttributionBtn: 'other-update-attribution-btn',
+    updateCustomAttributionBtn: 'other-update-custom-attribution-btn',
+    updateProviderAttributionBtn: (key: string | number) => `other-update-attribution-${key}-btn`,
     codeRedemptionBtn: 'other-code-redemption-btn',
     setLogLevelBtn: 'other-set-log-level-btn',
     setFallbackBtn: 'other-set-fallback-btn',
@@ -179,5 +188,7 @@ export const elementIds = {
     activateBtn: 'sdk-activate-btn',
     activateObserverBtn: 'sdk-activate-observer-btn',
     checkStatusBtn: 'sdk-check-status-btn',
+    adaptyAttributionToggle: 'sdk-adapty-attribution-toggle',
+    adaptyAttributionValue: 'sdk-adapty-attribution-value',
   },
 } as const;

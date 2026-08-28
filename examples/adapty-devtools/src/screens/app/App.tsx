@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   adapty,
   AdaptyFlow,
@@ -28,6 +28,17 @@ import { OtherActionsSection } from './sections/OtherActionsSection';
 import { RefundSection } from './sections/RefundSection';
 import { IntegrationSection } from './sections/IntegrationSection';
 import { ReportTransactionSection } from './sections/ReportTransactionSection';
+import {
+  CUSTOM_ATTRIBUTION_PAYLOAD,
+  PROVIDER_ATTRIBUTION_PAYLOAD,
+  sendCustomAttribution,
+  sendProviderAttribution,
+  type ExternalAttributionProvider,
+} from '../../services/externalAttribution';
+import { buildActivateParams } from '../../services/activateParams';
+import type { AdaptyPromotedProduct } from '@adapty/capacitor';
+import { buyPromotedProduct, subscribeToPromotedPurchase } from '../../services/promotedPurchase';
+import { PromotedPurchaseSection } from './sections/PromotedPurchaseSection';
 
 const App: React.FC = () => {
   // Get context state and actions
@@ -101,6 +112,9 @@ const App: React.FC = () => {
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingFlow, setIsLoadingFlow] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
+  const [adaptyAttributionEnabled, setAdaptyAttributionEnabled] = useState(false);
+  const [appHandlesPromoted, setAppHandlesPromoted] = useState(false);
+  const [promotedProduct, setPromotedProduct] = useState<AdaptyPromotedProduct | null>(null);
 
   const flowRef = useRef<FlowControllerRef>(null);
   const onboardingRef = useRef<OnboardingControllerRef>(null);
@@ -119,6 +133,40 @@ const App: React.FC = () => {
     'return_cache_data_if_not_expired_else_load',
   ] as const;
 
+  // Registering our own handler switches the SDK out of its default behaviour
+  // (which is to complete the promoted purchase itself), so this effect only
+  // runs while the app explicitly claims ownership. Unsubscribing through the
+  // function subscribeToPromotedPurchase returned — never
+  // adapty.removeAllListeners() — restores that default without touching the
+  // listeners EventListenersManager registered. That helper queues the
+  // subscribe and the remove on one module-level chain, so no interleaving of
+  // toggles, of resolutions, or of remounts of this screen can leave two app
+  // handlers registered at once.
+  useEffect(() => {
+    if (!isActivated || !appHandlesPromoted) {
+      return;
+    }
+
+    log('info', 'App now owns promoted purchases', 'promotedPurchase');
+    const unsubscribe = subscribeToPromotedPurchase(
+      (product) => {
+        log('info', 'Event: promoted purchase received', 'onPromotedPurchaseReceived', false, { product });
+        setPromotedProduct(product);
+      },
+      (error) => {
+        log('error', 'Error switching promoted-purchase ownership', 'promotedPurchase', false, {
+          error: String(error),
+        });
+      },
+    );
+
+    return () => {
+      log('info', 'Restoring the SDK promoted-purchase default', 'promotedPurchase');
+      void unsubscribe();
+      setPromotedProduct(null);
+    };
+  }, [isActivated, appHandlesPromoted]);
+
   const testActivate = async (observerMode = false) => {
     try {
       setResult(`Activating Adapty${observerMode ? ' (observer mode)' : ''}...`);
@@ -126,25 +174,12 @@ const App: React.FC = () => {
 
       await adapty.activate({
         apiKey: getApiKey(),
-        params: {
-          // serverCluster: 'cn',
-          // backendBaseUrl: 'http://localhost:8080',
-          ...(trimmedCustomerUserId ? { customerUserId: trimmedCustomerUserId } : {}),
-          logLevel: 'verbose',
+        params: buildActivateParams({
           observerMode,
-          __ignoreActivationOnFastRefresh: import.meta.env.DEV,
-          // android: {
-          //   adIdCollectionDisabled: true,
-          //   pendingPrepaidPlansEnabled: false,
-          //   localAccessLevelAllowed: false,
-          //   obfuscatedAccountId: 'testObfAccId',
-          // },
-          // ios: {
-          //   idfaCollectionDisabled: true,
-          //   appAccountToken: '550e8400-e29b-41d4-a716-446655440000',
-          //   clearDataOnBackup: true,
-          // },
-        },
+          adaptyAttributionEnabled,
+          ignoreActivationOnFastRefresh: import.meta.env.DEV,
+          customerUserId: trimmedCustomerUserId,
+        }),
       });
       const customerIdMessage = trimmedCustomerUserId ? ` customer user id: ${trimmedCustomerUserId}` : '';
       setResult(`Adapty activated successfully!${customerIdMessage}`);
@@ -301,37 +336,55 @@ const App: React.FC = () => {
     }
   };
 
-  const updateAttribution = async () => {
+  const updateCustomAttribution = async () => {
     if (!isActivated) return;
 
     try {
-      log('info', 'Updating attribution', 'updateAttribution', false, {
-        source: 'custom',
-        attribution: {
-          status: 'non_organic',
-          channel: 'Google Ads',
-          campaign: 'Adapty Web Test',
-          ad_group: 'adapty ad_group',
-          creative: 'test_creative',
-        },
+      log('info', 'Updating attribution', 'updateExternalAttribution', false, {
+        provider: 'custom',
+        attribution: CUSTOM_ATTRIBUTION_PAYLOAD,
       });
-      await adapty.updateAttribution({
-        attribution: {
-          status: 'non_organic',
-          channel: 'Google Ads',
-          campaign: 'Adapty Web Test',
-          ad_group: 'adapty ad_group',
-          creative: 'test_creative',
-        },
-        source: 'custom',
-      });
-      setResult('Attribution updated successfully');
+      await sendCustomAttribution();
+      setResult('Attribution updated successfully (custom)');
     } catch (error) {
-      log('error', 'Error updating attribution', 'updateAttribution', false, {
+      log('error', 'Error updating attribution', 'updateExternalAttribution', false, {
         error: String(error),
-        source: 'custom',
+        provider: 'custom',
       });
       setResult(`Error updating attribution: ${error}`);
+    }
+  };
+
+  const updateProviderAttribution = async (provider: ExternalAttributionProvider) => {
+    if (!isActivated) return;
+
+    try {
+      log('info', 'Updating attribution', 'updateExternalAttribution', false, {
+        provider,
+        attribution: PROVIDER_ATTRIBUTION_PAYLOAD,
+      });
+      await sendProviderAttribution(provider);
+      setResult(`Attribution updated successfully (${provider})`);
+    } catch (error) {
+      log('error', 'Error updating attribution', 'updateExternalAttribution', false, {
+        error: String(error),
+        provider,
+      });
+      setResult(`Error updating attribution: ${error}`);
+    }
+  };
+
+  const buyLastPromotedProduct = async () => {
+    if (!promotedProduct) return;
+
+    try {
+      log('info', 'Completing promoted purchase', 'makePromotedPurchase', false, { promotedProduct });
+      const purchaseResult = await buyPromotedProduct(promotedProduct);
+      log('info', 'Promoted purchase result', 'makePromotedPurchase', false, { purchaseResult });
+      setResult(`Promoted purchase result: ${purchaseResult.type}`);
+    } catch (error) {
+      log('error', 'Error completing promoted purchase', 'makePromotedPurchase', false, { error: String(error) });
+      setResult(`Error completing promoted purchase: ${error}`);
     }
   };
 
@@ -930,7 +983,8 @@ const App: React.FC = () => {
     <OtherActionsSection
       isActivated={isActivated}
       restorePurchases={restorePurchases}
-      updateAttribution={updateAttribution}
+      updateCustomAttribution={updateCustomAttribution}
+      updateProviderAttribution={updateProviderAttribution}
       presentCodeRedemptionSheet={presentCodeRedemptionSheet}
       setLogLevel={setLogLevel}
       testSetFallback={testSetFallback}
@@ -1021,6 +1075,20 @@ const App: React.FC = () => {
         {/* Activation Section */}
         <div className={styles.Section}>
           <h3 className={styles.SectionTitle}>SDK Activation</h3>
+          <div
+            id={elementIds.sdk.adaptyAttributionToggle}
+            className={styles.ClickableParam}
+            onClick={() => {
+              if (!isActivated) {
+                setAdaptyAttributionEnabled(!adaptyAttributionEnabled);
+              }
+            }}
+          >
+            <span>Adapty Attribution (activation-time only)</span>
+            <span id={elementIds.sdk.adaptyAttributionValue} className={styles.ParamValue}>
+              {adaptyAttributionEnabled.toString()}
+            </span>
+          </div>
           <div className={styles.ButtonGroup}>
             <button
               id={elementIds.sdk.activateBtn}
@@ -1076,6 +1144,17 @@ const App: React.FC = () => {
             setTransactionId={setTransactionId}
             setVariationId={setVariationId}
             reportTransaction={reportTransaction}
+          />
+        )}
+
+        {/* Promoted Purchases Section */}
+        {isActivated && (
+          <PromotedPurchaseSection
+            isActivated={isActivated}
+            appHandlesPromoted={appHandlesPromoted}
+            promotedProduct={promotedProduct}
+            setAppHandlesPromoted={setAppHandlesPromoted}
+            buyLastPromotedProduct={buyLastPromotedProduct}
           />
         )}
 

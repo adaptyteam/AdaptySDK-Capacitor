@@ -27,7 +27,7 @@ Adapty SDK is an open-source framework that makes implementing in-app subscripti
 - [Why Adapty?](#why-adapty)
 - [Getting Started](#getting-started)
 - [Integrate IAPs within a few hours without server coding](#integrate-iaps-within-a-few-hours-without-server-coding)
-- [Design paywalls in the no-code builder](#design-paywalls-in-the-no-code-builder)
+- [Design flows in the no-code Flow Builder](#design-flows-in-the-no-code-flow-builder)
 - [Test paywalls & prices on Capacitor without app releases](#test-paywalls--prices-on-capacitor-without-app-releases)
 - [Real-time analytics for your Capacitor app](#real-time-analytics-for-your-capacitor-app)
 - [Mobile app monetization's largest community](#mobile-app-monetizations-largest-community)
@@ -41,13 +41,12 @@ Adapty SDK is an open-source framework that makes implementing in-app subscripti
 
 ## Why Adapty?
 
-- [No server code implementation](https://adapty.io/docs/sdk-installation-capacitor?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Integrate in-app purchases with server-side receipt validation in minutes — in your own paywall or one created in the no-code builder.
-- [No-code paywall builder](https://adapty.io/docs/adapty-paywall-builder?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Create a beautiful, natively rendered paywall in the no-code editor and display it in your app to start getting paid instantly.
-- [On-the-fly paywalls price testing](https://docs.adapty.io/v3.0/docs/ab-tests?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Test different prices, duration, offers, messages, and designs simultaneously, all without new app releases.
-- [Beautiful onboardings](https://adapty.io/docs/onboardings?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Design onboardings in the no-code editor and guide users through their first app experience.
-- [Full customer's payment history](https://docs.adapty.io/v3.0/docs/profiles-crm?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Explore the user's payment events from the trial start to subscription cancellation or billing issues.
-- [3rd-party integrations](https://docs.adapty.io/v3.0/docs/events?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Send subscription events to 3rd-party analytics, attribution, and ad services with no coding, even if the user uninstalls the app.
-- [Advanced analytics](https://docs.adapty.io/v3.0/docs/charts?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Analyze your app real-time metrics with advanced filters, such as Ad network, Ad campaign, country, A/B test, etc.
+- [No server code implementation](https://adapty.io/docs/sdk-installation-capacitor?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Integrate in-app purchases with server-side receipt validation in minutes — in your own paywall or using the no-code flow builder.
+- [No-code flow builder](https://adapty.io/docs/adapty-flow-builder?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Create beautiful, natively rendered single- or multi-screen flows in the no-code editor and display them in your app. With flows, you can start getting paid instantly or implement engaging onboardings in your app.
+- [On-the-fly paywalls price testing](https://adapty.io/docs/ab-tests?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Test different prices, duration, offers, messages, and designs simultaneously, all without new app releases.
+- [Full customer's payment history](https://adapty.io/docs/profiles-crm?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Explore the user's payment events from the trial start to subscription cancellation or billing issues.
+- [3rd-party integrations](https://adapty.io/docs/events?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Send subscription events to 3rd-party analytics, attribution, and ad services with no coding, even if the user uninstalls the app.
+- [Advanced analytics](https://adapty.io/docs/charts?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor). Analyze your app real-time metrics with advanced filters, such as Ad network, Ad campaign, country, A/B test, etc.
 
 <h3 align="center" style="border-bottom: none; margin-top: -15px; margin-bottom: -15px; font-size: 150%">
 <a href="https://adapty.io/schedule-demo?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Unity_schedule-demo">Talk to Us to Learn More</a>
@@ -71,13 +70,17 @@ Follow our [quickstart guide](https://adapty.io/docs/sdk-installation-capacitor/
 - One-time purchases and lifetime subscriptions supported.
 - Sync subscribers' states across iOS, Android, and Web.
 
-## Design paywalls in the no-code builder
+## Design flows in the no-code Flow Builder
 
-![No-code builder](https://adapty.io/assets/uploads/2024/09/img-builder-and-templates@2x.webp)
+![No-code Flow Builder](https://adapty-portal-media-production.s3.amazonaws.com/github/flow-cover.webp)
 
-With Adapty, you can create a complete, purchase-ready paywall in the no-code builder.
+With the [Adapty Flow Builder](https://adapty.io/docs/adapty-flow-builder?utm_source=github&utm_medium=referral&utm_campaign=AdaptySDK-Capacitor), you can visually design complete user experiences — from single-screen paywalls to multi-step onboardings, surveys, and quizzes.
 
-Adapty automatically renders it and handles all the complex purchase flow, receipt validation, and subscription management behind the scenes.
+- **Flexible customizable flows**: Build any kind of flow: a single-screen paywall, a multi-step sequence, a survey, or anything in between.
+- **Native rendering**: The Adapty SDK renders flows natively without web views to ensure a seamless user experience.
+- **Update without redeploying**: Change copy, design, pricing, or logic any time. Updates reach your users without an app release.
+
+Adapty automatically renders your flow and handles all the complex purchase logic, receipt validation, and subscription management behind the scenes.
 
 ## Test paywalls & prices on Capacitor without app releases
 

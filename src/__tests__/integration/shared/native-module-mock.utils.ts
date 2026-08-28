@@ -42,6 +42,7 @@ interface ResponseRegistry {
   get_paywall_products?: components['requests']['GetPaywallProducts.Response'];
   log_show_flow?: components['requests']['LogShowFlow.Response'];
   make_purchase?: components['requests']['MakePurchase.Response'];
+  make_promoted_purchase?: components['requests']['MakePromotedPurchase.Response'];
   get_onboarding?: components['requests']['GetOnboarding.Response'];
   get_onboarding_for_default_audience?: components['requests']['GetOnboardingForDefaultAudience.Response'];
   identify?: components['requests']['Identify.Response'];
@@ -51,7 +52,7 @@ interface ResponseRegistry {
   report_transaction?: components['requests']['ReportTransaction.Response'];
   set_log_level?: components['requests']['SetLogLevel.Response'];
   set_fallback?: components['requests']['SetFallback.Response'];
-  update_attribution_data?: components['requests']['UpdateAttributionData.Response'];
+  update_external_attribution_data?: components['requests']['UpdateExternalAttributionData.Response'];
   update_profile?: components['requests']['UpdateProfile.Response'];
   get_current_installation_status?: components['requests']['GetCurrentInstallationStatus.Response'];
   present_code_redemption_sheet?: components['requests']['PresentCodeRedemptionSheet.Response'];

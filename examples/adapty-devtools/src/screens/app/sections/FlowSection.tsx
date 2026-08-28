@@ -2,6 +2,7 @@ import React from 'react';
 import type { AdaptyFlow, AdaptyPaywallProduct, FlowViewController } from '@adapty/capacitor';
 import styles from '../App.module.css';
 import { elementIds } from '../../../elementIds';
+import { describeFlowUiSchema } from './describeUiSchema';
 
 type Props = {
   isActivated: boolean;
@@ -200,6 +201,9 @@ export const FlowSection: React.FC<Props> = ({
             </div>
             <div id={elementIds.flow.paywallsCountValue}>
               <strong>Paywalls in flow:</strong> {flow.paywalls.length}
+            </div>
+            <div id={elementIds.flow.uiSchemaValue}>
+              <strong>UI schema:</strong> {describeFlowUiSchema(flow.uiSchema)}
             </div>
             <div id={elementIds.flow.hasRemoteConfigValue}>
               <strong>Has Remote Config:</strong> {remoteConfig ? '✅ Yes' : '❌ No'}

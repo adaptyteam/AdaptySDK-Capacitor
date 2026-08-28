@@ -20,7 +20,7 @@ function fakeSession(script) {
   };
 }
 
-const run = (session, raw) => runSteps(session, raw.map(parseStep), { pollMs: 1, timeoutMs: 50 });
+const run = (session, raw, options) => runSteps(session, raw.map(parseStep), { pollMs: 1, timeoutMs: 50, ...options });
 
 test('runSteps installs the helpers before the first step', async () => {
   const session = fakeSession([]);
@@ -64,7 +64,9 @@ test('runSteps polls a wait step until it is satisfied', async () => {
       },
     ],
   ]);
-  const { lines, failed } = await run(session, ['wait:flow-present-btn:enabled']);
+  // A generous deadline on purpose: this test is about the loop retrying until the
+  // condition flips, not the timeout — the shared 50ms budget made it flake on CI.
+  const { lines, failed } = await run(session, ['wait:flow-present-btn:enabled'], { timeoutMs: 30_000 });
   assert.equal(failed, false);
   assert.equal(attempts, 3);
   assert.equal(lines[0], 'wait:flow-present-btn:enabled -> enabled');

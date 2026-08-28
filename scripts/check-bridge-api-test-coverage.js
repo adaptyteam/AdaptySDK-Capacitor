@@ -4,7 +4,7 @@
  * API Coverage Checker
  *
  * Analyzes bridge integration test coverage by comparing:
- * - Methods defined in cross_platform.yaml ($requests section)
+ * - Methods defined in @adapty/core's declarations (generated from cross_platform.yaml)
  * - Methods covered by bridge samples in src/__tests__/integration/shared/bridge-samples/
  *
  * Exit codes:
@@ -15,25 +15,53 @@
 const fs = require('fs');
 const path = require('path');
 
-const YAML_PATH = path.join(__dirname, '../cross_platform.yaml');
+// cross_platform.yaml lives in @adapty/core, not in this repo, so the method
+// list has to be read from the built core declarations. Keep this pointed at
+// core: the list is generated from the yaml and lives there.
+const API_TYPES_PATH = path.join(__dirname, '../node_modules/@adapty/core/dist/index.d.mts');
 const BRIDGE_SAMPLES_DIR = path.join(__dirname, '../src/__tests__/integration/shared/bridge-samples');
 
 // Methods that are internal and don't require test coverage
 const INTERNAL_METHODS = new Set(['get_log_level', 'get_sdk_version']);
 
+// Tracked pre-existing coverage gaps. Entries here are reported as warnings
+// instead of failures, so this gate still fails on NEW gaps. Empty today:
+// unlike react-native-adapty, this SDK has bridge samples for every public
+// method, including the flow/observer callbacks. Remove entries as samples are
+// added; do not add entries without agreeing the debt first.
+const KNOWN_UNCOVERED = new Set([]);
+
 /**
- * Extract all method names from cross_platform.yaml $requests section.
- * Looks for patterns like: method: { const: "method_name" }
+ * Extract all method names from core's Request types
  */
 function extractApiMethods() {
-  const yamlContent = fs.readFileSync(YAML_PATH, 'utf8');
+  if (!fs.existsSync(API_TYPES_PATH)) {
+    console.error(`❌ Cannot find @adapty/core declarations at ${API_TYPES_PATH}`);
+    console.error('   Run `yarn install`, or build core into node_modules:');
+    console.error('   BUILD_OUT_DIR=../AdaptySDK-Capacitor/node_modules/@adapty/core/dist yarn build');
+    process.exit(1);
+  }
 
-  // Match method: { const: "method_name" } patterns in cross_platform.yaml
-  const methodMatches = yamlContent.matchAll(/method:\s*\{\s*const:\s*"([^"]+)"\s*\}/g);
+  const apiContent = fs.readFileSync(API_TYPES_PATH, 'utf8');
+  const requestMatches = apiContent.matchAll(/'([^']+)\.Request':\s*\{[^}]*method:\s*'([^']+)'/gs);
 
   const methods = new Set();
-  for (const match of methodMatches) {
-    methods.add(match[1]);
+  for (const match of requestMatches) {
+    methods.add(match[2]);
+  }
+
+  if (methods.size === 0) {
+    console.error(`❌ Extracted 0 methods from ${API_TYPES_PATH}.`);
+    console.error('   The declaration format changed — fix the regex in extractApiMethods().');
+    process.exit(1);
+  }
+
+  if (methods.size < 40) {
+    console.error(`❌ Extracted only ${methods.size} methods from ${API_TYPES_PATH}.`);
+    console.error(
+      "   That count is implausibly low — the regex in extractApiMethods() likely needs updating against core's declaration format.",
+    );
+    process.exit(1);
   }
 
   return Array.from(methods).sort();
@@ -67,22 +95,31 @@ function analyzeCoverage() {
   const covered = allMethods.filter((m) => testedMethods.has(m));
   const missing = allMethods.filter((m) => !testedMethods.has(m));
 
-  // Separate missing methods into public API and internal
+  // Separate missing methods into public API, internal, and known debt
   const missingInternal = missing.filter((m) => INTERNAL_METHODS.has(m));
-  const missingPublicApi = missing.filter((m) => !INTERNAL_METHODS.has(m));
+  const missingKnown = missing.filter((m) => !INTERNAL_METHODS.has(m) && KNOWN_UNCOVERED.has(m));
+  const missingPublicApi = missing.filter((m) => !INTERNAL_METHODS.has(m) && !KNOWN_UNCOVERED.has(m));
 
   // Print results
   console.log('╔════════════════════════════════════════╗');
   console.log('║   API Bridge Coverage Report          ║');
   console.log('╚════════════════════════════════════════╝\n');
 
-  console.log(`Total methods in cross_platform.yaml: ${allMethods.length}`);
+  console.log(`Total methods in @adapty/core:        ${allMethods.length}`);
   console.log(
     `Covered by tests:                     ${covered.length} (${((covered.length / allMethods.length) * 100).toFixed(1)}%)`,
   );
   console.log(
     `Missing:                              ${missing.length} (${((missing.length / allMethods.length) * 100).toFixed(1)}%)\n`,
   );
+
+  if (missingKnown.length > 0) {
+    console.log('⚠️  Known pre-existing gaps (tracked in KNOWN_UNCOVERED):');
+    missingKnown.forEach((m) => {
+      console.log(`   • ${m}`);
+    });
+    console.log('');
+  }
 
   if (missingPublicApi.length > 0) {
     console.log('❌ MISSING PUBLIC API METHODS:');
