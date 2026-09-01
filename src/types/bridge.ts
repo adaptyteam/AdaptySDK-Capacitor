@@ -2,13 +2,13 @@ import type {
   AdaptyProfile,
   AdaptyPromotedProduct,
   AdaptyInstallationDetails,
-  UserEventName,
+  GlobalEventName,
   AdaptyError,
 } from '@adapty/core';
 
 // Re-export bridge types from @adapty/core
 export { MethodNames } from '@adapty/core';
-export type { MethodName, Serializable, AdaptyNativeError, AdaptyBridgeError, UserEventName } from '@adapty/core';
+export type { MethodName, Serializable, AdaptyNativeError, AdaptyBridgeError, GlobalEventName } from '@adapty/core';
 
 // Capacitor-specific: event listener types
 // (Capacitor uses its own EmitterSubscription, not React Native's)
@@ -16,7 +16,7 @@ interface EmitterSubscription {
   remove(): void;
 }
 
-export type AddListenerGeneric<E extends UserEventName, Data> = (
+export type AddListenerGeneric<E extends GlobalEventName, Data> = (
   event: E,
   callback: (data: Data) => void | Promise<void>,
 ) => EmitterSubscription;
