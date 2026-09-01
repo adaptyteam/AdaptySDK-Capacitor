@@ -1,5 +1,6 @@
 import type { PluginListenerHandle } from '@capacitor/core';
 
+import type { NativeEventId } from '../bridge/definitions';
 import { AdaptyCapacitorPlugin } from '../bridge/plugin';
 import { LogContext } from '../logger';
 
@@ -19,7 +20,7 @@ export interface HandlerData<THandler> {
 export abstract class BaseViewEmitter<
   TEventHandlers extends Record<string, any>,
   TEventData,
-  TNativeEvent extends string = string,
+  TNativeEvent extends NativeEventId = NativeEventId,
 > {
   protected viewId: string;
   protected eventListeners: Map<TNativeEvent, PluginListenerHandle> = new Map();
