@@ -41,6 +41,11 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
       return;
     }
 
+    if (!flow.hasViewConfiguration) {
+      setResult('❌ Flow does not have view configuration (no UI schema / flow version).');
+      return;
+    }
+
     try {
       setResult('Creating flow view...');
 

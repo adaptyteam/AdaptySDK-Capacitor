@@ -205,6 +205,9 @@ export const FlowSection: React.FC<Props> = ({
             <div id={elementIds.flow.uiSchemaValue}>
               <strong>UI schema:</strong> {describeFlowUiSchema(flow.uiSchema)}
             </div>
+            <div id={elementIds.flow.hasViewConfigurationValue}>
+              <strong>Has View Configuration:</strong> {flow.hasViewConfiguration ? '✅ Yes' : '❌ No'}
+            </div>
             <div id={elementIds.flow.hasRemoteConfigValue}>
               <strong>Has Remote Config:</strong> {remoteConfig ? '✅ Yes' : '❌ No'}
             </div>
@@ -280,7 +283,7 @@ export const FlowSection: React.FC<Props> = ({
         <button
           id={elementIds.flow.presentBtn}
           onClick={presentFlow}
-          disabled={!flow}
+          disabled={!flow || !flow.hasViewConfiguration}
           className={`${styles.Button} ${styles.ButtonPrimary}`}
         >
           Present Flow

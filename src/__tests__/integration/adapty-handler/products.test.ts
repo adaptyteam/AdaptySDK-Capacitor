@@ -62,6 +62,7 @@ describe('Adapty - Paywall Products', () => {
         id: 'test_flow_id',
         name: 'Test Flow',
         variationId: 'test_variation_123',
+        hasViewConfiguration: false,
         placement,
         responseCreatedAt: 1704067200000,
         paywalls: [
@@ -161,6 +162,7 @@ describe('Adapty - Paywall Products', () => {
         id: 'test_flow_id',
         name: 'Test Flow',
         variationId: 'test_variation_123',
+        hasViewConfiguration: false,
         placement,
         responseCreatedAt: 1704067200000,
         paywalls: [
