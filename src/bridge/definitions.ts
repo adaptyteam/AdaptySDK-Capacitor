@@ -1,4 +1,4 @@
-import type { FlowEventIdType, OnboardingEventIdType, UserEventId } from '@adapty/core';
+import type { FlowEventIdType, OnboardingEventIdType, UserEventNativeId } from '@adapty/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
 /**
@@ -11,7 +11,7 @@ import type { PluginListenerHandle } from '@capacitor/core';
  * runtime. All three unions come from `@adapty/core`, which derives them from
  * `cross_platform.yaml`.
  */
-export type NativeEventId = UserEventId | FlowEventIdType | OnboardingEventIdType;
+export type NativeEventId = UserEventNativeId | FlowEventIdType | OnboardingEventIdType;
 
 export interface AdaptyCapacitorPlugin {
   /**

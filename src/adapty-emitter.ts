@@ -1,5 +1,5 @@
 import { USER_EVENT_TO_NATIVE_ID } from '@adapty/core';
-import type { AdaptyError, UserEventId, UserEventName } from '@adapty/core';
+import type { AdaptyError, UserEventNativeId, UserEventName } from '@adapty/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
@@ -10,7 +10,7 @@ import type { AdaptyProfile, AdaptyPromotedProduct, AdaptyInstallationDetails } 
 import type { AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 
 type EventConfig<K extends keyof EventPayloadMap> = {
-  native: UserEventId;
+  native: UserEventNativeId;
   parse: (raw: string, eventCtx: LogContext) => EventPayloadMap[K] | null;
 };
 
