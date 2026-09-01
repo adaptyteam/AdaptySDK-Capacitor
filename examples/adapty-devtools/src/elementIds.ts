@@ -84,6 +84,7 @@ export const elementIds = {
     revisionValue: 'flow-revision-value',
     paywallsCountValue: 'flow-paywalls-count-value',
     uiSchemaValue: 'flow-ui-schema-value',
+    hasViewConfigurationValue: 'flow-has-view-configuration-value',
     hasRemoteConfigValue: 'flow-has-remote-config-value',
     productsCountValue: 'flow-products-count-value',
     configLocaleValue: 'flow-config-locale-value',
