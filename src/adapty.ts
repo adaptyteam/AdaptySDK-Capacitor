@@ -9,6 +9,7 @@ import { parseMethodResult, type AdaptyType } from './coders/parse';
 import { defaultAdaptyOptions } from './default-configs';
 import { Log, LogContext } from './logger';
 import type { LoggerConfig, LogScope } from './logger';
+import { WebPresentation } from './types';
 import type {
   AdaptyExternalAttributionProvider,
   AdaptyFlow,
@@ -20,7 +21,6 @@ import type {
   AdaptyProfileParameters,
   RefundPreference,
   AdaptyInstallationStatus,
-  WebPresentation,
 } from './types';
 import type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 import type { components } from './types/api';
@@ -780,6 +780,7 @@ export class Adapty implements AdaptyPlugin {
    * @param options - The options object
    * @param options.paywallOrProduct - The flow paywall or product to open as a web paywall.
    * @param options.openIn - Optional. Where to open the web paywall ({@link WebPresentation}).
+   * Defaults to `WebPresentation.BrowserOutApp`.
    * @returns A promise that resolves when the web paywall is opened.
    * @throws Error if an error occurs while opening the web paywall.
    *
@@ -799,6 +800,7 @@ export class Adapty implements AdaptyPlugin {
     paywallOrProduct: AdaptyFlowPaywall | AdaptyPaywallProduct;
     openIn?: WebPresentation;
   }): Promise<void> {
+    const openIn = options.openIn ?? WebPresentation.BrowserOutApp;
     const method = 'open_web_paywall';
 
     const ctx = new LogContext();
@@ -813,7 +815,7 @@ export class Adapty implements AdaptyPlugin {
       ...(this.isPaywallProduct(options.paywallOrProduct)
         ? { product: this.encodeWithLogging(productCoder, options.paywallOrProduct, 'AdaptyPaywallProduct', ctx) }
         : { paywall: this.encodeWithLogging(flowPaywallCoder, options.paywallOrProduct, 'AdaptyFlowPaywall', ctx) }),
-      ...(options.openIn ? { open_in: options.openIn } : {}),
+      open_in: openIn,
     };
 
     const args = filterUndefined(argsWithUndefined);
