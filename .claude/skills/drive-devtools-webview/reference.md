@@ -470,6 +470,26 @@ relaunch, rather than guessing whether the SDK is already active.
 - **Port 9333, not 9222.** `ios_webkit_debug_proxy` owns 9222, so the `adb forward` uses 9333. They
   used to share it, and `adb` binding `127.0.0.1:9222` first shadowed the iOS proxy: every iOS
   command failed with `lists no inspectable page` while Android looked perfectly healthy.
+- **A presented onboarding is a second CDP page, and it sorts first.** Unlike iOS, where everything
+  lives in one `WKWebView`, the onboarding builder gets its own WebView on Android, so
+  `/json/list` returns two pages. `selectAppTarget()` in `cdp.mjs` picks the app's page instead of
+  `targets[0]`, by two rules in order:
+
+  1. the hostname Capacitor serves from — `localhost` — which nothing the app presents shares;
+  2. failing that, the document title, which equals `capacitor.config.json`'s `appName`.
+
+  **Do not drop either rule, and do not simplify back to `targets[0]`.** Taking the onboarding
+  target looks entirely healthy — `snap` returns the onboarding's DOM and `logs` blames the app
+  bundle (`window.__adaptyDevtoolsLogs is not published — the running bundle predates the
+  LogsContext change`) for what is really a target mix-up. The onboarding target also outlives the
+  onboarding: dismissing it, and even `POST /json/close/<id>`, leave it listed until the app is
+  relaunched, so the mix-up lasts the rest of the session.
+
+  The title rule carries `yarn dev:android`, which runs `cap run android --live-reload --host <ip>
+  --port 5173`: Capacitor then sets `server.url` and the app is served from an IP, so rule 1 finds
+  nothing and the old fallback handed back the onboarding. Only when neither rule matches does
+  `selectAppTarget()` fall back to the first page. Covered by `__tests__/cdp.test.mjs`, which pins
+  both rules, the live-reload case and the `evil.localhost` lookalike.
 
 ## 3. What each tool can and cannot see
 
@@ -523,6 +543,9 @@ wait:flow-view-locale-value:absent -> absent
 `#onboarding-dismiss-btn` is the equivalent. `wvd snap` and `wvd do` keep working normally while a
 native view is up: they see the DOM underneath it, which is what makes both the dismiss click and
 the `absent` assertion possible.
+
+This holds on Android only because the transport picks the app's page deliberately — a presented
+onboarding puts a second WebView in front of it in `/json/list` (see §2, `selectAppTarget()`).
 
 ### Tapping inside a native view
 
