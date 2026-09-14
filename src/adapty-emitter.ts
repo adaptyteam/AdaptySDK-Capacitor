@@ -1,4 +1,5 @@
-import type { AdaptyError } from '@adapty/core';
+import { GLOBAL_EVENT_TO_NATIVE_EVENT } from '@adapty/core';
+import type { AdaptyError, GlobalEventIdType, GlobalEventName } from '@adapty/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 
 import { AdaptyCapacitorPlugin } from './bridge/plugin';
@@ -9,11 +10,7 @@ import type { AdaptyProfile, AdaptyPromotedProduct, AdaptyInstallationDetails } 
 import type { AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 
 type EventConfig<K extends keyof EventPayloadMap> = {
-  native:
-    | 'did_load_latest_profile'
-    | 'did_receive_promoted_purchase'
-    | 'on_installation_details_success'
-    | 'on_installation_details_fail';
+  native: GlobalEventIdType;
   parse: (raw: string, eventCtx: LogContext) => EventPayloadMap[K] | null;
 };
 
@@ -57,21 +54,28 @@ function parseInstallationDetailsFailEvent(
   return error ? { error: error as AdaptyError } : null;
 }
 
-const EVENT_MAP: { [K in keyof EventPayloadMap]: EventConfig<K> } = {
+/**
+ * Keyed by core's {@link GlobalEventName} rather than by the local
+ * `EventPayloadMap`, so the two cannot drift: an event core gains leaves this
+ * literal missing a key, and one this SDK still lists after core dropped it
+ * fails to instantiate `EventConfig`. Either way it is a compile error rather
+ * than an event nothing here can subscribe to.
+ */
+const EVENT_MAP: { [K in GlobalEventName]: EventConfig<K> } = {
   onLatestProfileLoad: {
-    native: 'did_load_latest_profile',
+    native: GLOBAL_EVENT_TO_NATIVE_EVENT.onLatestProfileLoad,
     parse: parseProfileEvent,
   },
   onPromotedPurchaseReceived: {
-    native: 'did_receive_promoted_purchase',
+    native: GLOBAL_EVENT_TO_NATIVE_EVENT.onPromotedPurchaseReceived,
     parse: parsePromotedPurchaseEvent,
   },
   onInstallationDetailsSuccess: {
-    native: 'on_installation_details_success',
+    native: GLOBAL_EVENT_TO_NATIVE_EVENT.onInstallationDetailsSuccess,
     parse: parseInstallationDetailsSuccessEvent,
   },
   onInstallationDetailsFail: {
-    native: 'on_installation_details_fail',
+    native: GLOBAL_EVENT_TO_NATIVE_EVENT.onInstallationDetailsFail,
     parse: parseInstallationDetailsFailEvent,
   },
 };
