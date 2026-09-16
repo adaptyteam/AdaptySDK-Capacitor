@@ -600,11 +600,44 @@ const App: React.FC = () => {
 
     try {
       await flowView.dismiss();
+      // Default dismiss releases the native view, so the reference is dead.
       setFlowView(null);
       setResult('✅ Flow dismissed');
     } catch (error) {
       setResult(`❌ Failed to dismiss flow: ${String(error)}`);
       log('error', 'Failed to dismiss flow', 'dismissFlow', false, { error: String(error) });
+    }
+  };
+
+  const dismissFlowKeepingView = async () => {
+    if (!flowView) {
+      setResult('❌ No flow view to dismiss.');
+      return;
+    }
+
+    try {
+      await flowView.dismiss({ destroy: false });
+      // The view is held until a dismiss with destroy: true, so the reference stays valid.
+      setResult('✅ Flow dismissed, view kept alive');
+    } catch (error) {
+      setResult(`❌ Failed to dismiss (keep alive) flow: ${String(error)}`);
+      log('error', 'Failed to dismiss (keep alive) flow', 'dismissFlowKeepingView', false, { error: String(error) });
+    }
+  };
+
+  const destroyFlow = async () => {
+    if (!flowView) {
+      setResult('❌ No flow view to destroy.');
+      return;
+    }
+
+    try {
+      await flowView.destroy();
+      // Keep the reference on purpose: Present Existing afterwards shows what a released view does.
+      setResult('✅ Flow view destroyed');
+    } catch (error) {
+      setResult(`❌ Failed to destroy flow view: ${String(error)}`);
+      log('error', 'Failed to destroy flow view', 'destroyFlow', false, { error: String(error) });
     }
   };
 
@@ -694,6 +727,8 @@ const App: React.FC = () => {
       setWebPaywallOpenInIdx={setWebPaywallOpenInIdx}
       fetchFlow={fetchFlow}
       presentFlow={presentFlow}
+      dismissFlowKeepingView={dismissFlowKeepingView}
+      destroyFlow={destroyFlow}
       presentExistingFlow={presentExistingFlow}
       dismissFlow={dismissFlow}
       logFlowShown={logFlowShown}

@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", from: "8.0.0"),
         .package(
             url: "https://github.com/adaptyteam/AdaptySDK-iOS.git",
-            exact: "4.1.3",
+            branch: "release/4.2.0",
             traits: [
                 .defaults,
                 .trait(name: "KidsMode", condition: .when(traits: ["AdaptyCapacitorKidsMode"]))
