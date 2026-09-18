@@ -29,6 +29,8 @@ type Props = {
   setWebPaywallOpenInIdx: (v: number) => void;
   fetchFlow: (forDefaultAudience?: boolean) => Promise<void>;
   presentFlow: () => Promise<void>;
+  dismissFlowKeepingView: () => Promise<void>;
+  destroyFlow: () => Promise<void>;
   presentExistingFlow: () => Promise<void>;
   dismissFlow: () => Promise<void>;
   logFlowShown: () => Promise<void>;
@@ -64,6 +66,8 @@ export const FlowSection: React.FC<Props> = ({
   setWebPaywallOpenInIdx,
   fetchFlow,
   presentFlow,
+  dismissFlowKeepingView,
+  destroyFlow,
   presentExistingFlow,
   dismissFlow,
   logFlowShown,
@@ -295,7 +299,7 @@ export const FlowSection: React.FC<Props> = ({
           disabled={!flowView}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
         >
-          Present Existing (not supported)
+          Present Existing
         </button>
 
         <button
@@ -304,7 +308,25 @@ export const FlowSection: React.FC<Props> = ({
           disabled={!flowView}
           className={`${styles.Button} ${styles.ButtonSecondary}`}
         >
-          Dismiss Flow
+          Dismiss (destroy)
+        </button>
+
+        <button
+          id={elementIds.flow.dismissKeepBtn}
+          onClick={dismissFlowKeepingView}
+          disabled={!flowView}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Dismiss (keep alive)
+        </button>
+
+        <button
+          id={elementIds.flow.destroyBtn}
+          onClick={destroyFlow}
+          disabled={!flowView}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Destroy
         </button>
 
         <button

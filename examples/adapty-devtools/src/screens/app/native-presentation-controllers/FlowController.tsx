@@ -80,7 +80,7 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         onCloseButtonPress: () => {
           log('info', 'User pressed close button', 'flow.onCloseButtonPress');
           setResult('❌ User closed flow');
-          // The native view is gone; drop the reference so Dismiss Flow reports honestly.
+          // The default dismiss behind this handler releases the view; drop the reference.
           setFlowView(null);
           return true;
         },

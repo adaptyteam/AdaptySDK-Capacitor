@@ -65,6 +65,7 @@ interface ResponseRegistry {
   adapty_ui_create_flow_view?: components['requests']['AdaptyUICreateFlowView.Response'];
   adapty_ui_present_flow_view?: components['requests']['AdaptyUIPresentFlowView.Response'];
   adapty_ui_dismiss_flow_view?: components['requests']['AdaptyUIDismissFlowView.Response'];
+  adapty_ui_destroy_flow_view?: components['requests']['AdaptyUIDestroyFlowView.Response'];
   adapty_ui_show_dialog?: components['requests']['AdaptyUIShowDialog.Response'];
   adapty_ui_create_onboarding_view?: components['requests']['AdaptyUICreateOnboardingView.Response'];
   adapty_ui_present_onboarding_view?: components['requests']['AdaptyUIPresentOnboardingView.Response'];
