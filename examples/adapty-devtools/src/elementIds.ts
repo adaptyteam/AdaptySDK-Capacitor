@@ -74,6 +74,8 @@ export const elementIds = {
     presentBtn: 'flow-present-btn',
     presentExistingBtn: 'flow-present-existing-btn',
     dismissBtn: 'flow-dismiss-btn',
+    dismissKeepBtn: 'flow-dismiss-keep-btn',
+    destroyBtn: 'flow-destroy-btn',
     logShownBtn: 'flow-log-shown-btn',
     openWebPaywallBtn: 'flow-open-web-paywall-btn',
     createWebUrlBtn: 'flow-create-web-url-btn',

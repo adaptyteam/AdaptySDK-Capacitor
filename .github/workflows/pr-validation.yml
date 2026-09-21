@@ -189,6 +189,16 @@ jobs:
       with:
         xcode-version: '26.5'
 
+    # Runs before the SPM cache steps: independent of cache state and fails in seconds.
+    # The build below uses -disableAutomaticPackageResolution, so a stale lock is fatal —
+    # this turns SwiftPM's opaque error into an actionable one.
+    - name: Verify Package.resolved is in sync with Package.swift
+      run: |
+        if ! ./scripts/check-spm-lock.sh; then
+          echo "::error file=Package.resolved::Package.resolved is out of sync with Package.swift — run 'yarn resolve:ios' and commit the lock alongside the manifest."
+          exit 1
+        fi
+
     - name: Cache node_modules
       uses: actions/cache@v4
       id: cache-node-modules
@@ -230,13 +240,6 @@ jobs:
         key: spm-artifacts-${{ runner.os }}-${{ env.XCODE_VERSION }}-${{ hashFiles('Package.swift', 'Package.resolved') }}
         restore-keys: |
           spm-artifacts-${{ runner.os }}-${{ env.XCODE_VERSION }}-
-
-    - name: Resolve SPM dependencies
-      if: steps.cache-spm-checkouts.outputs.cache-hit != 'true' || steps.cache-spm-artifacts.outputs.cache-hit != 'true'
-      run: |
-        xcodebuild -resolvePackageDependencies \
-          -clonedSourcePackagesDirPath .spm \
-          -skipPackagePluginValidation
 
     - name: Run iOS verification (no signing)
       run: |

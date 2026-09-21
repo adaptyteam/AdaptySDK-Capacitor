@@ -19,6 +19,8 @@ yarn test:watch               # Run tests in watch mode
 yarn verify                   # Full verification: iOS + Android + Web builds
 yarn verify:ios               # Build iOS with xcodebuild
 yarn verify:android           # Build Android with Gradle
+yarn resolve:ios              # Regenerate the committed root Package.resolved
+yarn resolve:ios:check        # Verify the lock matches Package.swift (what CI runs)
 
 # Code Quality
 yarn lint                     # ESLint + Prettier check
@@ -65,6 +67,23 @@ src/
 ### cross_platform.yaml
 
 The JSON Schema defining all method signatures and data structures. It lives in **`@adapty/core`, not in this repo** — do not look for it here. Its generated types reach this SDK through core's declarations, re-exported by `src/types/api.d.ts` as `components['requests']['Activate.Request']` and friends, and `scripts/check-bridge-api-test-coverage.js` reads the method list from `node_modules/@adapty/core/dist/index.d.mts` for the same reason. Native arguments must conform to those request schemas (e.g. `Activate.Request`, `GetPaywall.Request`).
+
+### Package.resolved (iOS)
+
+The root `Package.resolved` is **tracked on purpose** — `.gitignore` keeps ignoring the examples'
+lock files but re-includes this one (`!/Package.resolved`). The iOS CI job builds with
+`-disableAutomaticPackageResolution`, so the lock is the only source of pins; while the native SDK
+dependency points at a branch it is mandatory, because a branch requirement can never be satisfied
+from local workspace state alone.
+
+**Any edit to `Package.swift` requires `yarn resolve:ios` and the regenerated lock in the same
+commit.** A stale lock is invisible locally (local builds resolve automatically) and fails CI.
+`yarn resolve:ios:check` reproduces the CI check: it compares the lock's `originHash` against
+`sha256(Package.swift)` — SwiftPM derives that hash from the manifest bytes, so a match means the
+lock was generated from exactly this manifest. No network, no SwiftPM invocation.
+
+The lock is not published — it is absent from `files` in `package.json`, and SwiftPM reads a
+`Package.resolved` only for the root package, so consumers of `@adapty/capacitor` never see it.
 
 ### Examples
 
