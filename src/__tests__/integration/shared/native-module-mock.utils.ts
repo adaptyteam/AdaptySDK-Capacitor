@@ -45,6 +45,8 @@ interface ResponseRegistry {
   make_promoted_purchase?: components['requests']['MakePromotedPurchase.Response'];
   get_onboarding?: components['requests']['GetOnboarding.Response'];
   get_onboarding_for_default_audience?: components['requests']['GetOnboardingForDefaultAudience.Response'];
+  preload_flows?: components['requests']['PreloadFlows.Response'];
+  preload_flows_for_default_audience?: components['requests']['PreloadFlowsForDefaultAudience.Response'];
   identify?: components['requests']['Identify.Response'];
   logout?: components['requests']['Logout.Response'];
   restore_purchases?: components['requests']['RestorePurchases.Response'];

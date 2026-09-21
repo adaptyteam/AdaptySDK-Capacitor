@@ -19,6 +19,7 @@ export * from './flow-reply-events';
 export * from './purchase';
 export * from './user-management';
 export * from './onboarding';
+export * from './preload';
 export * from './ui-methods';
 export * from './configuration';
 export * from './installation';

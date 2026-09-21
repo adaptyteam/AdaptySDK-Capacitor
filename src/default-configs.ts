@@ -25,4 +25,9 @@ export const defaultAdaptyOptions: AdaptyDefaultOptions = {
       loadTimeoutMs: 5000,
     },
   },
+  preload_flows: {
+    params: {
+      loadTimeoutMs: 5000,
+    },
+  },
 };

@@ -3,6 +3,7 @@ import type {
   GetPlacementParamsInput,
   GetPlacementForDefaultAudienceParamsInput,
   MakePurchaseParamsInput,
+  PreloadPlacementsParamsInput,
 } from './inputs';
 
 /**
@@ -42,6 +43,27 @@ export interface GetOnboardingForDefaultAudienceOptions {
   locale?: string;
   // Keep same input shape as RN: allow loadTimeoutMs even though it is not used by schema
   params?: GetPlacementParamsInput;
+}
+
+/**
+ * Describes the options for the `preloadFlows` method.
+ * @public
+ */
+export interface PreloadFlowsOptions {
+  placementIds: string[];
+  params?: PreloadPlacementsParamsInput;
+}
+
+/**
+ * Describes the options for the `preloadFlowsForDefaultAudience` method.
+ *
+ * @remarks
+ * The request carries no timeout — unlike {@link PreloadFlowsOptions} there is
+ * nothing to configure beyond the placements.
+ * @public
+ */
+export interface PreloadFlowsForDefaultAudienceOptions {
+  placementIds: string[];
 }
 
 /**
@@ -95,6 +117,12 @@ export interface AdaptyDefaultOptions {
   get_onboarding_for_default_audience: {
     params: GetPlacementParamsInput;
   };
+  /**
+   * Default options for the `preloadFlows` method.
+   */
+  preload_flows: {
+    params: Required<PreloadPlacementsParamsInput>;
+  };
 }
 
 /**
@@ -122,3 +150,9 @@ export type GetOnboardingOptionsWithDefaults = AdaptyDefaultOptions['get_onboard
  */
 export type GetOnboardingForDefaultAudienceOptionsWithDefaults =
   AdaptyDefaultOptions['get_onboarding_for_default_audience'] & GetOnboardingForDefaultAudienceOptions;
+
+/**
+ * Merged type for `preloadFlows` with defaults
+ * @public
+ */
+export type PreloadFlowsOptionsWithDefaults = AdaptyDefaultOptions['preload_flows'] & PreloadFlowsOptions;

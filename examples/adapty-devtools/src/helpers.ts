@@ -47,6 +47,19 @@ export function getAndroidApplicationId(): string {
   return credentials.android_application_id;
 }
 
+/**
+ * Split a placement input into the list the preload methods take.
+ *
+ * The placement inputs hold a single id for the get* methods, but preload
+ * accepts many, so a comma-separated value can be typed into the same field.
+ */
+export function parsePlacementIds(value: string): string[] {
+  return value
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0);
+}
+
 export interface JsLog {
   id: string;
   logLevel: 'error' | 'warn' | 'info' | 'debug' | 'verbose';

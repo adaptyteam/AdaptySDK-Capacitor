@@ -24,6 +24,7 @@ import type {
   GetPlacementForDefaultAudienceParamsInput,
   IdentifyParamsInput,
   MakePurchaseParamsInput,
+  PreloadPlacementsParamsInput,
   FileLocation,
   LogLevel,
 } from './inputs';
@@ -74,6 +75,16 @@ export interface AdaptyPlugin {
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
   }): Promise<AdaptyOnboarding>;
+
+  /**
+   * Warms the cache for the given flow placements.
+   */
+  preloadFlows(options: { placementIds: string[]; params?: PreloadPlacementsParamsInput }): Promise<void>;
+
+  /**
+   * Warms the cache for the given flow placements using the **All Users** audience.
+   */
+  preloadFlowsForDefaultAudience(options: { placementIds: string[] }): Promise<void>;
 
   /**
    * Gets the current user profile.

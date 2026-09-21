@@ -72,6 +72,8 @@ export const elementIds = {
     customTagsTextarea: 'flow-custom-tags-textarea',
     loadBtn: 'flow-load-btn',
     loadDefaultAudienceBtn: 'flow-load-default-audience-btn',
+    preloadBtn: 'flow-preload-btn',
+    preloadDefaultAudienceBtn: 'flow-preload-default-audience-btn',
     presentBtn: 'flow-present-btn',
     presentExistingBtn: 'flow-present-existing-btn',
     dismissBtn: 'flow-dismiss-btn',

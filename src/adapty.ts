@@ -36,6 +36,9 @@ import type {
   GetOnboardingOptionsWithDefaults,
   GetOnboardingForDefaultAudienceOptions,
   GetOnboardingForDefaultAudienceOptionsWithDefaults,
+  PreloadFlowsOptions,
+  PreloadFlowsOptionsWithDefaults,
+  PreloadFlowsForDefaultAudienceOptions,
 } from './types/configs';
 import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './types/inputs';
 import type { MethodName } from './types/method-types';
@@ -632,6 +635,107 @@ export class Adapty implements AdaptyPlugin {
     const args = filterUndefined(argsWithUndefined);
 
     return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'AdaptyOnboarding');
+  }
+
+  /**
+   * Warms the cache for the given flow placements.
+   *
+   * @remarks
+   * Same request as {@link getFlow}, one per placement, but with less decoding
+   * and all placements fetched in parallel. Nothing is returned; the result
+   * only lands in the cache.
+   *
+   * Useful for cross-placement A/B tests.
+   *
+   * Only the placement JSON is cached — not the UI schema or the paywall
+   * images, so the first `createFlowView` still goes to the network for those.
+   *
+   * A later {@link getFlow} reads the warmed cache only with
+   * `'return_cache_data_else_load'` (or
+   * `'return_cache_data_if_not_expired_else_load'`); with the default
+   * `'reload_revalidating_cache_data'` it still hits the network and the warmed
+   * copy serves as an offline fallback. Preloading itself always goes to the
+   * network — it has no fetch policy.
+   *
+   * @param options - The options for preloading the flows
+   * @param options.placementIds - The placements to preload.
+   * @param options.params - Optional. Additional parameters for preloading.
+   * @returns A promise that resolves once every placement has been stored.
+   * @throws {@link AdaptyError} if any placement failed to load. The error
+   *         aggregates the failures, and the placements that did succeed stay
+   *         in the cache. Requires {@link activate} to have been called.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * await adapty.preloadFlows({
+   *   placementIds: ['onboarding_flow', 'settings_paywall'],
+   *   params: { loadTimeoutMs: 5000 },
+   * });
+   *
+   * const flow = await adapty.getFlow({
+   *   placementId: 'onboarding_flow',
+   *   params: { fetchPolicy: 'return_cache_data_else_load' },
+   * });
+   * ```
+   */
+  async preloadFlows(options: PreloadFlowsOptions): Promise<void> {
+    const method = 'preload_flows';
+    const optionsWithDefault = mergeOptions<PreloadFlowsOptionsWithDefaults>(options, this.options[method]);
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ optionsWithDefault }));
+
+    const argsWithUndefined: Req['PreloadFlows.Request'] = {
+      method,
+      placement_ids: optionsWithDefault.placementIds,
+      load_timeout: optionsWithDefault.params.loadTimeoutMs / 1000,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+  }
+
+  /**
+   * Warms the cache for the given flow placements using the **All Users** audience.
+   *
+   * @remarks
+   * The same trade-offs as {@link getFlowForDefaultAudience} apply: faster
+   * fetching, but no targeting by country, attribution or custom attributes.
+   * Unlike {@link preloadFlows} the request carries no timeout.
+   *
+   * See {@link preloadFlows} for what preloading does and does not cover.
+   *
+   * @param options - The options for preloading the flows
+   * @param options.placementIds - The placements to preload.
+   * @returns A promise that resolves once every placement has been stored.
+   * @throws {@link AdaptyError} if any placement failed to load.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * await adapty.preloadFlowsForDefaultAudience({ placementIds: ['onboarding_flow'] });
+   * ```
+   */
+  async preloadFlowsForDefaultAudience(options: PreloadFlowsForDefaultAudienceOptions): Promise<void> {
+    const method = 'preload_flows_for_default_audience';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
+    const argsWithUndefined: Req['PreloadFlowsForDefaultAudience.Request'] = {
+      method,
+      placement_ids: options.placementIds,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
 
   /**

@@ -10,7 +10,7 @@ import {
   ErrorCodeName,
   AdaptyError,
 } from '@adapty/capacitor';
-import { getApiKey, getIosBundle, getAndroidApplicationId, createLog } from '../../helpers';
+import { getApiKey, getIosBundle, getAndroidApplicationId, createLog, parsePlacementIds } from '../../helpers';
 import { useAppContext } from '../../contexts/AppContext';
 import { useLogs } from '../../contexts/LogsContext';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
@@ -734,6 +734,7 @@ const App: React.FC = () => {
       setFetchPolicyIndex={setFetchPolicyIndex}
       setWebPaywallOpenInIdx={setWebPaywallOpenInIdx}
       fetchFlow={fetchFlow}
+      preloadFlows={preloadFlows}
       presentFlow={presentFlow}
       dismissFlowKeepingView={dismissFlowKeepingView}
       destroyFlow={destroyFlow}
@@ -868,6 +869,33 @@ const App: React.FC = () => {
     } catch (error) {
       log('error', 'Error identifying user', 'identify', false, { error: String(error), customerUserId });
       setResult(`Error identifying user: ${error}`);
+    }
+  };
+
+  const preloadFlows = async (forDefaultAudience: boolean = false) => {
+    if (!isActivated) return;
+
+    const methodName = forDefaultAudience ? 'preloadFlowsForDefaultAudience' : 'preloadFlows';
+    const placementIds = parsePlacementIds(placementId);
+
+    setIsLoadingFlow(true);
+    try {
+      log('info', 'Preloading flows', methodName, false, { placementIds, forDefaultAudience });
+
+      if (forDefaultAudience) {
+        await adapty.preloadFlowsForDefaultAudience({ placementIds });
+      } else {
+        await adapty.preloadFlows({ placementIds, params: { loadTimeoutMs: parseFloat(timeout) } });
+      }
+
+      log('info', 'Flows preloaded', methodName, false, { placementIds, forDefaultAudience });
+      const audienceType = forDefaultAudience ? ' for default audience' : '';
+      setResult(`Preloaded ${placementIds.length} flow placement(s)${audienceType}`);
+    } catch (error) {
+      log('error', 'Error preloading flows', methodName, false, { error: String(error), placementIds });
+      setResult(`Error preloading flows: ${error}`);
+    } finally {
+      setIsLoadingFlow(false);
     }
   };
 
