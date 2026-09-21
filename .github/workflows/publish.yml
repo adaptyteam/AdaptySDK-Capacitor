@@ -29,6 +29,9 @@ jobs:
     runs-on: ubuntu-slim
     name: Verify a real publish is from a v* git tag
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Enforce v* tag for real publishes (dry runs are exempt)
         env:
           DRY_RUN: ${{ inputs.dry-run }}
@@ -50,6 +53,27 @@ jobs:
               exit 1
               ;;
           esac
+
+      # A branch/revision pin is a moving target for consumers: SwiftPM reads Package.resolved
+      # only for the root package, so our lock never reaches them — they would resolve whatever
+      # the branch head is at install time.
+      - name: Forbid branch/revision SPM pins in a published package
+        env:
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          set -uo pipefail
+          HITS=$(grep -nE '(^|[^A-Za-z_])(branch|revision):' Package.swift || true)
+          if [ -z "$HITS" ]; then
+            echo "OK: Package.swift has no branch/revision pins."
+            exit 0
+          fi
+          echo "$HITS"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "::warning file=Package.swift::Package.swift pins a branch/revision. This would block a real publish."
+            exit 0
+          fi
+          echo "::error file=Package.swift::Package.swift pins a branch/revision instead of an exact version. Consumers do not receive our Package.resolved, so they would resolve a moving branch head. Switch to exact: \"<VERSION>\", run 'yarn resolve:ios' and commit the lock."
+          exit 1
 
   validation:
     name: Run validation checks

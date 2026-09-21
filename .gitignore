@@ -6,6 +6,9 @@ node_modules
 Pods
 Podfile.lock
 Package.resolved
+# ...except the root package lock file, which CI builds with -disableAutomaticPackageResolution
+!/Package.resolved
+.spm/
 Build
 xcuserdata
 /.build
