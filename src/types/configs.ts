@@ -41,8 +41,7 @@ export interface GetOnboardingOptions {
 export interface GetOnboardingForDefaultAudienceOptions {
   placementId: string;
   locale?: string;
-  // Keep same input shape as RN: allow loadTimeoutMs even though it is not used by schema
-  params?: GetPlacementParamsInput;
+  params?: GetPlacementForDefaultAudienceParamsInput;
 }
 
 /**
@@ -112,10 +111,9 @@ export interface AdaptyDefaultOptions {
   };
   /**
    * Default options for the `getOnboardingForDefaultAudience` method.
-   * Keep parity with RN by using `GetPlacementParamsInput`.
    */
   get_onboarding_for_default_audience: {
-    params: GetPlacementParamsInput;
+    params: GetPlacementForDefaultAudienceParamsInput;
   };
   /**
    * Default options for the `preloadFlows` method.

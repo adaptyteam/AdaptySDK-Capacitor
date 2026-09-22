@@ -22,7 +22,6 @@ export const defaultAdaptyOptions: AdaptyDefaultOptions = {
   get_onboarding_for_default_audience: {
     params: {
       fetchPolicy: FetchPolicy.ReloadRevalidatingCacheData,
-      loadTimeoutMs: 5000,
     },
   },
   preload_flows: {
