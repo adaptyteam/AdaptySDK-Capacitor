@@ -136,6 +136,16 @@ export const elementIds = {
     lastProductValue: 'promoted-last-product-value',
     buyBtn: 'promoted-buy-btn',
   },
+  storeMessages: {
+    modeValue: 'store-messages-mode-value',
+    getPendingBtn: 'store-messages-get-pending-btn',
+    pendingValue: 'store-messages-pending-value',
+    filterTypeToggle: (key: string | number) => `store-messages-filter-${key}-toggle`,
+    filterValue: 'store-messages-filter-value',
+    showAllBtn: 'store-messages-show-all-btn',
+    showFilteredBtn: 'store-messages-show-filtered-btn',
+    showTwiceBtn: 'store-messages-show-twice-btn',
+  },
   integration: {
     keyInput: 'integration-key-input',
     valueInput: 'integration-value-input',
@@ -198,5 +208,7 @@ export const elementIds = {
     observerModeValue: 'sdk-observer-mode-value',
     adaptyAttributionToggle: 'sdk-adapty-attribution-toggle',
     adaptyAttributionValue: 'sdk-adapty-attribution-value',
+    storeMessagesHandlingToggle: 'sdk-store-messages-handling-toggle',
+    storeMessagesHandlingValue: 'sdk-store-messages-handling-value',
   },
 } as const;

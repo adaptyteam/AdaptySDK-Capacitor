@@ -16,6 +16,7 @@ import type {
   RefundPreference,
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
+  AdaptyStoreMessageType,
   WebPresentation,
 } from './index';
 import type {
@@ -146,6 +147,18 @@ export interface AdaptyPlugin {
    * Presents the code redemption sheet (iOS only).
    */
   presentCodeRedemptionSheet(): Promise<void>;
+
+  /**
+   * Gets the store message types waiting in the SDK queue (iOS 16+, manual mode).
+   * Resolves `null` on Android, where the store cannot report pending messages.
+   * @platform ios
+   */
+  getPendingStoreMessageTypes(): Promise<AdaptyStoreMessageType[] | null>;
+
+  /**
+   * Shows pending store messages. `ios.filter` is ignored on Android.
+   */
+  showStoreMessages(options?: { ios?: { filter?: AdaptyStoreMessageType[] } }): Promise<void>;
 
   /**
    * Reports a transaction to Adapty.

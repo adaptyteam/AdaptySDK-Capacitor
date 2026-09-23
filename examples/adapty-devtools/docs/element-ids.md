@@ -239,6 +239,8 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `sdk-observer-mode-value` | `elementIds.sdk.observerModeValue` | src/screens/app/App.tsx |
 | `sdk-adapty-attribution-toggle` | `elementIds.sdk.adaptyAttributionToggle` | src/screens/app/App.tsx |
 | `sdk-adapty-attribution-value` | `elementIds.sdk.adaptyAttributionValue` | src/screens/app/App.tsx |
+| `sdk-store-messages-handling-toggle` | `elementIds.sdk.storeMessagesHandlingToggle` | src/screens/app/App.tsx |
+| `sdk-store-messages-handling-value` | `elementIds.sdk.storeMessagesHandlingValue` | src/screens/app/App.tsx |
 
 ## sdkStatus
 
@@ -248,3 +250,16 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `sdk-status-profile-loaded-value` | `elementIds.sdkStatus.profileLoadedValue` | src/screens/app/sections/SdkStatusSection.tsx |
 | `sdk-status-flow-loaded-value` | `elementIds.sdkStatus.flowLoadedValue` | src/screens/app/sections/SdkStatusSection.tsx |
 | `sdk-status-onboarding-loaded-value` | `elementIds.sdkStatus.onboardingLoadedValue` | src/screens/app/sections/SdkStatusSection.tsx |
+
+## storeMessages
+
+| id | registry path | used in |
+| --- | --- | --- |
+| `store-messages-mode-value` | `elementIds.storeMessages.modeValue` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-get-pending-btn` | `elementIds.storeMessages.getPendingBtn` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-pending-value` | `elementIds.storeMessages.pendingValue` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-filter-{key}-toggle` | `elementIds.storeMessages.filterTypeToggle` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-filter-value` | `elementIds.storeMessages.filterValue` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-show-all-btn` | `elementIds.storeMessages.showAllBtn` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-show-filtered-btn` | `elementIds.storeMessages.showFilteredBtn` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-show-twice-btn` | `elementIds.storeMessages.showTwiceBtn` | src/screens/app/sections/StoreMessagesSection.tsx |

@@ -36,9 +36,10 @@ import {
   type ExternalAttributionProvider,
 } from '../../services/externalAttribution';
 import { buildActivateParams } from '../../services/activateParams';
-import type { AdaptyPromotedProduct } from '@adapty/capacitor';
+import type { AdaptyPromotedProduct, AdaptyStoreMessageType } from '@adapty/capacitor';
 import { buyPromotedProduct, subscribeToPromotedPurchase } from '../../services/promotedPurchase';
 import { PromotedPurchaseSection } from './sections/PromotedPurchaseSection';
+import { StoreMessagesSection } from './sections/StoreMessagesSection';
 
 const App: React.FC = () => {
   // Get context state and actions
@@ -116,6 +117,10 @@ const App: React.FC = () => {
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
   const [observerMode, setObserverMode] = useState(false);
   const [adaptyAttributionEnabled, setAdaptyAttributionEnabled] = useState(false);
+  const [storeMessagesHandling, setStoreMessagesHandling] = useState<'auto' | 'manual'>('auto');
+  const [pendingStoreMessageTypes, setPendingStoreMessageTypes] = useState<AdaptyStoreMessageType[] | null | undefined>(
+    undefined,
+  );
   const [appHandlesPromoted, setAppHandlesPromoted] = useState(false);
   const [promotedProduct, setPromotedProduct] = useState<AdaptyPromotedProduct | null>(null);
 
@@ -180,6 +185,7 @@ const App: React.FC = () => {
         params: buildActivateParams({
           observerMode,
           adaptyAttributionEnabled,
+          storeMessagesHandling,
           ignoreActivationOnFastRefresh: import.meta.env.DEV,
           customerUserId: trimmedCustomerUserId,
         }),
@@ -775,6 +781,47 @@ const App: React.FC = () => {
     />
   );
 
+  const getPendingStoreMessageTypes = async () => {
+    if (!isActivated) return;
+
+    try {
+      log('info', 'Getting pending store message types', 'getPendingStoreMessageTypes');
+      const types = await adapty.getPendingStoreMessageTypes();
+      setPendingStoreMessageTypes(types);
+      setResult(`Pending store message types: ${JSON.stringify(types)}`);
+    } catch (error) {
+      log('error', 'Error getting pending store message types', 'getPendingStoreMessageTypes', false, {
+        error: String(error),
+      });
+      setResult(`Error getting pending store message types: ${error}`);
+    }
+  };
+
+  const showStoreMessages = async (filter?: AdaptyStoreMessageType[]) => {
+    if (!isActivated) return;
+
+    const filterLabel = filter ? JSON.stringify(filter) : 'none';
+    try {
+      log('info', `Showing store messages, filter: ${filterLabel}`, 'showStoreMessages', false, { filter });
+      await adapty.showStoreMessages(filter ? { ios: { filter } } : undefined);
+      setResult(`Store messages shown, filter: ${filterLabel}`);
+    } catch (error) {
+      log('error', 'Error showing store messages', 'showStoreMessages', false, { error: String(error), filter });
+      setResult(`Error showing store messages (filter: ${filterLabel}): ${error}`);
+    }
+  };
+
+  // The second call is expected to fail with operationInProgress (3201) while the first one is running
+  const showStoreMessagesTwice = async () => {
+    if (!isActivated) return;
+
+    log('info', 'Showing store messages twice at once', 'showStoreMessages');
+    const results = await Promise.allSettled([adapty.showStoreMessages(), adapty.showStoreMessages()]);
+    const summary = results.map((r) => (r.status === 'fulfilled' ? 'ok' : String(r.reason))).join(' | ');
+    log('info', `Show twice results: ${summary}`, 'showStoreMessages');
+    setResult(`Show twice: ${summary}`);
+  };
+
   const presentCodeRedemptionSheet = async () => {
     if (!isActivated) return;
 
@@ -1175,6 +1222,20 @@ const App: React.FC = () => {
               {adaptyAttributionEnabled.toString()}
             </span>
           </div>
+          <div
+            id={elementIds.sdk.storeMessagesHandlingToggle}
+            className={styles.ClickableParam}
+            onClick={() => {
+              if (!isActivated) {
+                setStoreMessagesHandling(storeMessagesHandling === 'auto' ? 'manual' : 'auto');
+              }
+            }}
+          >
+            <span>Store messages handling (activation-time only)</span>
+            <span id={elementIds.sdk.storeMessagesHandlingValue} className={styles.ParamValue}>
+              {storeMessagesHandling}
+            </span>
+          </div>
           <div className={styles.ButtonGroup}>
             <button
               id={elementIds.sdk.activateBtn}
@@ -1234,6 +1295,18 @@ const App: React.FC = () => {
             promotedProduct={promotedProduct}
             setAppHandlesPromoted={setAppHandlesPromoted}
             buyLastPromotedProduct={buyLastPromotedProduct}
+          />
+        )}
+
+        {/* Store Messages Section */}
+        {isActivated && (
+          <StoreMessagesSection
+            isActivated={isActivated}
+            storeMessagesHandling={storeMessagesHandling}
+            pendingTypes={pendingStoreMessageTypes}
+            getPendingStoreMessageTypes={getPendingStoreMessageTypes}
+            showStoreMessages={showStoreMessages}
+            showStoreMessagesTwice={showStoreMessagesTwice}
           />
         )}
 

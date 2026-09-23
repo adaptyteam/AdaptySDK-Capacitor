@@ -21,6 +21,7 @@ import type {
   AdaptyProfileParameters,
   RefundPreference,
   AdaptyInstallationStatus,
+  AdaptyStoreMessageType,
 } from './types';
 import type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 import type { components } from './types/api';
@@ -1220,6 +1221,106 @@ export class Adapty implements AdaptyPlugin {
 
     const argsWithUndefined: Req['PresentCodeRedemptionSheet.Request'] = {
       method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+  }
+
+  /**
+   * Gets the types of store messages currently waiting in the SDK queue.
+   *
+   * @platform ios
+   * @remarks
+   * iOS 16+ only. The queue is kept only when the SDK is activated with
+   * `storeMessagesHandling: 'manual'`; in `'auto'` mode and before activation
+   * the result is always empty. The result is a snapshot of unique types in
+   * no particular order — there is no event for newly arrived messages.
+   *
+   * `[]` means `showStoreMessages()` has nothing to show right now. `null` means the
+   * store cannot report pending messages: on Android Google Play decides on show, so
+   * this resolves `null` without calling native — call `showStoreMessages()` there.
+   * Below iOS 16 the native method is unavailable and the call rejects.
+   *
+   * @returns A promise that resolves with the pending {@link AdaptyStoreMessageType} values, or `null` where the store cannot report them (Android).
+   * @throws Error if an error occurs on iOS.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * const types = await adapty.getPendingStoreMessageTypes();
+   * if (types === null) {
+   *   // The store can't report pending messages (Android): let it decide
+   *   await adapty.showStoreMessages();
+   * } else if (types.includes('billing_issue')) {
+   *   // Explain the billing issue in your own UI first, then show the system message
+   *   await adapty.showStoreMessages({ ios: { filter: ['billing_issue'] } });
+   * }
+   * ```
+   */
+  async getPendingStoreMessageTypes(): Promise<AdaptyStoreMessageType[] | null> {
+    if (Capacitor.getPlatform() === 'android') {
+      return null;
+    }
+
+    const method = 'get_pending_store_message_types';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({}));
+
+    const argsWithUndefined: Req['GetPendingStoreMessageTypes.Request'] = {
+      method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'Array<AdaptyStoreMessageType>');
+  }
+
+  /**
+   * Shows pending store messages: App Store messages on iOS, Google Play in-app messages on Android.
+   *
+   * @remarks
+   * Intended for `storeMessagesHandling: 'manual'`, but works in both modes.
+   *
+   * iOS 16+: messages are shown one by one; a successfully shown message leaves
+   * the queue, a message that failed to show stays for a retry. Omit `ios.filter` to
+   * show every pending message, pass `[]` to show none.
+   *
+   * Android: shows every applicable message; Google Play decides whether one exists.
+   * `ios.filter` is not sent there, so `{ ios: { filter: [] } }` shows everything on Android.
+   *
+   * @param options - Optional. The options object
+   * @param options.ios - Optional. iOS-only options, ignored on Android.
+   * @param options.ios.filter - Optional. The message types to show.
+   * @returns A promise that resolves once the messages have been processed.
+   * @throws {@link AdaptyError} with code `operationInProgress` (3201) if another show is running,
+   * or `resolverFailure` (3202) if no foreground window scene is available (iOS).
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * // Show everything that is pending, e.g. after onboarding is finished
+   * await adapty.showStoreMessages();
+   *
+   * // iOS: show just the price increase consent; Android shows everything
+   * await adapty.showStoreMessages({ ios: { filter: ['price_increase_consent'] } });
+   * ```
+   */
+  async showStoreMessages(options?: { ios?: { filter?: AdaptyStoreMessageType[] } }): Promise<void> {
+    const method = 'show_store_messages';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
+    const argsWithUndefined: Req['ShowStoreMessage.Request'] = {
+      method,
+      filter: Capacitor.getPlatform() === 'ios' ? options?.ios?.filter : undefined,
     };
 
     const args = filterUndefined(argsWithUndefined);

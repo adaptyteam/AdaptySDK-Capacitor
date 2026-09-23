@@ -62,6 +62,7 @@ export {
   RefundPreference,
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
+  AdaptyStoreMessageType,
 } from './types';
 // Config types
 export {

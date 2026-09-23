@@ -750,4 +750,38 @@ describe('Adapty - Activation (Bridge Integration)', () => {
       expect(request.configuration).not.toHaveProperty('log_level');
     });
   });
+
+  describe('storeMessagesHandling', () => {
+    it('should omit store_messages_handling when not set', async () => {
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+      });
+
+      await adapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } });
+
+      const request = extractNativeRequest<components['requests']['Activate.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.configuration).not.toHaveProperty('store_messages_handling');
+    });
+
+    it.each(['ios', 'android'])('should forward storeMessagesHandling on %s', async (platform) => {
+      (Capacitor.getPlatform as jest.Mock).mockReturnValue(platform);
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+      });
+
+      await adapty.activate({
+        apiKey: 'test_api_key',
+        params: { logLevel: 'error', storeMessagesHandling: 'manual' },
+      });
+
+      const request = extractNativeRequest<components['requests']['Activate.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.configuration.store_messages_handling).toBe('manual');
+    });
+  });
 });

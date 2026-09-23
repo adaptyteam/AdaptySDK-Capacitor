@@ -11,6 +11,7 @@ import type {
   AdaptyFlowUiSchemaGrid,
   AdaptyFlowUiSchemaLayout,
   AdaptyPromotedProduct,
+  AdaptyStoreMessageType,
 } from 'types';
 
 describe('public type exports', () => {
@@ -30,6 +31,14 @@ describe('public type exports', () => {
     const unknown: AdaptyExternalAttributionProvider = 'some_future_provider';
 
     expect([known, unknown]).toStrictEqual(['appsflyer', 'some_future_provider']);
+  });
+
+  it('exposes AdaptyStoreMessageType, including opaque StoreKit reasons', () => {
+    const known: AdaptyStoreMessageType = 'price_increase_consent';
+    // StoreKit reasons unknown to the SDK arrive as storekit_<rawValue>.
+    const opaque: AdaptyStoreMessageType = 'storekit_-42';
+
+    expect([known, opaque]).toStrictEqual(['price_increase_consent', 'storekit_-42']);
   });
 
   it('exposes the flow ui schema types', () => {

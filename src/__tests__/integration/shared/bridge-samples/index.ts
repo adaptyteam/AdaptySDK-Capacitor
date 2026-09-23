@@ -26,3 +26,4 @@ export * from './installation';
 export * from './ios-specific';
 export * from './events';
 export * from './common';
+export * from './store-messages';

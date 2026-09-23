@@ -60,6 +60,8 @@ interface ResponseRegistry {
   present_code_redemption_sheet?: components['requests']['PresentCodeRedemptionSheet.Response'];
   update_collecting_refund_data_consent?: components['requests']['UpdateCollectingRefundDataConsent.Response'];
   update_refund_preference?: components['requests']['UpdateRefundPreference.Response'];
+  get_pending_store_message_types?: components['requests']['GetPendingStoreMessageTypes.Response'];
+  show_store_messages?: components['requests']['ShowStoreMessage.Response'];
   open_web_paywall?: components['requests']['OpenWebPaywall.Response'];
   create_web_paywall_url?: components['requests']['CreateWebPaywallUrl.Response'];
   adapty_ui_open_url?: components['requests']['AdaptyUIOpenUrl.Response'];
