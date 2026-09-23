@@ -81,6 +81,7 @@ export const elementIds = {
     emptyValue: 'flow-empty-value',
     nameValue: 'flow-name-value',
     variationIdValue: 'flow-variation-id-value',
+    variationNameValue: 'flow-variation-name-value',
     revisionValue: 'flow-revision-value',
     paywallsCountValue: 'flow-paywalls-count-value',
     uiSchemaValue: 'flow-ui-schema-value',

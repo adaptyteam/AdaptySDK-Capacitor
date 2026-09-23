@@ -196,6 +196,9 @@ export const FlowSection: React.FC<Props> = ({
             <div id={elementIds.flow.variationIdValue}>
               <strong>Variation ID:</strong> {flow.variationId}
             </div>
+            <div id={elementIds.flow.variationNameValue}>
+              <strong>Variation name:</strong> {flow.variationName ?? '—'}
+            </div>
             <div id={elementIds.flow.revisionValue}>
               <strong>Revision:</strong> {flow.placement.revision}
             </div>
