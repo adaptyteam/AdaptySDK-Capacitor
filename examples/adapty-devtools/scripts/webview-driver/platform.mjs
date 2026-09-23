@@ -92,7 +92,9 @@ export async function resolvePlatform({ flag = null } = {}) {
     ]);
     return {
       name,
-      subsystem: 'io.adapty',
+      // The star is not decoration: the predicate matches io.adapty, io.adapty.ui and
+      // io.adapty.capacitor, so a bare `io.adapty` header would understate what was read.
+      subsystem: 'io.adapty*',
       openSession: inspector.openSession,
       ensureReady: async () => {
         await inspector.ensureProxy({ settleMs: inspector.RELAUNCH_SETTLE_MS });

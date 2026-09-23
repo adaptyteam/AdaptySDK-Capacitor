@@ -29,7 +29,7 @@ would succeed and the output would look normal.
 | `yarn wvd snap` | Every element with an id, its value, `DISABLED`, `HIDDEN`. Read this instead of a screenshot |
 | `yarn wvd do <step>...` | A chain of UI steps in ONE call. Stops at the first failure, exits 1 |
 | `yarn wvd logs [n]` | What the JS layer did (default 20 entries) |
-| `yarn wvd native [--seconds=N] [--level=error\|warn\|info\|verbose\|debug] [--full]` | What the native SDK did: HTTP, billing, native errors. os_log on iOS, logcat on Android |
+| `yarn wvd native [--seconds=N] [--level=error\|warn\|info\|verbose\|debug] [--full]` | What the native SDK did: HTTP, billing, native errors. os_log on iOS (core SDK plus the `[ui]` and `[capacitor]` subsystems), logcat on Android |
 | `yarn wvd shot [path]` | Screenshot, downscaled. The ONLY way to see a presented native view or a native toast |
 | `yarn wvd relaunch` | Restart the app. Recovers a wedged session; costs the SDK session |
 | `yarn wvd eval <expr>` | Escape hatch for anything the steps do not cover |

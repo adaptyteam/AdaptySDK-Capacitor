@@ -65,7 +65,7 @@ comparison of the SDKs rather than of two harnesses.
 | --- | --- | --- |
 | Transport | WebKit inspector via `ios_webkit_debug_proxy` (`inspector.mjs`) | CDP via `adb forward` (`cdp.mjs`) |
 | Device | `xcrun simctl` (`simulator.mjs`) | `adb` (`android-device.mjs`) |
-| Native log | `os_log`, `subsystem == "io.adapty"` | `logcat`, tags matching `Adapty*` |
+| Native log | `os_log`, `subsystem BEGINSWITH "io.adapty"` | `logcat`, tags matching `Adapty*` |
 | Clean state | uninstall + install, ~1 min | `wvd clear` (`pm clear`), ~1 s |
 | Native-view taps | derive coordinates from `wvd shot` | `wvd bounds <text>`, measured |
 
@@ -149,14 +149,14 @@ entries by default.
 
 The native SDK log: HTTP requests with their `curl` equivalents, StoreKit calls, native errors —
 the records the Xcode console shows. This is a **wholly separate channel** from `wvd logs`: the
-native SDK writes through `os_log` (subsystem `io.adapty`), which never reaches the WebView.
+native SDK writes through `os_log` (subsystems `io.adapty`, `io.adapty.ui`, `io.adapty.capacitor`), which never reaches the WebView. Records from the last two are tagged `[ui]` / `[capacitor]`; core-SDK records are untagged.
 
 ```bash
 yarn wvd native --seconds=45
 ```
 
 ```
-34 native entries (io.adapty, last 45s)
+34 native entries (io.adapty*, last 45s)
 17:40:07.176 info    Adapty activated successfully. [Ert9IT] | Adapty/Adapty+Activate.swift#99
 17:40:07.177 info    LifecycleManager initialize | Adapty/LifecycleManager.swift#40
 17:40:07.177 verbose LifecycleManager: hyEhnO scheduleProfileUpdate | Adapty/LifecycleManager.swift#98
@@ -177,7 +177,7 @@ Options:
   ```
 
   ```
-  2 native entries (io.adapty, last 45s)
+  2 native entries (io.adapty*, last 45s)
   17:40:07.178 error   UpdateASAToken: On AAAttribution.attributionToken Error Domain=com.apple.ap.adservices.attributionError Code=3 "Attribution services are only available on iOS and iPadOS." UserInfo={NSLocalizedDescrip… | Adapty/Adapty+UpdateASAToken.swift#57
   17:40:07.778 error   Completed getPaywallProducts(flow:) [WsAtAL] with error: StoreKitManagerError.noProductIDsFound([4.0.2]: Adapty/ProductsManager.swift#89). | Adapty/Adapty+Shared.swift#72
   ```
@@ -221,7 +221,7 @@ Four things that will mislead you otherwise:
    ```
 
    ```
-   0 native entries (io.adapty, last 1s) — nothing in this window; try a longer --seconds
+   0 native entries (io.adapty*, last 1s) — nothing in this window; try a longer --seconds
    ```
 
    Widen `--seconds` rather than concluding the SDK is quiet.

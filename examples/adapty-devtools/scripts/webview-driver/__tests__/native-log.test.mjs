@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { filterByLevel, formatNativeLog, parseNativeLog } from '../native-log.mjs';
+import { filterByLevel, formatNativeLog, parseNativeLog, scopeOf } from '../native-log.mjs';
 
 const RAW = [
   'Timestamp               Ty Process[PID:TID]',
@@ -24,6 +24,8 @@ test('parseNativeLog reads one entry per os_log record', () => {
   assert.deepEqual(entries[1], {
     time: '12:31:34.904',
     level: 'info',
+    subsystem: 'io.adapty',
+    scope: 'sdk',
     category: 'sdk',
     message: 'Adapty activated successfully. [MXvG07]',
     source: 'Adapty/Adapty+Activate.swift#99',
@@ -75,7 +77,7 @@ test('filterByLevel rejects an unknown level', () => {
 test('filterByLevel keeps an entry whose os_log type letter is unrecognised', () => {
   // A letter outside the LEVELS table must never vanish just because --level was passed:
   // it is visible without the flag, so hiding it with the flag would lose diagnostic data.
-  const unknown = { time: '12:00:00.000', level: 'Q', category: 'sdk', message: 'x', source: null };
+  const unknown = { time: '12:00:00.000', level: 'Q', scope: 'sdk', category: 'sdk', message: 'x', source: null };
   assert.deepEqual(filterByLevel([unknown], 'error'), [unknown]);
   assert.deepEqual(filterByLevel([unknown], 'debug'), [unknown]);
 });
@@ -87,16 +89,50 @@ test('parseNativeLog accepts an upper-case thread id', () => {
 
 test('formatNativeLog says why an empty window is probably not an empty log', () => {
   const out = formatNativeLog([], { window: '60s' });
-  assert.equal(out, '0 native entries (io.adapty, last 60s) — nothing in this window; try a longer --seconds');
+  assert.equal(out, '0 native entries (io.adapty*, last 60s) — nothing in this window; try a longer --seconds');
 });
 
 test('formatNativeLog renders a header, one line per entry, and clips long messages', () => {
   const out = formatNativeLog(parseNativeLog(RAW), { window: '40s', maxMessage: 40 });
-  assert.equal(out.split('\n')[0], '4 native entries (io.adapty, last 40s)');
+  assert.equal(out.split('\n')[0], '4 native entries (io.adapty*, last 40s)');
   assert.equal(
     out.split('\n')[2],
     '12:31:34.904 info    Adapty activated successfully. [MXvG07] | Adapty/Adapty+Activate.swift#99',
   );
   assert.match(out.split('\n')[1], /…$|… \| /);
   assert.equal(out.split('\n').length, 5);
+});
+
+// AdaptyUI and the Capacitor plugin log under their own subsystems. Both were invisible
+// until the predicate matched by prefix, so the parser has to keep them apart from the core.
+const SIBLINGS = [
+  'Timestamp               Ty Process[PID:TID]',
+  '2026-09-22 17:01:47.959 E  App[70070:46d149] [io.adapty.ui:ui] destroyFlowView: view B51F is still presented, use dismissFlowView(destroy: true) instead',
+  '2026-09-22 17:01:48.100 Df App[70070:46d149] [io.adapty.capacitor:wrapper] handleMethodCall: adapty_ui_destroy_flow_view',
+].join('\n');
+
+test('parseNativeLog keeps the subsystem of sibling scopes apart from the core SDK', () => {
+  const entries = parseNativeLog(SIBLINGS);
+  assert.deepEqual(
+    entries.map(({ subsystem, scope, category }) => ({ subsystem, scope, category })),
+    [
+      { subsystem: 'io.adapty.ui', scope: 'ui', category: 'ui' },
+      { subsystem: 'io.adapty.capacitor', scope: 'capacitor', category: 'wrapper' },
+    ],
+  );
+});
+
+test('scopeOf names the core sdk and shortens its siblings', () => {
+  assert.equal(scopeOf('io.adapty'), 'sdk');
+  assert.equal(scopeOf('io.adapty.ui'), 'ui');
+  assert.equal(scopeOf('io.adapty.capacitor'), 'capacitor');
+  // An unrelated subsystem is reported verbatim rather than silently relabelled.
+  assert.equal(scopeOf('com.apple.storekit'), 'com.apple.storekit');
+});
+
+test('formatNativeLog tags sibling scopes and leaves core SDK lines untagged', () => {
+  const out = formatNativeLog([...parseNativeLog(SIBLINGS), ...parseNativeLog(RAW)], { window: '60s' });
+  assert.match(out.split('\n')[1], /^17:01:47\.959 warn    \[ui\] destroyFlowView: /);
+  assert.match(out.split('\n')[2], /^17:01:48\.100 info    \[capacitor\] handleMethodCall: /);
+  assert.match(out.split('\n')[3], /^12:31:34\.903 verbose GET --> /);
 });

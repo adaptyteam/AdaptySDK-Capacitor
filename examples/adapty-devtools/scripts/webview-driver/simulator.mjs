@@ -80,6 +80,12 @@ export function relaunch() {
  * Reads the native SDK log out of the simulator — the same records the Xcode console
  * shows. --info --debug are not optional: AdaptyLogger maps verbose to .info and debug
  * to .debug, and neither is persisted without them.
+ *
+ * The predicate matches the subsystem by PREFIX, not equality: the SDK writes under three
+ * of them — `io.adapty` (core), `io.adapty.ui` (AdaptyUI) and `io.adapty.capacitor` (this
+ * plugin). Equality read only the core, so paywall and wrapper records were invisible here
+ * while Xcode showed them — including AdaptyUI's own warnings, e.g. the one destroyFlowView
+ * logs when the view is still presented.
  */
 export function nativeLog({ seconds = 60 } = {}) {
   return execFileSync(
@@ -97,7 +103,7 @@ export function nativeLog({ seconds = 60 } = {}) {
       '--info',
       '--debug',
       '--predicate',
-      'subsystem == "io.adapty"',
+      'subsystem BEGINSWITH "io.adapty"',
     ],
     // stderr is piped, not ignored: because stdio is explicit, 'pipe' captures WITHOUT
     // forwarding, so log show's harmless `getpwuid_r did not find a match` warning stays
