@@ -188,8 +188,9 @@ export const elementIds = {
   },
   sdk: {
     activateBtn: 'sdk-activate-btn',
-    activateObserverBtn: 'sdk-activate-observer-btn',
     checkStatusBtn: 'sdk-check-status-btn',
+    observerModeToggle: 'sdk-observer-mode-toggle',
+    observerModeValue: 'sdk-observer-mode-value',
     adaptyAttributionToggle: 'sdk-adapty-attribution-toggle',
     adaptyAttributionValue: 'sdk-adapty-attribution-value',
   },

@@ -112,6 +112,7 @@ const App: React.FC = () => {
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isLoadingFlow, setIsLoadingFlow] = useState(false);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(false);
+  const [observerMode, setObserverMode] = useState(false);
   const [adaptyAttributionEnabled, setAdaptyAttributionEnabled] = useState(false);
   const [appHandlesPromoted, setAppHandlesPromoted] = useState(false);
   const [promotedProduct, setPromotedProduct] = useState<AdaptyPromotedProduct | null>(null);
@@ -167,7 +168,7 @@ const App: React.FC = () => {
     };
   }, [isActivated, appHandlesPromoted]);
 
-  const testActivate = async (observerMode = false) => {
+  const testActivate = async () => {
     try {
       setResult(`Activating Adapty${observerMode ? ' (observer mode)' : ''}...`);
       const trimmedCustomerUserId = customerUserId.trim();
@@ -1076,6 +1077,20 @@ const App: React.FC = () => {
         <div className={styles.Section}>
           <h3 className={styles.SectionTitle}>SDK Activation</h3>
           <div
+            id={elementIds.sdk.observerModeToggle}
+            className={styles.ClickableParam}
+            onClick={() => {
+              if (!isActivated) {
+                setObserverMode(!observerMode);
+              }
+            }}
+          >
+            <span>Observer Mode (activation-time only)</span>
+            <span id={elementIds.sdk.observerModeValue} className={styles.ParamValue}>
+              {observerMode.toString()}
+            </span>
+          </div>
+          <div
             id={elementIds.sdk.adaptyAttributionToggle}
             className={styles.ClickableParam}
             onClick={() => {
@@ -1092,17 +1107,10 @@ const App: React.FC = () => {
           <div className={styles.ButtonGroup}>
             <button
               id={elementIds.sdk.activateBtn}
-              onClick={() => testActivate(false)}
+              onClick={testActivate}
               className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
             >
               {isActivated ? 'Activated' : 'Activate Adapty'}
-            </button>
-            <button
-              id={elementIds.sdk.activateObserverBtn}
-              onClick={() => testActivate(true)}
-              className={`${styles.Button} ${isActivated ? styles.ButtonSuccess : styles.ButtonPrimary}`}
-            >
-              {isActivated ? 'Activated' : 'Activate (Observer Mode)'}
             </button>
             <button
               id={elementIds.sdk.checkStatusBtn}

@@ -229,8 +229,9 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | id | registry path | used in |
 | --- | --- | --- |
 | `sdk-activate-btn` | `elementIds.sdk.activateBtn` | src/screens/app/App.tsx |
-| `sdk-activate-observer-btn` | `elementIds.sdk.activateObserverBtn` | src/screens/app/App.tsx |
 | `sdk-check-status-btn` | `elementIds.sdk.checkStatusBtn` | src/screens/app/App.tsx |
+| `sdk-observer-mode-toggle` | `elementIds.sdk.observerModeToggle` | src/screens/app/App.tsx |
+| `sdk-observer-mode-value` | `elementIds.sdk.observerModeValue` | src/screens/app/App.tsx |
 | `sdk-adapty-attribution-toggle` | `elementIds.sdk.adaptyAttributionToggle` | src/screens/app/App.tsx |
 | `sdk-adapty-attribution-value` | `elementIds.sdk.adaptyAttributionValue` | src/screens/app/App.tsx |
 
