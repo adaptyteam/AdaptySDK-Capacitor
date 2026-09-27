@@ -186,8 +186,8 @@ const App: React.FC = () => {
       setResult(`Adapty activated successfully!${customerIdMessage}`);
       setIsActivated(true);
 
-      // Fetch initial profile
-      await fetchProfile();
+      // Fetch initial profile; `isActivated` in this closure is still stale, so skip the guard
+      await loadProfile();
     } catch (error) {
       setResult(`Activation Error: ${error}`);
       setIsActivated(false);
@@ -206,7 +206,10 @@ const App: React.FC = () => {
 
   const fetchProfile = async () => {
     if (!isActivated) return;
+    await loadProfile();
+  };
 
+  const loadProfile = async () => {
     setIsLoadingProfile(true);
     try {
       const profile = await adapty.getProfile();
