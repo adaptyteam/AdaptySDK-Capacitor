@@ -1328,7 +1328,8 @@ export class Adapty implements AdaptyPlugin {
    * Sets the preferred log level and/or custom logger configuration.
    *
    * @remarks
-   * By default, the log level is set to `error`.
+   * By default, JS-side SDK logs are disabled until a log level is set here or via `logLevel` in `activate`.
+   * The native level stays at the native SDK default until then.
    *
    * There are four levels available:
    * - `error`: only errors will be logged
