@@ -272,9 +272,10 @@ export class Adapty implements AdaptyPlugin {
   private async performActivation(apiKey: string, params: ActivateParamsInput): Promise<void> {
     const method = 'activate';
 
-    // Set log level before creating LogContext
-    const logLevel = params.logLevel;
-    Log.logLevel = logLevel || null;
+    // Set log level before creating LogContext; keep a level set earlier via setLogLevel
+    if (params.logLevel) {
+      Log.logLevel = params.logLevel;
+    }
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
