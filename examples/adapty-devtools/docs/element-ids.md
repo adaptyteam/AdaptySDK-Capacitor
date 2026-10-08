@@ -51,6 +51,7 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `flow-fetch-policy-select` | `elementIds.flow.fetchPolicySelect` | src/screens/app/sections/FlowSection.tsx |
 | `flow-web-paywall-open-in-select` | `elementIds.flow.webPaywallOpenInSelect` | src/screens/app/sections/FlowSection.tsx |
 | `flow-view-locale-input` | `elementIds.flow.viewLocaleInput` | src/screens/app/sections/FlowSection.tsx |
+| `flow-view-load-timeout-input` | `elementIds.flow.viewLoadTimeoutInput` | src/screens/app/sections/FlowSection.tsx |
 | `flow-custom-tags-textarea` | `elementIds.flow.customTagsTextarea` | src/screens/app/sections/FlowSection.tsx |
 | `flow-load-btn` | `elementIds.flow.loadBtn` | src/screens/app/sections/FlowSection.tsx |
 | `flow-load-default-audience-btn` | `elementIds.flow.loadDefaultAudienceBtn` | src/screens/app/sections/FlowSection.tsx |

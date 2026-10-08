@@ -68,6 +68,7 @@ export const elementIds = {
     fetchPolicySelect: 'flow-fetch-policy-select',
     webPaywallOpenInSelect: 'flow-web-paywall-open-in-select',
     viewLocaleInput: 'flow-view-locale-input',
+    viewLoadTimeoutInput: 'flow-view-load-timeout-input',
     customTagsTextarea: 'flow-custom-tags-textarea',
     loadBtn: 'flow-load-btn',
     loadDefaultAudienceBtn: 'flow-load-default-audience-btn',

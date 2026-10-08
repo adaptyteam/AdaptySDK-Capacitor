@@ -63,6 +63,7 @@ const App: React.FC = () => {
     onboardingPlacementId,
     locale,
     flowViewLocale,
+    flowViewLoadTimeout,
     timeout,
     maxAge,
     customTagsJson,
@@ -88,6 +89,7 @@ const App: React.FC = () => {
     setOnboardingPlacementId,
     setLocale,
     setFlowViewLocale,
+    setFlowViewLoadTimeout,
     setLoadTimeout,
     setMaxAge,
     setCustomTagsJson,
@@ -680,6 +682,7 @@ const App: React.FC = () => {
       products={products}
       placementId={placementId}
       flowViewLocale={flowViewLocale}
+      flowViewLoadTimeout={flowViewLoadTimeout}
       timeout={timeout}
       maxAge={maxAge}
       customTagsJson={customTagsJson}
@@ -691,6 +694,7 @@ const App: React.FC = () => {
       webPaywallUrl={webPaywallUrl}
       setPlacementId={setPlacementId}
       setFlowViewLocale={setFlowViewLocale}
+      setFlowViewLoadTimeout={setFlowViewLoadTimeout}
       setLoadTimeout={setLoadTimeout}
       setMaxAge={setMaxAge}
       setCustomTagsJson={setCustomTagsJson}
@@ -1050,6 +1054,7 @@ const App: React.FC = () => {
         flow={flow}
         customTagsJson={customTagsJson}
         locale={flowViewLocale}
+        loadTimeout={flowViewLoadTimeout}
         setFlowView={setFlowView}
         setResult={setResult}
         log={log}
