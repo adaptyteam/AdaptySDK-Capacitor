@@ -1337,6 +1337,8 @@ export class Adapty implements AdaptyPlugin {
    * - `info`: various information messages, such as those that log the lifecycle of various modules
    * - `verbose`: any additional information that may be useful during debugging, such as function calls, API queries, etc.
    *
+   * The new level and logger apply to this call's own logs too.
+   *
    * @param options - The options object
    * @param options.logLevel - Optional. The new preferred log level.
    * @param options.logger - Optional. Custom logger configuration.
@@ -1368,12 +1370,12 @@ export class Adapty implements AdaptyPlugin {
     }
 
     if (options.logLevel !== undefined) {
+      // apply the level before the first log, as activate does, so this call is logged under it
+      Log.logLevel = options.logLevel;
+
       const ctx = new LogContext();
       const log = ctx.call({ methodName: method });
       log.start(() => ({ options: { logLevel: options.logLevel } }));
-
-      // Update log level immediately
-      Log.logLevel = options.logLevel;
 
       const argsWithUndefined: Req['SetLogLevel.Request'] = {
         method,
