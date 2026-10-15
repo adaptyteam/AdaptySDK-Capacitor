@@ -52,7 +52,8 @@ Steps for `do`: `set:<id>=<value>`, `click:<id>`, `read:<id>`, `wait:<id>[:enabl
 - "What did the SDK actually do — request, billing, native error" → `native`, and start with
   `--level=error` before reading everything
 - "Is a native view covering the WebView" → `shot`. No DOM signal answers this
-- "Where do I tap on that native view" → Android: `bounds <text>`, measured. iOS: derive from `shot`
+- "Where do I tap on that native view" → Android: `bounds <text>`, measured. iOS: `idb ui
+  describe-all` (flow) / `describe-point` (onboarding), measured — see the last section
 
 ## Traps that each cost a wasted cycle
 
@@ -83,8 +84,22 @@ Steps for `do`: `set:<id>=<value>`, `click:<id>`, `read:<id>`, `wait:<id>[:enabl
   `android/app/build.gradle`; the two genuinely differ here (`com.adaptytest` vs
   `com.adapty.adaptydemoapp`), and `yarn credentials` patches them independently.
 
-## When this does not apply
+## Presented views: flow is native, onboarding is a separate WebView
 
-Buttons *inside* a presented native paywall or onboarding are not in the DOM. On Android use
-`bounds <text>` then `tap`. On iOS you need a simulator tap against a `shot` — take coordinates from
-`wvd shot` (a uniform 0.46 scale of the point space), not from another screenshot tool.
+Nothing a presented view shows is in `snap` — `wvd` only ever talks to Capacitor's page. But the two
+kinds of view are built differently, and that decides how to find a control inside them:
+
+| | Flow (`flow-*`, UI builder) | Legacy onboarding (`onboarding-*`) |
+| --- | --- | --- |
+| Rendered by | Native SDK views: SwiftUI on iOS, Compose on Android. No WebView at all | The native SDK's **own** WebView — not Capacitor's, a second one owned by AdaptyUI |
+| In the web inspector | No | iOS: no — AdaptyUI creates it with `isInspectable = false`. Android: yes, as a second CDP page, which `wvd` deliberately skips (reference §2) |
+| Find a control, iOS | `idb ui describe-all` — real `Button`s with labels and frames in points | `describe-all` is blind (returns only `Application`). Probe with `idb ui describe-point <x> <y>` near a spot from `shot` — it returns the web button's label and exact frame |
+| Find a control, Android | `bounds <text>` | `bounds <text>` (not re-verified for the onboarding WebView) |
+| Press it | iOS: `idb ui tap <x> <y>` (points, centre of the frame). Android: `tap` | same |
+
+- `idb` coordinates are points, the same space as the simulator MCP — no scaling. `describe-all` also
+  lists off-screen carousel items (x past the device width); ignore those.
+- A presented onboarding shows a spinner for several seconds while its WebView loads — 4 s was not
+  enough, 8 s was. Settle with `sleep` and confirm with `shot` before probing.
+- Without `idb`, fall back to coordinates from `wvd shot` (a uniform 0.46 scale of the point space),
+  never from another screenshot tool.

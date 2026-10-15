@@ -470,9 +470,11 @@ relaunch, rather than guessing whether the SDK is already active.
 - **Port 9333, not 9222.** `ios_webkit_debug_proxy` owns 9222, so the `adb forward` uses 9333. They
   used to share it, and `adb` binding `127.0.0.1:9222` first shadowed the iOS proxy: every iOS
   command failed with `lists no inspectable page` while Android looked perfectly healthy.
-- **A presented onboarding is a second CDP page, and it sorts first.** Unlike iOS, where everything
-  lives in one `WKWebView`, the onboarding builder gets its own WebView on Android, so
-  `/json/list` returns two pages. `selectAppTarget()` in `cdp.mjs` picks the app's page instead of
+- **A presented onboarding is a second CDP page, and it sorts first.** The onboarding is rendered by
+  the native SDK in its own WebView on both platforms. On iOS that `WKWebView` is created with
+  `isInspectable = false` (the plugin path calls `getOnboardingConfiguration` without
+  `inspectWebView`), so the proxy never lists it. On Android `setWebContentsDebuggingEnabled` is
+  process-wide, so the onboarding's WebView is inspectable too and `/json/list` returns two pages. `selectAppTarget()` in `cdp.mjs` picks the app's page instead of
   `targets[0]`, by two rules in order:
 
   1. the hostname Capacitor serves from — `localhost` — which nothing the app presents shares;
@@ -505,8 +507,9 @@ Getting this wrong is what costs round-trips.
 - **`wvd snap` answers "what is the app state"** — ids, values, `DISABLED`, and which sections are
   mounted. Exact, cheap and diffable. It is the default; reach past it only when the answer is not
   in the DOM.
-- **`wvd shot` is the only thing that sees native content.** A presented flow or onboarding is a
-  native view controller — its content is not in the DOM at any point. So are toasts:
+- **`wvd shot` is the only `wvd` command that sees native content.** A presented flow is native
+  SwiftUI / Compose; a presented onboarding is a separate WebView owned by the native SDK. Neither is
+  in the Capacitor DOM at any point (see §4 for reading their controls with `idb` / `bounds`). So are toasts:
   `src/utils/toast.ts` wraps `@capacitor/toast`, so a toast never appears in `snap` and never
   appears in `logs`. If a check depends on a toast or on what a paywall rendered, it needs a shot.
 - **`wvd logs` answers what the JS layer did**, including native events that arrive at the JS
@@ -570,10 +573,36 @@ This works on system UI as well as the app's own, which is what makes the Google
 drivable. Note it is not blocked by `FLAG_SECURE` here: both `screencap` and the dump return the
 Play sheet's contents.
 
-On **iOS** there is no equivalent — derive coordinates from `wvd shot`, which is a uniform 0.46 scale
-of the point space (230×500 for a 402×874 device: `x_pt = x_img / 230 * 402`). Do not derive them
-from another screenshot tool: the simulator MCP's own capture is not uniformly scaled and put a tap
-~80 pt off target.
+On **iOS**, use `idb` (fb-idb + idb_companion) — it reads the simulator's accessibility tree, in
+points. What it sees depends on what renders the view:
+
+- **Flow** — native SwiftUI, fully exposed. `describe-all` returns every `Button` / `StaticText`
+  with its label and frame:
+
+  ```bash
+  $ idb ui describe-all --udid <udid>     # JSON; trimmed to type / label / centre
+  StaticText 'Welcome!\n\nThis is your space to slow down.' 194 649
+  Button 'Start my journey' 201 792
+  $ idb ui tap --udid <udid> 201 792      # ~0.2 s; the flow advanced to the next screen
+  ```
+
+  Carousel items scrolled off screen are listed too, with x beyond the device width.
+- **Onboarding** — a `WKWebView` owned by AdaptyUI. `describe-all` returns only the `Application`
+  node, however long you wait. `describe-point` does hit-test into the web content and returns the
+  element with its exact frame, so take a rough spot from `wvd shot` and confirm it:
+
+  ```bash
+  $ idb ui describe-point --udid <udid> 201 790
+  Button 'Next screen →' {x: 23, y: 770, width: 356, height: 73}
+  ```
+
+  The onboarding shows a loading spinner for several seconds after `present()` — a `shot` at 4 s
+  caught the spinner, at 8 s the content. Neither the inspector nor `wvd` can see this WebView (§2).
+
+Without `idb`, derive coordinates from `wvd shot`, which is a uniform 0.46 scale of the point space
+(230×500 for a 402×874 device: `x_pt = x_img / 230 * 402`). Do not derive them from another
+screenshot tool: the simulator MCP's own capture is not uniformly scaled and put a tap ~80 pt off
+target.
 
 **Present twice without dismissing in between and Dismiss goes stale — while still reporting
 success.** Each `click:flow-present-btn` creates a *new* view controller and overwrites the stored
@@ -594,9 +623,9 @@ read:app-result-value -> ✅ Flow dismissed
 `wvd shot` is the only thing that catches it. Same shape as the activate-twice trap in §1, and the
 same cure: `yarn wvd relaunch`. Dismiss before presenting again.
 
-Interacting with the *content* of a presented paywall is still out of reach: its buttons are not in
-the DOM. That needs simulator taps against a `wvd shot`. System dialogs (StoreKit purchase sheets,
-permission prompts) are native too.
+Interacting with the *content* of a presented flow or onboarding is out of `wvd`'s reach: its
+buttons are not in the Capacitor DOM. Use `idb` on iOS and `bounds` on Android, as above. System
+dialogs (StoreKit purchase sheets, permission prompts) are native too.
 
 ## 5. Honest accounting
 
