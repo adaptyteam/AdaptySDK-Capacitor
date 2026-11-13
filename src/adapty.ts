@@ -1347,18 +1347,20 @@ export class Adapty implements AdaptyPlugin {
    *
    * @example
    * ```typescript
-   * import { adapty } from '@adapty/capacitor';
+   * import { adapty, consoleLogSink } from '@adapty/capacitor';
    *
    * // Set log level
    * await adapty.setLogLevel({ logLevel: 'verbose' });
    *
-   * // Or set custom logger
+   * // Or route logs to your own sink too; the sinks replace the current ones
    * await adapty.setLogLevel({
+   *   logLevel: 'verbose',
    *   logger: {
-   *     handler: (level, scope, message, data) => {
-   *       sendLogToYourServer(`[${level}] ${message}`, data);
-   *     }
-   *   }
+   *     sinks: [
+   *       consoleLogSink,
+   *       { id: 'my-sink', handle: (event) => sendLogToYourServer(event.level, event.message, event.params) },
+   *     ],
+   *   },
    * });
    * ```
    */
