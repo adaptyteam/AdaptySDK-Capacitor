@@ -15,7 +15,9 @@
     "dist/",
     "ios/Sources",
     "ios/Tests",
+    "ios/adapty_podfile.rb",
     "Package.swift",
+    "AdaptyCapacitor.podspec",
     "scripts/kids-mode.cjs"
   ],
   "author": "Adapty team <support@adapty.io>",
