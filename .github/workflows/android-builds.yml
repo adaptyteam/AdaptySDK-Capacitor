@@ -1,0 +1,130 @@
+name: Android Builds (full)
+
+# The Android build pr-validation.yml cannot afford: the devtools app as a customer ships it to
+# Play — assembleRelease + bundleRelease with R8 on. R8 strips by static reachability, which the
+# Capacitor bridge and Adapty's Gson models must survive on io.adapty:android-sdk's own -keep
+# rules; Debug never catches that. Release outputs stay unsigned, so no secrets.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'src/**'
+      - 'android/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'rollup.config.mjs'
+      - 'tsconfig.json'
+      - 'scripts/check-r8-keep.cjs'
+      - 'scripts/credentials.mjs'
+      - 'scripts/update_versions.cjs'
+      - 'examples/adapty-devtools/**'
+      - '!examples/adapty-devtools/ios/**'
+      - '.github/workflows/android-builds.yml'
+
+concurrency:
+  group: android-builds-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android-release:
+    runs-on: ubuntu-24.04
+    name: Android Build (Release APK + AAB, R8)
+    timeout-minutes: 60
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '24'
+
+    - name: Setup Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
+    # Same key as pr-validation, so the two workflows share the cache.
+    - name: Cache node_modules
+      uses: actions/cache@v5
+      id: cache-node-modules
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          node-modules-${{ runner.os }}-
+
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: yarn install --frozen-lockfile --prefer-offline
+
+    # The example consumes the plugin through a link: to the repo root, so dist/ must exist.
+    - name: Build plugin
+      run: yarn build
+
+    - name: Cache adapty-devtools node_modules
+      uses: actions/cache@v5
+      id: cache-adapty-devtools-node-modules
+      with:
+        path: examples/adapty-devtools/node_modules
+        key: adapty-devtools-node-modules-${{ runner.os }}-${{ hashFiles('examples/adapty-devtools/yarn.lock') }}
+        restore-keys: |
+          adapty-devtools-node-modules-${{ runner.os }}-
+
+    # --ignore-scripts: skips the preinstall root build and the interactive credentials postinstall.
+    - name: Install adapty-devtools dependencies
+      if: steps.cache-adapty-devtools-node-modules.outputs.cache-hit != 'true'
+      working-directory: examples/adapty-devtools
+      run: yarn install --prefer-offline --ignore-scripts
+
+    # The web bundle imports .adapty-credentials.json; a placeholder is enough to build.
+    - name: Create placeholder credentials
+      working-directory: examples/adapty-devtools
+      run: |
+        node ../../scripts/credentials.mjs \
+          --token=public_live_placeholder \
+          --ios-bundle=com.example.plugin \
+          --android-id=com.example.plugin \
+          --placement-id=placeholder \
+          --onboarding-placement-id=placeholder
+
+    # Seconds instead of a ~20 minute build when cap sync failed to register the plugin.
+    - name: Build web app and sync Android
+      working-directory: examples/adapty-devtools
+      run: |
+        yarn build
+        yarn cap sync android
+        node ../../scripts/check-r8-keep.cjs --plugins-only \
+          --plugins-json=android/app/src/main/assets/capacitor.plugins.json
+
+    # The root android/build.gradle pins the Adapty BOM, so it is part of the key.
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v5
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          examples/adapty-devtools/android/.gradle
+        key: adapty-devtools-gradle-${{ runner.os }}-${{ hashFiles('examples/adapty-devtools/android/build.gradle', 'examples/adapty-devtools/android/app/build.gradle', 'examples/adapty-devtools/android/variables.gradle', 'examples/adapty-devtools/android/gradle.properties', 'examples/adapty-devtools/android/gradle/wrapper/gradle-wrapper.properties', 'android/build.gradle') }}
+        restore-keys: |
+          adapty-devtools-gradle-${{ runner.os }}-
+
+    # One invocation for both tasks — they share the compilation and the R8 run. The example's
+    # gradle.properties caps the heap at 1.5 GB, too tight for R8 on a cold runner.
+    - name: Run Android build (Release APK + AAB, R8 enabled)
+      working-directory: examples/adapty-devtools/android
+      run: ./gradlew assembleRelease bundleRelease -PenableProguardInReleaseBuilds=true -Dorg.gradle.jvmargs=-Xmx4g
+
+    # A green minified build is a weak signal: R8 can strip Adapty and still succeed, breaking
+    # only at runtime in a customer's release app — so read R8's own reports.
+    - name: Verify R8 kept the Adapty classes
+      run: |
+        MAPPING_DIR=examples/adapty-devtools/android/app/build/outputs/mapping/release
+        node scripts/check-r8-keep.cjs \
+          --mapping="$MAPPING_DIR/mapping.txt" \
+          --usage="$MAPPING_DIR/usage.txt" \
+          --plugins-json=examples/adapty-devtools/android/app/src/main/assets/capacitor.plugins.json

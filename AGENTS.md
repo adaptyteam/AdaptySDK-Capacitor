@@ -121,6 +121,30 @@ config or picked up by the plugin's Jest run.
   has no app code: `src` is a symlink to `examples/adapty-devtools/src`, so devtools changes reach it
   as they are. Has its own CLAUDE.md
 
+### CI workflows (`.github/workflows/`)
+
+- `pr-validation.yml` — every PR into `master`/`dev`: JS checks (tsc, lint, Jest, web build, devtools
+  tsc), the plugin's Android library build, and the plugin's iOS scheme build against the root
+  `Package.resolved`.
+- `kids-mode-ios.yml` — proves IDFA / AdSupport / ATT are compiled out with Kids Mode on (SPM and
+  CocoaPods); see [Kids Mode](#kids-mode-ios--scriptskids-modecjs).
+- `android-builds.yml` — PRs into `master` (release PRs) and manual runs: the devtools app as
+  Release APK + AAB with R8 on, then `scripts/check-r8-keep.cjs` reads R8's `mapping.txt` /
+  `usage.txt` and fails if any non-synthetic `com.adapty.*` class was renamed, or a class or member
+  removed (static initializers R8 optimizes away aside), or the plugin class is missing. Locally:
+  `./gradlew assembleRelease bundleRelease -PenableProguardInReleaseBuilds=true` in
+  `examples/adapty-devtools/android` (minify stays off by default).
+- `ios-builds.yml` — PRs into `master` and manual runs: the devtools app on SPM and
+  `test-apps/adapty-devtools-pods` on CocoaPods, each in Debug (simulator) and Release (device,
+  unsigned). `scripts/check-ios-app.cjs` asserts `cap sync` registered `AdaptyCapacitorPlugin`
+  (`packageClassList`, the CapApp-SPM product) before the builds, and that some Mach-O in the built
+  `App.app` defines the class after them. The pods job also fails when `pod install` changes
+  `Podfile.lock`: a native SDK bump or a plugin version bump needs `yarn update-native-modules` in
+  the test app and the updated lock committed. Ignored: the `COCOAPODS:` line and the checksums of
+  the local `:path` pods (`AdaptyCapacitor`, `Capacitor*`). Those are SHA1 of podspec JSON, whose
+  formatting depends on the Ruby `json` gem: a `pod` on Ruby 2.7 rewrites all of them, so do not
+  commit a lock whose only change is those lines.
+
 ### Kids Mode (iOS) — `scripts/kids-mode.cjs`
 
 `scripts/kids-mode.cjs` is the `adapty-kids-mode` CLI, shipped in the npm package via `bin` + `files`. It toggles the `AdaptyCapacitorKidsMode` SPM trait in `Package.swift` (`enable` (default) / `disable`), which forwards to the native `KidsMode` trait of AdaptySDK-iOS — compiling out all IDFA / AdSupport / AppTrackingTransparency code for COPPA / App Store Kids Category builds. It edits the package's own `Package.swift` (in this repo: the root manifest; in a consumer app: `node_modules/@adapty/capacitor/Package.swift`), is idempotent, and fails loudly if the trait anchor is missing. Consumers wire it into their app's `postinstall`. Unit tests: `scripts/__tests__/kids-mode.test.js`. User-facing docs: https://adapty.io/docs/kids-mode-capacitor (not the README).

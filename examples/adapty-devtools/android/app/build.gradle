@@ -18,8 +18,9 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Off by default; CI passes -PenableProguardInReleaseBuilds=true (android-builds.yml)
+            minifyEnabled = (findProperty('enableProguardInReleaseBuilds') ?: 'false').toBoolean()
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
