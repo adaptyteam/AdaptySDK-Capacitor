@@ -127,7 +127,8 @@ Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms
 
 #### CocoaPods
 
-Apps on CocoaPods (`npx cap add ios --packagemanager CocoaPods`) install the Adapty iOS SDK pods from the [Adapty spec repo](https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs), not from CocoaPods trunk. Require the Adapty Podfile helpers in `ios/App/Podfile` and call `adapty_pods!` in the app target, outside `capacitor_pods`, which `npx cap sync` regenerates:
+In apps on CocoaPods, Adapty iOS SDK comes from the public [Adapty spec repo](https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs).
+It requires the Adapty Podfile helpers in `ios/App/Podfile` and a call to `adapty_pods!` in the app target, outside `capacitor_pods`, which `npx cap sync` regenerates:
 
 ```ruby
 require Pod::Executable.execute_command('node', ['-p',
@@ -139,21 +140,8 @@ require Pod::Executable.execute_command('node', ['-p',
 target 'App' do
   capacitor_pods
   adapty_pods!
+  # ...
 end
-```
-
-Then run `npx cap sync ios`. Instead of `adapty_pods!`, you can declare both sources at the top of the Podfile; any `source` disables the implicit trunk, so it has to be listed too:
-
-```ruby
-source 'https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs.git'
-source 'https://cdn.cocoapods.org/'
-```
-
-When an `@adapty/capacitor` update moves to a newer native SDK, `pod install` does not refresh the spec repo or unlock the Adapty pods. Update them in `ios/App` before syncing:
-
-```sh
-pod repo update
-pod update Adapty AdaptyUI AdaptyPlugin
 ```
 
 
