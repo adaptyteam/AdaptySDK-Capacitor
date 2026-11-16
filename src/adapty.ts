@@ -1133,7 +1133,8 @@ export class Adapty implements AdaptyPlugin {
    *
    * @param options - The options object
    * @param options.transactionId - The transaction ID of the purchase.
-   * @param options.variationId - Optional. The variation ID from the {@link AdaptyFlow}.
+   * @param options.variationId - Optional. The `variationId` of the purchased {@link AdaptyPaywallProduct}
+   * (the same value as `variationId` of its parent {@link AdaptyFlowPaywall}).
    * @returns A promise that resolves when the transaction is reported.
    * @throws Error if an error occurs while reporting the transaction.
    *
