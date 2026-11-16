@@ -67,6 +67,7 @@
     "dev-example-js": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap copy",
     "dev-example": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap sync --deployment",
     "dev-example-full": "yarn build && cd ./examples/adapty-devtools && yarn --force &&  yarn build && yarn cap sync",
+    "dev-example-pods": "yarn build && cd ./test-apps/adapty-devtools-pods && yarn build && yarn cap sync ios",
     "prepare": "husky"
   },
   "devDependencies": {

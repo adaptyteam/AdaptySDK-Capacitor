@@ -1,6 +1,8 @@
 examples/adapty-devtools/android
 examples/adapty-devtools/ios
 examples/**/dist
+test-apps/adapty-devtools-pods/ios
+test-apps/**/dist
 /dist
 src/shared/
 # checkouts of this repo made by agents — not ours to format

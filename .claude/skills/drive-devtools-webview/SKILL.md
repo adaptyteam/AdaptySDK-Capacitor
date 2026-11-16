@@ -12,6 +12,10 @@ screenshots and coordinate taps: it reads state as text and presses controls by 
 Run everything from `examples/adapty-devtools`. Full reference, including protocol notes and
 troubleshooting: [reference.md](reference.md). Read it when this page is not enough — not before.
 
+`test-apps/adapty-devtools-pods`, the CocoaPods twin (iOS only, bundle id `com.example.plugin.pods` until
+`yarn credentials`), runs this same CLI with `WVD_APP_ROOT=.`: run `yarn wvd` from its folder to drive it.
+With an Android device attached as well, pass `--ios`.
+
 ## Platform
 
 One tool, two backends. The element ids, the step vocabulary and the `snap` format are identical on

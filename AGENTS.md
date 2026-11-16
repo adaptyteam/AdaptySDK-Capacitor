@@ -30,6 +30,7 @@ yarn format                   # Auto-fix ESLint + Prettier + SwiftLint
 yarn dev-example              # Build plugin → sync files → build example → cap sync
 yarn dev-example-js           # Same but with cap copy (faster, JS-only changes)
 yarn dev-example-full         # Full rebuild including yarn --force in example
+yarn dev-example-pods         # Build plugin → build the CocoaPods devtools → cap sync ios (pod install)
 
 # Then run example from examples/adapty-devtools:
 yarn ios                      # Run on iOS simulator
@@ -109,6 +110,16 @@ The lock is not published — it is absent from `files` in `package.json`, and S
 
 - `examples/adapty-devtools/` - Full devtools app (React + Capacitor) - has its own CLAUDE.md
 - `examples/basic-*-example/` - Minimal examples for React, Angular, Vue
+
+### Test apps (`test-apps/`)
+
+Internal apps for testing the SDK, kept apart from `examples/`, which customers read. End-to-end
+tests will live here too. Nothing in `test-apps/` is published, linted with the plugin's ESLint
+config or picked up by the plugin's Jest run.
+
+- `test-apps/adapty-devtools-pods/` - The devtools app with its iOS project on CocoaPods (iOS only). It
+  has no app code: `src` is a symlink to `examples/adapty-devtools/src`, so devtools changes reach it
+  as they are. Has its own CLAUDE.md
 
 ### Kids Mode (iOS) — `scripts/kids-mode.cjs`
 

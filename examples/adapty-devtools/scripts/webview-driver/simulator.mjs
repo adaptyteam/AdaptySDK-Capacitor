@@ -2,10 +2,8 @@
 // comes from the booted device list and the bundle id from capacitor.config.json.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+import { resolve } from 'node:path';
+import { APP_ROOT } from './app-root.mjs';
 
 // stdio is explicit so a child's stderr is CAPTURED into error.stderr instead of ALSO being
 // forwarded to wvd's own stderr, which is what execFileSync does by default. Without this a
