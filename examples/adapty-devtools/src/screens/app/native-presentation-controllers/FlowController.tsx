@@ -20,6 +20,8 @@ type Props = {
   flow: AdaptyFlow | null;
   customTagsJson: string;
   locale: string;
+  // createFlowView loadTimeoutMs; empty keeps the SDK default
+  loadTimeout: string;
   setFlowView: (view: FlowViewController | null) => void;
   setResult: (value: string) => void;
   log: (
@@ -32,7 +34,7 @@ type Props = {
 };
 
 export const FlowController = forwardRef<FlowControllerRef, Props>(function FlowController(
-  { flow, customTagsJson, locale, setFlowView, setResult, log }: Props,
+  { flow, customTagsJson, locale, loadTimeout, setFlowView, setResult, log }: Props,
   ref,
 ) {
   const presentFlow = async () => {
@@ -69,7 +71,13 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         apple_icon_image: { type: 'image' as const, base64: APPLE_ICON_IMAGE_BASE64 },
       } satisfies Record<string, AdaptyCustomAsset>;
 
-      const view = await createFlowView(flow, { customTags, customAssets, ...(locale ? { locale } : {}) });
+      const loadTimeoutMs = Number(loadTimeout);
+      const view = await createFlowView(flow, {
+        customTags,
+        customAssets,
+        ...(locale ? { locale } : {}),
+        ...(loadTimeout.trim() && Number.isFinite(loadTimeoutMs) ? { loadTimeoutMs } : {}),
+      });
       setFlowView(view);
 
       // `view.locale` is the localization the flow was actually built with:
@@ -231,7 +239,7 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
     }
   };
 
-  useImperativeHandle(ref, () => ({ presentFlow }), [flow, customTagsJson, locale]);
+  useImperativeHandle(ref, () => ({ presentFlow }), [flow, customTagsJson, locale, loadTimeout]);
 
   return null;
 });

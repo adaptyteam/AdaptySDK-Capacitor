@@ -18,7 +18,8 @@ For **android**, also ask:
 
 ## iOS Steps
 
-iOS dependencies are distributed via Swift Package Manager only (no CocoaPods podspec).
+The native SDK is pinned in two manifests that never read each other: `Package.swift` (SPM apps)
+and `AdaptyCapacitor.podspec` (CocoaPods apps). Bump **both** to the same version.
 
 ### 1. `Package.swift`
 Update the SPM exact version pin. **Preserve the `traits:` block** — it forwards the native `KidsMode` trait (COPPA / Kids-category builds); dropping it silently breaks Kids Mode:
@@ -32,6 +33,70 @@ Update the SPM exact version pin. **Preserve the `traits:` block** — it forwar
     ]
 )
 ```
+
+### 2. Regenerate `Package.resolved` — iOS only, mandatory
+
+**Trigger: you edited `Package.swift`. If you did not, skip this step.**
+Android bumps never touch it — `android/build.gradle` has no SPM lock.
+
+The repo root `Package.resolved` is committed on purpose (see `.gitignore`: `!/Package.resolved`).
+CI builds the root package with `-disableAutomaticPackageResolution`, so the lock is the only
+source of pins and must match the manifest. **You cannot notice drift locally** — `yarn verify:ios`
+resolves automatically and stays green with a stale lock. Run this explicitly:
+
+```bash
+yarn resolve:ios        # regenerates Package.resolved, prints the diffstat
+yarn resolve:ios:check  # what CI runs; must print "OK: Package.resolved matches Package.swift."
+```
+
+Then stage `Package.resolved` **in the same commit as `Package.swift`**. A commit that changes
+the manifest without the lock is almost always wrong.
+
+> **Not the same as `yarn update-native-modules`.** That script lives in
+> `examples/adapty-devtools/package.json` and resolves `ios/App/App.xcodeproj` — the *example's*
+> lock, which is gitignored. It does not regenerate the root `Package.resolved`.
+
+### 3. `AdaptyCapacitor.podspec`
+Set the same version:
+```ruby
+adapty_ios_version = '<NEW_VERSION>'
+```
+
+The pods come from the Adapty spec repo, not trunk: the version must already be published there
+(`Specs/Adapty/<NEW_VERSION>` in https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs; the
+AdaptySDK-iOS release tag publishes it). `scripts/__tests__/package-manifest.test.js` fails while
+the podspec and the `exact:` pin of `Package.swift` differ. To prove the pods build, run
+`bash scripts/verify-kids-mode-ios.sh on pods` — it scaffolds a CocoaPods app and builds it.
+
+## iOS: temporary switch to a branch (pre-release testing)
+
+While a native release is still in progress, the dependency may point at a branch instead of a
+version:
+
+```swift
+.package(
+    url: "https://github.com/adaptyteam/AdaptySDK-iOS.git",
+    branch: "release/<X.Y.Z>",   // TEMPORARY — must become `exact:` before publishing
+    traits: [
+        .defaults,
+        .trait(name: "KidsMode", condition: .when(traits: ["AdaptyCapacitorKidsMode"]))
+    ]
+)
+```
+
+Rules for this state:
+
+1. `Package.resolved` becomes **mandatory** — a branch requirement can never be satisfied from
+   local state alone, so the CI build cannot resolve without the lock. Run `yarn resolve:ios`
+   and commit it, same as any manifest edit.
+2. The lock pins a **commit**, so CI keeps building that commit even after the upstream branch
+   moves. To pick up a newer head: `rm Package.resolved && yarn resolve:ios`, then commit.
+3. **Never publish from a `branch:` manifest** — `publish.yml` blocks it. Consumers never receive
+   our lock, so they would resolve a moving branch head. Before releasing, switch back to
+   `exact: "<VERSION>"`, run `yarn resolve:ios` and commit the resulting lock.
+4. Leave `AdaptyCapacitor.podspec` at the last published version: pods exist only for release
+   tags. The manifest test skips the version comparison while `Package.swift` is not `exact:`;
+   bump the podspec together with the switch back.
 
 ## Android Steps
 
@@ -73,10 +138,14 @@ node ../../scripts/credentials.mjs \
 # 4. Build devtools
 yarn build
 
-# 5. Update native modules (resolves iOS SPM package versions, then cap copy + cap sync)
-# Run this instead of a bare `cap sync` so Xcode re-resolves the bumped SPM
-# dependency versions before syncing.
+# 5. Update native modules (cap copy + cap sync)
+# Run from examples/adapty-devtools (that is the cwd after step 2), not from the repo root —
+# the script only exists in the example's package.json. It resolves the EXAMPLE's Xcode project;
+# it does NOT regenerate the root Package.resolved — that is `yarn resolve:ios` (iOS Steps §2).
 yarn update-native-modules
+
+# 6. iOS only — confirm the committed root lock still matches the manifest
+cd ../.. && yarn resolve:ios:check
 ```
 
 Wait for all commands to succeed before considering the task done.
@@ -88,6 +157,15 @@ Format: `chore: upgrade <platform> SDK to <version>`
 Examples:
 - `chore: upgrade ios SDK to 3.15.3`
 - `chore: upgrade android SDK to bom 3.15.2, crossplatform 3.15.6`
+
+**iOS:** the commit must contain `Package.swift`, `Package.resolved` **and**
+`AdaptyCapacitor.podspec`. Verify before committing:
+
+```bash
+git status --short -- Package.swift Package.resolved AdaptyCapacitor.podspec
+```
+
+`Package.swift` staged alone is a bug, not a smaller change.
 
 ## Reminder
 

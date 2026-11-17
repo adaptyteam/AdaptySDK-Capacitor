@@ -8,12 +8,10 @@
 // `adb forward` exposes the WebView's devtools socket directly, and the page target is
 // listed over plain HTTP.
 import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
 import { forwardDevtools } from './android-device.mjs';
-
-const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+import { APP_ROOT } from './app-root.mjs';
 
 // Fixed rather than ephemeral so a leaked forward from a previous run is reused instead of
 // accumulating — adb replaces an existing forward on the same local port.

@@ -2,10 +2,23 @@ name: Kids Mode (iOS)
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Verify mode'
+        required: false
+        type: choice
+        options:
+          - 'on'
+          - 'off'
+          - 'both'
+        default: 'on'
+  schedule:
+    - cron: '0 9 * * 1'   # weekly Mon 09:00 UTC — full `both` (negative + positive control)
   pull_request:
     branches: [ master, dev ]
     paths:
       - 'Package.swift'
+      - 'AdaptyCapacitor.podspec'
       - 'scripts/kids-mode.cjs'
       - 'scripts/verify-kids-mode-ios.sh'
       - '.github/workflows/kids-mode-ios.yml'
@@ -19,8 +32,20 @@ concurrency:
 jobs:
   verify-kids-mode-ios:
     runs-on: macos-26
-    name: Verify Kids Mode (iOS)
+    name: Verify Kids Mode (iOS, ${{ matrix.name }})
     timeout-minutes: 40
+
+    # SPM never reads the podspec and CocoaPods never reads Package.swift, and each has its own
+    # Kids Mode toggle (the package trait vs the Podfile helper), so each needs its own proof.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: SPM
+            target: spm
+          - name: CocoaPods
+            target: pods
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,12 +71,14 @@ jobs:
         run: yarn update-versions
 
       - name: Install example dependencies
+        if: matrix.target == 'spm'
         working-directory: examples/adapty-devtools
         run: yarn install --prefer-offline --ignore-scripts
 
       # Non-interactive placeholder via the example's own generator (DRY). Also patches
       # pbxproj/gradle bundle id to com.example.plugin — harmless in an ephemeral unsigned build.
       - name: Create placeholder credentials
+        if: matrix.target == 'spm'
         working-directory: examples/adapty-devtools
         run: |
           node ../../scripts/credentials.mjs \
@@ -62,11 +89,36 @@ jobs:
             --onboarding-placement-id=placeholder
 
       - name: Cache SPM checkouts
+        if: matrix.target == 'spm'
         uses: actions/cache@v4
         with:
           path: .spm-kids-mode
           key: kids-mode-spm-${{ runner.os }}-${{ hashFiles('Package.swift') }}
           restore-keys: kids-mode-spm-${{ runner.os }}-
 
-      - name: Verify Kids Mode (enabled -> AdSupport/IDFA must be absent)
-        run: bash scripts/verify-kids-mode-ios.sh on
+      # Pod downloads only: a restored clone of the spec repo would be stale, and `pod install`
+      # never refreshes it. The podspec pins the pods, so a native SDK bump changes the key.
+      - name: Cache CocoaPods downloads
+        if: matrix.target == 'pods'
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/CocoaPods
+          key: kids-mode-pods-${{ runner.os }}-${{ hashFiles('AdaptyCapacitor.podspec') }}
+          restore-keys: kids-mode-pods-${{ runner.os }}-
+
+      - name: Determine verify mode
+        id: mode
+        env:
+          INPUT_MODE: ${{ github.event.inputs.mode }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "mode=both" >> "$GITHUB_OUTPUT"   # weekly: negative + positive control
+          else
+            echo "mode=${INPUT_MODE:-on}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The pods run also asserts the Adapty pods resolved from AdaptySDK-CocoaPods-Specs.
+      - name: Verify Kids Mode (on -> AdSupport/IDFA absent; both -> +negative control)
+        env:
+          VERIFY_MODE: ${{ steps.mode.outputs.mode }}
+        run: bash scripts/verify-kids-mode-ios.sh "$VERIFY_MODE" "${{ matrix.target }}"

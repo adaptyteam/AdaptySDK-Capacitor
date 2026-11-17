@@ -1,0 +1,14 @@
+{
+  "appId": "com.example.plugin.pods",
+  "appName": "Adapty capacitor devtools pods",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    },
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "LIGHT"
+    }
+  }
+}

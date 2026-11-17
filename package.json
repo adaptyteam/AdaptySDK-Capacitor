@@ -1,6 +1,6 @@
 {
   "name": "@adapty/capacitor",
-  "version": "4.1.3",
+  "version": "4.2.0",
   "description": "Official Adapty SDK for Capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -15,7 +15,9 @@
     "dist/",
     "ios/Sources",
     "ios/Tests",
+    "ios/adapty_podfile.rb",
     "Package.swift",
+    "AdaptyCapacitor.podspec",
     "scripts/kids-mode.cjs"
   ],
   "author": "Adapty team <support@adapty.io>",
@@ -42,6 +44,8 @@
     "verify:ios": "xcodebuild -scheme AdaptyCapacitor -destination generic/platform=iOS",
     "verify:android": "cd android && ./gradlew clean build test && cd ..",
     "verify:web": "yarn build",
+    "resolve:ios": "swift package resolve && git --no-pager diff --stat -- Package.resolved",
+    "resolve:ios:check": "./scripts/check-spm-lock.sh",
     "lint": "yarn eslint && yarn prettier -- --check",
     "format": "yarn eslint -- --fix && yarn prettier && yarn swiftlint -- --fix --format",
     "eslint": "eslint . --ext ts",
@@ -63,6 +67,7 @@
     "dev-example-js": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap copy",
     "dev-example": "yarn build && yarn dev-sync-all-files && cd ./examples/adapty-devtools && yarn build && yarn cap sync --deployment",
     "dev-example-full": "yarn build && cd ./examples/adapty-devtools && yarn --force &&  yarn build && yarn cap sync",
+    "dev-example-pods": "yarn build && cd ./test-apps/adapty-devtools-pods && yarn build && yarn cap sync ios",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -94,7 +99,7 @@
     "@capacitor/core": ">=8.0.0"
   },
   "dependencies": {
-    "@adapty/core": "4.1.2",
+    "@adapty/core": "4.2.0",
     "tslib": "^2.5.0"
   },
   "publishConfig": {

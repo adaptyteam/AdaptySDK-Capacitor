@@ -11,6 +11,7 @@ type Props = {
   products: AdaptyPaywallProduct[];
   placementId: string;
   flowViewLocale: string;
+  flowViewLoadTimeout: string;
   timeout: string;
   maxAge: string;
   customTagsJson: string;
@@ -22,6 +23,7 @@ type Props = {
   webPaywallUrl: string;
   setPlacementId: (v: string) => void;
   setFlowViewLocale: (v: string) => void;
+  setFlowViewLoadTimeout: (v: string) => void;
   setLoadTimeout: (v: string) => void;
   setMaxAge: (v: string) => void;
   setCustomTagsJson: (v: string) => void;
@@ -46,6 +48,7 @@ export const FlowSection: React.FC<Props> = ({
   products,
   placementId,
   flowViewLocale,
+  flowViewLoadTimeout,
   timeout,
   maxAge,
   customTagsJson,
@@ -57,6 +60,7 @@ export const FlowSection: React.FC<Props> = ({
   webPaywallUrl,
   setPlacementId,
   setFlowViewLocale,
+  setFlowViewLoadTimeout,
   setLoadTimeout,
   setMaxAge,
   setCustomTagsJson,
@@ -154,6 +158,15 @@ export const FlowSection: React.FC<Props> = ({
           className={styles.Input}
           disabled={!isActivated}
         />
+        <input
+          id={elementIds.flow.viewLoadTimeoutInput}
+          type="text"
+          value={flowViewLoadTimeout}
+          onChange={(e) => setFlowViewLoadTimeout(e.target.value)}
+          placeholder="View load timeout (ms, default 5000)"
+          className={styles.Input}
+          disabled={!isActivated}
+        />
       </div>
 
       <div className={styles.InputGroup}>
@@ -195,6 +208,9 @@ export const FlowSection: React.FC<Props> = ({
             </div>
             <div id={elementIds.flow.variationIdValue}>
               <strong>Variation ID:</strong> {flow.variationId}
+            </div>
+            <div id={elementIds.flow.variationNameValue}>
+              <strong>Variation name:</strong> {flow.variationName ?? '—'}
             </div>
             <div id={elementIds.flow.revisionValue}>
               <strong>Revision:</strong> {flow.placement.revision}
