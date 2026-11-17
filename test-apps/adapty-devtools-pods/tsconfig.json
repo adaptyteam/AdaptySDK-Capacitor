@@ -1,0 +1,8 @@
+{
+  "extends": "../../examples/adapty-devtools/tsconfig.json",
+  "compilerOptions": {
+    // src/ is a symlink to examples/adapty-devtools/src: resolve its imports from this app
+    "preserveSymlinks": true
+  },
+  "include": ["src"]
+}

@@ -51,6 +51,7 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `flow-fetch-policy-select` | `elementIds.flow.fetchPolicySelect` | src/screens/app/sections/FlowSection.tsx |
 | `flow-web-paywall-open-in-select` | `elementIds.flow.webPaywallOpenInSelect` | src/screens/app/sections/FlowSection.tsx |
 | `flow-view-locale-input` | `elementIds.flow.viewLocaleInput` | src/screens/app/sections/FlowSection.tsx |
+| `flow-view-load-timeout-input` | `elementIds.flow.viewLoadTimeoutInput` | src/screens/app/sections/FlowSection.tsx |
 | `flow-custom-tags-textarea` | `elementIds.flow.customTagsTextarea` | src/screens/app/sections/FlowSection.tsx |
 | `flow-load-btn` | `elementIds.flow.loadBtn` | src/screens/app/sections/FlowSection.tsx |
 | `flow-load-default-audience-btn` | `elementIds.flow.loadDefaultAudienceBtn` | src/screens/app/sections/FlowSection.tsx |
@@ -66,6 +67,7 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `flow-empty-value` | `elementIds.flow.emptyValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-name-value` | `elementIds.flow.nameValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-variation-id-value` | `elementIds.flow.variationIdValue` | src/screens/app/sections/FlowSection.tsx |
+| `flow-variation-name-value` | `elementIds.flow.variationNameValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-revision-value` | `elementIds.flow.revisionValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-paywalls-count-value` | `elementIds.flow.paywallsCountValue` | src/screens/app/sections/FlowSection.tsx |
 | `flow-ui-schema-value` | `elementIds.flow.uiSchemaValue` | src/screens/app/sections/FlowSection.tsx |
@@ -230,8 +232,9 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | id | registry path | used in |
 | --- | --- | --- |
 | `sdk-activate-btn` | `elementIds.sdk.activateBtn` | src/screens/app/App.tsx |
-| `sdk-activate-observer-btn` | `elementIds.sdk.activateObserverBtn` | src/screens/app/App.tsx |
 | `sdk-check-status-btn` | `elementIds.sdk.checkStatusBtn` | src/screens/app/App.tsx |
+| `sdk-observer-mode-toggle` | `elementIds.sdk.observerModeToggle` | src/screens/app/App.tsx |
+| `sdk-observer-mode-value` | `elementIds.sdk.observerModeValue` | src/screens/app/App.tsx |
 | `sdk-adapty-attribution-toggle` | `elementIds.sdk.adaptyAttributionToggle` | src/screens/app/App.tsx |
 | `sdk-adapty-attribution-value` | `elementIds.sdk.adaptyAttributionValue` | src/screens/app/App.tsx |
 

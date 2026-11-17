@@ -25,11 +25,18 @@ const BRIDGE_SAMPLES_DIR = path.join(__dirname, '../src/__tests__/integration/sh
 const INTERNAL_METHODS = new Set(['get_log_level', 'get_sdk_version']);
 
 // Tracked pre-existing coverage gaps. Entries here are reported as warnings
-// instead of failures, so this gate still fails on NEW gaps. Empty today:
-// unlike react-native-adapty, this SDK has bridge samples for every public
-// method, including the flow/observer callbacks. Remove entries as samples are
-// added; do not add entries without agreeing the debt first.
-const KNOWN_UNCOVERED = new Set([]);
+// instead of failures, so this gate still fails on NEW gaps. Remove entries as
+// samples are added; do not add entries without agreeing the debt first.
+const KNOWN_UNCOVERED = new Set([
+  // Temporary: dev pins a @adapty/core build whose schema already has the 4.3
+  // preload and store message methods, but this SDK exposes them only with the
+  // 4.3 work. Drop all four together with preloadFlows / preloadFlowsForDefaultAudience,
+  // getPendingStoreMessageTypes / showStoreMessages and their bridge samples.
+  'preload_flows',
+  'preload_flows_for_default_audience',
+  'get_pending_store_message_types',
+  'show_store_messages',
+]);
 
 /**
  * Extract all method names from core's Request types

@@ -34,6 +34,7 @@ Adapty SDK is an open-source framework that makes implementing in-app subscripti
 - [Platform Support](#platform-support)
 - [Capacitor compatibility](#capacitor-compatibility)
 - [iOS dependency manager](#ios-dependency-manager)
+- [CocoaPods (since 4.2.0)](#cocoapods-since-420)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [Like Adapty SDK?](#like-adapty-sdk)
@@ -120,8 +121,28 @@ Adapty SDK for Capacitor is fully supported on **iOS** and **Android** platforms
 
 | `@adapty/capacitor` version | iOS dependency manager |
 | --- | --- |
-| 4.x and newer | Swift Package Manager (SPM) only |
-| 3.x | CocoaPods and Swift Package Manager (SPM) |
+| 4.2.0 and newer | Swift Package Manager (SPM) and CocoaPods (from the [Adapty spec repo](https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs)) |
+| 4.0.0 – 4.1.x | Swift Package Manager (SPM) only |
+| 3.x | Swift Package Manager (SPM) and CocoaPods |
+
+#### CocoaPods (since 4.2.0)
+
+In apps on CocoaPods, Adapty iOS SDK comes from the public [Adapty spec repo](https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs).
+It requires the Adapty Podfile helpers in `ios/App/Podfile` and a call to `adapty_pods!` in the app target, outside `capacitor_pods`, which `npx cap sync` regenerates:
+
+```ruby
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "@adapty/capacitor/ios/adapty_podfile.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
+
+target 'App' do
+  capacitor_pods
+  adapty_pods!
+  # ...
+end
+```
 
 
 ## Examples

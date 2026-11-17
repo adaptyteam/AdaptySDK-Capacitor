@@ -18,7 +18,8 @@ For **android**, also ask:
 
 ## iOS Steps
 
-iOS dependencies are distributed via Swift Package Manager only (no CocoaPods podspec).
+The native SDK is pinned in two manifests that never read each other: `Package.swift` (SPM apps)
+and `AdaptyCapacitor.podspec` (CocoaPods apps). Bump **both** to the same version.
 
 ### 1. `Package.swift`
 Update the SPM exact version pin. **Preserve the `traits:` block** — it forwards the native `KidsMode` trait (COPPA / Kids-category builds); dropping it silently breaks Kids Mode:
@@ -55,6 +56,18 @@ the manifest without the lock is almost always wrong.
 > `examples/adapty-devtools/package.json` and resolves `ios/App/App.xcodeproj` — the *example's*
 > lock, which is gitignored. It does not regenerate the root `Package.resolved`.
 
+### 3. `AdaptyCapacitor.podspec`
+Set the same version:
+```ruby
+adapty_ios_version = '<NEW_VERSION>'
+```
+
+The pods come from the Adapty spec repo, not trunk: the version must already be published there
+(`Specs/Adapty/<NEW_VERSION>` in https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs; the
+AdaptySDK-iOS release tag publishes it). `scripts/__tests__/package-manifest.test.js` fails while
+the podspec and the `exact:` pin of `Package.swift` differ. To prove the pods build, run
+`bash scripts/verify-kids-mode-ios.sh on pods` — it scaffolds a CocoaPods app and builds it.
+
 ## iOS: temporary switch to a branch (pre-release testing)
 
 While a native release is still in progress, the dependency may point at a branch instead of a
@@ -81,6 +94,9 @@ Rules for this state:
 3. **Never publish from a `branch:` manifest** — `publish.yml` blocks it. Consumers never receive
    our lock, so they would resolve a moving branch head. Before releasing, switch back to
    `exact: "<VERSION>"`, run `yarn resolve:ios` and commit the resulting lock.
+4. Leave `AdaptyCapacitor.podspec` at the last published version: pods exist only for release
+   tags. The manifest test skips the version comparison while `Package.swift` is not `exact:`;
+   bump the podspec together with the switch back.
 
 ## Android Steps
 
@@ -142,11 +158,11 @@ Examples:
 - `chore: upgrade ios SDK to 3.15.3`
 - `chore: upgrade android SDK to bom 3.15.2, crossplatform 3.15.6`
 
-**iOS:** the commit must contain **both** `Package.swift` and `Package.resolved`. Verify before
-committing:
+**iOS:** the commit must contain `Package.swift`, `Package.resolved` **and**
+`AdaptyCapacitor.podspec`. Verify before committing:
 
 ```bash
-git status --short -- Package.swift Package.resolved
+git status --short -- Package.swift Package.resolved AdaptyCapacitor.podspec
 ```
 
 `Package.swift` staged alone is a bug, not a smaller change.

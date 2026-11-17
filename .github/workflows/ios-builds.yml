@@ -1,0 +1,300 @@
+name: iOS Builds (full)
+
+# The app-level iOS builds pr-validation.yml cannot afford (it builds only the plugin scheme):
+# the devtools app on SPM (examples/adapty-devtools) and its CocoaPods twin
+# (test-apps/adapty-devtools-pods), each in Debug (simulator) and Release (device, unsigned) —
+# Release is where link errors surface. scripts/check-ios-app.cjs proves `cap sync` registered the
+# plugin before building and that the built App.app defines it after. Default configuration only —
+# the Kids Mode variant lives in kids-mode-ios.yml.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'src/**'
+      - 'ios/**'
+      - 'Package.swift'
+      - 'Package.resolved'
+      - 'AdaptyCapacitor.podspec'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'rollup.config.mjs'
+      - 'tsconfig.json'
+      - 'scripts/check-ios-app.cjs'
+      - 'scripts/credentials.mjs'
+      - 'scripts/update_versions.cjs'
+      - 'examples/adapty-devtools/**'
+      - '!examples/adapty-devtools/android/**'
+      - 'test-apps/adapty-devtools-pods/**'
+      - '.github/workflows/ios-builds.yml'
+
+concurrency:
+  group: ios-builds-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios-spm:
+    runs-on: macos-26
+    name: iOS Build (SPM, Debug + Release)
+    timeout-minutes: 60
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '24'
+
+    # Package.swift uses swift-tools-version 6.2 and package traits: Xcode 26+ is required.
+    - name: Select Xcode
+      uses: maxim-lobanov/setup-xcode@v1.7.0
+      with:
+        xcode-version: '26.6'
+
+    - name: Cache node_modules
+      uses: actions/cache@v5
+      id: cache-node-modules
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          node-modules-${{ runner.os }}-
+
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: yarn install --frozen-lockfile --prefer-offline
+
+    - name: Build plugin
+      run: yarn build
+
+    - name: Cache adapty-devtools node_modules
+      uses: actions/cache@v5
+      id: cache-adapty-devtools-node-modules
+      with:
+        path: examples/adapty-devtools/node_modules
+        key: adapty-devtools-node-modules-${{ runner.os }}-${{ hashFiles('examples/adapty-devtools/yarn.lock') }}
+        restore-keys: |
+          adapty-devtools-node-modules-${{ runner.os }}-
+
+    # --ignore-scripts: skips the preinstall root build and the interactive credentials postinstall.
+    - name: Install adapty-devtools dependencies
+      if: steps.cache-adapty-devtools-node-modules.outputs.cache-hit != 'true'
+      working-directory: examples/adapty-devtools
+      run: yarn install --prefer-offline --ignore-scripts
+
+    - name: Create placeholder credentials
+      working-directory: examples/adapty-devtools
+      run: |
+        node ../../scripts/credentials.mjs \
+          --token=public_live_placeholder \
+          --ios-bundle=com.example.plugin \
+          --android-id=com.example.plugin \
+          --placement-id=placeholder \
+          --onboarding-placement-id=placeholder
+
+    # cap sync regenerates CapApp-SPM/Package.swift and packageClassList; checking them takes a
+    # second instead of two builds.
+    - name: Build web app, sync iOS and verify the plugin is registered
+      working-directory: examples/adapty-devtools
+      run: |
+        yarn build
+        yarn cap sync ios
+        node ../../scripts/check-ios-app.cjs sync --app-dir=ios/App
+
+    - name: Cache SwiftPM checkouts
+      uses: actions/cache@v5
+      with:
+        path: examples/adapty-devtools/ios/DerivedData/SourcePackages
+        key: adapty-devtools-spm-${{ runner.os }}-${{ hashFiles('Package.swift', 'Package.resolved', 'examples/adapty-devtools/ios/App/CapApp-SPM/Package.swift') }}
+        restore-keys: |
+          adapty-devtools-spm-${{ runner.os }}-
+
+    - name: Run iOS build (Debug, simulator)
+      working-directory: examples/adapty-devtools
+      run: |
+        xcodebuild -project ios/App/App.xcodeproj \
+          -scheme App \
+          -configuration Debug \
+          -sdk iphonesimulator \
+          -destination "generic/platform=iOS Simulator" \
+          -derivedDataPath ios/DerivedData/ci-debug \
+          -clonedSourcePackagesDirPath ios/DerivedData/SourcePackages \
+          -skipPackagePluginValidation \
+          ONLY_ACTIVE_ARCH=YES \
+          CODE_SIGNING_ALLOWED=NO \
+          build
+
+    - name: Verify the plugin is linked (Debug)
+      working-directory: examples/adapty-devtools
+      run: node ../../scripts/check-ios-app.cjs linked --app=ios/DerivedData/ci-debug/Build/Products/Debug-iphonesimulator/App.app
+
+    # Release is what catches SwiftPM link errors — Debug does not.
+    - name: Run iOS build (Release, device, unsigned)
+      working-directory: examples/adapty-devtools
+      run: |
+        xcodebuild -project ios/App/App.xcodeproj \
+          -scheme App \
+          -configuration Release \
+          -sdk iphoneos \
+          -destination "generic/platform=iOS" \
+          -derivedDataPath ios/DerivedData/ci-release \
+          -clonedSourcePackagesDirPath ios/DerivedData/SourcePackages \
+          -skipPackagePluginValidation \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          build
+
+    - name: Verify the plugin is linked (Release)
+      working-directory: examples/adapty-devtools
+      run: node ../../scripts/check-ios-app.cjs linked --app=ios/DerivedData/ci-release/Build/Products/Release-iphoneos/App.app
+
+    # Which native SDK this green run built. Informational, except that a missing pin means our
+    # Package.swift never reached the graph; comparing it with Package.swift would be circular.
+    - name: Report the resolved AdaptySDK-iOS
+      working-directory: examples/adapty-devtools
+      run: node ../../scripts/check-ios-app.cjs pin --resolved=ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+  build-ios-pods:
+    runs-on: macos-26
+    name: iOS Build (CocoaPods, Debug + Release)
+    timeout-minutes: 60
+    env:
+      LANG: en_US.UTF-8     # CocoaPods warns on, then breaks with, other encodings
+      LC_ALL: en_US.UTF-8
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '24'
+
+    - name: Select Xcode
+      uses: maxim-lobanov/setup-xcode@v1.7.0
+      with:
+        xcode-version: '26.6'
+
+    - name: Cache node_modules
+      uses: actions/cache@v5
+      id: cache-node-modules
+      with:
+        path: node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          node-modules-${{ runner.os }}-
+
+    - name: Install dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: yarn install --frozen-lockfile --prefer-offline
+
+    - name: Build plugin
+      run: yarn build
+
+    # Its own install: src/ is a symlink resolved with preserveSymlinks, so react and @capacitor/*
+    # come from this folder. Frozen: a re-resolved @capacitor/* would change Podfile.lock.
+    - name: Cache adapty-devtools-pods node_modules
+      uses: actions/cache@v5
+      id: cache-pods-app-node-modules
+      with:
+        path: test-apps/adapty-devtools-pods/node_modules
+        key: adapty-devtools-pods-node-modules-${{ runner.os }}-${{ hashFiles('test-apps/adapty-devtools-pods/yarn.lock') }}
+        restore-keys: |
+          adapty-devtools-pods-node-modules-${{ runner.os }}-
+
+    - name: Install adapty-devtools-pods dependencies
+      if: steps.cache-pods-app-node-modules.outputs.cache-hit != 'true'
+      working-directory: test-apps/adapty-devtools-pods
+      run: yarn install --frozen-lockfile --prefer-offline --ignore-scripts
+
+    # Written here: the linked src reads .adapty-credentials.json from this app's folder.
+    - name: Create placeholder credentials
+      working-directory: test-apps/adapty-devtools-pods
+      run: |
+        node ../../scripts/credentials.mjs \
+          --token=public_live_placeholder \
+          --ios-bundle=com.example.plugin.pods \
+          --android-id=com.example.plugin.pods \
+          --placement-id=placeholder \
+          --onboarding-placement-id=placeholder
+
+    # Pod downloads only: a restored clone of the spec repo would be stale, and `pod install`
+    # never refreshes it.
+    - name: Cache CocoaPods downloads
+      uses: actions/cache@v5
+      with:
+        path: ~/Library/Caches/CocoaPods
+        key: adapty-devtools-pods-${{ runner.os }}-${{ hashFiles('test-apps/adapty-devtools-pods/ios/App/Podfile.lock', 'AdaptyCapacitor.podspec') }}
+        restore-keys: |
+          adapty-devtools-pods-${{ runner.os }}-
+
+    # cap sync runs `pod install`. Not --deployment: it compares the whole lock, including lines
+    # that depend on the machine rather than on the pods (see the next step).
+    - name: Build web app and sync iOS (pod install)
+      working-directory: test-apps/adapty-devtools-pods
+      run: |
+        yarn build
+        yarn cap sync ios
+
+    # Ignored: the CocoaPods version line, and the checksums of the local :path pods
+    # (AdaptyCapacitor, Capacitor*) — SHA1 of their podspec JSON, whose formatting depends on the
+    # Ruby json gem (2.3 writes `[\n\n]` where >= 2.9 writes `[]`). Versions in PODS, the
+    # spec-repo pods' checksums and the Podfile checksum still have to match.
+    - name: Verify Podfile.lock is up to date
+      working-directory: test-apps/adapty-devtools-pods
+      run: |
+        if ! git diff --exit-code -I '^COCOAPODS:' -I '^  (AdaptyCapacitor|Capacitor[A-Za-z]*): [0-9a-f]{40}$' -- ios/App/Podfile.lock; then
+          echo "::error file=test-apps/adapty-devtools-pods/ios/App/Podfile.lock::Podfile.lock is stale — run 'yarn update-native-modules' in test-apps/adapty-devtools-pods and commit Podfile.lock (a plugin version bump changes it too)."
+          exit 1
+        fi
+
+    # The Adapty pods must come from the Adapty spec repo (adapty_pods!), not trunk.
+    - name: Verify the Adapty pods resolved from AdaptySDK-CocoaPods-Specs
+      working-directory: test-apps/adapty-devtools-pods
+      run: |
+        ruby -ryaml -e 'pods = YAML.load_file(ARGV[0]).dig("SPEC REPOS", ARGV[1]) || []
+          missing = %w[Adapty AdaptyUI AdaptyPlugin] - pods
+          abort "FATAL: not resolved from #{ARGV[1]}: #{missing.join(", ")}" unless missing.empty?
+          puts "Adapty pods resolved from #{ARGV[1]}"' ios/App/Podfile.lock https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs.git
+
+    - name: Verify the plugin is registered
+      working-directory: test-apps/adapty-devtools-pods
+      run: node ../../scripts/check-ios-app.cjs sync --app-dir=ios/App
+
+    - name: Run iOS build (Release, device, unsigned)
+      working-directory: test-apps/adapty-devtools-pods
+      run: |
+        xcodebuild -workspace ios/App/App.xcworkspace \
+          -scheme App \
+          -configuration Release \
+          -sdk iphoneos \
+          -destination "generic/platform=iOS" \
+          -derivedDataPath ios/DerivedData/ci-release \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          build
+
+    - name: Verify the plugin is linked (Release)
+      working-directory: test-apps/adapty-devtools-pods
+      run: node ../../scripts/check-ios-app.cjs linked --app=ios/DerivedData/ci-release/Build/Products/Release-iphoneos/App.app
+
+    - name: Run iOS build (Debug, simulator)
+      working-directory: test-apps/adapty-devtools-pods
+      run: |
+        xcodebuild -workspace ios/App/App.xcworkspace \
+          -scheme App \
+          -configuration Debug \
+          -sdk iphonesimulator \
+          -destination "generic/platform=iOS Simulator" \
+          -derivedDataPath ios/DerivedData/ci-debug \
+          ONLY_ACTIVE_ARCH=YES \
+          CODE_SIGNING_ALLOWED=NO \
+          build
+
+    - name: Verify the plugin is linked (Debug)
+      working-directory: test-apps/adapty-devtools-pods
+      run: node ../../scripts/check-ios-app.cjs linked --app=ios/DerivedData/ci-debug/Build/Products/Debug-iphonesimulator/App.app

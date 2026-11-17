@@ -5,7 +5,14 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   modulePaths: ['./src'],
   setupFiles: ['<rootDir>/jest/jest.setup.js'],
-  testPathIgnorePatterns: ['/dist', '/node_modules/', '/examples', '/.worktrees/', '<rootDir>/\\.claude/'],
+  testPathIgnorePatterns: [
+    '/dist',
+    '/node_modules/',
+    '/examples',
+    '/test-apps',
+    '/.worktrees/',
+    '<rootDir>/\\.claude/',
+  ],
   maxWorkers: 1,
   transform: {
     '^.+\\.tsx?$': [

@@ -17,7 +17,7 @@ const PRIORITIES = { F: 'error', E: 'error', W: 'warn', I: 'info', D: 'debug', V
 const TAG = /^Adapty/;
 
 /**
- * Keeps only the SDK's own records, mirroring the iOS predicate `subsystem == "io.adapty"`.
+ * Keeps only the SDK's own records, mirroring the iOS predicate `subsystem BEGINSWITH "io.adapty"`.
  * Without it a 60-second window is ~1100 lines of WindowManager noise, and `wvd native`
  * stops being readable — the one property that makes the iOS command useful.
  */
@@ -43,6 +43,9 @@ export function parseAndroidLog(raw, { tagFilter = TAG } = {}) {
       time,
       level: sdk ? sdk[1].toLowerCase() : (PRIORITIES[priority] ?? priority),
       category: 'sdk',
+      // logcat has no subsystem split — one tag family carries every layer — so every
+      // record reads as core SDK and none of them gets the iOS `[ui]` / `[capacitor]` tag.
+      scope: 'sdk',
       message: sdk ? sdk[2] : rest,
       source: null,
       // The tag carries the native SDK version — the Android equivalent of the `v4.0.2,

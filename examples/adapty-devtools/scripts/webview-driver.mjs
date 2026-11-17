@@ -17,7 +17,7 @@ const USAGE = `usage: yarn wvd [--ios|--android] <command>
 
   snap                 print a compact text snapshot of every element with an id
   logs [n]             print the last n log entries (default 20)
-  native [--seconds=N]  print the native SDK log (iOS: os_log io.adapty, Android: logcat)
+  native [--seconds=N]  print the native SDK log (iOS: os_log io.adapty*, Android: logcat)
                         options: --level=error|warn|info|verbose|debug --full
   do <step>...         run steps in one session; stops at the first failure
                        set:<id>=<value> | click:<id> | read:<id> | sleep:<ms> | snap

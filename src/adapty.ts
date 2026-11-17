@@ -272,9 +272,10 @@ export class Adapty implements AdaptyPlugin {
   private async performActivation(apiKey: string, params: ActivateParamsInput): Promise<void> {
     const method = 'activate';
 
-    // Set log level before creating LogContext
-    const logLevel = params.logLevel;
-    Log.logLevel = logLevel || null;
+    // Set log level before creating LogContext; keep a level set earlier via setLogLevel
+    if (params.logLevel) {
+      Log.logLevel = params.logLevel;
+    }
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
@@ -1132,7 +1133,8 @@ export class Adapty implements AdaptyPlugin {
    *
    * @param options - The options object
    * @param options.transactionId - The transaction ID of the purchase.
-   * @param options.variationId - Optional. The variation ID from the {@link AdaptyFlow}.
+   * @param options.variationId - Optional. The `variationId` of the purchased {@link AdaptyPaywallProduct}
+   * (the same value as `variationId` of its parent {@link AdaptyFlowPaywall}).
    * @returns A promise that resolves when the transaction is reported.
    * @throws Error if an error occurs while reporting the transaction.
    *
@@ -1327,13 +1329,16 @@ export class Adapty implements AdaptyPlugin {
    * Sets the preferred log level and/or custom logger configuration.
    *
    * @remarks
-   * By default, the log level is set to `error`.
+   * By default, JS-side SDK logs are disabled until a log level is set here or via `logLevel` in `activate`.
+   * The native level stays at the native SDK default until then.
    *
    * There are four levels available:
    * - `error`: only errors will be logged
    * - `warn`: messages from the SDK that do not cause critical errors, but are worth paying attention to
    * - `info`: various information messages, such as those that log the lifecycle of various modules
    * - `verbose`: any additional information that may be useful during debugging, such as function calls, API queries, etc.
+   *
+   * The new level and logger apply to this call's own logs too.
    *
    * @param options - The options object
    * @param options.logLevel - Optional. The new preferred log level.
@@ -1343,18 +1348,20 @@ export class Adapty implements AdaptyPlugin {
    *
    * @example
    * ```typescript
-   * import { adapty } from '@adapty/capacitor';
+   * import { adapty, consoleLogSink } from '@adapty/capacitor';
    *
    * // Set log level
    * await adapty.setLogLevel({ logLevel: 'verbose' });
    *
-   * // Or set custom logger
+   * // Or route logs to your own sink too; the sinks replace the current ones
    * await adapty.setLogLevel({
+   *   logLevel: 'verbose',
    *   logger: {
-   *     handler: (level, scope, message, data) => {
-   *       sendLogToYourServer(`[${level}] ${message}`, data);
-   *     }
-   *   }
+   *     sinks: [
+   *       consoleLogSink,
+   *       { id: 'my-sink', handle: (event) => sendLogToYourServer(event.level, event.message, event.params) },
+   *     ],
+   *   },
    * });
    * ```
    */
@@ -1366,12 +1373,12 @@ export class Adapty implements AdaptyPlugin {
     }
 
     if (options.logLevel !== undefined) {
+      // apply the level before the first log, as activate does, so this call is logged under it
+      Log.logLevel = options.logLevel;
+
       const ctx = new LogContext();
       const log = ctx.call({ methodName: method });
       log.start(() => ({ options: { logLevel: options.logLevel } }));
-
-      // Update log level immediately
-      Log.logLevel = options.logLevel;
 
       const argsWithUndefined: Req['SetLogLevel.Request'] = {
         method,

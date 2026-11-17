@@ -8,6 +8,12 @@ This is a React + Capacitor + TypeScript devtools application for testing Adapty
 
 **Platforms**: iOS, Android, Web (Capacitor hybrid app)
 
+`src/` is shared: [`test-apps/adapty-devtools-pods`](../../test-apps/adapty-devtools-pods) — the same
+app on CocoaPods — links it by symlink, and its Xcode project references `assets/ios/*` and
+`ios/App/App/AdaptyDemoApp.storekit` from here. Changes to them reach both apps. Relative imports
+in `src/` must stay inside it — the one exception, `../.adapty-credentials.json`, is meant to reach
+each app's own root. `yarn wvd` honours `WVD_APP_ROOT` for the same reason.
+
 ## Requirements
 
 See [Capacitor Environment Setup](https://capacitorjs.com/docs/getting-started/environment-setup) for full details.

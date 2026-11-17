@@ -17,6 +17,8 @@ xcuserdata/
 DerivedData/
 .derivedData-kids-mode/
 .spm-kids-mode/
+.derivedData-kids-mode-pods/
+.kids-mode-pods-app/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
