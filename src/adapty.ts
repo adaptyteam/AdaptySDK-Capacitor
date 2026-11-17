@@ -41,7 +41,13 @@ import type {
   PreloadFlowsOptionsWithDefaults,
   PreloadFlowsForDefaultAudienceOptions,
 } from './types/configs';
-import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './types/inputs';
+import type {
+  ActivateParamsInput,
+  FileLocation,
+  LogLevel,
+  IdentifyParamsInput,
+  ReportTransactionParamsInput,
+} from './types/inputs';
 import type { MethodName } from './types/method-types';
 import { filterUndefined, mergeOptions, withErrorContext } from './utils';
 import VERSION from './version';
@@ -1344,6 +1350,7 @@ export class Adapty implements AdaptyPlugin {
    * @param options.transactionId - The transaction ID of the purchase.
    * @param options.variationId - Optional. The `variationId` of the purchased {@link AdaptyPaywallProduct}
    * (the same value as `variationId` of its parent {@link AdaptyFlowPaywall}).
+   * @param options.ios.jwsTransaction - iOS only. StoreKit 2 JWS representation of the transaction; ignored on Android.
    * @returns A promise that resolves when the transaction is reported.
    * @throws Error if an error occurs while reporting the transaction.
    *
@@ -1354,27 +1361,25 @@ export class Adapty implements AdaptyPlugin {
    * try {
    *   await adapty.reportTransaction({
    *     transactionId: 'transaction_123',
-   *     variationId: 'variation_456'
+   *     variationId: 'variation_456',
+   *     ios: { jwsTransaction: 'eyJhbGciOiJFUzI1NiJ9...' },
    *   });
    * } catch (error) {
    *   console.error('Failed to report transaction:', error);
    * }
    * ```
    */
-  async reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void> {
+  async reportTransaction(options: ReportTransactionParamsInput): Promise<void> {
     const method = 'report_transaction';
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const argsWithUndefined: Req['ReportTransaction.Request'] = {
+    const args: Req['ReportTransaction.Request'] = {
       method,
-      transaction_id: options.transactionId,
-      variation_id: options.variationId,
+      ...coderFactory.createReportTransactionParamsCoder().encode(options),
     };
-
-    const args = filterUndefined(argsWithUndefined);
 
     await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }

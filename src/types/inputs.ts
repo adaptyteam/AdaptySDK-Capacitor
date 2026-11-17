@@ -10,5 +10,6 @@ export {
   type GetPlacementForDefaultAudienceParamsInput,
   type PreloadPlacementsParamsInput,
   type GetPaywallProductsParamsInput,
+  type ReportTransactionParamsInput,
   type FileLocation,
 } from '@adapty/core';

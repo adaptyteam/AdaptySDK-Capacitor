@@ -32,6 +32,7 @@ export {
   AdaptyAndroidSubscriptionUpdateReplacementMode,
   AdaptyAndroidPurchaseParams,
   MakePurchaseParamsInput,
+  ReportTransactionParamsInput,
   FileLocation,
 } from './types/inputs';
 // Core types

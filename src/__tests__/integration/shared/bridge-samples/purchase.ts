@@ -110,6 +110,14 @@ export const REPORT_TRANSACTION_REQUEST: components['requests']['ReportTransacti
 };
 
 /**
+ * ReportTransaction request with StoreKit 2 JWS (iOS only)
+ */
+export const REPORT_TRANSACTION_REQUEST_WITH_JWS: components['requests']['ReportTransaction.Request'] = {
+  ...REPORT_TRANSACTION_REQUEST,
+  apple_jws_transaction: 'eyJhbGciOiJFUzI1NiJ9.jws.sig',
+};
+
+/**
  * ReportTransaction request with variation
  */
 export const REPORT_TRANSACTION_REQUEST_WITH_VARIATION: components['requests']['ReportTransaction.Request'] = {

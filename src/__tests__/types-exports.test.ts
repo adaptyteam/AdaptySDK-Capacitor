@@ -15,6 +15,7 @@ import type {
   AdaptyStoreMessageType,
   AdaptySubscriptionCommitmentInfo,
   AdaptySubscriptionPricingTerms,
+  ReportTransactionParamsInput,
 } from 'types';
 import { SubscriptionBillingPlan } from 'types';
 
@@ -61,6 +62,15 @@ describe('public type exports', () => {
     const unknown: SubscriptionBillingPlan = 'some_future_plan';
 
     expect([terms.billingPlan, upFront, unknown]).toStrictEqual(['monthly', 'up_front', 'some_future_plan']);
+  });
+
+  it('exposes ReportTransactionParamsInput', () => {
+    const params: ReportTransactionParamsInput = {
+      transactionId: 'transaction_12345',
+      ios: { jwsTransaction: 'eyJhbGciOiJFUzI1NiJ9.jws.sig' },
+    };
+
+    expect(params.ios?.jwsTransaction).toBe('eyJhbGciOiJFUzI1NiJ9.jws.sig');
   });
 
   it('exposes AdaptyProfileSubscriptionCommitmentInfo', () => {

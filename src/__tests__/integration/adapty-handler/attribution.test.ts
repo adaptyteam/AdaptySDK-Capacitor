@@ -1,9 +1,11 @@
+import { Capacitor } from '@capacitor/core';
 import { Adapty } from 'adapty';
 import type { components } from 'types/api';
 
 import {
   ACTIVATE_RESPONSE_SUCCESS,
   REPORT_TRANSACTION_REQUEST,
+  REPORT_TRANSACTION_REQUEST_WITH_JWS,
   REPORT_TRANSACTION_RESPONSE_SUCCESS,
   UPDATE_EXTERNAL_ATTRIBUTION_DATA_RESPONSE_SUCCESS,
 } from '../shared/bridge-samples';
@@ -63,6 +65,52 @@ describe('Adapty - Attribution (Bridge Integration)', () => {
       expect(request.method).toBe('report_transaction');
       expect(request.transaction_id).toBe('transaction_12345');
       expect(request.variation_id).toBe('variation_abc');
+    });
+
+    describe('ios.jwsTransaction', () => {
+      const originalGetPlatform = Capacitor.getPlatform;
+
+      afterEach(() => {
+        Capacitor.getPlatform = originalGetPlatform;
+      });
+
+      it('should send apple_jws_transaction on iOS', async () => {
+        await adapty.reportTransaction({
+          transactionId: 'transaction_12345',
+          ios: { jwsTransaction: 'eyJhbGciOiJFUzI1NiJ9.jws.sig' },
+        });
+
+        const request = extractNativeRequest<components['requests']['ReportTransaction.Request']>({
+          nativeModule: nativeMock,
+        });
+
+        expect(request).toStrictEqual(REPORT_TRANSACTION_REQUEST_WITH_JWS);
+      });
+
+      it('should omit apple_jws_transaction on Android', async () => {
+        Capacitor.getPlatform = jest.fn(() => 'android');
+
+        await adapty.reportTransaction({
+          transactionId: 'transaction_12345',
+          ios: { jwsTransaction: 'eyJhbGciOiJFUzI1NiJ9.jws.sig' },
+        });
+
+        const request = extractNativeRequest<components['requests']['ReportTransaction.Request']>({
+          nativeModule: nativeMock,
+        });
+
+        expect(request).toStrictEqual(REPORT_TRANSACTION_REQUEST);
+      });
+    });
+
+    it('should omit variation_id when variationId is empty', async () => {
+      await adapty.reportTransaction({ transactionId: 'transaction_12345', variationId: '' });
+
+      const request = extractNativeRequest<components['requests']['ReportTransaction.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request).not.toHaveProperty('variation_id');
     });
   });
 

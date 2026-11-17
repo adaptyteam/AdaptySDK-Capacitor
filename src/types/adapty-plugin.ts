@@ -26,6 +26,7 @@ import type {
   IdentifyParamsInput,
   MakePurchaseParamsInput,
   PreloadPlacementsParamsInput,
+  ReportTransactionParamsInput,
   FileLocation,
   LogLevel,
 } from './inputs';
@@ -163,7 +164,7 @@ export interface AdaptyPlugin {
   /**
    * Reports a transaction to Adapty.
    */
-  reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void>;
+  reportTransaction(options: ReportTransactionParamsInput): Promise<void>;
 
   /**
    * Restores user purchases.
