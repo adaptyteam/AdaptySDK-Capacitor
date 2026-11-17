@@ -39,6 +39,7 @@ export {
   AdaptyAndroidPurchaseParams,
   MakePurchaseParamsInput,
   ReportTransactionParamsInput,
+  type PreloadPlacementsParamsInput,
   FileLocation,
 } from './types/inputs';
 // Core types
@@ -81,6 +82,8 @@ export {
   GetFlowForDefaultAudienceOptions,
   GetOnboardingOptions,
   GetOnboardingForDefaultAudienceOptions,
+  type PreloadFlowsOptions,
+  type PreloadFlowsForDefaultAudienceOptions,
   MakePurchaseOptions,
   MakePromotedPurchaseOptions,
 } from './types/configs';
