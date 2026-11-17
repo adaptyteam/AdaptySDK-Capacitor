@@ -99,7 +99,7 @@
     "@capacitor/core": ">=8.0.0"
   },
   "dependencies": {
-    "@adapty/core": "4.2.0-dev.6df7646570395507c906db71e57fe0e2db474722",
+    "@adapty/core": "4.3.3",
     "tslib": "^2.5.0"
   },
   "publishConfig": {
