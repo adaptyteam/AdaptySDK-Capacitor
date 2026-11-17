@@ -28,6 +28,9 @@ export type {
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
   AdaptyStoreMessageType,
+  AdaptySubscriptionPricingTerms,
+  AdaptySubscriptionCommitmentInfo,
+  AdaptyProfileSubscriptionCommitmentInfo,
 } from '@adapty/core';
 
 export {
@@ -39,6 +42,7 @@ export {
   Gender,
   AppTrackingTransparencyStatus,
   ProductPeriod,
+  SubscriptionBillingPlan,
   ErrorCode,
   ErrorCodeName,
   getErrorCode,

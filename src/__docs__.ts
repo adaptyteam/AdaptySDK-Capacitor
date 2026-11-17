@@ -16,6 +16,7 @@ export {
   Gender,
   AppTrackingTransparencyStatus,
   ProductPeriod,
+  SubscriptionBillingPlan,
   WebPresentation,
 } from '@adapty/core';
 export type { AdaptyErrorInput } from '@adapty/core';
@@ -63,6 +64,9 @@ export {
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
   AdaptyStoreMessageType,
+  AdaptySubscriptionPricingTerms,
+  AdaptySubscriptionCommitmentInfo,
+  AdaptyProfileSubscriptionCommitmentInfo,
 } from './types';
 // Config types
 export {
