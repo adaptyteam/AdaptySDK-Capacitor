@@ -1,29 +1,29 @@
 PODS:
-  - Adapty (4.2.2):
-    - AdaptyCodable (= 4.2.2)
-    - AdaptyLogger (= 4.2.2)
-    - AdaptyUIBuilder (= 4.2.2)
-  - AdaptyCapacitor (4.2.0):
-    - Adapty (= 4.2.2)
-    - AdaptyPlugin (= 4.2.2)
-    - AdaptyUI (= 4.2.2)
+  - Adapty (4.3.2):
+    - AdaptyCodable (= 4.3.2)
+    - AdaptyLogger (= 4.3.2)
+    - AdaptyUIBuilder (= 4.3.2)
+  - AdaptyCapacitor (4.3.0):
+    - Adapty (= 4.3.2)
+    - AdaptyPlugin (= 4.3.2)
+    - AdaptyUI (= 4.3.2)
     - Capacitor
-  - AdaptyCodable (4.2.2):
-    - AdaptyCSimdjson (= 4.2.2)
-  - AdaptyCSimdjson (4.2.2)
-  - AdaptyLogger (4.2.2)
-  - AdaptyPlugin (4.2.2):
-    - Adapty (= 4.2.2)
-    - AdaptyLogger (= 4.2.2)
-    - AdaptyUI (= 4.2.2)
-    - AdaptyUIBuilder (= 4.2.2)
-  - AdaptyUI (4.2.2):
-    - Adapty (= 4.2.2)
-    - AdaptyLogger (= 4.2.2)
-    - AdaptyUIBuilder (= 4.2.2)
-  - AdaptyUIBuilder (4.2.2):
-    - AdaptyCodable (= 4.2.2)
-    - AdaptyLogger (= 4.2.2)
+  - AdaptyCodable (4.3.2):
+    - AdaptyCSimdjson (= 4.3.2)
+  - AdaptyCSimdjson (4.3.2)
+  - AdaptyLogger (4.3.2)
+  - AdaptyPlugin (4.3.2):
+    - Adapty (= 4.3.2)
+    - AdaptyLogger (= 4.3.2)
+    - AdaptyUI (= 4.3.2)
+    - AdaptyUIBuilder (= 4.3.2)
+  - AdaptyUI (4.3.2):
+    - Adapty (= 4.3.2)
+    - AdaptyLogger (= 4.3.2)
+    - AdaptyUIBuilder (= 4.3.2)
+  - AdaptyUIBuilder (4.3.2):
+    - AdaptyCodable (= 4.3.2)
+    - AdaptyLogger (= 4.3.2)
   - Capacitor (8.0.1):
     - CapacitorCordova
   - CapacitorApp (8.0.0):
@@ -89,14 +89,14 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/toast"
 
 SPEC CHECKSUMS:
-  Adapty: e8955cdd5e811ea16edc15133d7e11a2bf47ba2e
-  AdaptyCapacitor: 6f9f27ada27f28b3a8130a702a8c0a2fd165124d
-  AdaptyCodable: 487fb5017d30278c482c40ce135f864a8f4d7283
-  AdaptyCSimdjson: f067fb19d764eca1f7b8a258bccc8c83c7d7f550
-  AdaptyLogger: 35b6019b81d6ba543d53650a7a3809de08d651d6
-  AdaptyPlugin: 2811d79cbee32a8864bffad4a14b97a0bafa45dd
-  AdaptyUI: 5013df34aadb283be71a0ede3a5a3ba103791ace
-  AdaptyUIBuilder: a1950ddac1800a22a5aa9a956c17ee98ccd7f121
+  Adapty: 5aa21ed537c0e1a96906e83eb1535d4d43ee3b12
+  AdaptyCapacitor: 9ec0c032420312b8c9f5c00c8bad4a95d25c84e7
+  AdaptyCodable: 131acdd5a15d192a3cf952f2c34fdeccb07ca0b6
+  AdaptyCSimdjson: bcd88581c822ac68d8d49c7dcf64125b7275e185
+  AdaptyLogger: ac9cd06de7b5e932a65fa130113201102b5f28ea
+  AdaptyPlugin: 5291077805142f24362147a384c672f0afaa13b4
+  AdaptyUI: 4271c6ba609082ab482e09d4fb95241de1cc2553
+  AdaptyUIBuilder: ac955a5838400869e108657fd07106a90e1416db
   Capacitor: ff35b0f66370b84aa238251b35b91886a3207c16
   CapacitorApp: 3963a84197280757b84f126afd1520a85ae3b092
   CapacitorClipboard: 61832a3722adc61afed6e0191c8a0e11ba11674d
