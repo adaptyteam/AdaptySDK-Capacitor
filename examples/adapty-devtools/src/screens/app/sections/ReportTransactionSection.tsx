@@ -6,8 +6,10 @@ type Props = {
   isActivated: boolean;
   transactionId: string;
   variationId: string;
+  jwsTransaction: string;
   setTransactionId: (v: string) => void;
   setVariationId: (v: string) => void;
+  setJwsTransaction: (v: string) => void;
   reportTransaction: () => Promise<void>;
 };
 
@@ -15,8 +17,10 @@ export const ReportTransactionSection: React.FC<Props> = ({
   isActivated,
   transactionId,
   variationId,
+  jwsTransaction,
   setTransactionId,
   setVariationId,
+  setJwsTransaction,
   reportTransaction,
 }) => {
   return (
@@ -38,6 +42,15 @@ export const ReportTransactionSection: React.FC<Props> = ({
           value={variationId}
           onChange={(e) => setVariationId(e.target.value)}
           placeholder="Variation ID (optional)"
+          className={styles.Input}
+          disabled={!isActivated}
+        />
+        <input
+          id={elementIds.reportTransaction.jwsInput}
+          type="text"
+          value={jwsTransaction}
+          onChange={(e) => setJwsTransaction(e.target.value)}
+          placeholder="iOS JWS transaction (optional)"
           className={styles.Input}
           disabled={!isActivated}
         />

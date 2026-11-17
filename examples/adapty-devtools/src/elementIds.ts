@@ -127,6 +127,7 @@ export const elementIds = {
   reportTransaction: {
     transactionIdInput: 'report-tx-transaction-id-input',
     variationIdInput: 'report-tx-variation-id-input',
+    jwsInput: 'report-tx-jws-input',
     submitBtn: 'report-tx-submit-btn',
   },
   promoted: {

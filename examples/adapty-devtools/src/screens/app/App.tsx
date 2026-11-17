@@ -122,6 +122,7 @@ const App: React.FC = () => {
     undefined,
   );
   const [appHandlesPromoted, setAppHandlesPromoted] = useState(false);
+  const [jwsTransaction, setJwsTransaction] = useState('');
   const [promotedProduct, setPromotedProduct] = useState<AdaptyPromotedProduct | null>(null);
 
   const flowRef = useRef<FlowControllerRef>(null);
@@ -1121,10 +1122,16 @@ const App: React.FC = () => {
     }
 
     try {
-      log('info', 'Reporting transaction', 'reportTransaction', false, { transactionId, variationId });
+      const jws = jwsTransaction.trim();
+      log('info', 'Reporting transaction', 'reportTransaction', false, {
+        transactionId,
+        variationId,
+        jwsTransaction: jws,
+      });
       await adapty.reportTransaction({
         transactionId: transactionId.trim(),
         ...(variationId.trim() ? { variationId: variationId.trim() } : {}),
+        ...(jws ? { ios: { jwsTransaction: jws } } : {}),
       });
       setResult(`Transaction reported successfully: ${transactionId.trim()}`);
     } catch (error) {
@@ -1132,6 +1139,7 @@ const App: React.FC = () => {
         error: String(error),
         transactionId,
         variationId,
+        jwsTransaction,
       });
       setResult(`Error reporting transaction: ${error}`);
     }
@@ -1281,8 +1289,10 @@ const App: React.FC = () => {
             isActivated={isActivated}
             transactionId={transactionId}
             variationId={variationId}
+            jwsTransaction={jwsTransaction}
             setTransactionId={setTransactionId}
             setVariationId={setVariationId}
+            setJwsTransaction={setJwsTransaction}
             reportTransaction={reportTransaction}
           />
         )}

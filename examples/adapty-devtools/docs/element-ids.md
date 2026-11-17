@@ -227,6 +227,7 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | --- | --- | --- |
 | `report-tx-transaction-id-input` | `elementIds.reportTransaction.transactionIdInput` | src/screens/app/sections/ReportTransactionSection.tsx |
 | `report-tx-variation-id-input` | `elementIds.reportTransaction.variationIdInput` | src/screens/app/sections/ReportTransactionSection.tsx |
+| `report-tx-jws-input` | `elementIds.reportTransaction.jwsInput` | src/screens/app/sections/ReportTransactionSection.tsx |
 | `report-tx-submit-btn` | `elementIds.reportTransaction.submitBtn` | src/screens/app/sections/ReportTransactionSection.tsx |
 
 ## sdk
