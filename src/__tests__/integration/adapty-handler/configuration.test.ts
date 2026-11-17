@@ -1,4 +1,5 @@
 import { Adapty } from 'adapty';
+import { Log, consoleLogSink, type LogEvent, type LogSink } from 'logger';
 import type { components } from 'types/api';
 
 import {
@@ -49,6 +50,49 @@ describe('Adapty - Configuration (Bridge Integration)', () => {
         nativeModule: nativeMock,
         method: 'set_log_level',
         expectedRequest: SET_LOG_LEVEL_REQUEST,
+      });
+    });
+
+    describe('own call logs', () => {
+      let events: LogEvent[];
+      const collectingSink = (): LogSink => ({ id: 'test-sink', handle: (event) => events.push(event) });
+
+      beforeEach(() => {
+        events = [];
+      });
+
+      afterEach(() => {
+        Log.configure({ sinks: [consoleLogSink] });
+      });
+
+      it('should deliver the call logs to the new sink when logging was off', async () => {
+        Log.logLevel = null;
+
+        await adapty.setLogLevel({ logLevel: 'verbose', logger: { sinks: [collectingSink()] } });
+
+        expect(events).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              funcName: 'set_log_level',
+              message: expect.stringContaining('Calling method...'),
+            }),
+            expect.objectContaining({ funcName: 'fetch/set_log_level' }),
+            expect.objectContaining({
+              funcName: 'set_log_level',
+              message: expect.stringContaining('Calling method: OK'),
+            }),
+          ]),
+        );
+      });
+
+      it('should filter the call logs by the new level when lowering it', async () => {
+        await adapty.setLogLevel({ logLevel: 'verbose', logger: { sinks: [collectingSink()] } });
+        events = [];
+
+        await adapty.setLogLevel({ logLevel: 'error' });
+
+        expect(Log.logLevel).toBe('error');
+        expect(events).toEqual([]);
       });
     });
   });

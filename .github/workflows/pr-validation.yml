@@ -152,6 +152,20 @@ jobs:
         cd examples/adapty-devtools
         yarn test-wvd
 
+    # The CocoaPods twin links the devtools' src/ and resolves its imports from its own node_modules
+    # (preserveSymlinks), so type-check it there too.
+    - name: Install adapty-devtools-pods dependencies
+      if: matrix.check-type == 'js-checks'
+      run: |
+        cd test-apps/adapty-devtools-pods
+        yarn install --prefer-offline --ignore-scripts
+
+    - name: Run adapty-devtools-pods tsc
+      if: matrix.check-type == 'js-checks'
+      run: |
+        cd test-apps/adapty-devtools-pods
+        yarn tsc
+
     - name: Setup Java
       if: matrix.check-type == 'android'
       uses: actions/setup-java@v4

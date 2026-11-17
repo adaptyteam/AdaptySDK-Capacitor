@@ -2,10 +2,8 @@
 // machine: the serial comes from the attached device list, the package from build.gradle.
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+import { resolve } from 'node:path';
+import { APP_ROOT } from './app-root.mjs';
 
 // Same explicit stdio as simulator.mjs: 'pipe' CAPTURES a child's stderr into
 // error.stderr instead of also forwarding it to wvd's own stderr, where it would be

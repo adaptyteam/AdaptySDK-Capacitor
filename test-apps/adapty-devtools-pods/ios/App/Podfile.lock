@@ -1,0 +1,112 @@
+PODS:
+  - Adapty (4.2.2):
+    - AdaptyCodable (= 4.2.2)
+    - AdaptyLogger (= 4.2.2)
+    - AdaptyUIBuilder (= 4.2.2)
+  - AdaptyCapacitor (4.2.0):
+    - Adapty (= 4.2.2)
+    - AdaptyPlugin (= 4.2.2)
+    - AdaptyUI (= 4.2.2)
+    - Capacitor
+  - AdaptyCodable (4.2.2):
+    - AdaptyCSimdjson (= 4.2.2)
+  - AdaptyCSimdjson (4.2.2)
+  - AdaptyLogger (4.2.2)
+  - AdaptyPlugin (4.2.2):
+    - Adapty (= 4.2.2)
+    - AdaptyLogger (= 4.2.2)
+    - AdaptyUI (= 4.2.2)
+    - AdaptyUIBuilder (= 4.2.2)
+  - AdaptyUI (4.2.2):
+    - Adapty (= 4.2.2)
+    - AdaptyLogger (= 4.2.2)
+    - AdaptyUIBuilder (= 4.2.2)
+  - AdaptyUIBuilder (4.2.2):
+    - AdaptyCodable (= 4.2.2)
+    - AdaptyLogger (= 4.2.2)
+  - Capacitor (8.0.1):
+    - CapacitorCordova
+  - CapacitorApp (8.0.0):
+    - Capacitor
+  - CapacitorClipboard (8.0.0):
+    - Capacitor
+  - CapacitorCordova (8.0.1)
+  - CapacitorFilesystem (8.1.0):
+    - Capacitor
+    - IONFilesystemLib (~> 1.1.0)
+  - CapacitorShare (8.0.0):
+    - Capacitor
+  - CapacitorStatusBar (8.0.0):
+    - Capacitor
+  - CapacitorToast (8.0.0):
+    - Capacitor
+  - IONFilesystemLib (1.1.4)
+
+DEPENDENCIES:
+  - Adapty
+  - AdaptyCapacitor (from `../../../..`)
+  - AdaptyPlugin
+  - AdaptyUI
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorClipboard (from `../../node_modules/@capacitor/clipboard`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
+  - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
+  - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+  - "CapacitorToast (from `../../node_modules/@capacitor/toast`)"
+
+SPEC REPOS:
+  https://github.com/adaptyteam/AdaptySDK-CocoaPods-Specs.git:
+    - Adapty
+    - AdaptyCodable
+    - AdaptyCSimdjson
+    - AdaptyLogger
+    - AdaptyPlugin
+    - AdaptyUI
+    - AdaptyUIBuilder
+  trunk:
+    - IONFilesystemLib
+
+EXTERNAL SOURCES:
+  AdaptyCapacitor:
+    :path: "../../../.."
+  Capacitor:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorApp:
+    :path: "../../node_modules/@capacitor/app"
+  CapacitorClipboard:
+    :path: "../../node_modules/@capacitor/clipboard"
+  CapacitorCordova:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
+  CapacitorShare:
+    :path: "../../node_modules/@capacitor/share"
+  CapacitorStatusBar:
+    :path: "../../node_modules/@capacitor/status-bar"
+  CapacitorToast:
+    :path: "../../node_modules/@capacitor/toast"
+
+SPEC CHECKSUMS:
+  Adapty: e8955cdd5e811ea16edc15133d7e11a2bf47ba2e
+  AdaptyCapacitor: 6f9f27ada27f28b3a8130a702a8c0a2fd165124d
+  AdaptyCodable: 487fb5017d30278c482c40ce135f864a8f4d7283
+  AdaptyCSimdjson: f067fb19d764eca1f7b8a258bccc8c83c7d7f550
+  AdaptyLogger: 35b6019b81d6ba543d53650a7a3809de08d651d6
+  AdaptyPlugin: 2811d79cbee32a8864bffad4a14b97a0bafa45dd
+  AdaptyUI: 5013df34aadb283be71a0ede3a5a3ba103791ace
+  AdaptyUIBuilder: a1950ddac1800a22a5aa9a956c17ee98ccd7f121
+  Capacitor: ff35b0f66370b84aa238251b35b91886a3207c16
+  CapacitorApp: 3963a84197280757b84f126afd1520a85ae3b092
+  CapacitorClipboard: 61832a3722adc61afed6e0191c8a0e11ba11674d
+  CapacitorCordova: 0d65b9bb74e995dcecb9463f34f1af2aba6f955c
+  CapacitorFilesystem: a957d4a4b6860844c4eba5bf441607a5166f92a7
+  CapacitorShare: 12f1d192170cbcf9f108fd675ac8e343761a4638
+  CapacitorStatusBar: 312e2e67928dfe9514c4a8916a1fd610552f5f35
+  CapacitorToast: aefebcd4cead9f44a04ace80c66a7eb4031751e7
+  IONFilesystemLib: e6610c2b260d15e4b9cb9d5e37a87095479b669e
+
+PODFILE CHECKSUM: d9e82595df72c50cfc9c760493c6bcae74a532bc
+
+COCOAPODS: 1.15.2

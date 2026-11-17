@@ -1,4 +1,5 @@
 import { Adapty } from 'adapty';
+import { Log, consoleLogSink, type LogEvent } from 'logger';
 import type { components } from 'types/api';
 
 import {
@@ -16,6 +17,7 @@ import {
   IS_ACTIVATED_REQUEST,
   IS_ACTIVATED_RESPONSE_TRUE,
   IS_ACTIVATED_RESPONSE_FALSE,
+  SET_LOG_LEVEL_RESPONSE,
 } from '../shared/bridge-samples';
 import {
   createNativeModuleMock,
@@ -684,6 +686,68 @@ describe('Adapty - Activation (Bridge Integration)', () => {
       });
 
       expect(request.configuration.adapty_attribution_enabled).toBe(true);
+    });
+  });
+
+  describe('JS log level', () => {
+    afterEach(() => {
+      Log.configure({ sinks: [consoleLogSink] });
+    });
+
+    it('should keep the log level set via setLogLevel when activate omits logLevel', async () => {
+      nativeMock = createNativeModuleMock({
+        set_log_level: SET_LOG_LEVEL_RESPONSE,
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+      });
+      const events: LogEvent[] = [];
+      await adapty.setLogLevel({ logger: { sinks: [{ id: 'test', handle: (event) => events.push(event) }] } });
+      await adapty.setLogLevel({ logLevel: 'verbose' });
+      events.length = 0;
+
+      await adapty.activate({ apiKey: 'test_api_key_12345' });
+
+      expect(Log.logLevel).toBe('verbose');
+      expect(events.map(({ funcName }) => funcName)).toEqual(expect.arrayContaining(['activate', 'fetch/activate']));
+    });
+
+    it('should override the log level with params.logLevel', async () => {
+      nativeMock = createNativeModuleMock({
+        set_log_level: SET_LOG_LEVEL_RESPONSE,
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+      });
+      await adapty.setLogLevel({ logLevel: 'verbose' });
+
+      await adapty.activate({ apiKey: 'test_api_key_12345', params: { logLevel: 'error' } });
+
+      expect(Log.logLevel).toBe('error');
+    });
+
+    it('should leave the log level null when neither setLogLevel nor logLevel is used', async () => {
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+      });
+
+      await adapty.activate({ apiKey: 'test_api_key_12345' });
+
+      expect(Log.logLevel).toBeNull();
+    });
+
+    it('should omit log_level from Activate.Request when logLevel is not passed', async () => {
+      nativeMock = createNativeModuleMock({
+        set_log_level: SET_LOG_LEVEL_RESPONSE,
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+      });
+      await adapty.setLogLevel({ logLevel: 'verbose' });
+
+      await adapty.activate({ apiKey: 'test_api_key_12345' });
+
+      const request = extractNativeRequest<components['requests']['Activate.Request']>({
+        nativeModule: nativeMock,
+        callIndex: 1,
+      });
+
+      expect(request.method).toBe('activate');
+      expect(request.configuration).not.toHaveProperty('log_level');
     });
   });
 });

@@ -4,6 +4,9 @@
 // The thread id accepts either case: every capture seen so far is lowercase hex, but a
 // non-match here drops the whole record silently, so the class is deliberately wider.
 const ENTRY = /^\d{4}-\d{2}-\d{2} (\d{2}:\d{2}:\d{2}\.\d{3}) (\S+)\s+\S+?\[\d+:[0-9a-fA-F]+\] \[([^\]]+)\] ?(.*)$/;
+
+/** The core SDK's subsystem. Its siblings are `io.adapty.ui` and `io.adapty.capacitor`. */
+const SDK_SUBSYSTEM = 'io.adapty';
 // v4.0.2, Adapty/HTTPSession.Log.swift#23 — and the degraded form os_log emits once a
 // message exceeds its size limit: "v<decode: missing data>, <decode: missing data>"
 const SOURCE = /^v(?:([\d.]+), (.+#\d+)|<decode: missing data>, <decode: missing data>)$/;
@@ -30,6 +33,27 @@ export const LOG_LEVELS = ['error', 'warn', 'info', 'verbose', 'debug'];
  */
 export const LEVEL_COLUMN_WIDTH = Math.max(...LOG_LEVELS.map((level) => level.length));
 
+/**
+ * Splits os_log's `<subsystem>:<category>` label. Split on the LAST colon: subsystems are
+ * dotted (`io.adapty.ui`) while categories are single words, so anything else mangles a
+ * nested subsystem into part of the category.
+ */
+function splitScope(label) {
+  const at = label.lastIndexOf(':');
+  if (at === -1) return { subsystem: label, category: '' };
+  return { subsystem: label.slice(0, at), category: label.slice(at + 1) };
+}
+
+/**
+ * Short name for the subsystem a record came from: `sdk` for the core, and the suffix for
+ * its siblings (`io.adapty.ui` -> `ui`). This is what distinguishes the layers once the
+ * predicate reads all of them — without it a UI warning is indistinguishable from an SDK one.
+ */
+export function scopeOf(subsystem) {
+  if (subsystem === SDK_SUBSYSTEM) return 'sdk';
+  return subsystem.startsWith(`${SDK_SUBSYSTEM}.`) ? subsystem.slice(SDK_SUBSYSTEM.length + 1) : subsystem;
+}
+
 export function parseNativeLog(raw) {
   const entries = [];
   let current = null;
@@ -37,11 +61,14 @@ export function parseNativeLog(raw) {
   for (const line of raw.split('\n')) {
     const head = ENTRY.exec(line);
     if (head) {
-      const [, time, type, category, message] = head;
+      const [, time, type, label, message] = head;
+      const { subsystem, category } = splitScope(label);
       current = {
         time,
         level: LEVELS[type] ?? type,
-        category: category.replace(/^io\.adapty:?/, '') || 'sdk',
+        subsystem,
+        scope: scopeOf(subsystem),
+        category,
         message,
         source: null,
         version: null,
@@ -83,15 +110,20 @@ export function filterByLevel(entries, minLevel) {
 
 /**
  * `subsystem` names the log scope in the header. It defaults to the iOS predicate so the
- * iOS output is unchanged; the Android backend passes its tag filter instead, because a
- * header claiming `io.adapty` over logcat records would be a quiet lie about what was read.
+ * header states what was actually read; the Android backend passes its tag filter instead,
+ * because a header claiming `io.adapty*` over logcat records would be a quiet lie.
+ *
+ * Records from a sibling subsystem carry a `[ui]` / `[capacitor]` tag. Core-SDK records
+ * stay untagged: they are the bulk of every capture, and tagging them would cost a column
+ * of width on every line to say what the header already says.
  */
-export function formatNativeLog(entries, { window, maxMessage = 200, subsystem = 'io.adapty' } = {}) {
+export function formatNativeLog(entries, { window, maxMessage = 200, subsystem = 'io.adapty*' } = {}) {
   const lines = entries.map((entry) => {
     const message = entry.message.replace(/\s+/g, ' ').trim();
     const clipped = message.length > maxMessage ? `${message.slice(0, maxMessage)}…` : message;
     const source = entry.source ? ` | ${entry.source}` : '';
-    return `${entry.time} ${entry.level.padEnd(LEVEL_COLUMN_WIDTH)} ${clipped}${source}`;
+    const scope = entry.scope && entry.scope !== 'sdk' ? ` [${entry.scope}]` : '';
+    return `${entry.time} ${entry.level.padEnd(LEVEL_COLUMN_WIDTH)}${scope} ${clipped}${source}`;
   });
   const scope = window ? ` (${subsystem}, last ${window})` : ` (${subsystem})`;
   const header = `${entries.length} native entries${scope}`;
