@@ -83,6 +83,11 @@ export interface MakePurchaseOptions {
  * @public
  */
 export interface MakePromotedPurchaseOptions {
+  /**
+   * The product from the `'onPromotedPurchaseReceived'` event, passed as is.
+   * On iOS it carries the StoreKit purchase intent; a hand-built product
+   * lacks `purchaseIntentId` and the purchase fails.
+   */
   product: AdaptyPromotedProduct;
 }
 

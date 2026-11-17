@@ -1155,8 +1155,12 @@ export class Adapty implements AdaptyPlugin {
    * event. Unlike {@link makePurchase}, a promoted product carries no paywall
    * context, so no purchase parameters are accepted.
    *
+   * Pass the event's product object as is: on iOS it carries the StoreKit
+   * purchase intent required to complete the purchase, so a hand-built
+   * product fails.
+   *
    * @param options - The purchase options
-   * @param options.product - The promoted product to purchase.
+   * @param options.product - The promoted product from the `'onPromotedPurchaseReceived'` event, passed as is.
    * @returns A promise that resolves with the {@link AdaptyPurchaseResult} object.
    * @throws Error if an error occurs during the purchase process.
    *
@@ -1537,11 +1541,12 @@ export class Adapty implements AdaptyPlugin {
    * By default, JS-side SDK logs are disabled until a log level is set here or via `logLevel` in `activate`.
    * The native level stays at the native SDK default until then.
    *
-   * There are four levels available:
+   * There are five levels available:
    * - `error`: only errors will be logged
    * - `warn`: messages from the SDK that do not cause critical errors, but are worth paying attention to
    * - `info`: various information messages, such as those that log the lifecycle of various modules
    * - `verbose`: any additional information that may be useful during debugging, such as function calls, API queries, etc.
+   * - `debug`: the most detailed native logs. Android has no such level and treats it as `verbose`.
    *
    * The new level and logger apply to this call's own logs too.
    *
