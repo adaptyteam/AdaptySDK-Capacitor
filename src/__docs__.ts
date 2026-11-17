@@ -10,6 +10,12 @@ export { OnboardingViewController } from './ui-builder/onboarding-view-controlle
 export {
   AdaptyError,
   ErrorCode,
+  ErrorCodeName,
+  getErrorCode,
+  getErrorCodeName,
+  getErrorPrompt,
+  isKnownErrorCode,
+  type KnownErrorCode,
   VendorStore,
   OfferType,
   CancellationReason,

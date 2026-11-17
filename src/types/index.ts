@@ -31,6 +31,7 @@ export type {
   AdaptySubscriptionPricingTerms,
   AdaptySubscriptionCommitmentInfo,
   AdaptyProfileSubscriptionCommitmentInfo,
+  KnownErrorCode,
 } from '@adapty/core';
 
 export {
@@ -46,7 +47,9 @@ export {
   ErrorCode,
   ErrorCodeName,
   getErrorCode,
+  getErrorCodeName,
   getErrorPrompt,
+  isKnownErrorCode,
 } from '@adapty/core';
 
 // Re-export local modules that are NOT in core
