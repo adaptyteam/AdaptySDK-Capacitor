@@ -70,6 +70,27 @@ describe('Adapty - Placement preload (Bridge Integration)', () => {
 
       expect(request.placement_ids).toEqual([]);
     });
+
+    // An explicit undefined means "not provided", so the defaults still apply
+    it('should send the default load_timeout for params: undefined', async () => {
+      await adapty.preloadFlows({ placementIds: ['test_flow_placement'], params: undefined });
+
+      const request = extractNativeRequest<components['requests']['PreloadFlows.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.load_timeout).toBe(5);
+    });
+
+    it('should send the default load_timeout for loadTimeoutMs: undefined', async () => {
+      await adapty.preloadFlows({ placementIds: ['test_flow_placement'], params: { loadTimeoutMs: undefined } });
+
+      const request = extractNativeRequest<components['requests']['PreloadFlows.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.load_timeout).toBe(5);
+    });
   });
 
   describe('preloadFlowsForDefaultAudience', () => {
