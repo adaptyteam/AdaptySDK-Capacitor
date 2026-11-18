@@ -105,6 +105,7 @@ export {
   AdaptyUiOnboardingMeta,
   AdaptyUiOnboardingStateParams,
   OnboardingStateUpdatedAction,
+  OnboardingAnalyticsEventName,
   ProductPurchaseParams,
   AdaptyCustomAsset,
   AdaptyCustomImageAsset,
