@@ -158,6 +158,7 @@ export interface AdaptyPlugin {
 
   /**
    * Shows pending store messages. `ios.filter` is ignored on Android.
+   * Rejects below iOS 16; on Android resolves right away without reporting Google Play errors.
    */
   showStoreMessages(options?: { ios?: { filter?: AdaptyStoreMessageType[] } }): Promise<void>;
 

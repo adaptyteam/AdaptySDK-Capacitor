@@ -1299,16 +1299,19 @@ export class Adapty implements AdaptyPlugin {
    * iOS 16+: messages are shown one by one; a successfully shown message leaves
    * the queue, a message that failed to show stays for a retry. Omit `ios.filter` to
    * show every pending message, pass `[]` to show none.
+   * Below iOS 16 the native method is unavailable and the call rejects.
    *
    * Android: shows every applicable message; Google Play decides whether one exists.
    * `ios.filter` is not sent there, so `{ ios: { filter: [] } }` shows everything on Android.
+   * The call resolves right away without waiting for Google Play and does not report its
+   * errors; without a current Activity it does nothing.
    *
    * @param options - Optional. The options object
    * @param options.ios - Optional. iOS-only options, ignored on Android.
    * @param options.ios.filter - Optional. The message types to show.
-   * @returns A promise that resolves once the messages have been processed.
-   * @throws {@link AdaptyError} with code `operationInProgress` (3201) if another show is running,
-   * or `resolverFailure` (3202) if no foreground window scene is available (iOS).
+   * @returns A promise that resolves once the messages have been processed on iOS, or right away on Android.
+   * @throws {@link AdaptyError} on iOS only: `operationInProgress` (3201) if another show is running,
+   * or `resolverFailure` (3202) if no foreground window scene is available.
    *
    * @example
    * ```typescript
@@ -1552,6 +1555,9 @@ export class Adapty implements AdaptyPlugin {
    * - `info`: various information messages, such as those that log the lifecycle of various modules
    * - `verbose`: any additional information that may be useful during debugging, such as function calls, API queries, etc.
    * - `debug`: the most detailed native logs. Android has no such level and treats it as `verbose`.
+   *
+   * `options.logger.sinks` replaces all current sinks and calls `destroy()` on them, so include
+   * `consoleLogSink` to keep console output. Any `options.logger` also resets `defaultMeta`.
    *
    * The new level and logger apply to this call's own logs too.
    *

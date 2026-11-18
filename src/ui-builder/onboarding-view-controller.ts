@@ -98,7 +98,7 @@ export class OnboardingViewController {
    * @remarks
    * Calling `present` on an already visible onboarding view will result in an error.
    * The onboarding will be displayed with the configured presentation style on iOS.
-   * On Android, the onboarding is always presented as a full-screen activity.
+   * On Android, the onboarding is always shown full screen inside the app's Activity.
    *
    * @param options - Optional presentation options
    * @param options.iosPresentationStyle - iOS presentation style. Available options: `'full_screen'` (default) or `'page_sheet'`. Only affects iOS platform.

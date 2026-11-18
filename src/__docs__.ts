@@ -26,6 +26,7 @@ export {
   WebPresentation,
 } from '@adapty/core';
 export type { AdaptyErrorInput } from '@adapty/core';
+export { consoleLogSink } from './logger';
 export type { LoggerConfig, LogSink, LogEvent } from './logger';
 // Input types
 export {
