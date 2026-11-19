@@ -16,6 +16,7 @@ import type {
   RefundPreference,
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
+  AdaptyStoreMessageType,
   WebPresentation,
 } from './index';
 import type {
@@ -24,6 +25,8 @@ import type {
   GetPlacementForDefaultAudienceParamsInput,
   IdentifyParamsInput,
   MakePurchaseParamsInput,
+  PreloadPlacementsParamsInput,
+  ReportTransactionParamsInput,
   FileLocation,
   LogLevel,
 } from './inputs';
@@ -74,6 +77,16 @@ export interface AdaptyPlugin {
     locale?: string;
     params?: GetPlacementForDefaultAudienceParamsInput;
   }): Promise<AdaptyOnboarding>;
+
+  /**
+   * Warms the cache for the given flow placements.
+   */
+  preloadFlows(options: { placementIds: string[]; params?: PreloadPlacementsParamsInput }): Promise<void>;
+
+  /**
+   * Warms the cache for the given flow placements using the **All Users** audience.
+   */
+  preloadFlowsForDefaultAudience(options: { placementIds: string[] }): Promise<void>;
 
   /**
    * Gets the current user profile.
@@ -137,9 +150,22 @@ export interface AdaptyPlugin {
   presentCodeRedemptionSheet(): Promise<void>;
 
   /**
+   * Gets the store message types waiting in the SDK queue (iOS 16+, manual mode).
+   * Resolves `null` on Android, where the store cannot report pending messages.
+   * @platform ios
+   */
+  getPendingStoreMessageTypes(): Promise<AdaptyStoreMessageType[] | null>;
+
+  /**
+   * Shows pending store messages. `ios.filter` is ignored on Android.
+   * Rejects below iOS 16; on Android resolves right away without reporting Google Play errors.
+   */
+  showStoreMessages(options?: { ios?: { filter?: AdaptyStoreMessageType[] } }): Promise<void>;
+
+  /**
    * Reports a transaction to Adapty.
    */
-  reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void>;
+  reportTransaction(options: ReportTransactionParamsInput): Promise<void>;
 
   /**
    * Restores user purchases.

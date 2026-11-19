@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { AdaptyFlow, AdaptyPaywallProduct, FlowViewController } from '@adapty/capacitor';
 import styles from '../App.module.css';
 import { elementIds } from '../../../elementIds';
@@ -30,6 +30,7 @@ type Props = {
   setFetchPolicyIndex: (v: number) => void;
   setWebPaywallOpenInIdx: (v: number) => void;
   fetchFlow: (forDefaultAudience?: boolean) => Promise<void>;
+  preloadFlows: (forDefaultAudience?: boolean) => Promise<void>;
   presentFlow: () => Promise<void>;
   dismissFlowKeepingView: () => Promise<void>;
   destroyFlow: () => Promise<void>;
@@ -69,6 +70,7 @@ export const FlowSection: React.FC<Props> = ({
   setFetchPolicyIndex,
   setWebPaywallOpenInIdx,
   fetchFlow,
+  preloadFlows,
   presentFlow,
   dismissFlowKeepingView,
   destroyFlow,
@@ -82,6 +84,12 @@ export const FlowSection: React.FC<Props> = ({
   createWebPaywallUrlForProduct,
 }) => {
   const remoteConfig = flow?.remoteConfigs?.[0];
+  const [hasPreloaded, setHasPreloaded] = useState(false);
+
+  const handlePreload = (forDefaultAudience: boolean) => {
+    setHasPreloaded(true);
+    return preloadFlows(forDefaultAudience);
+  };
 
   return (
     <div className={styles.Section}>
@@ -203,6 +211,33 @@ export const FlowSection: React.FC<Props> = ({
           {isLoadingFlow ? 'Loading...' : 'Load (Default Audience)'}
         </button>
       </div>
+
+      <div className={styles.ButtonGroup}>
+        <button
+          id={elementIds.flow.preloadBtn}
+          onClick={() => handlePreload(false)}
+          disabled={isLoadingFlow || !isActivated}
+          className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingFlow || !isActivated ? styles.Loading : ''}`}
+        >
+          {isLoadingFlow ? 'Loading...' : 'Preload Flows'}
+        </button>
+        <button
+          id={elementIds.flow.preloadDefaultAudienceBtn}
+          onClick={() => handlePreload(true)}
+          disabled={isLoadingFlow || !isActivated}
+          className={`${styles.Button} ${styles.ButtonSecondary} ${isLoadingFlow || !isActivated ? styles.Loading : ''}`}
+        >
+          {isLoadingFlow ? 'Loading...' : 'Preload (Default Audience)'}
+        </button>
+      </div>
+
+      {hasPreloaded && (
+        <div className={styles.InfoBox}>
+          Preload warms the placement cache only — the UI schema and images still load on first present. A later Load
+          reads that cache only with a `return_cache_data*` fetch policy. Comma-separate the placement field to preload
+          several at once.
+        </div>
+      )}
 
       <div className={styles.InfoBox}>
         {flow ? (

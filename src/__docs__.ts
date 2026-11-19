@@ -10,15 +10,23 @@ export { OnboardingViewController } from './ui-builder/onboarding-view-controlle
 export {
   AdaptyError,
   ErrorCode,
+  ErrorCodeName,
+  getErrorCode,
+  getErrorCodeName,
+  getErrorPrompt,
+  isKnownErrorCode,
+  type KnownErrorCode,
   VendorStore,
   OfferType,
   CancellationReason,
   Gender,
   AppTrackingTransparencyStatus,
   ProductPeriod,
+  SubscriptionBillingPlan,
   WebPresentation,
 } from '@adapty/core';
 export type { AdaptyErrorInput } from '@adapty/core';
+export { consoleLogSink } from './logger';
 export type { LoggerConfig, LogSink, LogEvent } from './logger';
 // Input types
 export {
@@ -31,6 +39,8 @@ export {
   AdaptyAndroidSubscriptionUpdateReplacementMode,
   AdaptyAndroidPurchaseParams,
   MakePurchaseParamsInput,
+  ReportTransactionParamsInput,
+  type PreloadPlacementsParamsInput,
   FileLocation,
 } from './types/inputs';
 // Core types
@@ -62,6 +72,10 @@ export {
   RefundPreference,
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
+  AdaptyStoreMessageType,
+  AdaptySubscriptionPricingTerms,
+  AdaptySubscriptionCommitmentInfo,
+  AdaptyProfileSubscriptionCommitmentInfo,
 } from './types';
 // Config types
 export {
@@ -69,6 +83,8 @@ export {
   GetFlowForDefaultAudienceOptions,
   GetOnboardingOptions,
   GetOnboardingForDefaultAudienceOptions,
+  type PreloadFlowsOptions,
+  type PreloadFlowsForDefaultAudienceOptions,
   MakePurchaseOptions,
   MakePromotedPurchaseOptions,
 } from './types/configs';
@@ -90,6 +106,7 @@ export {
   AdaptyUiOnboardingMeta,
   AdaptyUiOnboardingStateParams,
   OnboardingStateUpdatedAction,
+  OnboardingAnalyticsEventName,
   ProductPurchaseParams,
   AdaptyCustomAsset,
   AdaptyCustomImageAsset,

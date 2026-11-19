@@ -21,6 +21,7 @@ import type {
   AdaptyProfileParameters,
   RefundPreference,
   AdaptyInstallationStatus,
+  AdaptyStoreMessageType,
 } from './types';
 import type { AdaptyPlugin, AddListenerFn, EventPayloadMap } from './types/adapty-plugin';
 import type { components } from './types/api';
@@ -36,8 +37,17 @@ import type {
   GetOnboardingOptionsWithDefaults,
   GetOnboardingForDefaultAudienceOptions,
   GetOnboardingForDefaultAudienceOptionsWithDefaults,
+  PreloadFlowsOptions,
+  PreloadFlowsOptionsWithDefaults,
+  PreloadFlowsForDefaultAudienceOptions,
 } from './types/configs';
-import type { ActivateParamsInput, FileLocation, LogLevel, IdentifyParamsInput } from './types/inputs';
+import type {
+  ActivateParamsInput,
+  FileLocation,
+  LogLevel,
+  IdentifyParamsInput,
+  ReportTransactionParamsInput,
+} from './types/inputs';
 import type { MethodName } from './types/method-types';
 import { filterUndefined, mergeOptions, withErrorContext } from './utils';
 import VERSION from './version';
@@ -635,6 +645,107 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
+   * Warms the cache for the given flow placements.
+   *
+   * @remarks
+   * Same request as {@link getFlow}, one per placement, but with less decoding
+   * and all placements fetched in parallel. Nothing is returned; the result
+   * only lands in the cache.
+   *
+   * Useful for cross-placement A/B tests.
+   *
+   * Only the placement JSON is cached — not the UI schema or the paywall
+   * images, so the first `createFlowView` still goes to the network for those.
+   *
+   * A later {@link getFlow} reads the warmed cache only with
+   * `'return_cache_data_else_load'` (or
+   * `'return_cache_data_if_not_expired_else_load'`); with the default
+   * `'reload_revalidating_cache_data'` it still hits the network and the warmed
+   * copy serves as an offline fallback. Preloading itself always goes to the
+   * network — it has no fetch policy.
+   *
+   * @param options - The options for preloading the flows
+   * @param options.placementIds - The placements to preload.
+   * @param options.params - Optional. Additional parameters for preloading.
+   * @returns A promise that resolves once every placement has been stored.
+   * @throws {@link AdaptyError} if any placement failed to load. The error
+   *         aggregates the failures, and the placements that did succeed stay
+   *         in the cache. Requires {@link activate} to have been called.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * await adapty.preloadFlows({
+   *   placementIds: ['onboarding_flow', 'settings_paywall'],
+   *   params: { loadTimeoutMs: 5000 },
+   * });
+   *
+   * const flow = await adapty.getFlow({
+   *   placementId: 'onboarding_flow',
+   *   params: { fetchPolicy: 'return_cache_data_else_load' },
+   * });
+   * ```
+   */
+  async preloadFlows(options: PreloadFlowsOptions): Promise<void> {
+    const method = 'preload_flows';
+    const optionsWithDefault = mergeOptions<PreloadFlowsOptionsWithDefaults>(options, this.options[method]);
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ optionsWithDefault }));
+
+    const argsWithUndefined: Req['PreloadFlows.Request'] = {
+      method,
+      placement_ids: optionsWithDefault.placementIds,
+      load_timeout: optionsWithDefault.params.loadTimeoutMs / 1000,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+  }
+
+  /**
+   * Warms the cache for the given flow placements using the **All Users** audience.
+   *
+   * @remarks
+   * The same trade-offs as {@link getFlowForDefaultAudience} apply: faster
+   * fetching, but no targeting by country, attribution or custom attributes.
+   * Unlike {@link preloadFlows} the request carries no timeout.
+   *
+   * See {@link preloadFlows} for what preloading does and does not cover.
+   *
+   * @param options - The options for preloading the flows
+   * @param options.placementIds - The placements to preload.
+   * @returns A promise that resolves once every placement has been stored.
+   * @throws {@link AdaptyError} if any placement failed to load.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * await adapty.preloadFlowsForDefaultAudience({ placementIds: ['onboarding_flow'] });
+   * ```
+   */
+  async preloadFlowsForDefaultAudience(options: PreloadFlowsForDefaultAudienceOptions): Promise<void> {
+    const method = 'preload_flows_for_default_audience';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
+    const argsWithUndefined: Req['PreloadFlowsForDefaultAudience.Request'] = {
+      method,
+      placement_ids: options.placementIds,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+  }
+
+  /**
    * Fetches a user profile.
    *
    * @remarks
@@ -1050,8 +1161,12 @@ export class Adapty implements AdaptyPlugin {
    * event. Unlike {@link makePurchase}, a promoted product carries no paywall
    * context, so no purchase parameters are accepted.
    *
+   * Pass the event's product object as is: on iOS it carries the StoreKit
+   * purchase intent required to complete the purchase, so a hand-built
+   * product fails.
+   *
    * @param options - The purchase options
-   * @param options.product - The promoted product to purchase.
+   * @param options.product - The promoted product from the `'onPromotedPurchaseReceived'` event, passed as is.
    * @returns A promise that resolves with the {@link AdaptyPurchaseResult} object.
    * @throws Error if an error occurs during the purchase process.
    *
@@ -1124,6 +1239,109 @@ export class Adapty implements AdaptyPlugin {
   }
 
   /**
+   * Gets the types of store messages currently waiting in the SDK queue.
+   *
+   * @platform ios
+   * @remarks
+   * iOS 16+ only. The queue is kept only when the SDK is activated with
+   * `storeMessagesHandling: 'manual'`; in `'auto'` mode and before activation
+   * the result is always empty. The result is a snapshot of unique types in
+   * no particular order — there is no event for newly arrived messages.
+   *
+   * `[]` means `showStoreMessages()` has nothing to show right now. `null` means the
+   * store cannot report pending messages: on Android Google Play decides on show, so
+   * this resolves `null` without calling native — call `showStoreMessages()` there.
+   * Below iOS 16 the native method is unavailable and the call rejects.
+   *
+   * @returns A promise that resolves with the pending {@link AdaptyStoreMessageType} values, or `null` where the store cannot report them (Android).
+   * @throws Error if an error occurs on iOS.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * const types = await adapty.getPendingStoreMessageTypes();
+   * if (types === null) {
+   *   // The store can't report pending messages (Android): let it decide
+   *   await adapty.showStoreMessages();
+   * } else if (types.includes('billing_issue')) {
+   *   // Explain the billing issue in your own UI first, then show the system message
+   *   await adapty.showStoreMessages({ ios: { filter: ['billing_issue'] } });
+   * }
+   * ```
+   */
+  async getPendingStoreMessageTypes(): Promise<AdaptyStoreMessageType[] | null> {
+    if (Capacitor.getPlatform() === 'android') {
+      return null;
+    }
+
+    const method = 'get_pending_store_message_types';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({}));
+
+    const argsWithUndefined: Req['GetPendingStoreMessageTypes.Request'] = {
+      method,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    return await this.handleMethodCall(method, JSON.stringify(args), ctx, log, 'Array<AdaptyStoreMessageType>');
+  }
+
+  /**
+   * Shows pending store messages: App Store messages on iOS, Google Play in-app messages on Android.
+   *
+   * @remarks
+   * Intended for `storeMessagesHandling: 'manual'`, but works in both modes.
+   *
+   * iOS 16+: messages are shown one by one; a successfully shown message leaves
+   * the queue, a message that failed to show stays for a retry. Omit `ios.filter` to
+   * show every pending message, pass `[]` to show none.
+   * Below iOS 16 the native method is unavailable and the call rejects.
+   *
+   * Android: shows every applicable message; Google Play decides whether one exists.
+   * `ios.filter` is not sent there, so `{ ios: { filter: [] } }` shows everything on Android.
+   * The call resolves right away without waiting for Google Play and does not report its
+   * errors; without a current Activity it does nothing.
+   *
+   * @param options - Optional. The options object
+   * @param options.ios - Optional. iOS-only options, ignored on Android.
+   * @param options.ios.filter - Optional. The message types to show.
+   * @returns A promise that resolves once the messages have been processed on iOS, or right away on Android.
+   * @throws {@link AdaptyError} on iOS only: `operationInProgress` (3201) if another show is running,
+   * or `resolverFailure` (3202) if no foreground window scene is available.
+   *
+   * @example
+   * ```typescript
+   * import { adapty } from '@adapty/capacitor';
+   *
+   * // Show everything that is pending, e.g. after onboarding is finished
+   * await adapty.showStoreMessages();
+   *
+   * // iOS: show just the price increase consent; Android shows everything
+   * await adapty.showStoreMessages({ ios: { filter: ['price_increase_consent'] } });
+   * ```
+   */
+  async showStoreMessages(options?: { ios?: { filter?: AdaptyStoreMessageType[] } }): Promise<void> {
+    const method = 'show_store_messages';
+
+    const ctx = new LogContext();
+    const log = ctx.call({ methodName: method });
+    log.start(() => ({ options }));
+
+    const argsWithUndefined: Req['ShowStoreMessage.Request'] = {
+      method,
+      filter: Capacitor.getPlatform() === 'ios' ? options?.ios?.filter : undefined,
+    };
+
+    const args = filterUndefined(argsWithUndefined);
+
+    await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
+  }
+
+  /**
    * Sets the variation ID of the purchase.
    *
    * @remarks
@@ -1135,6 +1353,7 @@ export class Adapty implements AdaptyPlugin {
    * @param options.transactionId - The transaction ID of the purchase.
    * @param options.variationId - Optional. The `variationId` of the purchased {@link AdaptyPaywallProduct}
    * (the same value as `variationId` of its parent {@link AdaptyFlowPaywall}).
+   * @param options.ios.jwsTransaction - iOS only. StoreKit 2 JWS representation of the transaction; ignored on Android.
    * @returns A promise that resolves when the transaction is reported.
    * @throws Error if an error occurs while reporting the transaction.
    *
@@ -1145,27 +1364,25 @@ export class Adapty implements AdaptyPlugin {
    * try {
    *   await adapty.reportTransaction({
    *     transactionId: 'transaction_123',
-   *     variationId: 'variation_456'
+   *     variationId: 'variation_456',
+   *     ios: { jwsTransaction: 'eyJhbGciOiJFUzI1NiJ9...' },
    *   });
    * } catch (error) {
    *   console.error('Failed to report transaction:', error);
    * }
    * ```
    */
-  async reportTransaction(options: { transactionId: string; variationId?: string }): Promise<void> {
+  async reportTransaction(options: ReportTransactionParamsInput): Promise<void> {
     const method = 'report_transaction';
 
     const ctx = new LogContext();
     const log = ctx.call({ methodName: method });
     log.start(() => ({ options }));
 
-    const argsWithUndefined: Req['ReportTransaction.Request'] = {
+    const args: Req['ReportTransaction.Request'] = {
       method,
-      transaction_id: options.transactionId,
-      variation_id: options.variationId,
+      ...coderFactory.createReportTransactionParamsCoder().encode(options),
     };
-
-    const args = filterUndefined(argsWithUndefined);
 
     await this.handleMethodCall(method, JSON.stringify(args), ctx, log);
   }
@@ -1332,11 +1549,15 @@ export class Adapty implements AdaptyPlugin {
    * By default, JS-side SDK logs are disabled until a log level is set here or via `logLevel` in `activate`.
    * The native level stays at the native SDK default until then.
    *
-   * There are four levels available:
+   * There are five levels available:
    * - `error`: only errors will be logged
    * - `warn`: messages from the SDK that do not cause critical errors, but are worth paying attention to
    * - `info`: various information messages, such as those that log the lifecycle of various modules
    * - `verbose`: any additional information that may be useful during debugging, such as function calls, API queries, etc.
+   * - `debug`: the most detailed native logs. Android has no such level and treats it as `verbose`.
+   *
+   * `options.logger.sinks` replaces all current sinks and calls `destroy()` on them, so include
+   * `consoleLogSink` to keep console output. Any `options.logger` also resets `defaultMeta`.
    *
    * The new level and logger apply to this call's own logs too.
    *

@@ -10,25 +10,21 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { forwardDevtools } from './android-device.mjs';
+import { AdbError, deviceSerial, forwardDevtools, removeForward } from './android-device.mjs';
 import { APP_ROOT } from './app-root.mjs';
 
-// Fixed rather than ephemeral so a leaked forward from a previous run is reused instead of
-// accumulating — adb replaces an existing forward on the same local port.
-//
-// NOT 9222: that is ios_webkit_debug_proxy's port, and this tool now drives both platforms
-// on one machine. Sharing it let `adb forward` bind 127.0.0.1:9222 first and shadow the iOS
-// proxy, so every iOS command failed with "lists no inspectable page" while the Android side
-// looked perfectly healthy — a cross-platform collision with no obvious symptom.
-const PORT = 9333;
+// Every session gets its own forward on a port adb picks (`tcp:0`) and removes it when done.
+// A fixed port — 9333 once — was shared by every call: two calls on two devices could each
+// re-point it between the other's target listing and its WebSocket, and drive the wrong
+// device with no error. adb picks a port nothing listens on, so it cannot shadow an inspector proxy.
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
-async function listTargets() {
+async function listTargets(port) {
   // Node's fetch has no connect timeout worth relying on here; the socket is local, so a
   // failure is immediate and surfaces as a TypeError we translate below.
   try {
-    const res = await fetch(`http://localhost:${PORT}/json/list`);
+    const res = await fetch(`http://localhost:${port}/json/list`, { signal: AbortSignal.timeout(3000) });
     return await res.json();
   } catch {
     return null;
@@ -95,21 +91,37 @@ export function selectAppTarget(targets, { appName } = {}) {
  * ensureProxy() is on iOS: the process is up well before the WebView is inspectable, and
  * without the wait the next command reads a page that is about to be replaced.
  */
-export async function waitForPage({ timeoutMs = 15000 } = {}) {
+export async function waitForPage({ timeoutMs = 15000, keepForward = false } = {}) {
+  // Resolved once: the forward, its target listing and its removal must all name one device,
+  // and a missing or ambiguous device fails here instead of being retried until the timeout.
+  const serial = deviceSerial();
   const deadline = Date.now() + timeoutMs;
   let lastError = 'no response from the devtools socket';
   while (Date.now() < deadline) {
+    let port = null;
     try {
-      forwardDevtools(PORT);
+      ({ port } = forwardDevtools(serial));
     } catch (error) {
+      // A detached device is not worth 15 s of retries; a not-yet-running app is.
+      if (error instanceof AdbError) throw error;
       lastError = error.message;
       await sleep(300);
       continue;
     }
-    const targets = await listTargets();
-    const page = selectAppTarget(targets, { appName: capacitorAppName() });
-    if (page) return page;
-    lastError = targets ? 'no page target yet' : 'no response from the devtools socket';
+    try {
+      const targets = await listTargets(port);
+      const page = selectAppTarget(Array.isArray(targets) ? targets : null, { appName: capacitorAppName() });
+      if (page && keepForward) {
+        const kept = { page, serial, port };
+        port = null; // the session owns it now
+        return kept;
+      }
+      if (page) return { page, serial, port: null };
+      lastError = targets ? 'no page target yet' : 'no response from the devtools socket';
+    } finally {
+      // Whatever threw above, the forward does not outlive this attempt unless handed over.
+      if (port !== null) removeForward(serial, port);
+    }
     await sleep(300);
   }
   throw new Error(`timed out waiting for the WebView (${lastError})`);
@@ -128,8 +140,23 @@ export async function ensureProxy({ settleMs = 0 } = {}) {
 }
 
 export async function openSession() {
-  const page = await waitForPage();
-  const ws = new WebSocket(page.webSocketDebuggerUrl);
+  const { page, serial, port } = await waitForPage({ keepForward: true });
+  // Removed once, whichever way the session ends: close(), the socket dying first, or a
+  // failure before the handshake completes (a bad URL throws in the constructor).
+  let forwarded = true;
+  const releaseForward = () => {
+    if (!forwarded) return;
+    forwarded = false;
+    removeForward(serial, port);
+  };
+  let ws;
+  try {
+    ws = new WebSocket(page.webSocketDebuggerUrl);
+  } catch (error) {
+    releaseForward();
+    throw error;
+  }
+  ws.addEventListener('close', releaseForward);
 
   const pending = new Map();
   let nextId = 0;
@@ -150,6 +177,7 @@ export async function openSession() {
   await new Promise((ok, fail) => {
     const timer = setTimeout(() => {
       ws.close();
+      releaseForward();
       fail(new Error('timed out opening the CDP websocket'));
     }, 10000);
     ws.addEventListener(
@@ -164,6 +192,7 @@ export async function openSession() {
       'error',
       () => {
         clearTimeout(timer);
+        releaseForward();
         fail(new Error('CDP websocket error'));
       },
       { once: true },
@@ -209,6 +238,7 @@ export async function openSession() {
     },
     close() {
       ws.close();
+      releaseForward();
     },
   };
 }

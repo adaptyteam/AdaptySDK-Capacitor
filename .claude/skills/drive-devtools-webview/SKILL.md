@@ -26,6 +26,24 @@ Android device are present, `wvd` refuses to guess and asks for `--ios` / `--and
 `WVD_PLATFORM`) — driving the wrong platform is the one failure with no symptom, since every command
 would succeed and the output would look normal.
 
+## Several devices: `--device`
+
+With several simulators or emulators up, pin every call to one with `--device=<id|name>` (or
+`WVD_DEVICE`): a simulator UDID, an adb serial, a simulator / AVD name, or an id prefix of 4+ chars.
+It sets the platform too; `--ios` / `--android` next to it only narrow the search. Without it, `wvd`
+pins the only device of the platform, and with several refuses before doing anything — the error
+names the flag.
+
+```bash
+yarn wvd --device="iPhone 17 #2" snap
+yarn wvd --device=emulator-5556 do click:flow-load-btn
+```
+
+Each simulator gets its own inspector proxy and ports, each Android session its own `adb forward`,
+so one agent per device can run side by side; with `--device`, `shot` defaults to
+`.wvd/shot-<device id>.png`. Pass the device on **every** call of a parallel run, and prefer the full UDID or serial
+in scripts — it skips the device listing.
+
 ## Commands
 
 | Command | Use for |

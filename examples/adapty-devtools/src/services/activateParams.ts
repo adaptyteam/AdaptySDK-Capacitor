@@ -9,6 +9,11 @@ export interface DevtoolsActivateOptions {
    * devtools UI has to set it before the Activate button is tapped.
    */
   adaptyAttributionEnabled?: boolean;
+  /**
+   * Who decides when store messages are shown. Activation-time only, like
+   * adaptyAttributionEnabled. `'auto'` is the SDK default and is not sent.
+   */
+  storeMessagesHandling?: 'auto' | 'manual';
   /** Keeps the SDK activated across Vite HMR in dev builds. */
   ignoreActivationOnFastRefresh?: boolean;
   /** Sent only when non-empty. */
@@ -18,6 +23,7 @@ export interface DevtoolsActivateOptions {
 export function buildActivateParams({
   observerMode = false,
   adaptyAttributionEnabled = false,
+  storeMessagesHandling = 'auto',
   ignoreActivationOnFastRefresh = false,
   customerUserId = '',
 }: DevtoolsActivateOptions = {}): ActivateParamsInput {
@@ -25,6 +31,7 @@ export function buildActivateParams({
     // serverCluster: 'cn',
     // backendBaseUrl: 'http://localhost:8080',
     ...(customerUserId ? { customerUserId } : {}),
+    ...(storeMessagesHandling === 'manual' ? { storeMessagesHandling } : {}),
     logLevel: 'verbose',
     observerMode,
     adaptyAttributionEnabled,

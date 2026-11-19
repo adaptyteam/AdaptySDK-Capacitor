@@ -72,6 +72,8 @@ export const elementIds = {
     customTagsTextarea: 'flow-custom-tags-textarea',
     loadBtn: 'flow-load-btn',
     loadDefaultAudienceBtn: 'flow-load-default-audience-btn',
+    preloadBtn: 'flow-preload-btn',
+    preloadDefaultAudienceBtn: 'flow-preload-default-audience-btn',
     presentBtn: 'flow-present-btn',
     presentExistingBtn: 'flow-present-existing-btn',
     dismissBtn: 'flow-dismiss-btn',
@@ -125,6 +127,7 @@ export const elementIds = {
   reportTransaction: {
     transactionIdInput: 'report-tx-transaction-id-input',
     variationIdInput: 'report-tx-variation-id-input',
+    jwsInput: 'report-tx-jws-input',
     submitBtn: 'report-tx-submit-btn',
   },
   promoted: {
@@ -133,6 +136,16 @@ export const elementIds = {
     useAppHandlerBtn: 'promoted-use-app-handler-btn',
     lastProductValue: 'promoted-last-product-value',
     buyBtn: 'promoted-buy-btn',
+  },
+  storeMessages: {
+    modeValue: 'store-messages-mode-value',
+    getPendingBtn: 'store-messages-get-pending-btn',
+    pendingValue: 'store-messages-pending-value',
+    filterTypeToggle: (key: string | number) => `store-messages-filter-${key}-toggle`,
+    filterValue: 'store-messages-filter-value',
+    showAllBtn: 'store-messages-show-all-btn',
+    showFilteredBtn: 'store-messages-show-filtered-btn',
+    showTwiceBtn: 'store-messages-show-twice-btn',
   },
   integration: {
     keyInput: 'integration-key-input',
@@ -196,5 +209,7 @@ export const elementIds = {
     observerModeValue: 'sdk-observer-mode-value',
     adaptyAttributionToggle: 'sdk-adapty-attribution-toggle',
     adaptyAttributionValue: 'sdk-adapty-attribution-value',
+    storeMessagesHandlingToggle: 'sdk-store-messages-handling-toggle',
+    storeMessagesHandlingValue: 'sdk-store-messages-handling-value',
   },
 } as const;

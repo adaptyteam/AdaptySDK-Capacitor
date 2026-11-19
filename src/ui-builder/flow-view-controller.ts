@@ -114,7 +114,7 @@ export class FlowViewController {
    * @remarks
    * Calling `present` on an already visible flow view will result in an error.
    * The flow will be displayed with the configured presentation style on iOS.
-   * On Android, the flow is always presented as a full-screen activity.
+   * On Android, the flow is always shown full screen inside the app's Activity.
    *
    * @param options - Optional presentation options
    * @param options.iosPresentationStyle - iOS presentation style. Available options: `'full_screen'` (default) or `'page_sheet'`. Only affects iOS platform.
@@ -230,6 +230,8 @@ export class FlowViewController {
    * is no need to call `destroy()` after it.
    *
    * The controller cannot be presented afterwards. Event handlers are cleared.
+   * If the view is still presented, it is dismissed first; to close a visible flow, prefer
+   * {@link FlowViewController.dismiss}.
    *
    * @returns A promise that resolves when the native view is released.
    * @throws {@link AdaptyError} if the view reference is invalid, or if the native view

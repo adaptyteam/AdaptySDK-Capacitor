@@ -55,6 +55,8 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `flow-custom-tags-textarea` | `elementIds.flow.customTagsTextarea` | src/screens/app/sections/FlowSection.tsx |
 | `flow-load-btn` | `elementIds.flow.loadBtn` | src/screens/app/sections/FlowSection.tsx |
 | `flow-load-default-audience-btn` | `elementIds.flow.loadDefaultAudienceBtn` | src/screens/app/sections/FlowSection.tsx |
+| `flow-preload-btn` | `elementIds.flow.preloadBtn` | src/screens/app/sections/FlowSection.tsx |
+| `flow-preload-default-audience-btn` | `elementIds.flow.preloadDefaultAudienceBtn` | src/screens/app/sections/FlowSection.tsx |
 | `flow-present-btn` | `elementIds.flow.presentBtn` | src/screens/app/sections/FlowSection.tsx |
 | `flow-present-existing-btn` | `elementIds.flow.presentExistingBtn` | src/screens/app/sections/FlowSection.tsx |
 | `flow-dismiss-btn` | `elementIds.flow.dismissBtn` | src/screens/app/sections/FlowSection.tsx |
@@ -225,6 +227,7 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | --- | --- | --- |
 | `report-tx-transaction-id-input` | `elementIds.reportTransaction.transactionIdInput` | src/screens/app/sections/ReportTransactionSection.tsx |
 | `report-tx-variation-id-input` | `elementIds.reportTransaction.variationIdInput` | src/screens/app/sections/ReportTransactionSection.tsx |
+| `report-tx-jws-input` | `elementIds.reportTransaction.jwsInput` | src/screens/app/sections/ReportTransactionSection.tsx |
 | `report-tx-submit-btn` | `elementIds.reportTransaction.submitBtn` | src/screens/app/sections/ReportTransactionSection.tsx |
 
 ## sdk
@@ -237,6 +240,8 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `sdk-observer-mode-value` | `elementIds.sdk.observerModeValue` | src/screens/app/App.tsx |
 | `sdk-adapty-attribution-toggle` | `elementIds.sdk.adaptyAttributionToggle` | src/screens/app/App.tsx |
 | `sdk-adapty-attribution-value` | `elementIds.sdk.adaptyAttributionValue` | src/screens/app/App.tsx |
+| `sdk-store-messages-handling-toggle` | `elementIds.sdk.storeMessagesHandlingToggle` | src/screens/app/App.tsx |
+| `sdk-store-messages-handling-value` | `elementIds.sdk.storeMessagesHandlingValue` | src/screens/app/App.tsx |
 
 ## sdkStatus
 
@@ -246,3 +251,16 @@ document.querySelector('[data-vendor-product-id="my.product"]').id; // flow-prod
 | `sdk-status-profile-loaded-value` | `elementIds.sdkStatus.profileLoadedValue` | src/screens/app/sections/SdkStatusSection.tsx |
 | `sdk-status-flow-loaded-value` | `elementIds.sdkStatus.flowLoadedValue` | src/screens/app/sections/SdkStatusSection.tsx |
 | `sdk-status-onboarding-loaded-value` | `elementIds.sdkStatus.onboardingLoadedValue` | src/screens/app/sections/SdkStatusSection.tsx |
+
+## storeMessages
+
+| id | registry path | used in |
+| --- | --- | --- |
+| `store-messages-mode-value` | `elementIds.storeMessages.modeValue` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-get-pending-btn` | `elementIds.storeMessages.getPendingBtn` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-pending-value` | `elementIds.storeMessages.pendingValue` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-filter-{key}-toggle` | `elementIds.storeMessages.filterTypeToggle` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-filter-value` | `elementIds.storeMessages.filterValue` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-show-all-btn` | `elementIds.storeMessages.showAllBtn` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-show-filtered-btn` | `elementIds.storeMessages.showFilteredBtn` | src/screens/app/sections/StoreMessagesSection.tsx |
+| `store-messages-show-twice-btn` | `elementIds.storeMessages.showTwiceBtn` | src/screens/app/sections/StoreMessagesSection.tsx |
