@@ -9,7 +9,7 @@ Uses `NativeModuleMock` spy to verify exact request format and response parsing.
 - activation (30 tests), attribution (3), configuration (3), event-listeners (5)
 - installation (4), ios-specific (6), onboarding (3), flow (7)
 - products (2), profile (2), promoted-purchase-event (10), purchase (5)
-- purchase-event (1), restore-purchases (1), user-management (3), web-paywall (4)
+- purchase-event (1), restore-purchases (1), store-messages (8), user-management (3), web-paywall (4)
 
 `promoted-purchase-event.test.ts` is the App Store promoted-purchase suite: it
 pins who completes the purchase (the SDK default vs. an app handler) and the
@@ -31,7 +31,7 @@ Uses `NativeModuleMock` spy to verify exact request format and response parsing.
 ## Shared Utilities (`shared/`)
 
 ### `bridge-samples/` — Typed Request/Response Fixtures
-Organized by domain: `activation.ts`, `configuration.ts`, `events.ts`, `flow.ts`, `flow-reply-events.ts`, `installation.ts`, `ios-specific.ts`, `onboarding.ts`, `profile.ts`, `purchase.ts`, `ui-methods.ts`, `user-management.ts` (plus shared `common.ts`).
+Organized by domain: `activation.ts`, `configuration.ts`, `events.ts`, `flow.ts`, `flow-reply-events.ts`, `installation.ts`, `ios-specific.ts`, `onboarding.ts`, `profile.ts`, `purchase.ts`, `store-messages.ts`, `ui-methods.ts`, `user-management.ts` (plus shared `common.ts`).
 All samples are **strictly typed** against `api.d.ts` — compile-time validation catches API drift.
 Re-exported via `index.ts` barrel.
 

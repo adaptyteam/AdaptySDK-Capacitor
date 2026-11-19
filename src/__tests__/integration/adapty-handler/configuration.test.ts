@@ -53,6 +53,16 @@ describe('Adapty - Configuration (Bridge Integration)', () => {
       });
     });
 
+    it('should send the debug log level to native', async () => {
+      await adapty.setLogLevel({ logLevel: 'debug' });
+
+      expectNativeCall({
+        nativeModule: nativeMock,
+        method: 'set_log_level',
+        expectedRequest: { method: 'set_log_level', value: 'debug' },
+      });
+    });
+
     describe('own call logs', () => {
       let events: LogEvent[];
       const collectingSink = (): LogSink => ({ id: 'test-sink', handle: (event) => events.push(event) });

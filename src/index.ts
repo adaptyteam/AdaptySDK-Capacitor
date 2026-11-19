@@ -18,5 +18,19 @@ export type {
   FlowPermissionResponse,
   FlowPermissionStatus,
 } from './ui-builder/index';
+export type {
+  EventHandlerResult,
+  ProductPurchaseParams,
+  CreateOnboardingViewParamsInput,
+  AdaptyUiMediaCache,
+  AdaptyCustomImageAsset,
+  AdaptyCustomVideoAsset,
+  AdaptyCustomColorAsset,
+  AdaptyCustomGradientAsset,
+  AdaptyUiOnboardingMeta,
+  AdaptyUiOnboardingStateParams,
+  OnboardingStateUpdatedAction,
+  OnboardingAnalyticsEventName,
+} from './ui-builder/types';
 export { AdaptyUiDialogActionType } from './ui-builder/index';
 export type { IdentifyParamsInput } from './types/inputs';

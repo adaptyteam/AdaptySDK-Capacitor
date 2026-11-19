@@ -1,5 +1,5 @@
 // xcrun simctl / sips wrappers. Nothing here is hardcoded to one machine: the UDID
-// comes from the booted device list and the bundle id from capacitor.config.json.
+// comes from --device or the booted device list, the bundle id from capacitor.config.json.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -12,16 +12,46 @@ import { APP_ROOT } from './app-root.mjs';
 // check, from the `wvd: …` line main().catch prints for a genuinely fatal error.
 const run = (file, args) => execFileSync(file, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 
-export function bootedUdid() {
-  const listed = JSON.parse(run('xcrun', ['simctl', 'list', 'devices', 'booted', '-j']));
-  const devices = Object.values(listed.devices).flat();
+/** Pure: booted simulators from `simctl list devices booted -j`. */
+export function parseBootedSimulators(json) {
+  return Object.values(JSON.parse(json).devices ?? {})
+    .flat()
+    .filter((d) => (d.state ?? 'Booted') === 'Booted')
+    .map((d) => ({ platform: 'ios', id: d.udid, name: d.name }));
+}
+
+/** Pure half of bootedUdid(). Refuses to guess: several booted devices is an error, not a pick. */
+export function parseBootedUdid(json) {
+  const devices = parseBootedSimulators(json);
   if (devices.length === 0) throw new Error('no booted simulator');
   if (devices.length > 1) {
     throw new Error(
-      `several booted simulators (${devices.map((d) => `${d.name} ${d.udid}`).join(', ')}) — shut down all but one`,
+      `several booted simulators (${devices.map((d) => `${d.name} ${d.id}`).join(', ')}) — pass --device=<udid|name> (or set WVD_DEVICE)`,
     );
   }
-  return devices[0].udid;
+  return devices[0].id;
+}
+
+export function bootedSimulators() {
+  return parseBootedSimulators(run('xcrun', ['simctl', 'list', 'devices', 'booted', '-j']));
+}
+
+let selected = null;
+
+/** Pins every command below to one simulator (--device); without it, the only booted one. */
+export function selectDevice(udid) {
+  selected = udid;
+}
+
+export function bootedUdid() {
+  return selected ?? parseBootedUdid(run('xcrun', ['simctl', 'list', 'devices', 'booted', '-j']));
+}
+
+/** The pinned simulator's web inspector socket. Changes whenever its launchd_sim restarts. */
+export function inspectorSocket(udid) {
+  const socket = run('xcrun', ['simctl', 'getenv', udid, 'RWI_LISTEN_SOCKET']);
+  if (!socket) throw new Error(`simulator ${udid} reports no RWI_LISTEN_SOCKET — is it booted?`);
+  return socket;
 }
 
 export function appId() {

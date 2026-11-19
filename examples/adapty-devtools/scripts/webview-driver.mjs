@@ -5,15 +5,18 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { filterByLevel, formatNativeLog } from './webview-driver/native-log.mjs';
 import { COLLECT_SNAPSHOT, LOG_TAIL } from './webview-driver/page-script.mjs';
-import { resolvePlatform } from './webview-driver/platform.mjs';
+import { parseDeviceFlag, resolvePlatform } from './webview-driver/platform.mjs';
 import { runSteps } from './webview-driver/runner.mjs';
 import { SCENARIO_NAMES, scenarioSteps } from './webview-driver/scenario.mjs';
 import { formatLogs, formatSnapshot, parseStep } from './webview-driver/steps.mjs';
 
-const USAGE = `usage: yarn wvd [--ios|--android] <command>
+const USAGE = `usage: yarn wvd [--device=<id|name>] [--ios|--android] <command>
 
-  platform is autodetected from what is running; the flag (or WVD_PLATFORM) is required
-  only when both a booted simulator and an attached Android device are present
+  device: --device (or WVD_DEVICE) = simulator UDID, adb serial, simulator/AVD name or an id
+          prefix of 4+ chars; it also sets the platform. Required when several devices of the
+          platform are up — e.g. one agent per simulator, each passing its own --device
+  platform: otherwise autodetected from what is running; --ios/--android (or WVD_PLATFORM)
+          is required only when both a booted simulator and an attached Android device are present
 
   snap                 print a compact text snapshot of every element with an id
   logs [n]             print the last n log entries (default 20)
@@ -23,7 +26,8 @@ const USAGE = `usage: yarn wvd [--ios|--android] <command>
                        set:<id>=<value> | click:<id> | read:<id> | sleep:<ms> | snap
                        wait:<id>[:enabled|:disabled|:absent]
                        option: --timeout=<ms> (default 15000) for wait steps
-  shot [path]          screenshot the device, downscaled (default .wvd/shot.png)
+  shot [path]          screenshot the device, downscaled (default .wvd/shot.png,
+                       .wvd/shot-<device id>.png with --device)
   relaunch             terminate and relaunch the app — clears a stuck native view
   scenario flow        activate -> load flow -> present -> dismiss
                        relaunches the app first for a clean session
@@ -40,7 +44,9 @@ const USAGE = `usage: yarn wvd [--ios|--android] <command>
 const argv = process.argv.slice(2);
 // Stripped before the command is read so every subcommand's own flag parsing is untouched.
 const platformFlag = argv.includes('--android') ? 'android' : argv.includes('--ios') ? 'ios' : null;
-const [command, ...rest] = argv.filter((token) => token !== '--android' && token !== '--ios');
+const [command, ...rest] = argv.filter(
+  (token) => token !== '--android' && token !== '--ios' && token !== '--device' && !token.startsWith('--device='),
+);
 
 const render = (value) => (typeof value === 'string' ? value : JSON.stringify(value, null, 2));
 
@@ -52,13 +58,18 @@ function androidOnly(platform, name) {
 }
 
 async function main() {
+  // Before anything else: a bad --device must fail even where usage would be printed.
+  const deviceFlag = parseDeviceFlag(argv);
   if (!command) {
     console.error(USAGE);
     process.exitCode = 2;
     return;
   }
 
-  const platform = await resolvePlatform({ flag: platformFlag });
+  const platform = await resolvePlatform({
+    flag: platformFlag,
+    ...(deviceFlag ? { deviceQuery: deviceFlag } : {}),
+  });
 
   const withSession = async (fn) => {
     const session = await platform.openSession();
@@ -98,7 +109,8 @@ async function main() {
   }
 
   if (command === 'shot') {
-    const outPath = rest[0] ?? '.wvd/shot.png';
+    // Per device when pinned: parallel agents in one checkout would overwrite one file.
+    const outPath = rest[0] ?? (platform.device ? `.wvd/shot-${platform.device}.png` : '.wvd/shot.png');
     mkdirSync(dirname(outPath), { recursive: true });
     console.log(platform.screenshot(outPath));
     return;

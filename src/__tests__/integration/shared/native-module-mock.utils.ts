@@ -45,6 +45,8 @@ interface ResponseRegistry {
   make_promoted_purchase?: components['requests']['MakePromotedPurchase.Response'];
   get_onboarding?: components['requests']['GetOnboarding.Response'];
   get_onboarding_for_default_audience?: components['requests']['GetOnboardingForDefaultAudience.Response'];
+  preload_flows?: components['requests']['PreloadFlows.Response'];
+  preload_flows_for_default_audience?: components['requests']['PreloadFlowsForDefaultAudience.Response'];
   identify?: components['requests']['Identify.Response'];
   logout?: components['requests']['Logout.Response'];
   restore_purchases?: components['requests']['RestorePurchases.Response'];
@@ -58,6 +60,8 @@ interface ResponseRegistry {
   present_code_redemption_sheet?: components['requests']['PresentCodeRedemptionSheet.Response'];
   update_collecting_refund_data_consent?: components['requests']['UpdateCollectingRefundDataConsent.Response'];
   update_refund_preference?: components['requests']['UpdateRefundPreference.Response'];
+  get_pending_store_message_types?: components['requests']['GetPendingStoreMessageTypes.Response'];
+  show_store_messages?: components['requests']['ShowStoreMessage.Response'];
   open_web_paywall?: components['requests']['OpenWebPaywall.Response'];
   create_web_paywall_url?: components['requests']['CreateWebPaywallUrl.Response'];
   adapty_ui_open_url?: components['requests']['AdaptyUIOpenUrl.Response'];
@@ -65,6 +69,7 @@ interface ResponseRegistry {
   adapty_ui_create_flow_view?: components['requests']['AdaptyUICreateFlowView.Response'];
   adapty_ui_present_flow_view?: components['requests']['AdaptyUIPresentFlowView.Response'];
   adapty_ui_dismiss_flow_view?: components['requests']['AdaptyUIDismissFlowView.Response'];
+  adapty_ui_destroy_flow_view?: components['requests']['AdaptyUIDestroyFlowView.Response'];
   adapty_ui_show_dialog?: components['requests']['AdaptyUIShowDialog.Response'];
   adapty_ui_create_onboarding_view?: components['requests']['AdaptyUICreateOnboardingView.Response'];
   adapty_ui_present_onboarding_view?: components['requests']['AdaptyUIPresentOnboardingView.Response'];

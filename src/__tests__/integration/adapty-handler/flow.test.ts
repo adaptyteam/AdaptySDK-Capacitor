@@ -177,6 +177,39 @@ describe('Adapty - Flow (Bridge Integration)', () => {
       expect(flow.id).toBe('flow_test_placement');
       expect(flow.placement.id).toBe('test_placement');
     });
+
+    // An explicit undefined means "not provided", so the defaults still apply
+    it('should send the defaults for params: undefined', async () => {
+      await adapty.getFlow({ placementId: 'test_placement', params: undefined });
+
+      const request = extractNativeRequest<components['requests']['GetFlow.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.load_timeout).toBe(5);
+      expect(request.fetch_policy).toEqual({ type: 'reload_revalidating_cache_data' });
+    });
+
+    it('should send the default load_timeout for loadTimeoutMs: undefined', async () => {
+      await adapty.getFlow({ placementId: 'test_placement', params: { loadTimeoutMs: undefined } });
+
+      const request = extractNativeRequest<components['requests']['GetFlow.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.load_timeout).toBe(5);
+    });
+
+    it('should send the default fetch_policy for fetchPolicy: undefined', async () => {
+      await adapty.getFlow({ placementId: 'test_placement', params: { fetchPolicy: undefined, loadTimeoutMs: 3000 } });
+
+      const request = extractNativeRequest<components['requests']['GetFlow.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.fetch_policy).toEqual({ type: 'reload_revalidating_cache_data' });
+      expect(request.load_timeout).toBe(3);
+    });
   });
 
   describe('getFlowForDefaultAudience', () => {
@@ -201,6 +234,16 @@ describe('Adapty - Flow (Bridge Integration)', () => {
       expect(flow.variationId).toBe('default_variation_123');
       // variation_name is optional on the wire
       expect(flow.variationName).toBeUndefined();
+    });
+
+    it('should send the default fetch_policy for params: undefined', async () => {
+      await adapty.getFlowForDefaultAudience({ placementId: 'test_placement_default', params: undefined });
+
+      const request = extractNativeRequest<components['requests']['GetFlowForDefaultAudience.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.fetch_policy).toEqual({ type: 'reload_revalidating_cache_data' });
     });
   });
 

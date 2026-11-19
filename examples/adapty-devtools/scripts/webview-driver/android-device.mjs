@@ -1,5 +1,5 @@
 // adb wrappers — the Android counterpart of simulator.mjs. Nothing is hardcoded to one
-// machine: the serial comes from the attached device list, the package from build.gradle.
+// machine: the serial comes from --device or the attached device list, the package from build.gradle.
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -11,25 +11,81 @@ import { APP_ROOT } from './app-root.mjs';
 const run = (args, options = {}) =>
   execFileSync('adb', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options }).trim();
 
-/**
- * The one attached device. Mirrors bootedUdid()'s contract deliberately: refusing to guess
- * between two devices is what keeps a command from silently driving the wrong one.
- */
-export function deviceSerial() {
-  const lines = run(['devices'])
+/** Pure: serials of ready devices, and the lines of those attached but not ready. */
+export function parseAdbSerials(text) {
+  const lines = text
     .split('\n')
     .slice(1) // "List of devices attached"
     .map((line) => line.trim())
     .filter(Boolean);
   const ready = lines.filter((line) => /\tdevice$/.test(line)).map((line) => line.split('\t')[0]);
+  return { ready, pending: lines.filter((line) => !/\tdevice$/.test(line)) };
+}
+
+/**
+ * Pure half of deviceSerial(). Mirrors parseBootedUdid()'s contract deliberately: refusing to
+ * guess between two devices is what keeps a command from silently driving the wrong one.
+ */
+export function parseAdbDevices(text) {
+  const { ready, pending } = parseAdbSerials(text);
   if (ready.length === 0) {
-    const pending = lines.length ? ` (attached but not ready: ${lines.join(', ')})` : '';
-    throw new Error(`no attached Android device${pending}`);
+    const waiting = pending.length ? ` (attached but not ready: ${pending.join(', ')})` : '';
+    throw new Error(`no attached Android device${waiting}`);
   }
   if (ready.length > 1) {
-    throw new Error(`several attached devices (${ready.join(', ')}) — leave one, or unset the others`);
+    throw new Error(
+      `several attached devices (${ready.join(', ')}) — pass --device=<serial|avd name> (or set WVD_DEVICE)`,
+    );
   }
   return ready[0];
+}
+
+export function attachedSerials() {
+  return parseAdbSerials(run(['devices'])).ready;
+}
+
+/** `adb devices`, ready and not-ready alike; throws when adb itself fails (not on PATH, …). */
+export function adbDevices() {
+  return parseAdbSerials(run(['devices']));
+}
+
+/** Pure: ready devices from `adb devices -l`, with the model it reports. */
+export function parseAdbDevicesLong(text) {
+  return text
+    .split('\n')
+    .slice(1)
+    .map((line) => line.trim().split(/\s+/))
+    .filter(([, state]) => state === 'device')
+    .map(([serial, , ...props]) => ({ serial, model: props.find((p) => p.startsWith('model:'))?.slice(6) ?? null }));
+}
+
+/**
+ * Ready devices: an emulator named by its AVD, a real device by model. Both come from the host
+ * side (`devices -l`, the emulator console): `adb shell` can take seconds on a loaded emulator.
+ */
+export function attachedDevices() {
+  return parseAdbDevicesLong(run(['devices', '-l'])).map(({ serial, model }) => {
+    let name = model;
+    if (serial.startsWith('emulator-')) {
+      try {
+        name = run(['-s', serial, 'emu', 'avd', 'name']).split('\n')[0].trim() || model;
+      } catch {
+        // console unreachable for a moment (booting): the model still names it
+      }
+    }
+    return { platform: 'android', id: serial, name };
+  });
+}
+
+let selected = null;
+
+/** Pins every command below to one device (--device); without it, the only attached one. */
+export function selectDevice(serial) {
+  selected = serial;
+}
+
+export function deviceSerial() {
+  return selected ?? parseAdbDevices(run(['devices']));
 }
 
 /**
@@ -55,23 +111,53 @@ const serialArgs = () => ['-s', deviceSerial()];
  * broke relaunch: force-stop leaves the app legitimately dead for a moment, and the wait for
  * the new pid died on the first poll while the relaunch itself had actually worked.
  */
-export function appPid() {
+export function appPid(serial = deviceSerial()) {
   try {
-    return run([...serialArgs(), 'shell', 'pidof', packageName()]) || null;
-  } catch {
-    return null;
+    return run(['-s', serial, 'shell', 'pidof', packageName()]) || null;
+  } catch (error) {
+    if (isNoProcess(error)) return null;
+    throw adbError(serial, error);
   }
 }
 
+/** A device that went away (`device not found`, `offline`) is not a stopped app: say so. */
+export class AdbError extends Error {}
+
+const adbError = (serial, error) =>
+  new AdbError(`adb -s ${serial}: ${String(error.stderr ?? '').trim() || error.message}`);
+
+/** Pure: a `pidof` failure that means "no such process" — exit 1 with nothing printed. */
+export function isNoProcess(error) {
+  return error?.status === 1 && !String(error.stderr ?? '').trim() && !String(error.stdout ?? '').trim();
+}
+
 /**
- * Forwards a local port to the WebView's devtools socket, whose name carries the app's
- * CURRENT pid — so this has to be re-resolved after every relaunch, not cached.
+ * Forwards a free local port (adb picks it: `tcp:0`) to the WebView's devtools socket, whose
+ * name carries the app's CURRENT pid — so this has to be re-resolved after every relaunch, not
+ * cached. A port of its own per call is what keeps parallel calls on several devices from
+ * reading each other's pages through a shared forward. Undo with removeForward().
  */
-export function forwardDevtools(port) {
-  const pid = appPid();
+export function forwardDevtools(serial) {
+  const pid = appPid(serial);
   if (!pid) throw new Error(`${packageName()} is not running — launch it first`);
-  run([...serialArgs(), 'forward', `tcp:${port}`, `localabstract:webview_devtools_remote_${pid}`]);
-  return pid;
+  let printed;
+  try {
+    printed = run(['-s', serial, 'forward', 'tcp:0', `localabstract:webview_devtools_remote_${pid}`]);
+  } catch (error) {
+    throw adbError(serial, error);
+  }
+  const port = Number(printed);
+  if (!Number.isInteger(port) || port <= 0) throw new AdbError(`adb -s ${serial} forward tcp:0 printed no port`);
+  return { pid, port };
+}
+
+/** Takes the serial the forward was made with: re-resolving it could name another device. */
+export function removeForward(serial, port) {
+  try {
+    run(['-s', serial, 'forward', '--remove', `tcp:${port}`]);
+  } catch {
+    // already gone (adb server restarted, device detached): nothing left to clean up
+  }
 }
 
 /** Screen capture + downscale. See simulator.mjs#screenshot for why maxDimension, not width. */

@@ -40,7 +40,7 @@ Every output below is a real capture, with the Yarn banner lines stripped. What 
 depends on the app's current state and, for `wvd native`, on which records fall inside the window —
 so expect the same *shape*, not the same rows.
 
-### Choosing the platform
+### Choosing the platform and the device
 
 `wvd` drives the iOS Simulator and Android (emulator or attached device) through one command set. The
 backend is autodetected from what is running; pass `--ios` / `--android` (or set `WVD_PLATFORM`) when
@@ -48,10 +48,32 @@ both are up:
 
 ```bash
 $ yarn wvd snap
-wvd: both a booted iOS simulator and an attached Android device are present — pass --ios or --android (or set WVD_PLATFORM)
+wvd: both a booted iOS simulator and an attached Android device are present — pass --device=<id|name>, or --ios / --android (or set WVD_DEVICE / WVD_PLATFORM)
 $ yarn wvd --android snap
 #/app | 93 els
 ```
+
+With several devices of one platform up, name the device with `--device=<id|name>` (or set
+`WVD_DEVICE`) — it also sets the platform. It takes a simulator UDID, an adb serial, a simulator or
+AVD name, or an id prefix of 4+ characters, tried in that order (exact id, exact name, prefix) across
+simulators and Android devices together; a query that matches several devices — a simulator and an
+AVD with the same name included — is an error that lists them. `--ios` / `--android` (or
+`WVD_PLATFORM`) next to `--device` restrict the search to that platform. An empty `--device=` is an
+error, never "no device": `--device="$SERIAL"` with an unset variable must not drive whatever is up. This is how parallel agents share one
+machine, one device each, every call pinned:
+
+```bash
+$ yarn wvd --device="iPhone 17 #2" snap
+$ yarn wvd --device=1C88 do click:flow-load-btn
+$ yarn wvd --device=Pixel_9_Pro_XL_google_play native --seconds=60
+$ WVD_DEVICE=emulator-5556 yarn wvd logs 10
+```
+
+A full UDID or an exact adb serial skips the device listing, so it is the cheapest form for scripts.
+A pinned simulator gets its own inspector proxy and ports, an Android session its own `adb forward`
+(§2 "Ports"), so pinned devices never share either. `wvd shot` without a path writes
+`.wvd/shot-<device id>.png` when pinned, so parallel agents in one checkout do not overwrite each
+other's screenshot.
 
 Autodetection deliberately errors instead of picking one. Driving the wrong platform is the only
 failure here with no symptom: every command succeeds, the ids are the same, and the output looks
@@ -406,23 +428,11 @@ relaunch, rather than guessing whether the SDK is already active.
 
 - **A Debug build.** Capacitor sets `isInspectable = true` on the `WKWebView` only in Debug
   (iOS 16.4+). `cap run ios` builds Debug by default. A Release build is invisible to all of this.
-- **Exactly one booted simulator.** Two different mechanisms enforce this, and they fail with
-  different messages:
-
-  - `wvd shot`, `wvd relaunch` and `wvd native` resolve a UDID from the booted device list and refuse
-    to guess: `several booted simulators (…) — shut down all but one`.
-  - `wvd snap`, `wvd do`, `wvd logs`, `wvd eval` and `wvd scenario`'s step phase never resolve a UDID at
-    all — they talk to whichever `com.apple.webinspectord_sim.socket` `lsof` returns first and to
-    the Capacitor page the proxy lists. Since that would silently pick a device, they refuse when
-    the proxy lists more than one Capacitor page:
-    `several inspectable Capacitor pages (…) — wvd cannot tell which simulator you mean`.
-
-  Either way, shut the extras down:
-
-  ```bash
-  xcrun simctl list devices booted
-  xcrun simctl shutdown <udid>
-  ```
+- **One booted simulator, or `--device`.** With several booted, pin the one you mean with
+  `--device=<udid|name>` (§1 "Choosing the platform and the device"). Unpinned, every command lists
+  the devices of its platform once (the same listing that picks the platform) and pins the only one;
+  with several it refuses before doing anything:
+  `several booted simulators (…) — pass --device=<udid|name> (or set WVD_DEVICE)`.
 
 - **The app running.** `yarn ios` builds and deploys it — but plain `yarn ios` **prompts
   interactively for a target**, which hangs any non-interactive caller. Pass a target explicitly:
@@ -438,18 +448,51 @@ relaunch, rather than guessing whether the SDK is already active.
   brew install ios-webkit-debug-proxy
   ```
 
-  `wvd` starts it, and replaces a stale one that is answering on `9221` while listing no pages,
-  before every command. There is no `lsof` ritual and nothing to leave running by hand — the socket
-  lookup that used to be a manual step now happens inside `webview-driver/inspector.mjs` on every invocation,
-  because the path changes whenever the simulator's `launchd_sim` restarts.
+  `wvd` starts it, and replaces a stale one that is answering on its port while listing no pages,
+  before every command. Nothing to leave running by hand. The simulator's inspector socket is read
+  with `xcrun simctl getenv <udid> RWI_LISTEN_SOCKET` each time a proxy has to be spawned, because the
+  path changes whenever the simulator's `launchd_sim` restarts.
+
+- **Ports.**
+  - Every simulator gets its own pair in `9400–9999` from a host-wide registry,
+    `$TMPDIR/adapty-wvd/inspector-ports.json` (`webview-driver/ports.mjs`). The first call for a
+    simulator allocates under a lock (a listening socket on `127.0.0.1:11999`, released by the OS
+    with its holder), starting at a slot hashed from the UDID and skipping pairs another simulator
+    holds; later calls reuse the pair, and with it the running proxy. The registry
+    is per user, not per checkout, so the pods twin (`WVD_APP_ROOT`) shares it. A corrupt registry is
+    an error naming the file, as is one with a pair out of range or assigned twice — delete it to
+    start over (stop the proxies first). The old fixed `9221`/`9222` are no longer used.
+  - Before reusing or killing anything on its pair, `wvd` checks who listens there (`lsof`, `ps`),
+    on every address: only an `ios_webkit_debug_proxy` that alone holds both ports, with `-s
+    unix:<this simulator's socket>`, is its own — an IPv6 listener sharing the port number makes the
+    pair foreign. Every request and the WebSocket then go to `127.0.0.1`, never `localhost`, which
+    may resolve to `::1`. The registry records that socket at spawn, so the check is ~70 ms; a mismatch (registry
+    lost, a proxy from an older `wvd`) reads the simulator's current socket once (`simctl getenv`,
+    ~0.4 s). Anything else on the pair — another simulator's proxy, any other process — is left alone,
+    and the simulator moves to a free pair. A proxy left on the old pair is not killed; it is
+    harmless, and `pkill -f 'ios_webkit_debug_proxy.*null:<old port>,'` removes it.
+  - A (re)spawn kills only its own stale proxy, by pid. It runs under a lock that is a listening
+    localhost socket (`12000–12299`, one per pair), which the OS releases if `wvd` dies — so two
+    parallel calls for one simulator do not kill each other's fresh proxy, and no lock is ever left
+    stuck. If the pair moves while a call waits, it drops the old pair's lock and takes the new
+    one's. The proxy must then hold both ports alone, as the child `wvd` started. `ios_webkit_debug_proxy` keeps running after a failed bind, so `Unable to bind …` on its
+    stderr, or a listener that is not the child, fails the spawn instead of counting as success.
+  - Before a page is used, the proxy's device list must assign its page port to `deviceId:
+    "SIMULATOR"` — the port range is open to any device the proxy sees, and a USB iPhone could take
+    it if the simulator's socket dropped.
+  - Android: no fixed port. Each session asks adb for a free one (`adb forward tcp:0`) on the serial
+    it resolved once, and removes the forward when it ends, whatever ends it. `adb forward --list`
+    should be empty between commands; a killed `wvd` can leave one behind:
+    `adb -s <serial> forward --remove tcp:<port>` (not `--remove-all`, which drops other tools' too).
 
 - **Node 22+**, which the app already requires: `wvd` uses the global `WebSocket` and has no
   dependencies of its own.
 
 ### Android
 
-- **`adb` on `PATH`** (`~/Library/Android/sdk/platform-tools`) and **exactly one attached device** —
-  same refusal-to-guess as the simulator: `several attached devices (…) — leave one`.
+- **`adb` on `PATH`** (`~/Library/Android/sdk/platform-tools`) and **one attached device, or
+  `--device`** — same refusal-to-guess as the simulator:
+  `several attached devices (…) — pass --device=<serial|avd name> (or set WVD_DEVICE)`.
 - **A debug build.** Capacitor calls `setWebContentsDebuggingEnabled(true)` only for a debuggable
   app; a release build exposes no `webview_devtools_remote_*` socket and nothing here works.
 - **The app running**, since the devtools socket name carries its pid — so it is re-resolved on every
@@ -467,9 +510,11 @@ relaunch, rather than guessing whether the SDK is already active.
   (`com.adaptytest` vs `com.adapty.adaptydemoapp`) because `yarn credentials` patches them
   independently. `android-device.mjs` reads the gradle file for that reason; taking `appId` there
   would target a package that does not exist and every adb call would quietly no-op.
-- **Port 9333, not 9222.** `ios_webkit_debug_proxy` owns 9222, so the `adb forward` uses 9333. They
-  used to share it, and `adb` binding `127.0.0.1:9222` first shadowed the iOS proxy: every iOS
-  command failed with `lists no inspectable page` while Android looked perfectly healthy.
+- **An ephemeral forward port.** `ios_webkit_debug_proxy` used to own 9222. A fixed `adb
+  forward` there once shadowed the iOS proxy — every iOS command failed with `lists no inspectable
+  page` while Android looked healthy — and a fixed port of its own (9333) was then shared by every
+  Android call, which is unsafe with several devices. adb now picks a free port per session ("Ports"
+  above).
 - **A presented onboarding is a second CDP page, and it sorts first.** The onboarding is rendered by
   the native SDK in its own WebView on both platforms. On iOS that `WKWebView` is created with
   `isInspectable = false` (the plugin path calls `getOnboardingConfiguration` without
@@ -763,13 +808,20 @@ Verified against Android 16 (`sdk_gphone64_arm64`), WebView Chrome 149.
 
 | Symptom | Cause |
 | --- | --- |
-| `several booted simulators (…) — shut down all but one` | `wvd shot` / `relaunch` / `native` will not guess which one you mean — `xcrun simctl shutdown <udid>` the extras |
-| `several inspectable Capacitor pages (…)` | the same, hit from the inspector side (`snap`, `do`, `logs`, `eval`, `scenario`) — see §2 |
+| `several booted simulators (…) — pass --device=<udid\|name>` | unpinned `wvd` will not guess which one you mean — pass `--device` (or `WVD_DEVICE`), or shut the extras down |
+| `several inspectable Capacitor pages in one simulator (…)` | two Capacitor apps run in that simulator (say, the pods twin and this app) — uninstall one |
+| `device "…" matches several (…) — pass the full id` | the `--device` query is a name or prefix shared by several devices — use the full UDID / serial |
+| `device "…" is not a booted simulator or attached Android device — up: …` | typo, the device is not booted, or `--ios` / `--android` excludes it — the message lists what is up |
+| `--device needs a value` | `--device=` with nothing after it, often an empty shell variable — refused rather than falling back to another device |
+| `ios_webkit_debug_proxy could not bind its ports` / `exited (…) — is port … taken?` | something took the pair between the ownership check and the spawn: rerun; `lsof -nP -iTCP:<port> -sTCP:LISTEN` shows who |
+| `inspector-ports.json is corrupt` | delete the file (stop the proxies first): pairs are reallocated on the next call |
+| `timed out waiting for the <port registry \| proxy spawn (<udid>)> lock (127.0.0.1:<port>)` | another `wvd` held it for over 30 s, or something else listens on that port — `lsof -nP -iTCP:<port>` tells which; a lock held by `wvd` dies with its process |
+| Android `adb -s <serial> …: error: device '…' not found` / `offline` | the pinned device went away mid-call — reported at once, not as "not running" |
 | `no booted simulator` | nothing is booted; start one and launch the app |
 | `ios_webkit_debug_proxy not found` | `brew install ios-webkit-debug-proxy` |
 | `ios_webkit_debug_proxy is up but lists no inspectable page` | the app is not running, or it is a Release build (only Debug sets `isInspectable`) |
 | `no inspectable page after 15000ms` | `waitForPage()`'s message, and **no `wvd` command raises it any more** — `relaunch` and `scenario` used to, whenever the proxy was dead or stale, because they polled the port without starting it. Both now go through `ensureProxy()`, so a not-running app reports the row above instead. Seeing this means something is calling `waitForPage()` directly |
-| `http://localhost:9222/json` returns `[]` (checking by hand) | same two causes as above |
+| `http://localhost:<page port>/json` returns `[]` (checking by hand; the pair is in `$TMPDIR/adapty-wvd/inspector-ports.json`) | same two causes as above |
 | `window.__adaptyDevtoolsLogs is not published` | the deployed bundle predates the `LogsContext` change — rebuild and redeploy (`yarn ios --target <udid>`) |
 | `ERR no #<id>` | typo, or the section is unmounted — run `wvd snap` and look |
 | `ERR disabled #<id>` | the control is genuinely disabled; add the `wait:<id>:enabled` that belongs in front of it |
@@ -781,10 +833,10 @@ Verified against Android 16 (`sdk_gphone64_arm64`), WebView Chrome 149.
 | A value set on an input reverts | React controlled component — use `set:`, not `wvd eval "el.value = …"` |
 | Typing through the simulator does nothing | keyboard events do not reach WebView inputs; that is what `set:` is for |
 | `head`/`grep` on `yarn wvd …` shows a Yarn banner | use `yarn --silent wvd …` or `node scripts/webview-driver.mjs …` |
-| `both a booted iOS simulator and an attached Android device are present` | pass `--ios` / `--android`, or set `WVD_PLATFORM` |
+| `both a booted iOS simulator and an attached Android device are present` | pass `--device`, or `--ios` / `--android` (or set `WVD_DEVICE` / `WVD_PLATFORM`) |
 | `no booted iOS simulator and no attached Android device` | nothing to drive — boot one and launch the app |
-| `several attached devices (…) — leave one` | the Android side of the refusal to guess |
-| iOS `lists no inspectable page` **while the app is definitely running** | two causes worth checking in order: (a) something else holds 9222 — `lsof -nP -iTCP:9222 -sTCP:LISTEN`, an old `adb forward tcp:9222` shadows the proxy; (b) the installed app is not ours. The React Native demo ships the **same** bundle id `com.adapty.adaptydemoapp`, so building it replaces the Capacitor app — `wvd shot` shows RN's red `No script URL provided` box, and an app with no WebView cannot have an inspectable page |
+| `several attached devices (…) — pass --device=<serial\|avd name>` | the Android side of the refusal to guess |
+| iOS `lists no inspectable page` **while the app is definitely running** | two causes worth checking in order: (a) something else holds the page port — `lsof -nP -iTCP:<page port> -sTCP:LISTEN` (the pair is in the registry, §2 "Ports"); `wvd` moves off a foreign listener by itself, so this points at a race or a hand-started proxy; (b) the installed app is not ours. The React Native demo ships the **same** bundle id `com.adapty.adaptydemoapp`, so building it replaces the Capacitor app — `wvd shot` shows RN's red `No script URL provided` box, and an app with no WebView cannot have an inspectable page |
 | Android `<pkg> is not running — launch it first` | the devtools socket only exists while the app is up; `npx cap run android --target <serial>` |
 | Android `could not resolve a launcher activity` | the package is installed but has no launcher intent — check `adb shell cmd package resolve-activity --brief <pkg>` |
 | `no native view matching "…" — is it on screen?` | `bounds` searches the CURRENT hierarchy; the sheet may have closed, or the text differs from what is rendered |

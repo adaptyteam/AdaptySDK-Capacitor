@@ -27,6 +27,11 @@ export type {
   AdaptyProductIdentifier,
   AdaptyInstallationStatus,
   AdaptyInstallationDetails,
+  AdaptyStoreMessageType,
+  AdaptySubscriptionPricingTerms,
+  AdaptySubscriptionCommitmentInfo,
+  AdaptyProfileSubscriptionCommitmentInfo,
+  KnownErrorCode,
 } from '@adapty/core';
 
 export {
@@ -38,10 +43,13 @@ export {
   Gender,
   AppTrackingTransparencyStatus,
   ProductPeriod,
+  SubscriptionBillingPlan,
   ErrorCode,
   ErrorCodeName,
   getErrorCode,
+  getErrorCodeName,
   getErrorPrompt,
+  isKnownErrorCode,
 } from '@adapty/core';
 
 // Re-export local modules that are NOT in core

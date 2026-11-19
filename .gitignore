@@ -87,6 +87,9 @@ docs
 # ...except the devtools element id reference, which is generated from src/elementIds.ts
 !examples/adapty-devtools/docs
 
+# Local implementation plans (kept out of docs/, which typedoc wipes)
+/plans
+
 # Claude
 .claude/settings.local.json
 

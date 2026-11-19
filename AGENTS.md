@@ -175,6 +175,10 @@ The CLI covers SPM apps only. CocoaPods apps never read `Package.swift`: there K
 - Interface tables: Prop | Type | Description format
 - All type links must resolve to their definitions
 
+### Implementation plans
+Save implementation plans (e.g. from superpowers `writing-plans`) to `plans/`, not `docs/`. Both are
+gitignored, but `docs/` is typedoc's output and `yarn doc-gen` wipes it.
+
 ## Testing
 
 ```bash

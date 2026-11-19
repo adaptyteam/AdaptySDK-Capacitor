@@ -10,8 +10,14 @@ import type {
   AdaptyFlowUiSchema,
   AdaptyFlowUiSchemaGrid,
   AdaptyFlowUiSchemaLayout,
+  AdaptyProfileSubscriptionCommitmentInfo,
   AdaptyPromotedProduct,
+  AdaptyStoreMessageType,
+  AdaptySubscriptionCommitmentInfo,
+  AdaptySubscriptionPricingTerms,
+  ReportTransactionParamsInput,
 } from 'types';
+import { SubscriptionBillingPlan } from 'types';
 
 describe('public type exports', () => {
   it('exposes AdaptyPromotedProduct', () => {
@@ -30,6 +36,51 @@ describe('public type exports', () => {
     const unknown: AdaptyExternalAttributionProvider = 'some_future_provider';
 
     expect([known, unknown]).toStrictEqual(['appsflyer', 'some_future_provider']);
+  });
+
+  it('exposes AdaptyStoreMessageType, including opaque StoreKit reasons', () => {
+    const known: AdaptyStoreMessageType = 'price_increase_consent';
+    // StoreKit reasons unknown to the SDK arrive as storekit_<rawValue>.
+    const opaque: AdaptyStoreMessageType = 'storekit_-42';
+
+    expect([known, opaque]).toStrictEqual(['price_increase_consent', 'storekit_-42']);
+  });
+
+  it('exposes subscription pricing terms, including unknown billing plans', () => {
+    const commitmentInfo: AdaptySubscriptionCommitmentInfo = {
+      price: { amount: 83.88 },
+      period: { unit: 'year', numberOfUnits: 1 },
+    };
+    const terms: AdaptySubscriptionPricingTerms = {
+      billingPlan: SubscriptionBillingPlan.Monthly,
+      billingPrice: { amount: 6.99 },
+      billingPeriod: { unit: 'month', numberOfUnits: 1 },
+      commitmentInfo,
+    };
+    const upFront: SubscriptionBillingPlan = SubscriptionBillingPlan.UpFront;
+    // Native SDKs pass through billing plans unknown to this version.
+    const unknown: SubscriptionBillingPlan = 'some_future_plan';
+
+    expect([terms.billingPlan, upFront, unknown]).toStrictEqual(['monthly', 'up_front', 'some_future_plan']);
+  });
+
+  it('exposes ReportTransactionParamsInput', () => {
+    const params: ReportTransactionParamsInput = {
+      transactionId: 'transaction_12345',
+      ios: { jwsTransaction: 'eyJhbGciOiJFUzI1NiJ9.jws.sig' },
+    };
+
+    expect(params.ios?.jwsTransaction).toBe('eyJhbGciOiJFUzI1NiJ9.jws.sig');
+  });
+
+  it('exposes AdaptyProfileSubscriptionCommitmentInfo', () => {
+    const info: AdaptyProfileSubscriptionCommitmentInfo = {
+      billingPeriodNumber: 3,
+      totalBillingPeriods: 12,
+      expiresAt: new Date('2027-01-01T00:00:00.000Z'),
+    };
+
+    expect(info.totalBillingPeriods).toBe(12);
   });
 
   it('exposes the flow ui schema types', () => {

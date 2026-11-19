@@ -23,7 +23,10 @@ test('autodetect picks the only thing running', () => {
 // The failure with no symptom: guessing here would run every command against the wrong
 // platform and the output would look entirely normal.
 test('an ambiguous environment is an error naming the flag', () => {
-  assert.throws(() => resolvePlatformName({ env: '', probes: BOTH }), /pass --ios or --android/);
+  assert.throws(
+    () => resolvePlatformName({ env: '', probes: BOTH }),
+    /pass --device=<id\|name>, or --ios \/ --android/,
+  );
 });
 
 test('an empty environment is an error, not a default', () => {

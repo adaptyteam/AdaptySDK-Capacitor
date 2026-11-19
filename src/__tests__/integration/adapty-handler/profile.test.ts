@@ -7,12 +7,15 @@
  * - Verify only customAttributes returned in profile
  */
 
+import { Capacitor } from '@capacitor/core';
 import { Adapty } from 'adapty';
 import type { components } from 'types/api';
 
 import {
   ACTIVATE_RESPONSE_SUCCESS,
   GET_PROFILE_RESPONSE_WITH_CUSTOM_ATTRS,
+  GET_PROFILE_RESPONSE_PLAY_STORE_OFFER,
+  GET_PROFILE_RESPONSE_WITH_PREMIUM,
   UPDATE_PROFILE_RESPONSE_SUCCESS,
   UPDATE_PROFILE_RESPONSE_ERROR,
 } from '../shared/bridge-samples';
@@ -108,6 +111,49 @@ describe('Adapty - Profile', () => {
 
       // appliedExternalAttributionProviders decoded from native applied_attribution_sources
       expect(profile.appliedExternalAttributionProviders).toEqual(['apple_search_ads']);
+    });
+  });
+
+  describe('Store-dependent offerId', () => {
+    const originalGetPlatform = Capacitor.getPlatform;
+
+    async function getProfile(response: components['requests']['GetProfile.Response']) {
+      resetNativeModuleMock(nativeMock);
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+        get_profile: response,
+      });
+      adapty = new Adapty();
+      await adapty.activate({ apiKey: 'test_api_key' });
+      return adapty.getProfile();
+    }
+
+    afterEach(() => {
+      Capacitor.getPlatform = originalGetPlatform;
+    });
+
+    // offer_id depends on the purchase store, not on the device OS
+    it.each(['ios', 'android'] as const)('should decode offerId of a Play Store purchase on %s', async (platform) => {
+      Capacitor.getPlatform = jest.fn(() => platform);
+
+      const profile = await getProfile(GET_PROFILE_RESPONSE_PLAY_STORE_OFFER);
+      const offerId = 'intro-pay-up-front-weekly-premium-determined';
+      const accessLevel = profile.accessLevels?.['premium'];
+
+      expect(accessLevel?.store).toBe('play_store');
+      expect(accessLevel?.offerId).toBe(offerId);
+      // Deprecated alias keeps the same value
+      expect(accessLevel?.android?.offerId).toBe(offerId);
+      expect(profile.subscriptions?.['weekly.premium.599']?.offerId).toBe(offerId);
+    });
+
+    it('should leave offerId undefined for an App Store purchase', async () => {
+      const profile = await getProfile(GET_PROFILE_RESPONSE_WITH_PREMIUM);
+      const accessLevel = profile.accessLevels?.['premium'];
+
+      expect(accessLevel?.store).toBe('app_store');
+      expect(accessLevel?.offerId).toBeUndefined();
+      expect(accessLevel?.android?.offerId).toBeUndefined();
     });
   });
 

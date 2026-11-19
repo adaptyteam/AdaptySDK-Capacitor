@@ -49,7 +49,10 @@ yarn link-assets            # Copy Adapty assets to native projects
 
 # Driving the app on iOS Simulator or Android (see the drive-devtools-webview skill)
 # Platform is autodetected; pass --ios / --android when both are running.
+# With several devices up, pin each call: --device=<udid|serial|name> (or WVD_DEVICE) picks the
+# device and with it the platform; --ios / --android next to it only narrow the search.
 yarn wvd snap                # text snapshot of every element with an id — use instead of a screenshot
+yarn wvd --device="iPhone 17 #2" snap  # pin a call to one of several devices
 yarn wvd logs 20             # structured JS log tail without navigating to /logs
 yarn wvd native --seconds=30 # native SDK log — os_log on iOS, logcat on Android
 yarn wvd do click:flow-load-btn wait:flow-present-btn:enabled read:flow-name-value

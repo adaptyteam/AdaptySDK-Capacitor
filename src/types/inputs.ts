@@ -8,6 +8,8 @@ export {
   type AdaptyAndroidPurchaseParams,
   type GetPlacementParamsInput,
   type GetPlacementForDefaultAudienceParamsInput,
+  type PreloadPlacementsParamsInput,
   type GetPaywallProductsParamsInput,
+  type ReportTransactionParamsInput,
   type FileLocation,
 } from '@adapty/core';

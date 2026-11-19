@@ -56,6 +56,42 @@ describe('Adapty - Onboarding (Bridge Integration)', () => {
 
       expect(request.locale).toBe('ru');
     });
+
+    // An explicit undefined means "not provided", so the defaults still apply
+    it('should send the defaults for params: undefined', async () => {
+      await adapty.getOnboarding({ placementId: 'test_onboarding_placement', params: undefined });
+
+      const request = extractNativeRequest<components['requests']['GetOnboarding.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.load_timeout).toBe(5);
+      expect(request.fetch_policy).toEqual({ type: 'reload_revalidating_cache_data' });
+    });
+
+    it('should send the default load_timeout for loadTimeoutMs: undefined', async () => {
+      await adapty.getOnboarding({ placementId: 'test_onboarding_placement', params: { loadTimeoutMs: undefined } });
+
+      const request = extractNativeRequest<components['requests']['GetOnboarding.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.load_timeout).toBe(5);
+    });
+
+    it('should send the default fetch_policy for fetchPolicy: undefined', async () => {
+      await adapty.getOnboarding({
+        placementId: 'test_onboarding_placement',
+        params: { fetchPolicy: undefined, loadTimeoutMs: 3000 },
+      });
+
+      const request = extractNativeRequest<components['requests']['GetOnboarding.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.fetch_policy).toEqual({ type: 'reload_revalidating_cache_data' });
+      expect(request.load_timeout).toBe(3);
+    });
   });
 
   describe('getOnboardingForDefaultAudience', () => {
@@ -69,6 +105,16 @@ describe('Adapty - Onboarding (Bridge Integration)', () => {
       expect(request.method).toBe('get_onboarding_for_default_audience');
       expect(request.placement_id).toBe('test_onboarding_placement');
       expect(request.fetch_policy?.type).toBe('reload_revalidating_cache_data');
+    });
+
+    it('should send the default fetch_policy for params: undefined', async () => {
+      await adapty.getOnboardingForDefaultAudience({ placementId: 'test_onboarding_placement', params: undefined });
+
+      const request = extractNativeRequest<components['requests']['GetOnboardingForDefaultAudience.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.fetch_policy).toEqual({ type: 'reload_revalidating_cache_data' });
     });
   });
 });
