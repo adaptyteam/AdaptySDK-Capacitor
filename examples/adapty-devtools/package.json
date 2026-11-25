@@ -22,6 +22,7 @@
     "check-ids:write": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/check-element-ids.mjs",
     "wvd": "node scripts/webview-driver.mjs",
     "test-wvd": "node scripts/webview-driver/run-tests.mjs",
+    "test-app-message": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test scripts/app-message.test.mts",
     "update-cap-config": "yarn cap copy && yarn cap sync",
     "update-native-modules": "xcodebuild -project ios/App/App.xcodeproj -resolvePackageDependencies && yarn run update-cap-config",
     "android": "yarn build && yarn cap run android",

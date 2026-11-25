@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 import {
   adapty,
   createFlowView,
@@ -6,14 +6,21 @@ import {
   AdaptyError,
   ErrorCodeName,
   AdaptyFlow,
+  AdaptyFlowMessage,
   FlowViewController,
   FlowEventHandlers,
 } from '@adapty/capacitor';
 import { APPLE_ICON_IMAGE_BASE64 } from '../../../assets/base64-data.ts';
 import { showSuccessToast } from '../../../utils/toast.ts';
+import { AppMessageSendResult, parseAppMessageJson, sendAppMessageSafe, toFlowMessageValue } from './appMessage.ts';
+
+// Custom action id reserved for diagnostics of edited bundle scripts: never answered.
+const DIAG_CUSTOM_ACTION_ID = 'diag';
 
 export type FlowControllerRef = {
   presentFlow: () => Promise<void>;
+  // Sends the textarea JSON to the current flow view
+  sendAppMessage: () => Promise<void>;
 };
 
 type Props = {
@@ -22,6 +29,11 @@ type Props = {
   locale: string;
   // createFlowView loadTimeoutMs; empty keeps the SDK default
   loadTimeout: string;
+  flowView: FlowViewController | null;
+  appMessageJson: string;
+  appMessageOnAppear: boolean;
+  appMessageOnCustomAction: boolean;
+  appMessageBeforePresent: boolean;
   setFlowView: (view: FlowViewController | null) => void;
   setResult: (value: string) => void;
   log: (
@@ -34,9 +46,48 @@ type Props = {
 };
 
 export const FlowController = forwardRef<FlowControllerRef, Props>(function FlowController(
-  { flow, customTagsJson, locale, loadTimeout, setFlowView, setResult, log }: Props,
+  {
+    flow,
+    customTagsJson,
+    locale,
+    loadTimeout,
+    flowView,
+    appMessageJson,
+    appMessageOnAppear,
+    appMessageOnCustomAction,
+    appMessageBeforePresent,
+    setFlowView,
+    setResult,
+    log,
+  }: Props,
   ref,
 ) {
+  // Handlers are registered at present time: they read the current toggles through this ref.
+  const appMessageRef = useRef({ appMessageJson, appMessageOnAppear, appMessageOnCustomAction });
+  appMessageRef.current = { appMessageJson, appMessageOnAppear, appMessageOnCustomAction };
+  // View that already sent its on-appear message: a second present does not resend.
+  const appMessageSentViewRef = useRef<FlowViewController | null>(null);
+
+  const logAppMessageOutcome = (result: AppMessageSendResult, payload: AdaptyFlowMessage, funcName: string) => {
+    if (result.ok) {
+      log('info', 'Send app message ok', funcName, false, { payload });
+    } else {
+      log('error', `Send app message failed: ${result.error}`, funcName, false, { payload, error: result.error });
+    }
+  };
+
+  const sendAppMessage = async () => {
+    const parsed = parseAppMessageJson(appMessageJson);
+    if ('error' in parsed) {
+      log('warn', 'Send app message: invalid JSON', 'sendAppMessage', false, { error: parsed.error });
+      setResult(`❌ Send app message: invalid JSON (${parsed.error})`);
+      return;
+    }
+    const result = await sendAppMessageSafe(flowView, parsed.payload);
+    logAppMessageOutcome(result, parsed.payload, 'sendAppMessage');
+    setResult(result.ok ? '✅ App message sent' : `❌ Failed to send app message: ${result.error}`);
+  };
+
   const presentFlow = async () => {
     if (!flow) {
       setResult('❌ No flow loaded. Please load flow first.');
@@ -98,9 +149,20 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
           // Mirror the SDK default: keep the flow view open.
           return false;
         },
-        onCustomAction: (actionId: string) => {
-          log('info', 'User performed custom action', 'flow.onCustomAction', false, { actionId });
+        onCustomAction: (actionId: string, args: Record<string, unknown>) => {
+          log('info', 'User performed custom action', 'flow.onCustomAction', false, { actionId, args });
           setResult(`⚡ Custom action: ${actionId}`);
+          // The presented flow covers the WebView, so this toggle is how the app replies meanwhile.
+          if (appMessageRef.current.appMessageOnCustomAction && actionId !== DIAG_CUSTOM_ACTION_ID) {
+            const payload: AdaptyFlowMessage = {
+              action: 'confirmed',
+              userCustomId: actionId,
+              args: toFlowMessageValue(args) ?? null,
+            };
+            sendAppMessageSafe(view, payload).then((result) =>
+              logAppMessageOutcome(result, payload, 'flow.onCustomAction'),
+            );
+          }
           return false;
         },
         onProductSelected: (productId: string) => {
@@ -143,6 +205,17 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
         onAppeared: () => {
           log('info', 'Flow appeared', 'flow.onAppeared');
           setResult('👁️ Flow appeared');
+          if (appMessageRef.current.appMessageOnAppear && appMessageSentViewRef.current !== view) {
+            const parsed = parseAppMessageJson(appMessageRef.current.appMessageJson);
+            if ('error' in parsed) {
+              log('warn', 'Send app message: invalid JSON', 'flow.onAppeared', false, { error: parsed.error });
+            } else {
+              appMessageSentViewRef.current = view;
+              sendAppMessageSafe(view, parsed.payload).then((result) =>
+                logAppMessageOutcome(result, parsed.payload, 'flow.onAppeared'),
+              );
+            }
+          }
           return false;
         },
         onDisappeared: () => {
@@ -225,6 +298,12 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
 
       await view.setEventHandlers(eventHandlers);
 
+      // Android drop check: a message sent before present()
+      if (appMessageBeforePresent) {
+        const payload: AdaptyFlowMessage = { marker: 'before-present' };
+        logAppMessageOutcome(await sendAppMessageSafe(view, payload), payload, 'presentFlow');
+      }
+
       setResult(`✅ Flow view created (locale: ${view.locale ?? 'not reported'}). Presenting...`);
       await view.present();
       setResult('✅ Flow presented successfully!');
@@ -239,7 +318,15 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
     }
   };
 
-  useImperativeHandle(ref, () => ({ presentFlow }), [flow, customTagsJson, locale, loadTimeout]);
+  useImperativeHandle(ref, () => ({ presentFlow, sendAppMessage }), [
+    flow,
+    customTagsJson,
+    locale,
+    loadTimeout,
+    flowView,
+    appMessageJson,
+    appMessageBeforePresent,
+  ]);
 
   return null;
 });

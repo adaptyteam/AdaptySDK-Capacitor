@@ -21,6 +21,15 @@ type Props = {
   webPresentations: readonly string[];
   flowView: FlowViewController | null;
   webPaywallUrl: string;
+  appMessageJson: string;
+  appMessageOnAppear: boolean;
+  appMessageOnCustomAction: boolean;
+  appMessageBeforePresent: boolean;
+  setAppMessageJson: (v: string) => void;
+  setAppMessageOnAppear: (v: boolean) => void;
+  setAppMessageOnCustomAction: (v: boolean) => void;
+  setAppMessageBeforePresent: (v: boolean) => void;
+  sendAppMessage: () => Promise<void>;
   setPlacementId: (v: string) => void;
   setFlowViewLocale: (v: string) => void;
   setFlowViewLoadTimeout: (v: string) => void;
@@ -61,6 +70,15 @@ export const FlowSection: React.FC<Props> = ({
   webPresentations,
   flowView,
   webPaywallUrl,
+  appMessageJson,
+  appMessageOnAppear,
+  appMessageOnCustomAction,
+  appMessageBeforePresent,
+  setAppMessageJson,
+  setAppMessageOnAppear,
+  setAppMessageOnCustomAction,
+  setAppMessageBeforePresent,
+  sendAppMessage,
   setPlacementId,
   setFlowViewLocale,
   setFlowViewLoadTimeout,
@@ -397,6 +415,53 @@ export const FlowSection: React.FC<Props> = ({
         >
           Open Web Paywall
         </button>
+      </div>
+
+      <div className={styles.InputGroup}>
+        <textarea
+          id={elementIds.flow.appMessageTextarea}
+          value={appMessageJson}
+          onChange={(e) => setAppMessageJson(e.target.value)}
+          placeholder="App message (JSON object)"
+          className={styles.Input}
+          rows={2}
+        />
+      </div>
+
+      <div className={styles.ButtonGroup}>
+        <button
+          id={elementIds.flow.sendAppMessageBtn}
+          onClick={sendAppMessage}
+          disabled={!flowView}
+          className={`${styles.Button} ${styles.ButtonSecondary}`}
+        >
+          Send app message
+        </button>
+      </div>
+
+      <div
+        id={elementIds.flow.appMessageOnAppearToggle}
+        className={styles.ClickableParam}
+        onClick={() => setAppMessageOnAppear(!appMessageOnAppear)}
+      >
+        <span>Send on appear (once per view)</span>
+        <span className={styles.ParamValue}>{appMessageOnAppear.toString()}</span>
+      </div>
+      <div
+        id={elementIds.flow.appMessageOnCustomActionToggle}
+        className={styles.ClickableParam}
+        onClick={() => setAppMessageOnCustomAction(!appMessageOnCustomAction)}
+      >
+        <span>Reply to custom actions</span>
+        <span className={styles.ParamValue}>{appMessageOnCustomAction.toString()}</span>
+      </div>
+      <div
+        id={elementIds.flow.appMessageBeforePresentToggle}
+        className={styles.ClickableParam}
+        onClick={() => setAppMessageBeforePresent(!appMessageBeforePresent)}
+      >
+        <span>Send before present</span>
+        <span className={styles.ParamValue}>{appMessageBeforePresent.toString()}</span>
       </div>
 
       {flowView && (
