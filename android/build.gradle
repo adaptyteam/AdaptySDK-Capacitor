@@ -69,7 +69,7 @@ dependencies {
     // kotlin-stdlib is added automatically by Kotlin Gradle plugin
 
     // Adapty SDK dependencies
-    implementation platform('io.adapty:adapty-bom:4.4.2')
+    api platform('io.adapty:adapty-bom:4.4.2')
     implementation 'io.adapty:android-sdk'
     implementation 'io.adapty:android-ui'
     implementation 'io.adapty.internal:crossplatform:4.4.1'
