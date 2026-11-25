@@ -338,12 +338,13 @@ export class FlowViewController {
    * The script receives it as the `applicationMsg` SDK event; the generated message id
    * becomes the event id.
    *
-   * Send messages after {@link FlowViewController.present} (e.g. from `onAppeared`).
-   * On Android a message sent before the first `present()` request is dropped with a native
-   * warning; after that request it waits for the flow script, even if the screen has not
-   * appeared yet.
+   * Send the first message from `onAppeared`: that is when the flow script is running.
+   * A message sent before the script runs may be dropped with a native warning; on Android
+   * that includes right after `present()` resolves.
    *
-   * Resolving means the native layer accepted the message, not that the script handled it.
+   * Resolving means the native layer accepted the message, not that the script received it.
+   *
+   * Values nested deeper than 128 levels reach the script as `null`.
    *
    * Requires iOS 16+, like all flow views.
    *
