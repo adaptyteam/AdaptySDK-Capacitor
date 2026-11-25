@@ -329,7 +329,7 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
     });
 
     it.each(['dismiss', 'destroy'] as const)(
-      'should send to the old id and reject with 3001 after %s',
+      'should send to the old id and propagate the native 3001 error after %s',
       async (method) => {
         const view = await createFlowView(flow);
         await view[method]();
@@ -353,6 +353,20 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
         expect(request.id).toBe('mock_flow_view_123');
       },
     );
+
+    it('should still send after dismiss({ destroy: false })', async () => {
+      const view = await createFlowView(flow);
+      await view.dismiss({ destroy: false });
+      nativeMock.handleMethodCall.mockClear();
+
+      await expect(view.sendAppMessage({ a: 1 })).resolves.toBeUndefined();
+
+      const request = extractNativeRequest<components['requests']['AdaptyUISendAppMessage.Request']>({
+        nativeModule: nativeMock,
+      });
+      expect(request.method).toBe('adapty_ui_send_app_message');
+      expect(request.id).toBe('mock_flow_view_123');
+    });
 
     it('should throw without a bridge call when the view reference is missing', async () => {
       const view = await createFlowView(flow);
