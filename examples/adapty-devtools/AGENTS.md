@@ -139,6 +139,33 @@ Rows of a dynamic list carry the key as a segment: `flow-product-0-purchase-btn`
   ids, form values and disabled state; long `textContent` is clipped with a trailing `…`, so read
   those with `read:<id>`. Only a presented native view needs `yarn wvd shot`.
 
+## Flow custom elements
+
+App-level native code; the plugin has none. Ported from pure-rn (`$RN` = `../../../AdaptySDK-React-Native-Devtools`,
+files in `$RN/pure-rn/{ios/AdaptyDevtools,android/...}/[cC]ustom[eE]lements/`); keep in sync, the only diffs are the
+Kotlin package, debug-only payload logging and on-screen diagnostics (`review_card` payload line, `lottie_badge` full
+URL; release shows the host), the test-fake comments, the Android `store_map` clip, and `text_input` honoring
+`ui_enabled` (both Android forms, the iOS UIKit form).
+
+- **iOS:** `ios/App/App/CustomElements/DevtoolsCustomElements.swift`, `DevtoolsCustomElements.register()` in
+  `AppDelegate`. Imports `AdaptyUI` / `AdaptyUIBuilder` transitively via `CapApp-SPM`; never edit its `Package.swift`.
+- **Android:** `android/app/src/main/java/com/example/plugin/customelements/` (+ unit test under `src/test`),
+  registered in `DevtoolsApplication.onCreate` (manifest `android:name`). Kotlin 2.2.20 + Compose compiler plugin
+  in the root buildscript, Compose BOM 2025.04.01. `io.adapty:android-ui` is versionless: the version comes from the
+  plugin's `api platform('io.adapty:adapty-bom:…')`.
+- **PODS** (`test-apps/adapty-devtools-pods`) references the same Swift file by relative path, calls `register()` in
+  its `AppDelegate` and links with `-Xlinker -ignore_auto_link_library -Xlinker SwiftUICore` (else dyld crash
+  below iOS 18: ld treats the product name `App` as an allowed client of SwiftUICore and links it directly; DEV
+  avoids it with its product name `CapacitorAdaptyDevtools`).
+- **Types:** `review_card`, `store_map`, `star_rating`, `lottie_badge`, `link_probe`, `text_input` (`_uikit` id → UIKit
+  / View); `checkout_widget` is unserved → builder fallback. iOS views carry `ce-<type>-<id>` for `idb`.
+- **Verify:** `node scripts/webview-driver.mjs --device=<id> native --seconds=N` and look for
+  `resolve type=… id=… served=…` (iOS subsystem `io.adapty.devtools`, Android tag `AdaptyDevtools`), once per pair.
+- **Gallery bundles:** follow the RN recipe "Custom elements" in
+  `$RN/.claude/skills/rn-allure-test-cases/test-cases.md` (Proxyman rule on `rt.custom.elements`). Assemble with
+  `node $RN/pure-rn/scripts/gallery-flow/assemble.mjs <bundleDir> --out <file>`.
+- "Send before present" in the Flow section sends the app message textarea JSON before `present()`.
+
 ## Capacitor Configuration
 
 - App ID: `com.example.plugin`

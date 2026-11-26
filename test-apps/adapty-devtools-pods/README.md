@@ -6,8 +6,8 @@ very same devtools on CocoaPods — the way an app created with
 `npx cap add ios --packagemanager CocoaPods` consumes the plugin — to catch what breaks only there.
 iOS only: Android does not depend on the iOS package manager.
 
-**It holds no app code of its own.** `src` is a symlink to `examples/adapty-devtools/src`, and the iOS
-project references the devtools' resources. What is here is only what differs: the native project
+**It holds no app code of its own**, except a reference to the devtools' custom elements file. `src`
+is a symlink to `examples/adapty-devtools/src`, and the iOS project references the devtools' resources. What is here is only what differs: the native project
 generated for CocoaPods, its `Podfile`, and the configs that point everything at this folder.
 Change the app in `examples/adapty-devtools`; both apps pick it up.
 
