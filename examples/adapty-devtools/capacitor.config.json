@@ -2,6 +2,9 @@
   "appId": "com.example.plugin",
   "appName": "Adapty capacitor devtools",
   "webDir": "dist",
+  "ios": {
+    "scheme": "CapacitorAdaptyDevtools"
+  },
   "plugins": {
     "SplashScreen": {
       "launchAutoHide": false
