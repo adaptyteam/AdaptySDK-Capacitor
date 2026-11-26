@@ -147,30 +147,7 @@ end
 
 ### iOS 15–17: crash on launch with Xcode 26
 
-An app built with Xcode 26 and the default Capacitor product name `App` can crash on launch on iOS 15–17 (iOS 18+ is fine):
-
-```
-dyld: Library not loaded: /System/Library/Frameworks/SwiftUICore.framework/SwiftUICore
-```
-
-This is an Xcode 26 linker issue, not an Adapty one. Apps may not link `SwiftUICore` directly, but the linker treats a product named `App` as an allowed client of it (`App` is a prefix of `AppKit`). It then links `SwiftUICore` into the app and binds some SwiftUI symbols to it, and `SwiftUICore` only exists on iOS 18+. Any SwiftUI code that uses such APIs (`zIndex`, `fixedSize`, `HStack`/`VStack` as a `Layout`, `tag`, custom `Layout`s) triggers it. AdaptyUI does, so an SPM app with `@adapty/capacitor` gets it whenever its product is named `App`. Debug and Release builds are both affected.
-
-To check a build, look for `SwiftUICore` in the app binary (in Debug builds, the code is in `App.debug.dylib`):
-
-```sh
-otool -L App.app/App | grep SwiftUICore
-```
-
-Fix it in the app target with either of the following:
-
-- **Linker flag (recommended).** In Xcode, open the `App` target → Build Settings → Other Linker Flags and add `-Wl,-ignore_auto_link_library,SwiftUICore` for all configurations. The SwiftUI symbols then bind to `SwiftUI`, which re-exports `SwiftUICore` on iOS 18+.
-- **Another product name.** Set `PRODUCT_NAME` of the `App` target to your own name, rename the shared scheme to match, and point Capacitor at it in `capacitor.config.json` (`npx cap run ios` launches `<scheme>.app`):
-
-  ```json
-  {
-    "ios": { "scheme": "MyApp" }
-  }
-  ```
+Apps built with Xcode 26 whose iOS product is named `App` (the Capacitor default) may crash on launch on iOS 15–17 with `Library not loaded: …/SwiftUICore.framework/SwiftUICore`. This is an Xcode 26 linker issue, not an Adapty one, and it affects any app that uses SwiftUI, including through AdaptyUI. Renaming the product or telling the linker not to auto-link `SwiftUICore` avoids it.
 
 ## Examples
 
