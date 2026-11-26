@@ -90,3 +90,37 @@ export async function sendAppMessageSafe(
     return { ok: false, error: describeError(error) };
   }
 }
+
+export type AppMessageLogLevel = 'info' | 'warn' | 'error';
+
+const LOGGED_KEYS_MAX = 20;
+
+// Log metadata only: a raw payload can be too deep for JSON.stringify in log export and may carry secrets
+export function appMessageLogParams(payload: AdaptyFlowMessage): { keys: string[] } {
+  return { keys: Object.keys(payload).slice(0, LOGGED_KEYS_MAX) };
+}
+
+// Optionally sends the message before present(); parse or send failures are logged and still present.
+export async function presentWithMessage(opts: {
+  view: Pick<FlowViewController, 'sendAppMessage' | 'present'>;
+  json: string;
+  sendFirst: boolean;
+  log: (level: AppMessageLogLevel, line: string, params?: Record<string, unknown>) => void;
+}): Promise<void> {
+  const { view, json, sendFirst, log } = opts;
+  if (sendFirst) {
+    const parsed = parseAppMessageJson(json);
+    if ('error' in parsed) {
+      log('warn', 'Send app message: invalid JSON', { error: parsed.error });
+    } else {
+      const result = await sendAppMessageSafe(view, parsed.payload);
+      const params = appMessageLogParams(parsed.payload);
+      if (result.ok) {
+        log('info', 'Send app message ok (accepted by native)', params);
+      } else {
+        log('error', `Send app message failed: ${result.error}`, { ...params, error: result.error });
+      }
+    }
+  }
+  await view.present();
+}

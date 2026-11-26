@@ -2,7 +2,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  appMessageLogParams,
   parseAppMessageJson,
+  presentWithMessage,
   sendAppMessageSafe,
   toFlowMessageValue,
 } from '../src/screens/app/native-presentation-controllers/appMessage.ts';
@@ -101,5 +103,107 @@ describe('toFlowMessageValue', () => {
 
   it('undefined inside -> undefined', () => {
     assert.equal(toFlowMessageValue({ a: undefined }), undefined);
+  });
+});
+
+describe('presentWithMessage', () => {
+  type LogEntry = [level: string, line: string, params?: Record<string, unknown>];
+
+  // Records calls in order; send settles on a later tick to expose ordering bugs
+  const recordingView = (sendError?: Error) => {
+    const calls: unknown[][] = [];
+    let sendDone = false;
+    let presentSawSendDone: boolean | undefined;
+    const view = {
+      sendAppMessage: async (payload: unknown) => {
+        calls.push(['send', payload]);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        sendDone = true;
+        if (sendError) throw sendError;
+      },
+      present: async () => {
+        presentSawSendDone = sendDone;
+        calls.push(['present']);
+      },
+    } as unknown as Parameters<typeof presentWithMessage>[0]['view'];
+    return { view, calls, presentSawSendDone: () => presentSawSendDone };
+  };
+
+  const recordingLog = () => {
+    const entries: LogEntry[] = [];
+    const log: Parameters<typeof presentWithMessage>[0]['log'] = (level, line, params) => {
+      entries.push(params === undefined ? [level, line] : [level, line, params]);
+    };
+    return { entries, log };
+  };
+
+  it('valid JSON + sendFirst -> send resolves, then present', async () => {
+    const rec = recordingView();
+    const logs = recordingLog();
+    await presentWithMessage({
+      view: rec.view,
+      json: '{"action":"noop","title":"A"}',
+      sendFirst: true,
+      log: logs.log,
+    });
+    assert.deepEqual(rec.calls, [['send', { action: 'noop', title: 'A' }], ['present']]);
+    assert.equal(rec.presentSawSendDone(), true);
+    assert.deepEqual(logs.entries, [
+      ['info', 'Send app message ok (accepted by native)', { keys: ['action', 'title'] }],
+    ]);
+  });
+
+  it('native send rejects + sendFirst -> error logged, still presents after send', async () => {
+    const rec = recordingView(new Error('view not found'));
+    const logs = recordingLog();
+    await presentWithMessage({ view: rec.view, json: '{"a":1}', sendFirst: true, log: logs.log });
+    assert.deepEqual(rec.calls, [['send', { a: 1 }], ['present']]);
+    assert.equal(rec.presentSawSendDone(), true);
+    assert.deepEqual(logs.entries, [
+      ['error', 'Send app message failed: view not found', { keys: ['a'], error: 'view not found' }],
+    ]);
+  });
+
+  it('deeply nested payload -> log entries stay serializable', async () => {
+    const depth = 20000;
+    const json = '{"a":'.repeat(depth) + '1' + '}'.repeat(depth);
+    const view = {
+      // Mirrors the bridge: serializing such a payload overflows the stack
+      sendAppMessage: async (payload: unknown) => {
+        JSON.stringify(payload);
+      },
+      present: async () => {},
+    } as unknown as Parameters<typeof presentWithMessage>[0]['view'];
+    const logs = recordingLog();
+    await presentWithMessage({ view, json, sendFirst: true, log: logs.log });
+    assert.equal(logs.entries.length, 1);
+    assert.deepEqual(logs.entries[0]?.[2]?.keys, ['a']);
+    assert.doesNotThrow(() => JSON.stringify(logs.entries));
+  });
+
+  it('wide payload -> logged keys are capped', () => {
+    const payload = Object.fromEntries(Array.from({ length: 50 }, (_, i) => [`k${i}`, i]));
+    assert.equal(appMessageLogParams(payload).keys.length, 20);
+  });
+
+  it('invalid JSON + sendFirst -> warn, no send, still presents', async () => {
+    const rec = recordingView();
+    const logs = recordingLog();
+    await presentWithMessage({ view: rec.view, json: '{', sendFirst: true, log: logs.log });
+    assert.deepEqual(rec.calls, [['present']]);
+    assert.deepEqual(logs.entries, [['warn', 'Send app message: invalid JSON', { error: 'not valid JSON' }]]);
+  });
+
+  it('sendFirst false -> present only', async () => {
+    const rec = recordingView();
+    const logs = recordingLog();
+    await presentWithMessage({
+      view: rec.view,
+      json: '{"action":"noop"}',
+      sendFirst: false,
+      log: logs.log,
+    });
+    assert.deepEqual(rec.calls, [['present']]);
+    assert.deepEqual(logs.entries, []);
   });
 });

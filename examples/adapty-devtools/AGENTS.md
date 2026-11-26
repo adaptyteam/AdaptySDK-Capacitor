@@ -164,7 +164,10 @@ URL; release shows the host), the test-fake comments, the Android `store_map` cl
 - **Gallery bundles:** follow the RN recipe "Custom elements" in
   `$RN/.claude/skills/rn-allure-test-cases/test-cases.md` (Proxyman rule on `rt.custom.elements`). Assemble with
   `node $RN/pure-rn/scripts/gallery-flow/assemble.mjs <bundleDir> --out <file>`.
-- "Send before present" in the Flow section sends the app message textarea JSON before `present()`.
+- "Send before present (diagnostic: dropped on Android)" in the Flow section sends the app message textarea JSON
+  before `present()`. It is a diagnostic, not a way to pass initial data: on Android (SDK 4.4.2) a message sent before
+  the first present is dropped (the bridge resolves, the screen keeps its defaults). To deliver data to a running
+  flow script, use "Send on appear (once per view)".
 
 ## Capacitor Configuration
 

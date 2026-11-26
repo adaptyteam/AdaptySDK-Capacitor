@@ -460,7 +460,7 @@ export const FlowSection: React.FC<Props> = ({
         className={styles.ClickableParam}
         onClick={() => setAppMessageBeforePresent(!appMessageBeforePresent)}
       >
-        <span>Send before present</span>
+        <span>Send before present (diagnostic: dropped on Android)</span>
         <span className={styles.ParamValue}>{appMessageBeforePresent.toString()}</span>
       </div>
 

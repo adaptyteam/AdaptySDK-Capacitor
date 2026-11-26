@@ -12,7 +12,14 @@ import {
 } from '@adapty/capacitor';
 import { APPLE_ICON_IMAGE_BASE64 } from '../../../assets/base64-data.ts';
 import { showSuccessToast } from '../../../utils/toast.ts';
-import { AppMessageSendResult, parseAppMessageJson, sendAppMessageSafe, toFlowMessageValue } from './appMessage.ts';
+import {
+  AppMessageSendResult,
+  parseAppMessageJson,
+  appMessageLogParams,
+  presentWithMessage,
+  sendAppMessageSafe,
+  toFlowMessageValue,
+} from './appMessage.ts';
 
 // Custom action id reserved for diagnostics of edited bundle scripts: never answered.
 const DIAG_CUSTOM_ACTION_ID = 'diag';
@@ -70,9 +77,12 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
 
   const logAppMessageOutcome = (result: AppMessageSendResult, payload: AdaptyFlowMessage, funcName: string) => {
     if (result.ok) {
-      log('info', 'Send app message ok (accepted by native)', funcName, false, { payload });
+      log('info', 'Send app message ok (accepted by native)', funcName, false, appMessageLogParams(payload));
     } else {
-      log('error', `Send app message failed: ${result.error}`, funcName, false, { payload, error: result.error });
+      log('error', `Send app message failed: ${result.error}`, funcName, false, {
+        ...appMessageLogParams(payload),
+        error: result.error,
+      });
     }
   };
 
@@ -301,14 +311,14 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
 
       await view.setEventHandlers(eventHandlers);
 
-      // Android drop check: a message sent before present()
-      if (appMessageBeforePresent) {
-        const payload: AdaptyFlowMessage = { marker: 'before-present' };
-        logAppMessageOutcome(await sendAppMessageSafe(view, payload), payload, 'presentFlow');
-      }
-
       setResult(`✅ Flow view created (locale: ${view.locale ?? 'not reported'}). Presenting...`);
-      await view.present();
+      // Diagnostic: the textarea message sent before present() (Android drops it; use on-appear to deliver)
+      await presentWithMessage({
+        view,
+        json: appMessageJson,
+        sendFirst: appMessageBeforePresent,
+        log: (level, line, params) => log(level, line, 'presentFlow', false, params),
+      });
       setResult('✅ Flow presented successfully!');
     } catch (error) {
       if (error instanceof AdaptyError && error.adaptyCode === ErrorCodeName.notActivated) {
