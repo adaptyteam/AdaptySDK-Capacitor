@@ -65,12 +65,12 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
   // Handlers are registered at present time: they read the current toggles through this ref.
   const appMessageRef = useRef({ appMessageJson, appMessageOnAppear, appMessageOnCustomAction });
   appMessageRef.current = { appMessageJson, appMessageOnAppear, appMessageOnCustomAction };
-  // View that already sent its on-appear message: a second present does not resend.
+  // View whose on-appear message is in flight or sent: a second present does not resend; a failed send clears it.
   const appMessageSentViewRef = useRef<FlowViewController | null>(null);
 
   const logAppMessageOutcome = (result: AppMessageSendResult, payload: AdaptyFlowMessage, funcName: string) => {
     if (result.ok) {
-      log('info', 'Send app message ok', funcName, false, { payload });
+      log('info', 'Send app message ok (accepted by native)', funcName, false, { payload });
     } else {
       log('error', `Send app message failed: ${result.error}`, funcName, false, { payload, error: result.error });
     }
@@ -211,9 +211,12 @@ export const FlowController = forwardRef<FlowControllerRef, Props>(function Flow
               log('warn', 'Send app message: invalid JSON', 'flow.onAppeared', false, { error: parsed.error });
             } else {
               appMessageSentViewRef.current = view;
-              sendAppMessageSafe(view, parsed.payload).then((result) =>
-                logAppMessageOutcome(result, parsed.payload, 'flow.onAppeared'),
-              );
+              sendAppMessageSafe(view, parsed.payload).then((result) => {
+                if (!result.ok && appMessageSentViewRef.current === view) {
+                  appMessageSentViewRef.current = null;
+                }
+                logAppMessageOutcome(result, parsed.payload, 'flow.onAppeared');
+              });
             }
           }
           return false;
