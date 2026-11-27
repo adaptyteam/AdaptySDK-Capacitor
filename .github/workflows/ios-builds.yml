@@ -4,7 +4,7 @@ name: iOS Builds (full)
 # the devtools app on SPM (examples/adapty-devtools) and its CocoaPods twin
 # (test-apps/adapty-devtools-pods), each in Debug (simulator) and Release (device, unsigned) —
 # Release is where link errors surface. scripts/check-ios-app.cjs proves `cap sync` registered the
-# plugin before building and that the built App.app defines it after. Default configuration only —
+# plugin before building and that the built .app defines it after. Default configuration only —
 # the Kids Mode variant lives in kids-mode-ios.yml.
 
 on:
@@ -116,7 +116,7 @@ jobs:
       working-directory: examples/adapty-devtools
       run: |
         xcodebuild -project ios/App/App.xcodeproj \
-          -scheme App \
+          -scheme CapacitorAdaptyDevtools \
           -configuration Debug \
           -sdk iphonesimulator \
           -destination "generic/platform=iOS Simulator" \
@@ -129,14 +129,14 @@ jobs:
 
     - name: Verify the plugin is linked (Debug)
       working-directory: examples/adapty-devtools
-      run: node ../../scripts/check-ios-app.cjs linked --app=ios/DerivedData/ci-debug/Build/Products/Debug-iphonesimulator/App.app
+      run: node ../../scripts/check-ios-app.cjs linked --app=ios/DerivedData/ci-debug/Build/Products/Debug-iphonesimulator/CapacitorAdaptyDevtools.app
 
     # Release is what catches SwiftPM link errors — Debug does not.
     - name: Run iOS build (Release, device, unsigned)
       working-directory: examples/adapty-devtools
       run: |
         xcodebuild -project ios/App/App.xcodeproj \
-          -scheme App \
+          -scheme CapacitorAdaptyDevtools \
           -configuration Release \
           -sdk iphoneos \
           -destination "generic/platform=iOS" \
@@ -149,7 +149,7 @@ jobs:
 
     - name: Verify the plugin is linked (Release)
       working-directory: examples/adapty-devtools
-      run: node ../../scripts/check-ios-app.cjs linked --app=ios/DerivedData/ci-release/Build/Products/Release-iphoneos/App.app
+      run: node ../../scripts/check-ios-app.cjs linked --app=ios/DerivedData/ci-release/Build/Products/Release-iphoneos/CapacitorAdaptyDevtools.app
 
     # Which native SDK this green run built. Informational, except that a missing pin means our
     # Package.swift never reached the graph; comparing it with Package.swift would be circular.

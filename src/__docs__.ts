@@ -114,4 +114,6 @@ export {
   AdaptyCustomColorAsset,
   AdaptyCustomGradientAsset,
   AdaptyIOSPresentationStyle,
+  AdaptyFlowMessage,
+  AdaptyFlowMessageValue,
 } from './ui-builder/types';

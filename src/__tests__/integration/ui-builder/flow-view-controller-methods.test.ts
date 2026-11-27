@@ -1,3 +1,4 @@
+import { AdaptyError } from '@adapty/core';
 import { Adapty } from 'adapty';
 import type { AdaptyFlow } from 'types';
 import type { components } from 'types/api';
@@ -13,9 +14,12 @@ import {
   ADAPTY_UI_DISMISS_FLOW_VIEW_RESPONSE,
   ADAPTY_UI_DESTROY_FLOW_VIEW_RESPONSE,
   ADAPTY_UI_SHOW_DIALOG_RESPONSE_PRIMARY,
+  ADAPTY_UI_SEND_APP_MESSAGE_RESPONSE,
+  ADAPTY_UI_SEND_APP_MESSAGE_RESPONSE_ERROR,
 } from '../shared/bridge-samples';
 import {
   createNativeModuleMock,
+  emitNativeEvent,
   extractNativeRequest,
   resetNativeModuleMock,
   type MockNativeModule,
@@ -47,6 +51,7 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
       adapty_ui_dismiss_flow_view: ADAPTY_UI_DISMISS_FLOW_VIEW_RESPONSE,
       adapty_ui_destroy_flow_view: ADAPTY_UI_DESTROY_FLOW_VIEW_RESPONSE,
       adapty_ui_show_dialog: ADAPTY_UI_SHOW_DIALOG_RESPONSE_PRIMARY,
+      adapty_ui_send_app_message: ADAPTY_UI_SEND_APP_MESSAGE_RESPONSE,
     });
 
     await adapty.activate({ apiKey: 'test_api_key', params: { logLevel: 'error' } });
@@ -120,6 +125,17 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
       });
 
       expect(request.custom_layout_id).toBeUndefined();
+    });
+
+    it('should reject createFlowView with platformNotSupported', async () => {
+      createNativeModuleMock({
+        adapty_ui_create_flow_view: { error: { adapty_code: 4001, message: 'platformNotSupported' } },
+      });
+
+      const error = await createFlowView(flow).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(AdaptyError);
+      expect(error).toMatchObject({ adaptyCode: 4001, codeName: 'platformNotSupported' });
     });
 
     it('should encode custom parameters', async () => {
@@ -272,6 +288,125 @@ describe('FlowViewController Methods (Bridge Integration)', () => {
       });
 
       expect(request.configuration.secondary_action_title).toBeUndefined();
+    });
+  });
+
+  describe('sendAppMessage', () => {
+    it('should send AdaptyUISendAppMessage.Request with a generated message id', async () => {
+      const view = await createFlowView(flow);
+      nativeMock.handleMethodCall.mockClear();
+
+      const payload = { coins: 10, nested: { ok: true } };
+      await expect(view.sendAppMessage(payload)).resolves.toBeUndefined();
+
+      const request = extractNativeRequest<components['requests']['AdaptyUISendAppMessage.Request']>({
+        nativeModule: nativeMock,
+      });
+
+      expect(request.method).toBe('adapty_ui_send_app_message');
+      expect(request.id).toBe('mock_flow_view_123');
+      expect(request.payload).toEqual(payload);
+      expect(typeof request.message_id).toBe('string');
+      expect(request.message_id.length).toBeGreaterThan(0);
+    });
+
+    it('should generate a new message id per call', async () => {
+      const view = await createFlowView(flow);
+      nativeMock.handleMethodCall.mockClear();
+
+      await view.sendAppMessage({ a: 1 });
+      await view.sendAppMessage({ a: 1 });
+
+      const [first, second] = [0, 1].map(
+        (callIndex) =>
+          extractNativeRequest<components['requests']['AdaptyUISendAppMessage.Request']>({
+            nativeModule: nativeMock,
+            callIndex,
+          }).message_id,
+      );
+
+      expect(first).not.toBe(second);
+    });
+
+    it.each(['dismiss', 'destroy'] as const)(
+      'should send to the old id and propagate the native 3001 error after %s',
+      async (method) => {
+        const view = await createFlowView(flow);
+        await view[method]();
+
+        // The controller keeps its id; native reports the released view
+        createNativeModuleMock({
+          adapty_ui_send_app_message: ADAPTY_UI_SEND_APP_MESSAGE_RESPONSE_ERROR,
+        });
+
+        const error = await view.sendAppMessage({ a: 1 }).catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(AdaptyError);
+        expect(error).toMatchObject({ adaptyCode: 3001, codeName: 'wrongParam' });
+
+        const calls = nativeMock.handleMethodCall.mock.calls;
+        const request = extractNativeRequest<components['requests']['AdaptyUISendAppMessage.Request']>({
+          nativeModule: nativeMock,
+          callIndex: calls.length - 1,
+        });
+        expect(request.method).toBe('adapty_ui_send_app_message');
+        expect(request.id).toBe('mock_flow_view_123');
+      },
+    );
+
+    it('should still send after dismiss({ destroy: false })', async () => {
+      const view = await createFlowView(flow);
+      await view.dismiss({ destroy: false });
+      nativeMock.handleMethodCall.mockClear();
+
+      await expect(view.sendAppMessage({ a: 1 })).resolves.toBeUndefined();
+
+      const request = extractNativeRequest<components['requests']['AdaptyUISendAppMessage.Request']>({
+        nativeModule: nativeMock,
+      });
+      expect(request.method).toBe('adapty_ui_send_app_message');
+      expect(request.id).toBe('mock_flow_view_123');
+    });
+
+    it('should throw without a bridge call when the view reference is missing', async () => {
+      const view = await createFlowView(flow);
+      nativeMock.handleMethodCall.mockClear();
+      (view as any).id = null;
+
+      await expect(view.sendAppMessage({ a: 1 })).rejects.toMatchObject({ adaptyCode: 2002 });
+      expect(nativeMock.handleMethodCall).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onCustomAction arguments', () => {
+    const performAction = (action: Record<string, unknown>) =>
+      emitNativeEvent({
+        eventName: 'flow_view_did_perform_action',
+        eventData: {
+          id: 'flow_view_did_perform_action',
+          view: { id: 'mock_flow_view_123' },
+          action,
+        },
+      });
+
+    it('passes custom action arguments to onCustomAction', async () => {
+      const view = await createFlowView(flow);
+      const onCustomAction = jest.fn(() => false);
+      await view.setEventHandlers({ onCustomAction });
+
+      performAction({ type: 'custom', value: 'open_article', arguments: { article_id: 42, tags: ['a', 'b'] } });
+
+      expect(onCustomAction).toHaveBeenCalledWith('open_article', { article_id: 42, tags: ['a', 'b'] });
+    });
+
+    it('passes an empty object when the action has no arguments', async () => {
+      const view = await createFlowView(flow);
+      const onCustomAction = jest.fn(() => false);
+      await view.setEventHandlers({ onCustomAction });
+
+      performAction({ type: 'custom', value: 'open_article' });
+
+      expect(onCustomAction).toHaveBeenCalledWith('open_article', {});
     });
   });
 });

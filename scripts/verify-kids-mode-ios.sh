@@ -2,7 +2,7 @@
 #
 # Verify Adapty Kids Mode (iOS) end-to-end, on each iOS integration.
 #
-# Builds an app with Kids Mode toggled, then inspects EVERY Mach-O inside App.app
+# Builds an app with Kids Mode toggled, then inspects EVERY Mach-O inside the built .app
 # (app stub, debug dylib, embedded frameworks) for IDFA/AdSupport (+ ATT) with otool/nm.
 #
 # Usage: scripts/verify-kids-mode-ios.sh <on|off|both> [spm|pods]
@@ -26,6 +26,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXAMPLE_DIR="$REPO_ROOT/examples/adapty-devtools"
 APP_PROJECT="$EXAMPLE_DIR/ios/App/App.xcodeproj"
+# Not "App": Xcode 26 ld links SwiftUICore into a product named "App", which breaks launch below iOS 18
+APP_NAME=CapacitorAdaptyDevtools
 DERIVED_DATA="$REPO_ROOT/.derivedData-kids-mode"
 SPM_DIR="$REPO_ROOT/.spm-kids-mode"
 
@@ -63,7 +65,7 @@ build_app() {
   # clone dir is reused between off/on builds.
   xcodebuild -resolvePackageDependencies -project "$APP_PROJECT" \
     -clonedSourcePackagesDirPath "$SPM_DIR" -skipPackagePluginValidation
-  xcodebuild -project "$APP_PROJECT" -scheme App \
+  xcodebuild -project "$APP_PROJECT" -scheme "$APP_NAME" \
     -destination generic/platform=iOS \
     -derivedDataPath "$DERIVED_DATA" \
     -clonedSourcePackagesDirPath "$SPM_DIR" \
@@ -160,9 +162,9 @@ build_pods_app() {
 # Every Mach-O inside the built .app: the app stub, debug dylib, and embedded frameworks.
 list_binaries() {
   local app
-  app="$(find "$DERIVED_DATA/Build/Products" -type d -name 'App.app' -print -quit 2>/dev/null || true)"
-  if [[ -z "$app" ]]; then echo "FATAL: App.app not found under $DERIVED_DATA/Build/Products" >&2; exit 1; fi
-  find "$app" -type f \( -name App -o -name '*.dylib' -o -path '*.framework/*' \) 2>/dev/null | while IFS= read -r f; do
+  app="$(find "$DERIVED_DATA/Build/Products" -type d -name "$APP_NAME.app" -print -quit 2>/dev/null || true)"
+  if [[ -z "$app" ]]; then echo "FATAL: $APP_NAME.app not found under $DERIVED_DATA/Build/Products" >&2; exit 1; fi
+  find "$app" -type f \( -name "$APP_NAME" -o -name '*.dylib' -o -path '*.framework/*' \) 2>/dev/null | while IFS= read -r f; do
     if file -b "$f" 2>/dev/null | grep -q 'Mach-O'; then printf '%s\n' "$f"; fi
   done
 }
@@ -170,7 +172,7 @@ list_binaries() {
 assert_mode() { # $1 = on|off
   local mode="$1" bins otool_all="" nm_all="" fw sym
   bins="$(list_binaries)"
-  if [[ -z "$bins" ]]; then echo "FATAL: no Mach-O binaries found inside App.app" >&2; exit 1; fi
+  if [[ -z "$bins" ]]; then echo "FATAL: no Mach-O binaries found inside $APP_NAME.app" >&2; exit 1; fi
   while IFS= read -r b; do
     [[ -n "$b" ]] || continue
     otool_all+="$(otool -L "$b" 2>/dev/null || true)"$'\n'
@@ -180,7 +182,7 @@ assert_mode() { # $1 = on|off
   # here-strings (not pipes) — nm output is multi-MB; a pipe + grep -q early-exit triggers
   # SIGPIPE under `set -o pipefail` and would falsely report "absent".
   if ! sentinel_present <<< "$nm_all"; then
-    echo "FATAL: sentinel '$SENTINEL_SYMBOL' not found in any App.app binary — inspection is vacuous." >&2
+    echo "FATAL: sentinel '$SENTINEL_SYMBOL' not found in any $APP_NAME.app binary — inspection is vacuous." >&2
     exit 1
   fi
   if frameworks_present <<< "$otool_all"; then fw=present; else fw=absent; fi
@@ -209,9 +211,9 @@ run_mode() { # $1 = on|off
   else
     kids_mode disable
   fi
-  log "Kids Mode $mode ($TARGET) — build App"
+  log "Kids Mode $mode ($TARGET) — build $APP_NAME"
   if [[ "$TARGET" == "pods" ]]; then build_pods_app; else build_app; fi
-  log "Kids Mode $mode ($TARGET) — inspect App.app Mach-O binaries"
+  log "Kids Mode $mode ($TARGET) — inspect $APP_NAME.app Mach-O binaries"
   assert_mode "$mode"
 }
 
@@ -229,6 +231,7 @@ main() {
   if [[ "$TARGET" == "pods" ]]; then
     export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8   # CocoaPods warns on, then breaks with, other encodings
     DERIVED_DATA="$PODS_DERIVED_DATA"
+    APP_NAME=App
     prepare_pods_app
   else
     trap restore_manifest EXIT

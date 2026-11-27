@@ -157,6 +157,34 @@ describe('Adapty - Profile', () => {
     });
   });
 
+  describe('Subscription billing plan', () => {
+    it('decodes a subscription without billing_plan_id as up_front', async () => {
+      const response = GET_PROFILE_RESPONSE_PLAY_STORE_OFFER as {
+        success: components['defs']['AdaptyProfile'];
+      };
+      const { billing_plan_id: _billingPlanId, ...subscription } =
+        response.success.subscriptions!['weekly.premium.599']!;
+
+      // The schema requires billing_plan_id, so the response is cast
+      resetNativeModuleMock(nativeMock);
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+        get_profile: {
+          success: {
+            ...response.success,
+            subscriptions: { 'weekly.premium.599': subscription },
+          },
+        } as unknown as components['requests']['GetProfile.Response'],
+      });
+      adapty = new Adapty();
+      await adapty.activate({ apiKey: 'test_api_key' });
+
+      const profile = await adapty.getProfile();
+
+      expect(profile.subscriptions?.['weekly.premium.599']?.billingPlan).toBe('up_front');
+    });
+  });
+
   describe('Error handling', () => {
     it('should parse AdaptyError from UpdateProfile.Response', async () => {
       // Reset and create new mock with error response for update_profile

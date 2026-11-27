@@ -35,6 +35,7 @@ Adapty SDK is an open-source framework that makes implementing in-app subscripti
 - [Capacitor compatibility](#capacitor-compatibility)
 - [iOS dependency manager](#ios-dependency-manager)
 - [CocoaPods (since 4.2.0)](#cocoapods-since-420)
+- [iOS 15–17: crash on launch with Xcode 26](#ios-1517-crash-on-launch-with-xcode-26)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [Like Adapty SDK?](#like-adapty-sdk)
@@ -144,6 +145,9 @@ target 'App' do
 end
 ```
 
+### iOS 15–17: crash on launch with Xcode 26
+
+Apps built with Xcode 26 whose iOS product is named `App` (the Capacitor default) may crash on launch on iOS 15–17 with `Library not loaded: …/SwiftUICore.framework/SwiftUICore`. This is an Xcode 26 linker issue, not an Adapty one, and it affects any app that uses SwiftUI, including through AdaptyUI. Renaming the product or telling the linker not to auto-link `SwiftUICore` avoids it.
 
 ## Examples
 

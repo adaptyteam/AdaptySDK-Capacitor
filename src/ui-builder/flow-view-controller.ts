@@ -1,4 +1,4 @@
-import { AdaptyError } from '@adapty/core';
+import { AdaptyError, generateId } from '@adapty/core';
 
 import type { Adapty } from '../adapty';
 import { coderFactory } from '../coders/factory';
@@ -9,6 +9,7 @@ import { mapValues, withErrorContext } from '../utils';
 
 import { FlowViewEmitter } from './flow-view-emitter';
 import type {
+  AdaptyFlowMessage,
   AdaptyUiView,
   CreateFlowViewParamsInput,
   AdaptyUiDialogConfig,
@@ -328,6 +329,68 @@ export class FlowViewController {
     };
 
     return await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
+  }
+
+  /**
+   * Sends a message from the app to the script of this flow.
+   *
+   * @remarks
+   * The script receives it as the `applicationMsg` SDK event; the generated message id
+   * becomes the event id.
+   *
+   * Send the first message from `onAppeared`: that is when the flow script is running.
+   * A message sent before the script runs may be dropped with a native warning; on Android
+   * that includes right after `present()` resolves.
+   *
+   * Resolving means the native layer accepted the message, not that the script received it.
+   *
+   * Values nested deeper than 128 levels reach the script as `null`.
+   *
+   * Requires iOS 16+, like all flow views.
+   *
+   * @param payload - JSON-serializable message content.
+   * @returns A promise that resolves when the native layer accepts the message.
+   * @throws {@link AdaptyError} with code `2002` if the view reference is invalid, or
+   * `3001` (`wrongParam`) if the native view was already released.
+   *
+   * @example
+   * Send a message once the flow has appeared
+   * ```typescript
+   * import { createFlowView } from '@adapty/capacitor';
+   *
+   * const view = await createFlowView(flow);
+   * await view.setEventHandlers({
+   *   onAppeared: () => {
+   *     view.sendAppMessage({ coins: 10 }).catch((error) => console.warn(error));
+   *     return false;
+   *   },
+   * });
+   * await view.present();
+   * ```
+   */
+  public async sendAppMessage(payload: AdaptyFlowMessage): Promise<void> {
+    const ctx = new LogContext();
+    const methodKey = 'adapty_ui_send_app_message';
+    const messageId = generateId();
+    const log = ctx.call({ methodName: methodKey });
+    log.start(() => ({ _id: this.id, messageId }));
+
+    if (this.id === null) {
+      throw new AdaptyError({
+        adaptyCode: 2002,
+        message: 'No view reference',
+      });
+    }
+
+    const data: Req['AdaptyUISendAppMessage.Request'] = {
+      method: methodKey,
+      id: this.id,
+      message_id: messageId,
+      payload,
+    };
+
+    // Bridge returns raw `true` for Void, do not leak it
+    await this.adaptyPlugin.handleMethodCall(methodKey, JSON.stringify(data), ctx, log);
   }
 
   private onRequestClose = async () => {

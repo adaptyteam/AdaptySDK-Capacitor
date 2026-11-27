@@ -7,7 +7,7 @@ repository = package['repository']['url'].delete_prefix('git+')
 # The native SDK version of the pods published to the AdaptySDK-CocoaPods-Specs spec repo, which
 # the app's Podfile has to reach (`adapty_pods!` in ios/adapty_podfile.rb). Package.swift pins the
 # same version for Swift Package Manager.
-adapty_ios_version = '4.3.2'
+adapty_ios_version = '4.4.1'
 
 # Read only by Capacitor apps on CocoaPods (`npx cap add ios --packagemanager CocoaPods`);
 # SPM apps use Package.swift.

@@ -64,6 +64,7 @@ export const PROFILE_DID_LOAD_LATEST_WITH_PREMIUM: components['events']['Event.D
     subscriptions: {
       'weekly.premium.599': {
         activated_at: '2025-12-26T13:36:09.931000+0000',
+        billing_plan_id: 'up_front',
         expires_at: '2025-12-26T13:41:09.549000+0000',
         is_active: true,
         is_in_grace_period: false,

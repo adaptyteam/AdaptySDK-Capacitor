@@ -17,6 +17,7 @@ import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import styles from './App.module.css';
 import { OnboardingController, OnboardingControllerRef } from './native-presentation-controllers/OnboardingController';
 import { FlowController, FlowControllerRef } from './native-presentation-controllers/FlowController';
+import { DEFAULT_APP_MESSAGE_JSON } from './native-presentation-controllers/appMessage';
 import { FlowSection } from './sections/FlowSection';
 import { OnboardingSection } from './sections/OnboardingSection';
 import { ResultBanner } from './components/ResultBanner';
@@ -124,6 +125,11 @@ const App: React.FC = () => {
   const [appHandlesPromoted, setAppHandlesPromoted] = useState(false);
   const [jwsTransaction, setJwsTransaction] = useState('');
   const [promotedProduct, setPromotedProduct] = useState<AdaptyPromotedProduct | null>(null);
+
+  const [appMessageJson, setAppMessageJson] = useState(DEFAULT_APP_MESSAGE_JSON);
+  const [appMessageOnAppear, setAppMessageOnAppear] = useState(false);
+  const [appMessageOnCustomAction, setAppMessageOnCustomAction] = useState(false);
+  const [appMessageBeforePresent, setAppMessageBeforePresent] = useState(false);
 
   const flowRef = useRef<FlowControllerRef>(null);
   const onboardingRef = useRef<OnboardingControllerRef>(null);
@@ -587,6 +593,10 @@ const App: React.FC = () => {
     await flowRef.current?.presentFlow();
   };
 
+  const sendAppMessage = async () => {
+    await flowRef.current?.sendAppMessage();
+  };
+
   const presentExistingFlow = async () => {
     if (!flowView) {
       setResult('❌ No flow view created. Please create flow first.');
@@ -732,6 +742,15 @@ const App: React.FC = () => {
       webPresentations={webPresentations}
       flowView={flowView}
       webPaywallUrl={webPaywallUrl}
+      appMessageJson={appMessageJson}
+      appMessageOnAppear={appMessageOnAppear}
+      appMessageOnCustomAction={appMessageOnCustomAction}
+      appMessageBeforePresent={appMessageBeforePresent}
+      setAppMessageJson={setAppMessageJson}
+      setAppMessageOnAppear={setAppMessageOnAppear}
+      setAppMessageOnCustomAction={setAppMessageOnCustomAction}
+      setAppMessageBeforePresent={setAppMessageBeforePresent}
+      sendAppMessage={sendAppMessage}
       setPlacementId={setPlacementId}
       setFlowViewLocale={setFlowViewLocale}
       setFlowViewLoadTimeout={setFlowViewLoadTimeout}
@@ -1173,6 +1192,11 @@ const App: React.FC = () => {
         customTagsJson={customTagsJson}
         locale={flowViewLocale}
         loadTimeout={flowViewLoadTimeout}
+        flowView={flowView}
+        appMessageJson={appMessageJson}
+        appMessageOnAppear={appMessageOnAppear}
+        appMessageOnCustomAction={appMessageOnCustomAction}
+        appMessageBeforePresent={appMessageBeforePresent}
         setFlowView={setFlowView}
         setResult={setResult}
         log={log}

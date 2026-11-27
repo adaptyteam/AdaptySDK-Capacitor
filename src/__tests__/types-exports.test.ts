@@ -19,6 +19,8 @@ import type {
 } from 'types';
 import { SubscriptionBillingPlan } from 'types';
 
+import type { AdaptyFlowMessage, AdaptyFlowMessageValue } from '../index';
+
 describe('public type exports', () => {
   it('exposes AdaptyPromotedProduct', () => {
     const product: AdaptyPromotedProduct = {
@@ -48,12 +50,16 @@ describe('public type exports', () => {
 
   it('exposes subscription pricing terms, including unknown billing plans', () => {
     const commitmentInfo: AdaptySubscriptionCommitmentInfo = {
-      price: { amount: 83.88 },
+      price: { amount: 83.88, currencyCode: 'USD', localizedString: '$83.88' },
       period: { unit: 'year', numberOfUnits: 1 },
     };
     const terms: AdaptySubscriptionPricingTerms = {
       billingPlan: SubscriptionBillingPlan.Monthly,
-      billingPrice: { amount: 6.99 },
+      billingPrice: {
+        amount: 6.99,
+        currencyCode: 'USD',
+        localizedString: '$6.99',
+      },
       billingPeriod: { unit: 'month', numberOfUnits: 1 },
       commitmentInfo,
     };
@@ -102,5 +108,12 @@ describe('public type exports', () => {
     };
 
     expect(uiSchema?.grids).toHaveLength(1);
+  });
+
+  it('exposes AdaptyFlowMessage and AdaptyFlowMessageValue', () => {
+    const value: AdaptyFlowMessageValue = ['a', 1, null];
+    const message: AdaptyFlowMessage = { coins: 10, tags: value, nested: { ok: true } };
+
+    expect(message.coins).toBe(10);
   });
 });

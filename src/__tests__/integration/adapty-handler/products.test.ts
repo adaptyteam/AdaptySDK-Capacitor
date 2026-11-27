@@ -7,6 +7,7 @@
  * - variationId extraction from flow
  */
 
+import { AdaptyError } from '@adapty/core';
 import { Capacitor } from '@capacitor/core';
 import { Adapty } from 'adapty';
 import type { AdaptyFlow } from 'types';
@@ -182,6 +183,70 @@ describe('Adapty - Paywall Products', () => {
       // Execute: get paywall products should throw with error message
       await expect(adapty.getPaywallProducts({ flow })).rejects.toThrow('Products not found');
     });
+
+    // Core 4.4.0 requires both fields and treats null as missing
+    it.each([
+      { field: 'currency_code', modelField: 'currencyCode', mode: 'missing' },
+      { field: 'currency_code', modelField: 'currencyCode', mode: 'null' },
+      { field: 'localized_string', modelField: 'localizedString', mode: 'missing' },
+      { field: 'localized_string', modelField: 'localizedString', mode: 'null' },
+    ] as const)('should reject a product whose price $field is $mode', async ({ field, modelField, mode }) => {
+      const response = GET_PAYWALL_PRODUCTS_RESPONSE as {
+        success: components['defs']['AdaptyPaywallProduct.Response'][];
+      };
+      const product = response.success[0]!;
+      const price: Record<string, unknown> = { ...product.price };
+      if (mode === 'missing') {
+        delete price[field];
+      } else {
+        price[field] = null;
+      }
+
+      resetNativeModuleMock(nativeMock);
+      nativeMock = createNativeModuleMock({
+        activate: ACTIVATE_RESPONSE_SUCCESS,
+        get_paywall_products: {
+          success: [{ ...product, price }],
+        } as components['requests']['GetPaywallProducts.Response'],
+      });
+      adapty = new Adapty();
+      await adapty.activate({ apiKey: 'test_api_key' });
+
+      const placement = {
+        id: 'test_placement',
+        abTestName: 'test_ab',
+        audienceName: 'all_users',
+        revision: 1,
+        audienceVersionId: 'v1',
+      };
+      const flow: AdaptyFlow = {
+        id: 'test_flow_id',
+        name: 'Test Flow',
+        variationId: 'test_variation_123',
+        hasViewConfiguration: false,
+        placement,
+        responseCreatedAt: 1704067200000,
+        paywalls: [
+          {
+            placement,
+            id: 'test_paywall_id',
+            name: 'Test Paywall',
+            variationId: 'test_variation_123',
+            productIdentifiers: [],
+            products: [],
+          } as AdaptyFlow['paywalls'][number],
+        ],
+      };
+
+      const error = await adapty.getPaywallProducts({ flow }).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(AdaptyError);
+      expect(error).toMatchObject({
+        adaptyCode: 2006,
+        codeName: 'decodingFailed',
+        message: expect.stringContaining(`"${modelField}"`),
+      });
+    });
   });
 
   describe('Android subscription decoding', () => {
@@ -198,7 +263,11 @@ describe('Adapty - Paywall Products', () => {
       paywall_name: 'Test Flow',
       localized_description: 'Yearly Premium Subscription',
       localized_title: 'Premium Yearly',
-      price: { amount: 59.99, localized_string: '$59.99' },
+      price: {
+        amount: 59.99,
+        currency_code: 'USD',
+        localized_string: '$59.99',
+      },
       subscription: {
         base_plan_id: 'yearly-base',
         renewal_type: 'autorenewable',
