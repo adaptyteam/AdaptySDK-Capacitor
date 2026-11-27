@@ -138,7 +138,7 @@ config or picked up by the plugin's Jest run.
   `test-apps/adapty-devtools-pods` on CocoaPods, each in Debug (simulator) and Release (device,
   unsigned). `scripts/check-ios-app.cjs` asserts `cap sync` registered `AdaptyCapacitorPlugin`
   (`packageClassList`, the CapApp-SPM product) before the builds, and that some Mach-O in the built
-  `App.app` defines the class after them. The pods job also fails when `pod install` changes
+  app (`CapacitorAdaptyDevtools.app` on SPM, `App.app` on CocoaPods) defines the class after them. The pods job also fails when `pod install` changes
   `Podfile.lock`: a native SDK bump or a plugin version bump needs `yarn update-native-modules` in
   the test app and the updated lock committed. Ignored: the `COCOAPODS:` line and the checksums of
   the local `:path` pods (`AdaptyCapacitor`, `Capacitor*`). Those are SHA1 of podspec JSON, whose
@@ -151,7 +151,7 @@ config or picked up by the plugin's Jest run.
 
 The CLI covers SPM apps only. CocoaPods apps never read `Package.swift`: there Kids Mode is `adapty_enable_kids_mode(installer)` from `ios/adapty_podfile.rb` in the Podfile's `post_install`, which sets `-DKidsMode` on the `Adapty` pod and unlinks AdSupport, failing `pod install` if it cannot. The CLI patches the manifest anyway and then warns (never fails) when the app root (`INIT_CWD`, or `--app-root=`) has `ios/App/Podfile` disagreeing with the command — no `adapty_enable_kids_mode` on `enable`, or one on `disable` — or has neither a Podfile nor `ios/App/CapApp-SPM`. `--no-warnings` / `ADAPTY_KIDS_MODE_NO_WARNINGS=1` silence it.
 
-**CI verification:** `scripts/verify-kids-mode-ios.sh <on|off|both> [spm|pods]` builds an app with Kids Mode toggled and inspects every Mach-O in `App.app` (`otool`/`nm`) to prove IDFA / AdSupport / AppTrackingTransparency are compiled out. `spm` (default) builds `examples/adapty-devtools` with the trait toggled; `pods` scaffolds a throwaway Capacitor app on CocoaPods in `.kids-mode-pods-app/` (gitignored) the way a consumer does and also checks the Adapty pods resolved from the spec repo. The workflow `.github/workflows/kids-mode-ios.yml` runs both targets with `on` on PRs and with `both` (positive + negative control) weekly; run `both` locally after changing the toggles.
+**CI verification:** `scripts/verify-kids-mode-ios.sh <on|off|both> [spm|pods]` builds an app with Kids Mode toggled and inspects every Mach-O in the built `.app` (`otool`/`nm`) to prove IDFA / AdSupport / AppTrackingTransparency are compiled out. `spm` (default) builds `examples/adapty-devtools` with the trait toggled; `pods` scaffolds a throwaway Capacitor app on CocoaPods in `.kids-mode-pods-app/` (gitignored) the way a consumer does and also checks the Adapty pods resolved from the spec repo. The workflow `.github/workflows/kids-mode-ios.yml` runs both targets with `on` on PRs and with `both` (positive + negative control) weekly; run `both` locally after changing the toggles.
 
 ## Development Rules
 

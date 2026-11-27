@@ -20,4 +20,10 @@ describe('public error code exports', () => {
     expect(error.codeName).toBeUndefined();
     expect(isKnownErrorCode(error.adaptyCode)).toBe(false);
   });
+
+  it('knows the AdaptyUI error codes 4001-4300', () => {
+    expect(getErrorCodeName(4001)).toBe('platformNotSupported');
+    expect(getErrorCodeName(4300)).toBe('platformView');
+    expect(isKnownErrorCode(4108)).toBe(true);
+  });
 });

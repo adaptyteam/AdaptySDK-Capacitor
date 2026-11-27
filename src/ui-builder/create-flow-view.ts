@@ -7,6 +7,10 @@ import type { CreateFlowViewParamsInput } from './types';
 /**
  * Creates a flow view controller. Use it to further configure a view or present it.
  *
+ * @remarks
+ * Flow views need iOS 16+: below it this rejects with `platformNotSupported` (4001),
+ * though the package itself still supports iOS 15.
+ *
  * @see {@link https://adapty.io/docs/capacitor-present-paywalls | [DOC] Creating a flow view}
  *
  * @param {AdaptyFlow} flow - flow to present (from `adapty.getFlow(...)`).

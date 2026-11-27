@@ -19,6 +19,7 @@
 		7B399DCFE4C27427A17CEBB4 /* demo_video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = F30DFB50A3332BC6DDD51BC2 /* demo_video.mp4 */; };
 		932E15FA2059962F20AD6E30 /* landscape.png in Resources */ = {isa = PBXBuildFile; fileRef = E2C6E4ED1C5A6996A04653D4 /* landscape.png */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
+		5C1E0A0D2F00000100CE0001 /* DevtoolsCustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1E0A0D2F00000100CE0002 /* DevtoolsCustomElements.swift */; };
 		A24EB08317730F130751DDDA /* Walter_White.png in Resources */ = {isa = PBXBuildFile; fileRef = D41400C8F74D1594020AF975 /* Walter_White.png */; };
 /* End PBXBuildFile section */
 
@@ -33,6 +34,7 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
+		5C1E0A0D2F00000100CE0002 /* DevtoolsCustomElements.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DevtoolsCustomElements.swift; path = "../../../../examples/adapty-devtools/ios/App/App/CustomElements/DevtoolsCustomElements.swift"; sourceTree = SOURCE_ROOT; };
 		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
 		C28BDA05DC7FD710EDE17452 /* ios_fallback.json */ = {isa = PBXFileReference; includeInIndex = 1; name = ios_fallback.json; path = "../../../../../examples/adapty-devtools/assets/ios/ios_fallback.json"; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 			children = (
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
+				5C1E0A0D2F00000100CE0002 /* DevtoolsCustomElements.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -228,6 +231,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+				5C1E0A0D2F00000100CE0001 /* DevtoolsCustomElements.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,6 +375,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-Xlinker",
+					"-ignore_auto_link_library",
+					"-Xlinker",
+					SwiftUICore,
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.plugin.pods;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -391,6 +402,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-Xlinker",
+					"-ignore_auto_link_library",
+					"-Xlinker",
+					SwiftUICore,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.plugin.pods;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";

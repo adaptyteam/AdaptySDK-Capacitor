@@ -18,6 +18,12 @@ about the app itself — architecture, element ids, credentials, driving it — 
   `WVD_APP_ROOT=.`, so it reads `appId` / `appName` from this app's `capacitor.config.json`.
 - The Xcode project references the resources (`assets/ios/*`, `AdaptyDemoApp.storekit`) in
   `examples/adapty-devtools` by relative path; there are no copies to keep in sync.
+- The one native exception is `DevtoolsCustomElements.swift` (flow custom elements, registered in
+  `AppDelegate`): referenced from `examples/adapty-devtools/ios/App/App/CustomElements`, not copied.
+  Its SwiftUI code is why the App target passes `-Xlinker -ignore_auto_link_library -Xlinker
+  SwiftUICore`: ld matches the product name `App` as the allowed client `AppKit`, links SwiftUICore
+  directly, and the app crashes in dyld below iOS 18 (DEV avoids it with its product name
+  `CapacitorAdaptyDevtools`).
 
 ## CocoaPods
 

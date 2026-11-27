@@ -103,8 +103,12 @@ Rules for this state:
 ### 1. `android/build.gradle`
 Update BOM version:
 ```gradle
-implementation platform('io.adapty:adapty-bom:<NEW_VERSION>')
+api platform('io.adapty:adapty-bom:<NEW_VERSION>')
 ```
+
+Keep the BOM on `api platform`: apps declare `io.adapty:android-ui` without a version (custom
+elements resolver) and take it from this BOM. With `implementation platform` that line fails
+on AGP 9 and in `androidTest` on every AGP.
 
 Update crossplatform version (ask user for the exact version — it may differ):
 ```gradle

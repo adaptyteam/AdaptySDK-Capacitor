@@ -7,6 +7,8 @@ export type {
   AdaptyUiView,
   AdaptyUiDialogConfig,
   AdaptyIOSPresentationStyle,
+  AdaptyFlowMessage,
+  AdaptyFlowMessageValue,
   FlowEventHandlers,
   OnboardingEventHandlers,
   AdaptyPermission,
